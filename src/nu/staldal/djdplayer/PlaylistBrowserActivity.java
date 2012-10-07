@@ -381,17 +381,17 @@ public class PlaylistBrowserActivity extends ListActivity
         }
         if (id == RECENTLY_ADDED_PLAYLIST) {
             Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
             intent.putExtra("playlist", "recentlyadded");
             startActivity(intent);
         } else if (id == PODCASTS_PLAYLIST) {
             Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
             intent.putExtra("playlist", "podcasts");
             startActivity(intent);
         } else {
             Intent intent = new Intent(Intent.ACTION_EDIT);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
             intent.putExtra("playlist", Long.valueOf(id).toString());
             startActivity(intent);
         }

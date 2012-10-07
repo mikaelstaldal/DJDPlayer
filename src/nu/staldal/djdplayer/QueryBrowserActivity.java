@@ -103,7 +103,7 @@ implements MusicUtils.Defs, ServiceConnection
             } else if (path.startsWith("content://media/external/audio/albums/")) {
                 // This is an album, show the songs on it
                 Intent i = new Intent(Intent.ACTION_PICK);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
                 i.putExtra("album", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -111,7 +111,7 @@ implements MusicUtils.Defs, ServiceConnection
             } else if (path.startsWith("content://media/external/audio/artists/")) {
                 // This is an artist, show the albums for that artist
                 Intent i = new Intent(Intent.ACTION_PICK);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/album");
+                i.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
                 i.putExtra("artist", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -276,13 +276,13 @@ implements MusicUtils.Defs, ServiceConnection
         if ("artist".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/album");
+            intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
             intent.putExtra("artist", Long.valueOf(id).toString());
             startActivity(intent);
         } else if ("album".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0){

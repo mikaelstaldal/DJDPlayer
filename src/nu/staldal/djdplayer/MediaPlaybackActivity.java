@@ -391,7 +391,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             startActivity(
                     new Intent(Intent.ACTION_EDIT)
-                    .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track")
+                    .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track")
                     .putExtra("playlist", "nowplaying")
             );
         }

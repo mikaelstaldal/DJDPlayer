@@ -260,7 +260,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         mCurrentAlbumId = Long.valueOf(id).toString();
         
         Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
         intent.putExtra("album", mCurrentAlbumId);
         Cursor c = (Cursor) getExpandableListAdapter().getChild(groupPosition, childPosition);
         String album = c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM));

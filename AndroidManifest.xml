@@ -129,14 +129,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/artistalbum"/>
+                <data android:mimeType="vnd.android.cursor.dir/djd.artistalbum"/>
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity" android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/album"/>
+                <data android:mimeType="vnd.android.cursor.dir/albums"/>
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity" android:exported="false" >
@@ -151,7 +151,7 @@
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/track"/>
+                <data android:mimeType="vnd.android.cursor.dir/djd.track"/>
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.QueryBrowserActivity"
