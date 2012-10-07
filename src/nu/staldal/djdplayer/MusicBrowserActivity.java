@@ -40,6 +40,7 @@ public class MusicBrowserActivity extends Activity
         int activeTab = MusicUtils.getIntPref(this, "activetab", R.id.artisttab);
         if (activeTab != R.id.artisttab
                 && activeTab != R.id.albumtab
+                && activeTab != R.id.genretab
                 && activeTab != R.id.songtab
                 && activeTab != R.id.playlisttab) {
             activeTab = R.id.artisttab;

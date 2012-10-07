@@ -75,6 +75,11 @@
     <!-- Delete confirmation dialog when deleting an entire artist -->
     <string name="delete_artist_desc_nosdcard" msgid="1843750591006508005">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from USB storage.</string>
 
+    <!-- Delete confirmation dialog when deleting an entire genre -->
+    <string name="delete_genre_desc">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted from the SD card.</string>
+    <!-- Delete confirmation dialog when deleting an entire grene -->
+    <string name="delete_genre_desc_nosdcard">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted from USB storage.</string>
+
     <!-- Delete confirmation dialog when deleting an entire album -->
     <string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from the SD card.</string>
     <!-- Delete confirmation dialog when deleting an entire album -->
@@ -108,8 +113,12 @@
     <string name="artists_title">Artists</string>
     <!-- Category label on Library screen -->
     <string name="albums_menu">Albums</string>
+    <!-- Category label on Library screen -->
+    <string name="genres_menu">Genres</string>
     <!-- Albums screen title -->
     <string name="albums_title">Albums</string>
+    <!-- Albums screen title -->
+    <string name="genres_title">Genres</string>
     <!-- Category label on Library screen -->
     <string name="tracks_menu">Songs</string>
     <!-- Songs screen title -->
@@ -176,6 +185,8 @@
     <string name="sdcard_error_message_nosdcard" msgid="4574563894036627855">An error was encountered on your USB storage.</string>
     <!-- Default name of artist that doesn't have a name in the metadata -->
     <string name="unknown_artist_name">Unknown artist</string>
+    <!-- Default name of genre that doesn't have a name in the metadata -->
+    <string name="unknown_genre_name">Unknown genre</string>
     <!-- Default name of album that doesn't have a name in the metadata -->
     <string name="unknown_album_name">Unknown album</string>
     <!-- Toast after turning shuffle on -->
@@ -281,6 +292,8 @@
     <string name="working_artists">Artists\u2026</string>
     <!-- Shown in the title bar while the list of albums is being retrieved in the background -->
     <string name="working_albums">Albums\u2026</string>
+    <!-- Shown in the title bar while the list of albums is being retrieved in the background -->
+    <string name="working_genres">Genres\u2026</string>
     <!-- Shown in the title bar while the list of songs is being retrieved in the background -->
     <string name="working_songs">Songs\u2026</string>
     <!-- Shown in the title bar while the list of playlists is being retrieved in the background -->

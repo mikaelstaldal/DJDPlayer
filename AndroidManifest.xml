@@ -139,6 +139,13 @@
                 <data android:mimeType="vnd.android.cursor.dir/album"/>
             </intent-filter>
         </activity>
+        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/genre"/>
+            </intent-filter>
+        </activity>
         <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity" android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
