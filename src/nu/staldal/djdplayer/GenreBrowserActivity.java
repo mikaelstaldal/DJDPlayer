@@ -529,7 +529,7 @@ public class GenreBrowserActivity extends ListActivity
             }
             vh.line1.setText(displayname);
 
-            /* TODO check for currently playing genre
+            /* TODO [mikes] check for currently playing genre
             long currentgenreid = MusicUtils.getCurrentGenreId();
             ImageView iv = vh.play_indicator;
             if (currentgenreid == aid) {
