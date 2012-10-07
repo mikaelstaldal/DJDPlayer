@@ -138,13 +138,6 @@
                 <data android:mimeType="vnd.android.cursor.dir/album"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.NowPlayingActivity" android:exported="false" >
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/nowplaying"/>
-            </intent-filter>
-        </activity>
         <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity" android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
@@ -192,24 +185,6 @@
             </intent-filter>
 
         </activity-alias>
-        <activity android:name="nu.staldal.djdplayer.VideoBrowserActivity"
-            android:taskAffinity="android.task.video"
-            android:label="@string/videobrowserlabel"
-            android:icon="@drawable/app_video"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
-            </intent-filter>
-<!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
--->
-        </activity>
         <activity android:name="nu.staldal.djdplayer.MediaPickerActivity"
                 android:label="@string/mediapickerlabel" android:exported="false" >
 <!--
