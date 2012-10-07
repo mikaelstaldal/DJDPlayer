@@ -1,3 +1,3 @@
--keep class com.android.music.AudioPreview {
+-keep class nu.staldal.djdplayer.AudioPreview {
   public void playPauseClicked(android.view.View);
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.content.Context;
 import android.util.AttributeSet;

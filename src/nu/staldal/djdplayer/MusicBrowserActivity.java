@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.music;
-
-import com.android.music.MusicUtils.ServiceToken;
+package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,7 +26,7 @@ import android.os.RemoteException;
 public class MusicBrowserActivity extends Activity
     implements MusicUtils.Defs {
 
-    private ServiceToken mToken;
+    private MusicUtils.ServiceToken mToken;
 
     public MusicBrowserActivity() {
     }

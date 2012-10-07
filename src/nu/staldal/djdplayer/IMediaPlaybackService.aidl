@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.graphics.Bitmap;
 

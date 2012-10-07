@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
-
-import com.android.music.MusicUtils.ServiceToken;
+package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.content.AsyncQueryHandler;
@@ -74,7 +72,7 @@ public class PlaylistBrowserActivity extends ListActivity
     private static int mLastListPosFine = -1;
 
     private boolean mCreateShortcut;
-    private ServiceToken mToken;
+    private MusicUtils.ServiceToken mToken;
 
     public PlaylistBrowserActivity()
     {

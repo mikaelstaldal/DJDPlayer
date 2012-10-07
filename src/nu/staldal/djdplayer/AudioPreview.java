@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.content.AsyncQueryHandler;
@@ -40,7 +40,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;

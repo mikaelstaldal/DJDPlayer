@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -821,7 +821,7 @@ public class MusicUtils {
             sService.play();
         } catch (RemoteException ex) {
         } finally {
-            Intent intent = new Intent("com.android.music.PLAYBACK_VIEWER")
+            Intent intent = new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(intent);
         }

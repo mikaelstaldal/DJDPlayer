@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
-import com.android.music.MusicUtils.ServiceToken;
-import com.android.music.QueryBrowserActivity.QueryListAdapter.QueryHandler;
+import nu.staldal.djdplayer.MusicUtils.ServiceToken;
 
 import android.app.ExpandableListActivity;
 import android.app.SearchManager;
@@ -40,12 +39,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,8 +56,6 @@ import android.widget.SectionIndexer;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
-
-import java.text.Collator;
 
 
 public class ArtistAlbumBrowserActivity extends ExpandableListActivity

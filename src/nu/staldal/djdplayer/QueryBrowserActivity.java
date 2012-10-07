@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
-
-import com.android.music.MusicUtils.ServiceToken;
+package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -41,18 +39,13 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.ViewGroup.OnHierarchyChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 public class QueryBrowserActivity extends ListActivity
 implements MusicUtils.Defs, ServiceConnection
@@ -68,7 +61,7 @@ implements MusicUtils.Defs, ServiceConnection
     private QueryListAdapter mAdapter;
     private boolean mAdapterSent;
     private String mFilterString = "";
-    private ServiceToken mToken;
+    private MusicUtils.ServiceToken mToken;
 
     public QueryBrowserActivity()
     {

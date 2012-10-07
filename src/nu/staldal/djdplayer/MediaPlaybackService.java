@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -77,11 +77,11 @@ public class MediaPlaybackService extends Service {
     public static final int REPEAT_CURRENT = 1;
     public static final int REPEAT_ALL = 2;
 
-    public static final String PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
-    public static final String META_CHANGED = "com.android.music.metachanged";
-    public static final String QUEUE_CHANGED = "com.android.music.queuechanged";
+    public static final String PLAYSTATE_CHANGED = "nu.staldal.djdplayer.playstatechanged";
+    public static final String META_CHANGED = "nu.staldal.djdplayer.metachanged";
+    public static final String QUEUE_CHANGED = "nu.staldal.djdplayer.queuechanged";
 
-    public static final String SERVICECMD = "com.android.music.musicservicecommand";
+    public static final String SERVICECMD = "nu.staldal.djdplayer.musicservicecommand";
     public static final String CMDNAME = "command";
     public static final String CMDTOGGLEPAUSE = "togglepause";
     public static final String CMDSTOP = "stop";
@@ -89,10 +89,10 @@ public class MediaPlaybackService extends Service {
     public static final String CMDPREVIOUS = "previous";
     public static final String CMDNEXT = "next";
 
-    public static final String TOGGLEPAUSE_ACTION = "com.android.music.musicservicecommand.togglepause";
-    public static final String PAUSE_ACTION = "com.android.music.musicservicecommand.pause";
-    public static final String PREVIOUS_ACTION = "com.android.music.musicservicecommand.previous";
-    public static final String NEXT_ACTION = "com.android.music.musicservicecommand.next";
+    public static final String TOGGLEPAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.togglepause";
+    public static final String PAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.pause";
+    public static final String PREVIOUS_ACTION = "nu.staldal.djdplayer.musicservicecommand.previous";
+    public static final String NEXT_ACTION = "nu.staldal.djdplayer.musicservicecommand.next";
 
     private static final int TRACK_ENDED = 1;
     private static final int RELEASE_WAKELOCK = 2;
@@ -734,10 +734,10 @@ public class MediaPlaybackService extends Service {
      * "album" - String: the name of the album
      * "track" - String: the name of the track
      * The intent has an action that is one of
-     * "com.android.music.metachanged"
-     * "com.android.music.queuechanged",
-     * "com.android.music.playbackcomplete"
-     * "com.android.music.playstatechanged"
+     * "nu.staldal.djdplayer.metachanged"
+     * "nu.staldal.djdplayer.queuechanged",
+     * "nu.staldal.djdplayer.playbackcomplete"
+     * "nu.staldal.djdplayer.playstatechanged"
      * respectively indicating that a new track has
      * started playing, that the playback queue has
      * changed, that playback has stopped because
@@ -1093,7 +1093,7 @@ public class MediaPlaybackService extends Service {
             status.flags |= Notification.FLAG_ONGOING_EVENT;
             status.icon = R.drawable.stat_notify_musicplayer;
             status.contentIntent = PendingIntent.getActivity(this, 0,
-                    new Intent("com.android.music.PLAYBACK_VIEWER")
+                    new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
             startForeground(PLAYBACKSERVICE_STATUS, status);
             if (!mIsSupposedToBePlaying) {

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
-
-import com.android.music.MusicUtils.ServiceToken;
+package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -62,7 +60,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-import java.text.Collator;
 import java.util.Arrays;
 
 public class TrackBrowserActivity extends ListActivity
@@ -100,7 +97,7 @@ public class TrackBrowserActivity extends ListActivity
     private static int mLastListPosCourse = -1;
     private static int mLastListPosFine = -1;
     private boolean mUseLastListPos = false;
-    private ServiceToken mToken;
+    private MusicUtils.ServiceToken mToken;
 
     public TrackBrowserActivity()
     {

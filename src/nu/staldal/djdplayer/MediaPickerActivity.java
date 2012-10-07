@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
-import com.android.music.MusicUtils.ServiceToken;
+import nu.staldal.djdplayer.MusicUtils.ServiceToken;
 
 import android.app.ListActivity;
 import android.content.Context;

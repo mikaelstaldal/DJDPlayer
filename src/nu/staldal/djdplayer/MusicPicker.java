@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.music;
+package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.content.AsyncQueryHandler;
@@ -46,7 +46,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.text.Collator;
 import java.util.Formatter;
 import java.util.Locale;
 
