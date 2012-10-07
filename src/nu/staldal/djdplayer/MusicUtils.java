@@ -231,6 +231,16 @@ public class MusicUtils {
         return -1;
     }
 
+    public static long getCurrentGenreId() {
+        if (sService != null) {
+            try {
+                return sService.getGenreId();
+            } catch (RemoteException ex) {
+            }
+        }
+        return -1;
+    }
+
     public static long getCurrentArtistId() {
         if (MusicUtils.sService != null) {
             try {
@@ -359,10 +369,8 @@ public class MusicUtils {
 
     public static long [] getSongListForGenre(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        String where = MediaStore.Audio.Genres.Members.GENRE_ID + "=" + id + " AND " +
-                MediaStore.Audio.Media.IS_MUSIC + "=1";
-        Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                ccols, where, null, MediaStore.Audio.Media.TRACK);
+        Cursor cursor = query(context, MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                ccols, null, null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
         if (cursor != null) {
             long [] list = getSongListForCursor(cursor);

@@ -1288,6 +1288,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     albumName = getString(R.string.unknown_album_name);
                     albumid = -1;
                 }
+                // TODO [mikes] display genre of currently playing song
                 mAlbumName.setText(albumName);
                 mTrackName.setText(mService.getTrackName());
                 mAlbumArtHandler.removeMessages(GET_ALBUM_ART);

@@ -1651,6 +1651,26 @@ public class MediaPlaybackService extends Service {
         }
     }
 
+    public String getGenreName() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            // TODO [mikes] lookup genre name
+            return null;
+        }
+    }
+
+    public long getGenreId() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return -1;
+            }
+            // TODO [mikes] lookup genre id
+            return -1;
+        }
+    }
+
     public String getTrackName() {
         synchronized (this) {
             if (mCursor == null) {
@@ -1916,6 +1936,12 @@ public class MediaPlaybackService extends Service {
         }
         public long getAlbumId() {
             return mService.get().getAlbumId();
+        }
+        public String getGenreName() {
+            return mService.get().getGenreName();
+        }
+        public long getGenreId() {
+            return mService.get().getGenreId();
         }
         public String getArtistName() {
             return mService.get().getArtistName();

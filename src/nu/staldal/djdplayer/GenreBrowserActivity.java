@@ -432,7 +432,8 @@ public class GenreBrowserActivity extends ListActivity
         
         private final Drawable mNowPlayingOverlay;
         private final BitmapDrawable mDefaultGenreIcon;
-        private int mGenreIdx;
+        private int mGenreIdIndex;
+        private int mGenreNameIndex;
         private final Resources mResources;
         private final String mUnknownGenre;
         private AlphabetIndexer mIndexer;
@@ -483,12 +484,13 @@ public class GenreBrowserActivity extends ListActivity
 
         private void getColumnIndices(Cursor cursor) {
             if (cursor != null) {
-                mGenreIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
+                mGenreIdIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID);
+                mGenreNameIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
 
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
                 } else {
-                    mIndexer = new MusicAlphabetIndexer(cursor, mGenreIdx, mResources.getString(
+                    mIndexer = new MusicAlphabetIndexer(cursor, mGenreNameIndex, mResources.getString(
                             R.string.fast_scroll_alphabet));
                 }
             }
@@ -518,10 +520,9 @@ public class GenreBrowserActivity extends ListActivity
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            
             ViewHolder vh = (ViewHolder) view.getTag();
 
-            String name = cursor.getString(mGenreIdx);
+            String name = cursor.getString(mGenreNameIndex);
             String displayname = name;
             boolean unknown = name == null || name.equals(MediaStore.UNKNOWN_STRING); 
             if (unknown) {
@@ -529,15 +530,14 @@ public class GenreBrowserActivity extends ListActivity
             }
             vh.line1.setText(displayname);
 
-            /* TODO [mikes] check for currently playing genre
-            long currentgenreid = MusicUtils.getCurrentGenreId();
+            long genreId = cursor.getLong(mGenreIdIndex);
+            long currentGenreId = MusicUtils.getCurrentGenreId();
             ImageView iv = vh.play_indicator;
-            if (currentgenreid == aid) {
+            if (currentGenreId == genreId) {
                 iv.setImageDrawable(mNowPlayingOverlay);
             } else {
                 iv.setImageDrawable(null);
             }
-            */
         }
         
         @Override
