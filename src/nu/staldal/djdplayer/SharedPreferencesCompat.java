@@ -30,7 +30,7 @@ public class SharedPreferencesCompat {
 
     private static Method findApplyMethod() {
         try {
-            Class cls = SharedPreferences.Editor.class;
+            Class<SharedPreferences.Editor> cls = SharedPreferences.Editor.class;
             return cls.getMethod("apply");
         } catch (NoSuchMethodException unused) {
             // fall through
