@@ -107,6 +107,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mAlbum = (ImageView) findViewById(R.id.album);
         mArtistName = (TextView) findViewById(R.id.artistname);
         mAlbumName = (TextView) findViewById(R.id.albumname);
+        mGenreName = (TextView) findViewById(R.id.genrename);
         mTrackName = (TextView) findViewById(R.id.trackname);
 
         View v = (View)mArtistName.getParent(); 
@@ -114,6 +115,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         v.setOnLongClickListener(this);
 
         v = (View)mAlbumName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        v = (View)mGenreName.getParent();
         v.setOnTouchListener(this);
         v.setOnLongClickListener(this);
 
@@ -161,6 +166,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         View vv = v.findViewById(R.id.artistname);
         if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.albumname);
+        if (vv != null) return (TextView) vv;
+        vv = v.findViewById(R.id.genrename);
         if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.trackname);
         if (vv != null) return (TextView) vv;
@@ -263,12 +270,14 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         String query = null;
         String artist;
         String album;
+        String genre;
         String song;
         long audioid;
         
         try {
             artist = mService.getArtistName();
             album = mService.getAlbumName();
+            genre = mService.getGenreName();
             song = mService.getTrackName();
             audioid = mService.getAudioId();
         } catch (RemoteException ex) {
@@ -309,7 +318,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
         boolean knownalbum =
             (album != null) && !MediaStore.UNKNOWN_STRING.equals(album);
-        
+
+        boolean knowngenre =
+            (genre != null) && !MediaStore.UNKNOWN_STRING.equals(genre);
+
         if (knownartist && view.equals(mArtistName.getParent())) {
             title = artist;
             query = artist;
@@ -322,6 +334,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 query = album;
             }
             mime = MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE;
+        } else if (knowngenre && view.equals(mGenreName.getParent())) {
+            title = genre;
+            query = genre;
+            mime = MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE;
         } else if (view.equals(mTrackName.getParent()) || !knownartist || !knownalbum) {
             if ((song == null) || MediaStore.UNKNOWN_STRING.equals(song)) {
                 // A popup of the form "Search for null/'' using ..." is pretty
@@ -1140,6 +1156,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private TextView mTotalTime;
     private TextView mArtistName;
     private TextView mAlbumName;
+    private TextView mGenreName;
     private TextView mTrackName;
     private ProgressBar mProgress;
     private long mPosOverride = -1;
@@ -1270,6 +1287,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 // can show that info again when streaming.
                 ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
+                ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
                 mAlbum.setVisibility(View.GONE);
                 mTrackName.setText(path);
                 mAlbumArtHandler.removeMessages(GET_ALBUM_ART);
@@ -1277,6 +1295,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             } else {
                 ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
+                ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
                 String artistName = mService.getArtistName();
                 if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
                     artistName = getString(R.string.unknown_artist_name);
@@ -1288,8 +1307,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     albumName = getString(R.string.unknown_album_name);
                     albumid = -1;
                 }
-                // TODO [mikes] display genre of currently playing song
+                String genreName = mService.getGenreName();
+                if (MediaStore.UNKNOWN_STRING.equals(genreName)) {
+                    genreName = getString(R.string.unknown_genre_name);
+                }
                 mAlbumName.setText(albumName);
+                mGenreName.setText(genreName);
                 mTrackName.setText(mService.getTrackName());
                 mAlbumArtHandler.removeMessages(GET_ALBUM_ART);
                 mAlbumArtHandler.obtainMessage(GET_ALBUM_ART, new AlbumSongIdWrapper(albumid, songid)).sendToTarget();
