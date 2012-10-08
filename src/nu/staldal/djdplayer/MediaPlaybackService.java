@@ -112,6 +112,8 @@ public class MediaPlaybackService extends Service {
     private int mPlayListLen = 0;
     private Vector<Integer> mHistory = new Vector<Integer>(MAX_HISTORY_SIZE);
     private Cursor mCursor;
+    private long mGenreId = -1;
+    private String mGenreName = null;
     private int mPlayPos = -1;
     private static final String LOGTAG = "MediaPlaybackService";
     private final Shuffler mRand = new Shuffler();
@@ -346,6 +348,8 @@ public class MediaPlaybackService extends Service {
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
+            mGenreId = -1;
+            mGenreName = null;
         }
 
         unregisterReceiver(mIntentReceiver);
@@ -806,6 +810,8 @@ public class MediaPlaybackService extends Service {
         if (mPlayListLen == 0) {
             mCursor.close();
             mCursor = null;
+            mGenreId = -1;
+            mGenreName = null;
             notifyChange(META_CHANGED);
         }
     }
@@ -950,6 +956,8 @@ public class MediaPlaybackService extends Service {
             if (mCursor != null) {
                 mCursor.close();
                 mCursor = null;
+                mGenreId = -1;
+                mGenreName = null;
             }
 
             if (mPlayListLen == 0) {
@@ -964,6 +972,7 @@ public class MediaPlaybackService extends Service {
                     mCursorCols, "_id=" + id , null, null);
             if (mCursor != null) {
                 mCursor.moveToFirst();
+                fetchGenre();
                 open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
                 // go to bookmark if needed
                 if (isPodcast()) {
@@ -1010,8 +1019,11 @@ public class MediaPlaybackService extends Service {
                         if (mCursor.getCount() == 0) {
                             mCursor.close();
                             mCursor = null;
+                            mGenreId = -1;
+                            mGenreName = null;
                         } else {
                             mCursor.moveToNext();
+                            fetchGenre();
                             ensurePlayListCapacity(1);
                             mPlayListLen = 1;
                             mPlayList[0] = mCursor.getLong(IDCOLIDX);
@@ -1040,6 +1052,23 @@ public class MediaPlaybackService extends Service {
             } else {
                 mOpenFailedCounter = 0;
             }
+        }
+    }
+
+    private void fetchGenre() {
+        Cursor c = getContentResolver().query(
+                Uri.parse("content://media/external/audio/media/" + String.valueOf(mCursor.getLong(IDCOLIDX)) + "/genres"),
+                new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
+                null,
+                null,
+                null);
+        if (c != null) {
+            if (c.getCount() > 0) {
+                c.moveToFirst();
+                mGenreId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
+                mGenreName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME));
+            }
+            c.close();
         }
     }
 
@@ -1117,6 +1146,8 @@ public class MediaPlaybackService extends Service {
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
+            mGenreId = -1;
+            mGenreName = null;
         }
         if (remove_status_icon) {
             gotoIdleState();
@@ -1486,6 +1517,8 @@ public class MediaPlaybackService extends Service {
                     if (mCursor != null) {
                         mCursor.close();
                         mCursor = null;
+                        mGenreId = -1;
+                        mGenreName = null;
                     }
                 } else {
                     if (mPlayPos >= mPlayListLen) {
@@ -1656,8 +1689,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            // TODO [mikes] lookup genre name
-            return null;
+            return mGenreName;
         }
     }
 
@@ -1666,8 +1698,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return -1;
             }
-            // TODO [mikes] lookup genre id
-            return -1;
+            return mGenreId;
         }
     }
 
