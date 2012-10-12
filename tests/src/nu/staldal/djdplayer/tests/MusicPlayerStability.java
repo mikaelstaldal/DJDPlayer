@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.music.tests;
+package nu.staldal.djdplayer.tests;
 
 import android.app.Instrumentation;
-import com.android.music.TrackBrowserActivity;
 import android.view.KeyEvent;
 import android.widget.ListView;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
+import nu.staldal.djdplayer.TrackBrowserActivity;
 
 /**
  * Junit / Instrumentation test case for the Music Player
  */
 
-public class MusicPlayerStability extends ActivityInstrumentationTestCase2 <TrackBrowserActivity>{
+public class MusicPlayerStability extends ActivityInstrumentationTestCase2<TrackBrowserActivity> {
     private static String TAG = "musicplayerstability";
     private static int PLAY_TIME = 30000;
     private ListView mTrackList;
 
     public MusicPlayerStability() {
-        super("com.android.music",TrackBrowserActivity.class);
+        super("nu.staldal.djdplayer", TrackBrowserActivity.class);
     }
 
     @Override

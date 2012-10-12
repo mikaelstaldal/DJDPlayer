@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.music.tests;
+package nu.staldal.djdplayer.tests;
 
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import com.android.music.tests.functional.TestSongs;
-import com.android.music.tests.functional.TestPlaylist;
+import nu.staldal.djdplayer.tests.functional.TestSongs;
+import nu.staldal.djdplayer.tests.functional.TestPlaylist;
 
 import junit.framework.TestSuite;
 
 
 /**
  * Instrumentation Test Runner for all Music Player tests.
- * 
+ * <p/>
  * Precondition: Opened keyboard and wipe the userdata
- * 
+ * <p/>
  * Running all tests:
- *
+ * <p/>
  * adb shell am instrument \
- *   -w com.android.music.tests/.MusicPlayerFunctionalTestRunner
+ * -w nu.staldal.djdplayer.tests/.MusicPlayerFunctionalTestRunner
  */
 
 public class MusicPlayerFunctionalTestRunner extends InstrumentationTestRunner {
@@ -40,7 +40,7 @@ public class MusicPlayerFunctionalTestRunner extends InstrumentationTestRunner {
 
     @Override
     public TestSuite getAllTests() {
-        TestSuite suite = new InstrumentationTestSuite(this);  
+        TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(TestSongs.class);
         suite.addTestSuite(TestPlaylist.class);
         suite.addTestSuite(MusicPlayerStability.class);

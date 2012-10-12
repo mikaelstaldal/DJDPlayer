@@ -14,10 +14,9 @@
  * the License.
  */
 
-package com.android.music.tests;
+package nu.staldal.djdplayer.tests;
 
-import com.android.music.tests.stress.AlbumsPlaybackStress;
-import com.android.music.tests.stress.MusicPlaybackStress;
+import nu.staldal.djdplayer.tests.stress.AlbumsPlaybackStress;
 
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
@@ -26,26 +25,26 @@ import junit.framework.TestSuite;
 
 /**
  * Instrumentation Test Runner for all music player stress tests.
- * 
+ * <p/>
  * Running all tests:
- *
+ * <p/>
  * adb shell am instrument \
- *   -w com.android.music.tests/.MusicPlayerStressTestRunner
+ * -w nu.staldal.djdplayer.tests/.MusicPlayerStressTestRunner
  */
 
 public class MusicPlayerStressTestRunner extends InstrumentationTestRunner {
 
-  @Override
+    @Override
     public TestSuite getAllTests() {
-      TestSuite suite = new InstrumentationTestSuite(this);  
-      //suite.addTestSuite(MusicPlaybackStress.class);
-      suite.addTestSuite(AlbumsPlaybackStress.class);
-      return suite;
+        TestSuite suite = new InstrumentationTestSuite(this);
+        //suite.addTestSuite(MusicPlaybackStress.class);
+        suite.addTestSuite(AlbumsPlaybackStress.class);
+        return suite;
     }
 
     @Override
     public ClassLoader getLoader() {
-      return MusicPlayerStressTestRunner.class.getClassLoader();
+        return MusicPlayerStressTestRunner.class.getClassLoader();
     }
 }
 
