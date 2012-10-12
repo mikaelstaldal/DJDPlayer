@@ -225,8 +225,8 @@ public class GenreBrowserActivity extends ListActivity
         CharSequence fancyName = "";
         if (mGenreCursor != null && mGenreCursor.getCount() > 0) {
             mGenreCursor.moveToFirst();
-            fancyName = mGenreCursor.getString(
-                    mGenreCursor.getColumnIndex(MediaStore.Audio.Genres.NAME));
+            fancyName = ID3Utils.decodeGenre(mGenreCursor.getString(
+                    mGenreCursor.getColumnIndex(MediaStore.Audio.Genres.NAME)));
             if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING))
                 fancyName = getText(R.string.unknown_artist_name);
         }
@@ -247,7 +247,7 @@ public class GenreBrowserActivity extends ListActivity
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
         mGenreCursor.moveToPosition(mi.position);
         mCurrentGenreId = mGenreCursor.getString(mGenreCursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
-        mCurrentGenreName = mGenreCursor.getString(mGenreCursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME));
+        mCurrentGenreName = ID3Utils.decodeGenre(mGenreCursor.getString(mGenreCursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)));
         mIsUnknownGenre = mCurrentGenreName == null ||
                 mCurrentGenreName.equals(MediaStore.UNKNOWN_STRING);
         if (mIsUnknownGenre) {
@@ -522,7 +522,7 @@ public class GenreBrowserActivity extends ListActivity
         public void bindView(View view, Context context, Cursor cursor) {
             ViewHolder vh = (ViewHolder) view.getTag();
 
-            String name = cursor.getString(mGenreNameIndex);
+            String name = ID3Utils.decodeGenre(cursor.getString(mGenreNameIndex));
             String displayname = name;
             boolean unknown = name == null || name.equals(MediaStore.UNKNOWN_STRING); 
             if (unknown) {
@@ -591,4 +591,3 @@ public class GenreBrowserActivity extends ListActivity
         finish();
     }
 }
-

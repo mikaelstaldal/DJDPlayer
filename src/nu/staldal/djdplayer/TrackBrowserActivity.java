@@ -479,7 +479,7 @@ public class TrackBrowserActivity extends ListActivity
                 fancyName = getText(R.string.recentlyadded_title);
             } else {
                 String [] cols = new String [] {
-                MediaStore.Audio.Playlists.NAME
+                    MediaStore.Audio.Playlists.NAME
                 };
                 Cursor cursor = MusicUtils.query(this,
                         ContentUris.withAppendedId(Playlists.EXTERNAL_CONTENT_URI, Long.valueOf(mPlaylist)),
@@ -494,7 +494,7 @@ public class TrackBrowserActivity extends ListActivity
             }
         } else if (mGenre != null) {
             String [] cols = new String [] {
-            MediaStore.Audio.Genres.NAME
+                MediaStore.Audio.Genres.NAME
             };
             Cursor cursor = MusicUtils.query(this,
                     ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, Long.valueOf(mGenre)),
@@ -502,7 +502,7 @@ public class TrackBrowserActivity extends ListActivity
             if (cursor != null) {
                 if (cursor.getCount() != 0) {
                     cursor.moveToFirst();
-                    fancyName = cursor.getString(0);
+                    fancyName = ID3Utils.decodeGenre(cursor.getString(0));
                 }
                 cursor.deactivate();
             }

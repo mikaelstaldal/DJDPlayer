@@ -1066,7 +1066,7 @@ public class MediaPlaybackService extends Service {
             if (c.getCount() > 0) {
                 c.moveToFirst();
                 mGenreId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
-                mGenreName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME));
+                mGenreName = ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)));
             }
             c.close();
         }
