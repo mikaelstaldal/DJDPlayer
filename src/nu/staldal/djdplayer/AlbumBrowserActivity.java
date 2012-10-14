@@ -16,7 +16,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
@@ -82,25 +81,13 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
     }
 
     @Override
-    protected void doSearch() {
-        Intent i = new Intent();
-        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    protected String getEntryContentType() {
+        return MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE;
+    }
 
-        String query = "";
-        CharSequence title = "";
-        if (!mIsUnknown) {
-            query = mCurrentName;
-            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, mCurrentName);
-            title = mCurrentName;
-        }
-        // Since we hide the 'search' menu item when both album is
-        // unknown, the query and title strings will have at least one of those.
-        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE);
-        title = getString(R.string.mediasearch, title);
-        i.putExtra(SearchManager.QUERY, query);
-
-        startActivity(Intent.createChooser(i, title));
+    @Override
+    protected void addExtraSearchData(Intent i) {
+        i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, mCurrentName);
     }
 
     @Override
@@ -124,11 +111,6 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
                     cols, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         }
         return ret;
-    }
-
-    @Override
-    protected int getIdColumnIndex(Cursor cursor) {
-        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID);
     }
 
     @Override

@@ -17,6 +17,7 @@
 package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
+import android.app.SearchManager;
 import android.content.*;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -77,8 +78,6 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
     protected abstract Cursor getCursor(AsyncQueryHandler async, String filter);
 
-    protected abstract int getIdColumnIndex(Cursor cursor);
-
     protected abstract int getNameColumnIndex(Cursor cursor);
 
     protected abstract long[] getSongList(Context context, long id);
@@ -101,7 +100,34 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
     protected abstract long fetchCurrentlyPlayingCategoryId();
 
-    protected abstract void doSearch();
+    protected abstract String getEntryContentType();
+
+    /**
+     * Do nothing by default, can be overridden by subclasses.
+     * @param i  intent
+     */
+    protected void addExtraSearchData(Intent i) { }
+
+    protected void doSearch() {
+        Intent i = new Intent();
+        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        String query = "";
+        CharSequence title = "";
+        if (!mIsUnknown) {
+            query = mCurrentName;
+            addExtraSearchData(i);
+            title = mCurrentName;
+        }
+        // Since we hide the 'search' menu item when category is
+        // unknown, the query and title strings will have at least one of those.
+        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, getEntryContentType());
+        title = getString(R.string.mediasearch, title);
+        i.putExtra(SearchManager.QUERY, query);
+
+        startActivity(Intent.createChooser(i, title));
+    }
 
     protected void setTitle() {
         CharSequence fancyName = "";
