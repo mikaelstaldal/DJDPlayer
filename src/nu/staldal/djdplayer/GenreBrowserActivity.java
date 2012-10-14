@@ -113,7 +113,10 @@ public class GenreBrowserActivity extends CategoryBrowserActivity {
 
     @Override
     protected int fetchNumberOfSongsForCategory(Cursor cursor, long id) {
-        return fetchSongList(id).length; // TODO [mikes] this is quite slow
+        if (id > -1)
+            return fetchSongList(id).length; // TODO [mikes] this is quite slow
+        else
+            return 0;
     }
 
     @Override

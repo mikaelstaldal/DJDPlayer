@@ -577,28 +577,31 @@ public class PlaylistBrowserActivity extends ListActivity
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            
-            TextView tv = (TextView) view.findViewById(R.id.line1);
-            
+            TextView line1 = (TextView)view.findViewById(R.id.line1);
+            TextView line2 = (TextView)view.findViewById(R.id.line2);
+            ImageView icon = (ImageView)view.findViewById(R.id.icon);
+            ImageView playIndicator = (ImageView)view.findViewById(R.id.play_indicator);
+
             String name = cursor.getString(mTitleIdx);
-            tv.setText(name);
-            
+            line1.setText(name);
+
             long id = cursor.getLong(mIdIdx);
-            
-            ImageView iv = (ImageView) view.findViewById(R.id.icon);
+
             if (id == RECENTLY_ADDED_PLAYLIST) {
-                iv.setImageResource(R.drawable.ic_mp_playlist_recently_added_list);
+                icon.setImageResource(R.drawable.ic_mp_playlist_recently_added_list);
             } else {
-                iv.setImageResource(R.drawable.ic_mp_playlist_list);
+                icon.setImageResource(R.drawable.ic_mp_playlist_list);
             }
-            ViewGroup.LayoutParams p = iv.getLayoutParams();
+            ViewGroup.LayoutParams p = icon.getLayoutParams();
             p.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             p.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            iv = (ImageView) view.findViewById(R.id.play_indicator);
-            iv.setVisibility(View.GONE);
+            int numSongs = mActivity.fetchNumberOfSongs(cursor, id);
+            if (numSongs > 0) {
+                line2.setText(context.getResources().getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+            }
 
-            view.findViewById(R.id.line2).setVisibility(View.GONE);
+            playIndicator.setVisibility(View.GONE);
         }
 
         @Override
@@ -628,7 +631,14 @@ public class PlaylistBrowserActivity extends ListActivity
             return c;
         }
     }
-    
+
+    private int fetchNumberOfSongs(Cursor cursor, long id) {
+        if (id > -1)
+            return MusicUtils.getSongListForPlaylist(this, id).length; // TODO [mikes] this is quite slow
+        else
+            return 0;
+    }
+
     private Cursor mPlaylistCursor;
 }
 

@@ -8,3 +8,5 @@ Enhancements over the standard Music Player:
    - show genre of currently playing song
 
 * Do not pretend that album is a proper subcategory of artist (one album can contain songs from different artists)
+
+* Show number of songs for all categories (artist, album, genre) and playlists
