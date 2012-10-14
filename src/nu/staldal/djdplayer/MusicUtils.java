@@ -314,7 +314,7 @@ public class MusicUtils {
         return false;
     }
 
-    private final static long [] sEmptyList = new long[0];
+    public final static long [] sEmptyList = new long[0];
 
     public static long [] getSongListForCursor(Cursor cursor) {
         if (cursor == null) {
@@ -352,25 +352,13 @@ public class MusicUtils {
         return sEmptyList;
     }
 
+    // TODO [mikes] remove this
     public static long [] getSongListForAlbum(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " + 
                 MediaStore.Audio.Media.IS_MUSIC + "=1";
         Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null, MediaStore.Audio.Media.TRACK);
-
-        if (cursor != null) {
-            long [] list = getSongListForCursor(cursor);
-            cursor.close();
-            return list;
-        }
-        return sEmptyList;
-    }
-
-    public static long [] getSongListForGenre(Context context, long id) {
-        final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        Cursor cursor = query(context, MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                ccols, null, null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
         if (cursor != null) {
             long [] list = getSongListForCursor(cursor);
