@@ -113,6 +113,11 @@ public class GenreBrowserActivity extends CategoryBrowserActivity {
     }
 
     @Override
+    protected int fetchNumberOfSongsForCategory(Cursor cursor) {
+        return 0; // TODO [mst] number of songs for genre
+    }
+
+    @Override
     protected long[] getSongList(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Genres.Members.getContentUri("external", id),

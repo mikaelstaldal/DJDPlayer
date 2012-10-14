@@ -119,6 +119,11 @@ public class ArtistBrowserActivity extends CategoryBrowserActivity {
     }
 
     @Override
+    protected int fetchNumberOfSongsForCategory(Cursor cursor) {
+        return 0; // TODO [mst] number of songs for artist
+    }
+
+    @Override
     protected long[] getSongList(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " +

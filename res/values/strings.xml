@@ -19,10 +19,9 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- used in various places to indicate there is one song for a given artist or album -->
-    <string name="onesong">1 song</string>
-    <!-- used in various places to indicate there is some number other than one songs for a given artist or album. -->
+    <!-- used in various places to indicate how many songs for a given category. -->
     <plurals name="Nsongs">
+        <item quantity="one">1 song</item>
         <item quantity="other"><xliff:g id="count">%d</xliff:g> songs</item>
     </plurals>
 

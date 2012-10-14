@@ -84,7 +84,8 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
     protected Cursor getCursor(AsyncQueryHandler async, String filter) {
         String[] cols = new String[] {
                 MediaStore.Audio.Albums._ID,
-                MediaStore.Audio.Albums.ALBUM
+                MediaStore.Audio.Albums.ALBUM,
+                MediaStore.Audio.Albums.NUMBER_OF_SONGS
         };
 
         Cursor ret = null;
@@ -116,6 +117,11 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
     @Override
     protected int getNameColumnIndex(Cursor cursor) {
         return cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM);
+    }
+
+    @Override
+    protected int fetchNumberOfSongsForCategory(Cursor cursor) {
+        return cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS));
     }
 
     @Override

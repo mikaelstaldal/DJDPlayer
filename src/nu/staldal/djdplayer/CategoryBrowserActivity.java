@@ -87,6 +87,8 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
     protected abstract String fetchCategoryName(Cursor cursor);
 
+    protected abstract int fetchNumberOfSongsForCategory(Cursor cursor);
+
     protected abstract int getTabId();
 
     protected abstract int getWorkingCategoryStringId();

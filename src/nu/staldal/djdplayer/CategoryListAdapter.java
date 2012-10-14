@@ -100,6 +100,11 @@ public class CategoryListAdapter extends SimpleCursorAdapter implements SectionI
         }
         vh.line1.setText(displayname);
 
+        int numSongs = mActivity.fetchNumberOfSongsForCategory(cursor);
+        if (numSongs > 0) {
+            vh.line2.setText(mResources.getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+        }
+
         long id = mActivity.fetchCategoryId(cursor);
         long currentId = mActivity.fetchCurrentlyPlayingCategoryId();
         ImageView iv = vh.play_indicator;

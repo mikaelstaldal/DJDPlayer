@@ -95,13 +95,13 @@ public class MusicUtils {
         // There are two formats for the albums/songs information:
         // "N Song(s)"  - used for unknown artist/album
         // "N Album(s)" - used for known albums
-        
+
         StringBuilder songs_albums = new StringBuilder();
 
         Resources r = context.getResources();
         if (isUnknown) {
             if (numsongs == 1) {
-                songs_albums.append(context.getString(R.string.onesong));
+                songs_albums.append(r.getQuantityString(R.plurals.Nsongs, 1));
             } else {
                 String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
                 sFormatBuilder.setLength(0);
@@ -132,7 +132,7 @@ public class MusicUtils {
         StringBuilder songs_albums = new StringBuilder();
 
         if (numsongs == 1) {
-            songs_albums.append(context.getString(R.string.onesong));
+            songs_albums.append(context.getResources().getQuantityString(R.plurals.Nsongs, 1));
         } else {
             Resources r = context.getResources();
             if (! isUnknown) {
