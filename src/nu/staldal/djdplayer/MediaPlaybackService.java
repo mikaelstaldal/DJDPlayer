@@ -1056,6 +1056,9 @@ public class MediaPlaybackService extends Service {
     }
 
     private void fetchGenre() {
+        if (mCursor.getCount() == 0) {
+            return;
+        }
         Cursor c = getContentResolver().query(
                 Uri.parse("content://media/external/audio/media/" + String.valueOf(mCursor.getLong(IDCOLIDX)) + "/genres"),
                 new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },

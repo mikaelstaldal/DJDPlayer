@@ -419,7 +419,6 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
-            sub.add(1, Defs.QUEUE, 0, R.string.queue);
             sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
@@ -442,14 +441,12 @@ public class MusicUtils {
     }
 
     public static void clearPlaylist(Context context, int plid) {
-        
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", plid);
         context.getContentResolver().delete(uri, null, null);
         return;
     }
     
     public static void deleteTracks(Context context, long [] list) {
-        
         String [] cols = new String [] { MediaStore.Audio.Media._ID, 
                 MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID };
         StringBuilder where = new StringBuilder();

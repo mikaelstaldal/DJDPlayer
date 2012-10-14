@@ -209,7 +209,7 @@
     <!-- Context menu item -->
     <string name="add_to_playlist">Add to playlist</string>
     <!-- Context menu item -->
-    <string name="queue">Current playlist</string>
+    <string name="queue">Queue</string>
     <!-- Context menu item -->
     <string name="new_playlist">New</string>
     <!-- Template for newly created playlist name -->

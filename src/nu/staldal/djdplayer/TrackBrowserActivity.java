@@ -644,6 +644,7 @@ public class TrackBrowserActivity extends ListActivity
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
         menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
+        menu.add(0, QUEUE, 0, R.string.queue);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
         if (mEditMode) {
@@ -750,6 +751,15 @@ public class TrackBrowserActivity extends ListActivity
                 return true;
         }
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        if (mTrackCursor.getCount() == 0) {
+            return;
+        }
+        long [] list = new long[] { mSelectedId };
+        MusicUtils.addToCurrentPlaylist(this, list);
     }
 
     void doSearch() {
