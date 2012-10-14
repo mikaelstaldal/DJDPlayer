@@ -20,45 +20,19 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.RemoteException;
-import android.os.SystemClock;
+import android.os.*;
 import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.SubMenu;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.Window;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.*;
+import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 
@@ -78,8 +52,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private ImageButton mRepeatButton;
     private ImageButton mShuffleButton;
     private ImageButton mQueueButton;
-    private Worker mAlbumArtWorker;
-    private AlbumArtHandler mAlbumArtHandler;
     private Toast mToast;
     private int mTouchSlop;
     private MusicUtils.ServiceToken mToken;
@@ -95,16 +67,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        mAlbumArtWorker = new Worker("album art worker");
-        mAlbumArtHandler = new AlbumArtHandler(mAlbumArtWorker.getLooper());
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.audio_player);
 
         mCurrentTime = (TextView) findViewById(R.id.currenttime);
         mTotalTime = (TextView) findViewById(R.id.totaltime);
         mProgress = (ProgressBar) findViewById(android.R.id.progress);
-        mAlbum = (ImageView) findViewById(R.id.album);
         mArtistName = (TextView) findViewById(R.id.artistname);
         mAlbumName = (TextView) findViewById(R.id.albumname);
         mGenreName = (TextView) findViewById(R.id.genrename);
@@ -515,7 +483,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     @Override
     public void onDestroy()
     {
-        mAlbumArtWorker.quit();
         super.onDestroy();
         //System.out.println("***************** playback activity onDestroy\n");
     }
@@ -1151,7 +1118,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         }
     }
     
-    private ImageView mAlbum;
     private TextView mCurrentTime;
     private TextView mTotalTime;
     private TextView mArtistName;
@@ -1167,8 +1133,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
     private static final int REFRESH = 1;
     private static final int QUIT = 2;
-    private static final int GET_ALBUM_ART = 3;
-    private static final int ALBUM_ART_DECODED = 4;
 
     private void queueNextRefresh(long delay) {
         if (!paused) {
@@ -1213,11 +1177,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case ALBUM_ART_DECODED:
-                    mAlbum.setImageBitmap((Bitmap)msg.obj);
-                    mAlbum.getDrawable().setDither(true);
-                    break;
-
                 case REFRESH:
                     long next = refreshNow();
                     queueNextRefresh(next);
@@ -1283,15 +1242,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             
             long songid = mService.getAudioId(); 
             if (songid < 0 && path.toLowerCase().startsWith("http://")) {
-                // Once we can get album art and meta data from MediaPlayer, we
-                // can show that info again when streaming.
+                // Once we can get meta data from MediaPlayer,
+                // we can show that info again when streaming.
                 ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
                 ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
-                mAlbum.setVisibility(View.GONE);
                 mTrackName.setText(path);
-                mAlbumArtHandler.removeMessages(GET_ALBUM_ART);
-                mAlbumArtHandler.obtainMessage(GET_ALBUM_ART, new AlbumSongIdWrapper(-1, -1)).sendToTarget();
             } else {
                 ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
@@ -1314,86 +1270,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mAlbumName.setText(albumName);
                 mGenreName.setText(genreName);
                 mTrackName.setText(mService.getTrackName());
-                mAlbumArtHandler.removeMessages(GET_ALBUM_ART);
-                mAlbumArtHandler.obtainMessage(GET_ALBUM_ART, new AlbumSongIdWrapper(albumid, songid)).sendToTarget();
-                mAlbum.setVisibility(View.VISIBLE);
             }
             mDuration = mService.duration();
             mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
         } catch (RemoteException ex) {
             finish();
-        }
-    }
-    
-    public class AlbumArtHandler extends Handler {
-        private long mAlbumId = -1;
-        
-        public AlbumArtHandler(Looper looper) {
-            super(looper);
-        }
-        @Override
-        public void handleMessage(Message msg)
-        {
-            long albumid = ((AlbumSongIdWrapper) msg.obj).albumid;
-            long songid = ((AlbumSongIdWrapper) msg.obj).songid;
-            if (msg.what == GET_ALBUM_ART && (mAlbumId != albumid || albumid < 0)) {
-                // while decoding the new image, show the default album art
-                Message numsg = mHandler.obtainMessage(ALBUM_ART_DECODED, null);
-                mHandler.removeMessages(ALBUM_ART_DECODED);
-                mHandler.sendMessageDelayed(numsg, 300);
-                Bitmap bm = MusicUtils.getArtwork(MediaPlaybackActivity.this, songid, albumid);
-                if (bm == null) {
-                    bm = MusicUtils.getArtwork(MediaPlaybackActivity.this, songid, -1);
-                    albumid = -1;
-                }
-                if (bm != null) {
-                    numsg = mHandler.obtainMessage(ALBUM_ART_DECODED, bm);
-                    mHandler.removeMessages(ALBUM_ART_DECODED);
-                    mHandler.sendMessage(numsg);
-                }
-                mAlbumId = albumid;
-            }
-        }
-    }
-    
-    private static class Worker implements Runnable {
-        private final Object mLock = new Object();
-        private Looper mLooper;
-        
-        /**
-         * Creates a worker thread with the given name. The thread
-         * then runs a {@link android.os.Looper}.
-         * @param name A name for the new thread
-         */
-        Worker(String name) {
-            Thread t = new Thread(null, this, name);
-            t.setPriority(Thread.MIN_PRIORITY);
-            t.start();
-            synchronized (mLock) {
-                while (mLooper == null) {
-                    try {
-                        mLock.wait();
-                    } catch (InterruptedException ex) {
-                    }
-                }
-            }
-        }
-        
-        public Looper getLooper() {
-            return mLooper;
-        }
-        
-        public void run() {
-            synchronized (mLock) {
-                Looper.prepare();
-                mLooper = Looper.myLooper();
-                mLock.notifyAll();
-            }
-            Looper.loop();
-        }
-        
-        public void quit() {
-            mLooper.quit();
         }
     }
 }

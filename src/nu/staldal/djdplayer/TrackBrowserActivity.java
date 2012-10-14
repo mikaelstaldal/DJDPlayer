@@ -18,47 +18,21 @@ package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.AsyncQueryHandler;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.RemoteException;
+import android.os.*;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AlphabetIndexer;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SectionIndexer;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.*;
 
 import java.util.Arrays;
 
@@ -175,14 +149,6 @@ public class TrackBrowserActivity extends ListActivity
             setListAdapter(mAdapter);
         }
         mToken = MusicUtils.bindToService(this, this);
-
-        // don't set the album art until after the view has been layed out
-        mTrackList.post(new Runnable() {
-
-            public void run() {
-                setAlbumArtBackground();
-            }
-        });
     }
 
     public void onServiceConnected(ComponentName name, IBinder service)
@@ -417,25 +383,7 @@ public class TrackBrowserActivity extends ListActivity
         }
     }
 
-    private void setAlbumArtBackground() {
-        if (!mEditMode) {
-            try {
-                long albumid = Long.valueOf(mAlbumId);
-                Bitmap bm = MusicUtils.getArtwork(TrackBrowserActivity.this, -1, albumid, false);
-                if (bm != null) {
-                    MusicUtils.setBackground(mTrackList, bm);
-                    mTrackList.setCacheColorHint(0);
-                    return;
-                }
-            } catch (Exception ex) {
-            }
-        }
-        mTrackList.setBackgroundColor(0xff000000);
-        mTrackList.setCacheColorHint(0);
-    }
-
     private void setTitle() {
-
         CharSequence fancyName = null;
         if (mAlbumId != null) {
             int numresults = mTrackCursor != null ? mTrackCursor.getCount() : 0;

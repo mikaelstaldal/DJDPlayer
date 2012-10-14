@@ -28,7 +28,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 /**
- * Simple widget to show currently playing album art along
+ * Simple widget to show currently playing song along
  * with play/pause and next track buttons.  
  */
 public class MediaAppWidgetProvider extends AppWidgetProvider {

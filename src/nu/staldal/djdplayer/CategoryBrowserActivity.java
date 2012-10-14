@@ -58,9 +58,6 @@ public abstract class CategoryBrowserActivity extends ListActivity
         public void onReceive(Context context, Intent intent) {
             MusicUtils.setSpinnerState(CategoryBrowserActivity.this);
             mReScanHandler.sendEmptyMessage(0);
-            if (intent.getAction().equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
-                MusicUtils.clearAlbumArtCache();
-            }
         }
     };
 
