@@ -17,7 +17,6 @@
 package nu.staldal.djdplayer;
 
 import android.content.AsyncQueryHandler;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -120,16 +119,16 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
     }
 
     @Override
-    protected int fetchNumberOfSongsForCategory(Cursor cursor) {
+    protected int fetchNumberOfSongsForCategory(Cursor cursor, long id) {
         return cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS));
     }
 
     @Override
-    protected long[] getSongList(Context context, long id) {
+    protected long[] fetchSongList(long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " +
                 MediaStore.Audio.Media.IS_MUSIC + "=1";
-        Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null, MediaStore.Audio.Media.TRACK);
 
         if (cursor != null) {

@@ -81,13 +81,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
     protected abstract int getNameColumnIndex(Cursor cursor);
 
-    protected abstract long[] getSongList(Context context, long id);
+    protected abstract long[] fetchSongList(long id);
 
     protected abstract long fetchCategoryId(Cursor cursor);
 
     protected abstract String fetchCategoryName(Cursor cursor);
 
-    protected abstract int fetchNumberOfSongsForCategory(Cursor cursor);
+    protected abstract int fetchNumberOfSongsForCategory(Cursor cursor, long id);
 
     protected abstract int getTabId();
 
@@ -297,7 +297,7 @@ public abstract class CategoryBrowserActivity extends ListActivity
                 if (resultCode == RESULT_OK) {
                     Uri uri = intent.getData();
                     if (uri != null) {
-                        long [] list = getSongList(this, mCurrentId);
+                        long [] list = fetchSongList(mCurrentId);
                         MusicUtils.addToPlaylist(this, list, Long.parseLong(uri.getLastPathSegment()));
                     }
                 }
@@ -375,13 +375,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_SELECTION: {
-                long [] list = getSongList(this, mCurrentId);
+                long [] list = fetchSongList(mCurrentId);
                 MusicUtils.playAll(this, list, 0);
                 return true;
             }
 
             case QUEUE: {
-                long [] list = getSongList(this, mCurrentId);
+                long [] list = fetchSongList(mCurrentId);
                 MusicUtils.addToCurrentPlaylist(this, list);
                 return true;
             }
@@ -394,13 +394,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = getSongList(this, mCurrentId);
+                long [] list = fetchSongList(mCurrentId);
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(this, list, playlist);
                 return true;
             }
             case DELETE_ITEM: {
-                long [] list = getSongList(this, mCurrentId);
+                long [] list = fetchSongList(mCurrentId);
                 String f;
                 if (android.os.Environment.isExternalStorageRemovable()) {
                     f = getString(getDeleteDescStringId());
