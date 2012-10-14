@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,16 +48,6 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
     @Override
     protected int getTitleStringId() {
         return R.string.albums_title;
-    }
-
-    @Override
-    protected long fetchCategoryId(Cursor cursor) {
-        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-    }
-
-    @Override
-    protected String fetchCategoryName(Cursor cursor) {
-        return cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
     }
 
     @Override
@@ -111,6 +101,16 @@ public class AlbumBrowserActivity extends CategoryBrowserActivity {
                     cols, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         }
         return ret;
+    }
+
+    @Override
+    protected long fetchCategoryId(Cursor cursor) {
+        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
+    }
+
+    @Override
+    protected String fetchCategoryName(Cursor cursor) {
+        return cursor.getString(getNameColumnIndex(cursor));
     }
 
     @Override

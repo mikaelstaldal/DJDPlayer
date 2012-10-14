@@ -125,11 +125,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.ArtistAlbumBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity" android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/djd.artistalbum"/>
+                <data android:mimeType="vnd.android.cursor.dir/artists"/>
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity" android:exported="false" >

@@ -18,105 +18,113 @@ package nu.staldal.djdplayer;
 
 import android.content.AsyncQueryHandler;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-public class GenreBrowserActivity extends CategoryBrowserActivity {
+public class ArtistBrowserActivity extends CategoryBrowserActivity {
     @Override
     protected String getCategoryId() {
-        return "genre";
+        return "artist";
     }
 
     @Override
     protected String getSelectedCategoryId() {
-        return "selectedgenre";
+        return "selectedartist";
     }
 
     @Override
     protected int getTabId() {
-        return R.id.genretab;
+        return R.id.artisttab;
     }
 
     @Override
     protected int getWorkingCategoryStringId() {
-        return R.string.working_genres;
+        return R.string.working_artists;
     }
 
     @Override
     protected int getTitleStringId() {
-        return R.string.genres_title;
+        return R.string.artists_title;
     }
 
     @Override
     protected int getUnknownStringId() {
-        return R.string.unknown_genre_name;
+        return R.string.unknown_artist_name;
     }
 
     @Override
     protected int getDeleteDescStringId() {
-        return R.string.delete_genre_desc;
+        return R.string.delete_artist_desc;
     }
 
     @Override
     protected int getDeleteDescNoSdCardStringId() {
-        return R.string.delete_genre_desc_nosdcard;
+        return R.string.delete_artist_desc_nosdcard;
     }
 
     @Override
     protected long fetchCurrentlyPlayingCategoryId() {
-        return MusicUtils.getCurrentGenreId();
+        return MusicUtils.getCurrentArtistId();
     }
 
     @Override
     protected String getEntryContentType() {
-        return MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE;
+        return MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE;
+    }
+
+    @Override
+    protected void addExtraSearchData(Intent i) {
+        i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, mCurrentName);
     }
 
     @Override
     protected Cursor getCursor(AsyncQueryHandler async, String filter) {
         String[] cols = new String[] {
-                MediaStore.Audio.Genres._ID,
-                MediaStore.Audio.Genres.NAME,
+                MediaStore.Audio.Artists._ID,
+                MediaStore.Audio.Artists.ARTIST
         };
 
         Cursor ret = null;
-        Uri uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
         if (!TextUtils.isEmpty(filter)) {
             uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
         }
         if (async != null) {
             async.startQuery(0, null,
                     uri,
-                    cols, null, null, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+                    cols, null, null, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
         } else {
             ret = MusicUtils.query(this, uri,
-                    cols, null, null, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+                    cols, null, null, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
         }
         return ret;
     }
 
     @Override
     protected long fetchCategoryId(Cursor cursor) {
-        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
+        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
     }
 
     @Override
     protected String fetchCategoryName(Cursor cursor) {
-        return ID3Utils.decodeGenre(cursor.getString(getNameColumnIndex(cursor)));
+        return cursor.getString(getNameColumnIndex(cursor));
     }
 
     @Override
     protected int getNameColumnIndex(Cursor cursor) {
-        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
+        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST);
     }
 
     @Override
     protected long[] getSongList(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                ccols, null, null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+        String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " +
+                MediaStore.Audio.Media.IS_MUSIC + "=1";
+        Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                ccols, where, null, MediaStore.Audio.Media.TRACK);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
