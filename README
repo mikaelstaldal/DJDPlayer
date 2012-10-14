@@ -10,3 +10,5 @@ Enhancements over the standard Music Player:
 * Do not pretend that album is a proper subcategory of artist (one album can contain songs from different artists)
 
 * Show number of songs for all categories (artist, album, genre) and playlists
+
+* Jump directly to list of songs for artist/album/genre from currently playing song view

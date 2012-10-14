@@ -232,22 +232,22 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     };
     
     public boolean onLongClick(View view) {
-
-        CharSequence title = null;
-        String mime = null;
-        String query = null;
+        long artistId;
+        long albumId;
+        long genreId;
         String artist;
         String album;
-        String genre;
         String song;
-        long audioid;
+        long audioId;
         
         try {
+            artistId = mService.getArtistId();
+            albumId = mService.getAlbumId();
+            genreId = mService.getGenreId();
             artist = mService.getArtistName();
             album = mService.getAlbumName();
-            genre = mService.getGenreName();
             song = mService.getTrackName();
-            audioid = mService.getAudioId();
+            audioId = mService.getAudioId();
         } catch (RemoteException ex) {
             return true;
         } catch (NullPointerException ex) {
@@ -263,83 +263,82 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             return false;
         }
 
-        if (audioid < 0) {
+        if (audioId < 0) {
             return false;
         }
 
         Cursor c = MusicUtils.query(this,
-                ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioid),
+                ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId),
                 new String[] {MediaStore.Audio.Media.IS_MUSIC}, null, null, null);
-        boolean ismusic = true;
+        boolean isMusic = true;
         if (c != null) {
             if (c.moveToFirst()) {
-                ismusic = c.getInt(0) != 0;
+                isMusic = c.getInt(0) != 0;
             }
             c.close();
         }
-        if (!ismusic) {
+        if (!isMusic) {
             return false;
         }
 
-        boolean knownartist =
+        boolean knownArtist =
             (artist != null) && !MediaStore.UNKNOWN_STRING.equals(artist);
 
-        boolean knownalbum =
+        boolean knownAlbum =
             (album != null) && !MediaStore.UNKNOWN_STRING.equals(album);
 
-        boolean knowngenre =
-            (genre != null) && !MediaStore.UNKNOWN_STRING.equals(genre);
-
-        if (knownartist && view.equals(mArtistName.getParent())) {
-            title = artist;
-            query = artist;
-            mime = MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE;
-        } else if (knownalbum && view.equals(mAlbumName.getParent())) {
-            title = album;
-            if (knownartist) {
-                query = artist + " " + album;
-            } else {
-                query = album;
-            }
-            mime = MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE;
-        } else if (knowngenre && view.equals(mGenreName.getParent())) {
-            title = genre;
-            query = genre;
-            mime = MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE;
-        } else if (view.equals(mTrackName.getParent()) || !knownartist || !knownalbum) {
+        if (view.equals(mArtistName.getParent())) {
+            browseCategory("artist", artistId);
+            return true;
+        } else if (view.equals(mAlbumName.getParent())) {
+            browseCategory("album", albumId);
+            return true;
+        } else if (view.equals(mGenreName.getParent())) {
+            browseCategory("genre", genreId);
+            return true;
+        } else if (view.equals(mTrackName.getParent())) {
             if ((song == null) || MediaStore.UNKNOWN_STRING.equals(song)) {
                 // A popup of the form "Search for null/'' using ..." is pretty
                 // unhelpful, plus, we won't find any way to buy it anyway.
-                return true;
+                return false;
             }
 
-            title = song;
-            if (knownartist) {
+            String query;
+            CharSequence title = song;
+            if (knownArtist) {
                 query = artist + " " + song;
             } else {
                 query = song;
             }
-            mime = "audio/*"; // the specific type doesn't matter, so don't bother retrieving it
+            String mime = "audio/*"; // the specific type doesn't matter, so don't bother retrieving it
+
+            title = getString(R.string.mediasearch, title);
+
+            Intent i = new Intent();
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+            i.putExtra(SearchManager.QUERY, query);
+            if(knownArtist) {
+                i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
+            }
+            if(knownAlbum) {
+                i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
+            }
+            i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, song);
+            i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, mime);
+
+            startActivity(Intent.createChooser(i, title));
+            return true;
         } else {
             throw new RuntimeException("shouldn't be here");
         }
-        title = getString(R.string.mediasearch, title);
+    }
 
-        Intent i = new Intent();
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-        i.putExtra(SearchManager.QUERY, query);
-        if(knownartist) {
-            i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
-        }
-        if(knownalbum) {
-            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
-        }
-        i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, song);
-        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, mime);
-
-        startActivity(Intent.createChooser(i, title));
-        return true;
+    private void browseCategory(String categoryId, long id) {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+        intent.putExtra(categoryId, String.valueOf(id));
+        startActivity(intent);
     }
 
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
