@@ -21,9 +21,6 @@ import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -64,33 +61,6 @@ public class MusicUtils {
         public final static int QUEUE = 12;
         public final static int EFFECTS_PANEL = 13;
         public final static int CHILD_MENU_BASE = 14; // this should be the last item
-    }
-
-    public static String makeAlbumsLabel(Context context, int numalbums, int numsongs, boolean isUnknown) {
-        // There are two formats for the albums/songs information:
-        // "N Song(s)"  - used for unknown artist/album
-        // "N Album(s)" - used for known albums
-
-        StringBuilder songs_albums = new StringBuilder();
-
-        Resources r = context.getResources();
-        if (isUnknown) {
-            if (numsongs == 1) {
-                songs_albums.append(r.getQuantityString(R.plurals.Nsongs, 1));
-            } else {
-                String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
-                sFormatBuilder.setLength(0);
-                sFormatter.format(f, Integer.valueOf(numsongs));
-                songs_albums.append(sFormatBuilder);
-            }
-        } else {
-            String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
-            sFormatBuilder.setLength(0);
-            sFormatter.format(f, Integer.valueOf(numalbums));
-            songs_albums.append(sFormatBuilder);
-            songs_albums.append(context.getString(R.string.albumsongseparator));
-        }
-        return songs_albums.toString();
     }
 
     /**
@@ -308,22 +278,6 @@ public class MusicUtils {
             cursor.moveToNext();
         }
         return list;
-    }
-
-    public static long [] getSongListForArtist(Context context, long id) {
-        final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " + 
-        MediaStore.Audio.Media.IS_MUSIC + "=1";
-        Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                ccols, where, null,
-                MediaStore.Audio.Media.ALBUM_KEY + ","  + MediaStore.Audio.Media.TRACK);
-        
-        if (cursor != null) {
-            long [] list = getSongListForCursor(cursor);
-            cursor.close();
-            return list;
-        }
-        return sEmptyList;
     }
 
     public static long [] getSongListForPlaylist(Context context, long plid) {
@@ -794,29 +748,6 @@ public class MusicUtils {
         }
     }
     
-    // A really simple BitmapDrawable-like class, that doesn't do
-    // scaling, dithering or filtering.
-    private static class FastBitmapDrawable extends Drawable {
-        private Bitmap mBitmap;
-        public FastBitmapDrawable(Bitmap b) {
-            mBitmap = b;
-        }
-        @Override
-        public void draw(Canvas canvas) {
-            canvas.drawBitmap(mBitmap, 0, 0, null);
-        }
-        @Override
-        public int getOpacity() {
-            return PixelFormat.OPAQUE;
-        }
-        @Override
-        public void setAlpha(int alpha) {
-        }
-        @Override
-        public void setColorFilter(ColorFilter cf) {
-        }
-    }
-    
     static int getIntPref(Context context, String name, int def) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
@@ -999,43 +930,6 @@ public class MusicUtils {
         } catch (RemoteException ex) {
         }
         nowPlayingView.setVisibility(View.GONE);
-    }
-
-    static void setBackground(View v, Bitmap bm) {
-
-        if (bm == null) {
-            v.setBackgroundResource(0);
-            return;
-        }
-
-        int vwidth = v.getWidth();
-        int vheight = v.getHeight();
-        int bwidth = bm.getWidth();
-        int bheight = bm.getHeight();
-        float scalex = (float) vwidth / bwidth;
-        float scaley = (float) vheight / bheight;
-        float scale = Math.max(scalex, scaley) * 1.3f;
-
-        Bitmap.Config config = Bitmap.Config.ARGB_8888;
-        Bitmap bg = Bitmap.createBitmap(vwidth, vheight, config);
-        Canvas c = new Canvas(bg);
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setFilterBitmap(true);
-        ColorMatrix greymatrix = new ColorMatrix();
-        greymatrix.setSaturation(0);
-        ColorMatrix darkmatrix = new ColorMatrix();
-        darkmatrix.setScale(.3f, .3f, .3f, 1.0f);
-        greymatrix.postConcat(darkmatrix);
-        ColorFilter filter = new ColorMatrixColorFilter(greymatrix);
-        paint.setColorFilter(filter);
-        Matrix matrix = new Matrix();
-        matrix.setTranslate(-bwidth/2, -bheight/2); // move bitmap center to origin
-        matrix.postRotate(10);
-        matrix.postScale(scale, scale);
-        matrix.postTranslate(vwidth/2, vheight/2);  // Move bitmap center to view center
-        c.drawBitmap(bm, matrix, paint);
-        v.setBackgroundDrawable(new BitmapDrawable(bg));
     }
 
     static int getCardId(Context context) {
