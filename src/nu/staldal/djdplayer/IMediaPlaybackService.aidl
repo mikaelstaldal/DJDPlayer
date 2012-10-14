@@ -38,6 +38,8 @@ interface IMediaPlaybackService
     long getAlbumId();
     long getGenreId();
     String getGenreName();
+    String getNextArtistName();
+    String getNextTrackName();
     String getArtistName();
     long getArtistId();
     void enqueue(in long [] list, int action);

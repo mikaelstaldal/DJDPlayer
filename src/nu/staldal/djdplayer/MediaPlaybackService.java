@@ -114,6 +114,8 @@ public class MediaPlaybackService extends Service {
     private Cursor mCursor;
     private long mGenreId = -1;
     private String mGenreName = null;
+    private String mNextArtistName = null;
+    private String mNextTrackName = null;
     private int mPlayPos = -1;
     private static final String LOGTAG = "MediaPlaybackService";
     private final Shuffler mRand = new Shuffler();
@@ -350,6 +352,8 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
+            mNextArtistName = null;
+            mNextTrackName = null;
         }
 
         unregisterReceiver(mIntentReceiver);
@@ -812,6 +816,8 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
+            mNextArtistName = null;
+            mNextTrackName = null;
             notifyChange(META_CHANGED);
         }
     }
@@ -958,6 +964,8 @@ public class MediaPlaybackService extends Service {
                 mCursor = null;
                 mGenreId = -1;
                 mGenreName = null;
+                mNextArtistName = null;
+                mNextTrackName = null;
             }
 
             if (mPlayListLen == 0) {
@@ -973,6 +981,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor != null) {
                 mCursor.moveToFirst();
                 fetchGenre();
+                fetchNextSong();
                 open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
                 // go to bookmark if needed
                 if (isPodcast()) {
@@ -982,6 +991,23 @@ public class MediaPlaybackService extends Service {
                     seek(bookmark - 5000);
                 }
             }
+        }
+    }
+
+    private void fetchNextSong() {
+        if (mPlayPos < mPlayListLen - 1) { // not at end of playlist
+            long nextSongId = mPlayList[mPlayPos+1];
+            Cursor c = getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    mCursorCols, "_id=" + String.valueOf(nextSongId) , null, null);
+            if (c != null) {
+                if (c.moveToFirst()) {
+                    mNextArtistName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                    mNextTrackName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                }
+                c.close();
+            }
+
         }
     }
 
@@ -1021,6 +1047,8 @@ public class MediaPlaybackService extends Service {
                             mCursor = null;
                             mGenreId = -1;
                             mGenreName = null;
+                            mNextArtistName = null;
+                            mNextTrackName = null;
                         } else {
                             mCursor.moveToNext();
                             fetchGenre();
@@ -1151,6 +1179,8 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
+            mNextArtistName = null;
+            mNextTrackName = null;
         }
         if (remove_status_icon) {
             gotoIdleState();
@@ -1522,6 +1552,8 @@ public class MediaPlaybackService extends Service {
                         mCursor = null;
                         mGenreId = -1;
                         mGenreName = null;
+                        mNextArtistName = null;
+                        mNextTrackName = null;
                     }
                 } else {
                     if (mPlayPos >= mPlayListLen) {
@@ -1693,6 +1725,24 @@ public class MediaPlaybackService extends Service {
                 return null;
             }
             return mGenreName;
+        }
+    }
+
+    public String getNextArtistName() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            return mNextArtistName;
+        }
+    }
+
+    public String getNextTrackName() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            return mNextTrackName;
         }
     }
 
@@ -1976,6 +2026,12 @@ public class MediaPlaybackService extends Service {
         }
         public long getGenreId() {
             return mService.get().getGenreId();
+        }
+        public String getNextArtistName() {
+            return mService.get().getNextArtistName();
+        }
+        public String getNextTrackName() {
+            return mService.get().getNextTrackName();
         }
         public String getArtistName() {
             return mService.get().getArtistName();

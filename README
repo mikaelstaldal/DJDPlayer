@@ -12,3 +12,5 @@ Enhancements over the standard Music Player:
 * Show number of songs for all categories (artist, album, genre) and playlists
 
 * Jump directly to list of songs for artist/album/genre from currently playing song view
+
+* Show next song in currently playing song view

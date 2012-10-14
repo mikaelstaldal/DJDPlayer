@@ -77,6 +77,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mAlbumName = (TextView) findViewById(R.id.albumname);
         mGenreName = (TextView) findViewById(R.id.genrename);
         mTrackName = (TextView) findViewById(R.id.trackname);
+        mNextSong = (TextView) findViewById(R.id.nextsong);
 
         View v = (View)mArtistName.getParent(); 
         v.setOnTouchListener(this);
@@ -1123,6 +1124,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private TextView mAlbumName;
     private TextView mGenreName;
     private TextView mTrackName;
+    private TextView mNextSong;
     private ProgressBar mProgress;
     private long mPosOverride = -1;
     private boolean mFromTouch = false;
@@ -1219,15 +1221,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         }
     };
 
-    private static class AlbumSongIdWrapper {
-        public long albumid;
-        public long songid;
-        AlbumSongIdWrapper(long aid, long sid) {
-            albumid = aid;
-            songid = sid;
-        }
-    }
-    
     private void updateTrackInfo() {
         if (mService == null) {
             return;
@@ -1247,28 +1240,36 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
                 ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
                 mTrackName.setText(path);
+                ((View) mNextSong.getParent()).setVisibility(View.INVISIBLE);
             } else {
                 ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
+                ((View) mNextSong.getParent()).setVisibility(View.VISIBLE);
                 String artistName = mService.getArtistName();
                 if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
                     artistName = getString(R.string.unknown_artist_name);
                 }
                 mArtistName.setText(artistName);
                 String albumName = mService.getAlbumName();
-                long albumid = mService.getAlbumId();
                 if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
                     albumName = getString(R.string.unknown_album_name);
-                    albumid = -1;
                 }
+                mAlbumName.setText(albumName);
                 String genreName = mService.getGenreName();
                 if (MediaStore.UNKNOWN_STRING.equals(genreName)) {
                     genreName = getString(R.string.unknown_genre_name);
                 }
-                mAlbumName.setText(albumName);
                 mGenreName.setText(genreName);
                 mTrackName.setText(mService.getTrackName());
+
+                String nextTrackName = mService.getNextTrackName();
+                if (nextTrackName != null) {
+                    mNextSong.setText(getResources().getString(R.string.nextsong,
+                            nextTrackName, mService.getNextArtistName()));
+                } else {
+                    mNextSong.setText("");
+                }
             }
             mDuration = mService.duration();
             mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
