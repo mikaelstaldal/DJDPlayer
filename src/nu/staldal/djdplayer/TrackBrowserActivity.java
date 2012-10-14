@@ -414,6 +414,20 @@ public class TrackBrowserActivity extends ListActivity
                     fancyName = getString(R.string.unknown_album_name);
                 }
             }
+        } else if (mArtistId != null) {
+            String [] cols = new String [] {
+                MediaStore.Audio.Artists.ARTIST
+            };
+            Cursor cursor = MusicUtils.query(this,
+                    ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, Long.valueOf(mArtistId)),
+                    cols, null, null, null);
+            if (cursor != null) {
+                if (cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    fancyName = cursor.getString(0);
+                }
+                cursor.deactivate();
+            }
         } else if (mPlaylist != null) {
             if (mPlaylist.equals("nowplaying")) {
                 if (MusicUtils.getCurrentShuffleMode() == MediaPlaybackService.SHUFFLE_AUTO) {
