@@ -205,7 +205,7 @@
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
     <!-- Context menu item -->
-    <string name="play_selection">Play</string>
+    <string name="play_selection">Play now</string>
     <!-- Context menu item -->
     <string name="add_to_playlist">Add to playlist</string>
     <!-- Context menu item -->
