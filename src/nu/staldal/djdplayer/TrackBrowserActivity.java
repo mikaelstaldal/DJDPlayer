@@ -680,6 +680,18 @@ public class TrackBrowserActivity extends ListActivity
             case PLAY_SELECTION: {
                 // play the track
                 int position = mSelectedPosition;
+                // When selecting a track from the queue, just jump there instead of
+                // reloading the queue. This is both faster, and prevents accidentally
+                // dropping out of party shuffle.
+                if (mTrackCursor instanceof NowPlayingCursor) {
+                    if (MusicUtils.sService != null) {
+                        try {
+                            MusicUtils.sService.setQueuePosition(position);
+                            return true;
+                        } catch (RemoteException ex) {
+                        }
+                    }
+                }
                 MusicUtils.playAll(this, mTrackCursor, position);
                 return true;
             }
@@ -875,27 +887,6 @@ public class TrackBrowserActivity extends ListActivity
             wherearg[0] = mTrackCursor.getString(0);
             res.update(baseUri, values, where, wherearg);
         }
-    }
-    
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id)
-    {
-        if (mTrackCursor.getCount() == 0) {
-            return;
-        }
-        // When selecting a track from the queue, just jump there instead of
-        // reloading the queue. This is both faster, and prevents accidentally
-        // dropping out of party shuffle.
-        if (mTrackCursor instanceof NowPlayingCursor) {
-            if (MusicUtils.sService != null) {
-                try {
-                    MusicUtils.sService.setQueuePosition(position);
-                    return;
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-        MusicUtils.playAll(this, mTrackCursor, position);
     }
 
     @Override
