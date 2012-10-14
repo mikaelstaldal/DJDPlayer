@@ -20,67 +20,12 @@ import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.view.Window;
-import android.widget.ListView;
 
 public class GenreBrowserActivity extends CategoryBrowserActivity {
-    @Override
-    public void onCreate(Bundle icicle)
-    {
-        if (icicle != null) {
-            mCurrentId = icicle.getString(getSelectedCategoryId());
-        }
-        super.onCreate(icicle);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        mToken = MusicUtils.bindToService(this, this);
-
-        IntentFilter f = new IntentFilter();
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
-        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
-
-        setContentView(R.layout.media_picker_activity);
-        MusicUtils.updateButtonBar(this, getTabId());
-        ListView lv = getListView();
-        lv.setOnCreateContextMenuListener(this);
-        lv.setTextFilterEnabled(true);
-
-        mAdapter = (CategoryListAdapter)getLastNonConfigurationInstance();
-        if (mAdapter == null) {
-            //Log.i("@@@", "starting query");
-            mAdapter = new GenreListAdapter(
-                    getApplication(),
-                    this,
-                    R.layout.track_list_item,
-                    mCursor,
-                    new String[] {},
-                    new int[] {});
-            setListAdapter(mAdapter);
-            setTitle(getWorkingCategoryStringId());
-            getCursor(mAdapter.getQueryHandler(), null);
-        } else {
-            mAdapter.setActivity(this);
-            setListAdapter(mAdapter);
-            mCursor = mAdapter.getCursor();
-            if (mCursor != null) {
-                init(mCursor);
-            } else {
-                getCursor(mAdapter.getQueryHandler(), null);
-            }
-        }
-    }
-
     @Override
     protected String getCategoryId() {
         return "genre";
@@ -107,8 +52,8 @@ public class GenreBrowserActivity extends CategoryBrowserActivity {
     }
 
     @Override
-    protected String fetchCategoryId(Cursor cursor) {
-        return cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
+    protected long fetchCategoryId(Cursor cursor) {
+        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
     }
 
     @Override
@@ -129,6 +74,11 @@ public class GenreBrowserActivity extends CategoryBrowserActivity {
     @Override
     protected int getDeleteDescNoSdCardStringId() {
         return R.string.delete_genre_desc_nosdcard;
+    }
+
+    @Override
+    protected long fetchCurrentlyPlayingCategoryId() {
+        return MusicUtils.getCurrentGenreId();
     }
 
     @Override
@@ -173,6 +123,16 @@ public class GenreBrowserActivity extends CategoryBrowserActivity {
                     cols, null, null, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
         }
         return ret;
+    }
+
+    @Override
+    protected int getIdColumnIndex(Cursor cursor) {
+        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID);
+    }
+
+    @Override
+    protected int getNameColumnIndex(Cursor cursor) {
+        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
     }
 
     @Override

@@ -19,6 +19,7 @@ package nu.staldal.djdplayer;
 import android.app.ListActivity;
 import android.content.*;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +32,7 @@ import android.widget.ListView;
 
 public abstract class CategoryBrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
-    String mCurrentId;
+    long mCurrentId;
     String mCurrentName;
     boolean mIsUnknown;
     CategoryListAdapter mAdapter;
@@ -76,9 +77,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
     protected abstract Cursor getCursor(AsyncQueryHandler async, String filter);
 
+    protected abstract int getIdColumnIndex(Cursor cursor);
+
+    protected abstract int getNameColumnIndex(Cursor cursor);
+
     protected abstract long[] getSongList(Context context, long id);
 
-    protected abstract String fetchCategoryId(Cursor cursor);
+    protected abstract long fetchCategoryId(Cursor cursor);
 
     protected abstract String fetchCategoryName(Cursor cursor);
 
@@ -93,6 +98,8 @@ public abstract class CategoryBrowserActivity extends ListActivity
     protected abstract int getDeleteDescStringId();
 
     protected abstract int getDeleteDescNoSdCardStringId();
+
+    protected abstract long fetchCurrentlyPlayingCategoryId();
 
     protected abstract void doSearch();
 
@@ -136,6 +143,56 @@ public abstract class CategoryBrowserActivity extends ListActivity
     }
 
     @Override
+    public void onCreate(Bundle icicle)
+    {
+        if (icicle != null) {
+            mCurrentId = icicle.getLong(getSelectedCategoryId());
+        }
+        super.onCreate(icicle);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mToken = MusicUtils.bindToService(this, this);
+
+        IntentFilter f = new IntentFilter();
+        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+        f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        f.addDataScheme("file");
+        registerReceiver(mScanListener, f);
+
+        setContentView(R.layout.media_picker_activity);
+        MusicUtils.updateButtonBar(this, getTabId());
+        ListView lv = getListView();
+        lv.setOnCreateContextMenuListener(this);
+        lv.setTextFilterEnabled(true);
+
+        mAdapter = (CategoryListAdapter)getLastNonConfigurationInstance();
+        if (mAdapter == null) {
+            //Log.i("@@@", "starting query");
+            mAdapter = new CategoryListAdapter(
+                    getApplication(),
+                    R.layout.track_list_item,
+                    mCursor,
+                    new String[] {},
+                    new int[] {},
+                    this);
+            setListAdapter(mAdapter);
+            setTitle(getWorkingCategoryStringId());
+            getCursor(mAdapter.getQueryHandler(), null);
+        } else {
+            mAdapter.setActivity(this);
+            setListAdapter(mAdapter);
+            mCursor = mAdapter.getCursor();
+            if (mCursor != null) {
+                init(mCursor);
+            } else {
+                getCursor(mAdapter.getQueryHandler(), null);
+            }
+        }
+    }
+
+    @Override
     public Object onRetainNonConfigurationInstance() {
         mAdapterSent = true;
         return mAdapter;
@@ -173,7 +230,7 @@ public abstract class CategoryBrowserActivity extends ListActivity
         // need to store the selected item so we don't lose it in case
         // of an orientation switch. Otherwise we could lose it while
         // in the middle of specifying a playlist to add the item to.
-        outcicle.putString(getSelectedCategoryId(), mCurrentId);
+        outcicle.putLong(getSelectedCategoryId(), mCurrentId);
         super.onSaveInstanceState(outcicle);
     }
 
@@ -211,7 +268,7 @@ public abstract class CategoryBrowserActivity extends ListActivity
                 if (resultCode == RESULT_OK) {
                     Uri uri = intent.getData();
                     if (uri != null) {
-                        long [] list = getSongList(this, Long.parseLong(mCurrentId));
+                        long [] list = getSongList(this, mCurrentId);
                         MusicUtils.addToPlaylist(this, list, Long.parseLong(uri.getLastPathSegment()));
                     }
                 }
@@ -289,13 +346,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_SELECTION: {
-                long [] list = getSongList(this, Long.parseLong(mCurrentId));
+                long [] list = getSongList(this, mCurrentId);
                 MusicUtils.playAll(this, list, 0);
                 return true;
             }
 
             case QUEUE: {
-                long [] list = getSongList(this, Long.parseLong(mCurrentId));
+                long [] list = getSongList(this, mCurrentId);
                 MusicUtils.addToCurrentPlaylist(this, list);
                 return true;
             }
@@ -308,13 +365,13 @@ public abstract class CategoryBrowserActivity extends ListActivity
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = getSongList(this, Long.parseLong(mCurrentId));
+                long [] list = getSongList(this, mCurrentId);
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(this, list, playlist);
                 return true;
             }
             case DELETE_ITEM: {
-                long [] list = getSongList(this, Long.parseLong(mCurrentId));
+                long [] list = getSongList(this, mCurrentId);
                 String f;
                 if (android.os.Environment.isExternalStorageRemovable()) {
                     f = getString(getDeleteDescStringId());

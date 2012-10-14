@@ -22,14 +22,13 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
-public abstract class CategoryListAdapter extends SimpleCursorAdapter implements SectionIndexer {
+public class CategoryListAdapter extends SimpleCursorAdapter implements SectionIndexer {
     protected final Drawable mNowPlayingOverlay;
-    protected int mIdIndex;
-    protected int mNameIndex;
     protected final Resources mResources;
     protected final String mUnknown;
     protected AlphabetIndexer mIndexer;
@@ -57,21 +56,18 @@ public abstract class CategoryListAdapter extends SimpleCursorAdapter implements
     }
 
     public CategoryListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
-                               CategoryBrowserActivity currentActivity, String unknownName) {
+                               CategoryBrowserActivity currentActivity) {
         super(context, layout, cursor, from, to);
         this.mActivity = currentActivity;
-        this.mUnknown = unknownName;
+        this.mUnknown = context.getString(mActivity.getUnknownStringId());
         mQueryHandler = new QueryHandler(context.getContentResolver());
 
         Resources r = context.getResources();
         mNowPlayingOverlay = r.getDrawable(R.drawable.indicator_ic_mp_playing_list);
 
-        getColumnIndices(cursor);
         getIndexer(cursor);
         mResources = context.getResources();
     }
-
-    protected abstract void getColumnIndices(Cursor cursor);
 
     public void setActivity(CategoryBrowserActivity newActivity) {
         mActivity = newActivity;
@@ -92,13 +88,35 @@ public abstract class CategoryListAdapter extends SimpleCursorAdapter implements
        return v;
     }
 
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        ViewHolder vh = (ViewHolder) view.getTag();
+
+        String name = mActivity.fetchCategoryName(cursor);
+        String displayname = name;
+        boolean unknown = name == null || name.equals(MediaStore.UNKNOWN_STRING);
+        if (unknown) {
+            displayname = mUnknown;
+        }
+        vh.line1.setText(displayname);
+
+        long id = mActivity.fetchCategoryId(cursor);
+        long currentId = mActivity.fetchCurrentlyPlayingCategoryId();
+        ImageView iv = vh.play_indicator;
+        if (currentId == id) {
+            iv.setImageDrawable(mNowPlayingOverlay);
+        } else {
+            iv.setImageDrawable(null);
+        }
+    }
+
     protected void getIndexer(Cursor cursor) {
         if (cursor != null) {
             if (mIndexer != null) {
                 mIndexer.setCursor(cursor);
             } else {
-                mIndexer = new MusicAlphabetIndexer(cursor, mNameIndex, mResources.getString(
-                        R.string.fast_scroll_alphabet));
+                mIndexer = new MusicAlphabetIndexer(cursor, mActivity.getNameColumnIndex(cursor),
+                        mResources.getString(R.string.fast_scroll_alphabet));
             }
         }
     }
@@ -111,7 +129,6 @@ public abstract class CategoryListAdapter extends SimpleCursorAdapter implements
         }
         if (cursor != mActivity.mCursor) {
             mActivity.mCursor = cursor;
-            getColumnIndices(cursor);
             getIndexer(cursor);
             super.changeCursor(cursor);
         }
