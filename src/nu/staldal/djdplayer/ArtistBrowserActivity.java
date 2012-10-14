@@ -83,7 +83,8 @@ public class ArtistBrowserActivity extends CategoryBrowserActivity {
     protected Cursor getCursor(AsyncQueryHandler async, String filter) {
         String[] cols = new String[] {
                 MediaStore.Audio.Artists._ID,
-                MediaStore.Audio.Artists.ARTIST
+                MediaStore.Audio.Artists.ARTIST,
+                MediaStore.Audio.Artists.NUMBER_OF_TRACKS,
         };
 
         Cursor ret = null;
@@ -119,7 +120,7 @@ public class ArtistBrowserActivity extends CategoryBrowserActivity {
 
     @Override
     protected int fetchNumberOfSongsForCategory(Cursor cursor, long id) {
-        return fetchSongList(id).length; // TODO [mikes] this is quite slow
+        return cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_TRACKS));
     }
 
     @Override
