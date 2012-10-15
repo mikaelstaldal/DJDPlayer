@@ -1131,20 +1131,20 @@ public class MediaPlaybackService extends Service {
             if (getAudioId() < 0) {
                 // streaming
                 views.setTextViewText(R.id.trackname, getPath());
-                views.setTextViewText(R.id.artistalbum, null);
+                views.setTextViewText(R.id.artistgenre, null);
             } else {
                 String artist = getArtistName();
                 views.setTextViewText(R.id.trackname, getTrackName());
                 if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
                     artist = getString(R.string.unknown_artist_name);
                 }
-                String album = getAlbumName();
-                if (album == null || album.equals(MediaStore.UNKNOWN_STRING)) {
-                    album = getString(R.string.unknown_album_name);
+                String genre = getGenreName();
+                if (genre == null || genre.equals(MediaStore.UNKNOWN_STRING)) {
+                    genre = getString(R.string.unknown_genre_name);
                 }
                 
-                views.setTextViewText(R.id.artistalbum,
-                        getString(R.string.notification_artist_album, artist, album)
+                views.setTextViewText(R.id.artistgenre,
+                        getString(R.string.notification_artist_genre, artist, genre)
                         );
             }
             

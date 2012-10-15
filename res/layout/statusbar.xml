@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <TextView android:id="@+id/artistalbum"
+        <TextView android:id="@+id/artistgenre"
             style="@android:style/TextAppearance.StatusBar.EventContent"
             android:layout_gravity="left"
             android:maxLines="2"
