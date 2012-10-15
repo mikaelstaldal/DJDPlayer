@@ -65,13 +65,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_artist_playback" />
+                    android:src="@drawable/ic_mp_song_playback" />
 
-                <TextView android:id="@+id/artistname"
+                <TextView android:id="@+id/trackname"
                     android:textSize="18sp"
+                    android:textStyle="bold"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -89,13 +89,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_album_playback" />
+                    android:src="@drawable/ic_mp_artist_playback" />
 
-                <TextView android:id="@+id/albumname"
+                <TextView android:id="@+id/artistname"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -117,9 +117,9 @@
 
                 <TextView android:id="@+id/genrename"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -137,13 +137,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_song_playback" />
+                    android:src="@drawable/ic_mp_album_playback" />
 
-                <TextView android:id="@+id/trackname"
+                <TextView android:id="@+id/albumname"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -157,6 +157,7 @@
 
                 <TextView
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:singleLine="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
