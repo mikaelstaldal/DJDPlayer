@@ -659,9 +659,15 @@ public class TrackBrowserActivity extends ListActivity
                 return true;
             }
 
-            case QUEUE: {
+            case ADD_TO_CURRENT_PLAYLIST: {
                 long [] list = new long[] { mSelectedId };
                 MusicUtils.addToCurrentPlaylist(this, list);
+                return true;
+            }
+
+            case QUEUE: {
+                long [] list = new long[] { mSelectedId };
+                MusicUtils.queue(this, list);
                 return true;
             }
 
@@ -717,11 +723,20 @@ public class TrackBrowserActivity extends ListActivity
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        if (mTrackCursor.getCount() == 0) {
-            return;
-        }
-        long [] list = new long[] { mSelectedId };
-        MusicUtils.addToCurrentPlaylist(this, list);
+/*
+        // When selecting a track from the queue, just jump there instead of
+        // reloading the queue. This is both faster, and prevents accidentally
+        // dropping out of party shuffle.
+        if (mTrackCursor instanceof NowPlayingCursor) {
+          if (MusicUtils.sService != null) {
+              try {
+                  MusicUtils.sService.setQueuePosition(position);
+                  return;
+              } catch (RemoteException ex) {
+              }
+          }
+        } */
+        MusicUtils.queue(this, new long[] { id });
     }
 
     void doSearch() {

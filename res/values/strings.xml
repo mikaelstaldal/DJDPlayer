@@ -209,6 +209,8 @@
     <!-- Context menu item -->
     <string name="add_to_playlist">Add to playlist</string>
     <!-- Context menu item -->
+    <string name="current_playlist">Current playlist</string>
+    <!-- Context menu item -->
     <string name="queue">Queue</string>
     <!-- Context menu item -->
     <string name="new_playlist">New</string>

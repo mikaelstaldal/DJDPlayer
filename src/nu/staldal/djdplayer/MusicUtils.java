@@ -58,9 +58,10 @@ public class MusicUtils {
         public final static int SHUFFLE_ALL = 9;
         public final static int DELETE_ITEM = 10;
         public final static int SCAN_DONE = 11;
-        public final static int QUEUE = 12;
+        public final static int ADD_TO_CURRENT_PLAYLIST = 12;
         public final static int EFFECTS_PANEL = 13;
-        public final static int CHILD_MENU_BASE = 14; // this should be the last item
+        public final static int QUEUE = 14;
+        public final static int CHILD_MENU_BASE = 15; // this should be the last item
     }
 
     /**
@@ -328,7 +329,7 @@ public class MusicUtils {
      * any existing playlists. When the user selects an item, the
      * application will receive PLAYLIST_SELECTED with the Uri of
      * the selected playlist, NEW_PLAYLIST if a new playlist
-     * should be created, and QUEUE if the "current playlist" was
+     * should be created, and ADD_TO_CURRENT_PLAYLIST if the "current playlist" was
      * selected.
      * @param context The context to use for creating the menu items
      * @param sub The submenu to add the items to.
@@ -347,6 +348,7 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
+            sub.add(1, Defs.ADD_TO_CURRENT_PLAYLIST, 0, R.string.current_playlist);
             sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
@@ -445,6 +447,11 @@ public class MusicUtils {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         } catch (RemoteException ex) {
         }
+    }
+
+    public static void queue(Context context, long[] list) {
+        Log.i("MusicUtils", "queue: " + Arrays.toString(list));
+        // TODO [mikes] queue
     }
 
     private static ContentValues[] sContentValuesCache = null;

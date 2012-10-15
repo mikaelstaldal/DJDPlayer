@@ -380,6 +380,12 @@ public abstract class CategoryBrowserActivity extends ListActivity
 
             case QUEUE: {
                 long [] list = fetchSongList(mCurrentId);
+                MusicUtils.queue(this, list);
+                return true;
+            }
+
+            case ADD_TO_CURRENT_PLAYLIST: {
+                long [] list = fetchSongList(mCurrentId);
                 MusicUtils.addToCurrentPlaylist(this, list);
                 return true;
             }
