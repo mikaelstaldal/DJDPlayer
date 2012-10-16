@@ -599,6 +599,8 @@ public class PlaylistBrowserActivity extends ListActivity
             int numSongs = mActivity.fetchNumberOfSongs(cursor, id);
             if (numSongs > 0) {
                 line2.setText(context.getResources().getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+            } else {
+                line2.setText("");
             }
 
             playIndicator.setVisibility(View.GONE);
@@ -633,7 +635,7 @@ public class PlaylistBrowserActivity extends ListActivity
     }
 
     private int fetchNumberOfSongs(Cursor cursor, long id) {
-        if (id > -1)
+        if (id >= 0)
             return MusicUtils.getSongListForPlaylist(this, id).length; // TODO [mikes] this is quite slow
         else
             return 0;
