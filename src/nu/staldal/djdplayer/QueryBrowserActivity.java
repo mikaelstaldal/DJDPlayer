@@ -18,50 +18,26 @@ package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.AsyncQueryHandler;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-
+import android.content.*;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
+import android.os.*;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
+import android.view.*;
+import android.widget.*;
 
 public class QueryBrowserActivity extends ListActivity
-implements MusicUtils.Defs, ServiceConnection
-{
-    private final static int PLAY_NOW = 0;
-    private final static int ADD_TO_QUEUE = 1;
-    private final static int PLAY_NEXT = 2;
-    private final static int PLAY_ARTIST = 3;
-    private final static int EXPLORE_ARTIST = 4;
-    private final static int PLAY_ALBUM = 5;
-    private final static int EXPLORE_ALBUM = 6;
-    private final static int REQUERY = 3;
+        implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
     private QueryListAdapter mAdapter;
     private boolean mAdapterSent;
     private String mFilterString = "";
     private MusicUtils.ServiceToken mToken;
+    private long mSelectedId;
 
     public QueryBrowserActivity()
     {
@@ -145,6 +121,7 @@ implements MusicUtils.Defs, ServiceConnection
 
         setContentView(R.layout.query_activity);
         mTrackList = getListView();
+        mTrackList.setOnCreateContextMenuListener(this);
         mTrackList.setTextFilterEnabled(true);
         if (mAdapter == null) {
             mAdapter = new QueryListAdapter(
@@ -260,10 +237,93 @@ implements MusicUtils.Defs, ServiceConnection
         }
         MusicUtils.hideDatabaseError(this);
     }
-    
+
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id)
-    {
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
+        mQueryCursor.moveToPosition(mi.position);
+        if (mQueryCursor.isBeforeFirst() || mQueryCursor.isAfterLast()) {
+            return;
+        }
+        String selectedType = mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.MIME_TYPE));
+
+        if (!"artist".equals(selectedType) && !"album".equals(selectedType) && mi.position >= 0 && mi.id >= 0) {
+            menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
+            menu.add(0, QUEUE, 0, R.string.queue);
+            SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
+            MusicUtils.makePlaylistMenu(this, sub);
+            menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+            menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+            mSelectedId = mi.id;
+            menu.setHeaderTitle(mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case PLAY_SELECTION: {
+                // play the track
+                MusicUtils.playAll(this, new long[] { mSelectedId }, 0);
+                return true;
+            }
+
+            case ADD_TO_CURRENT_PLAYLIST: {
+                MusicUtils.addToCurrentPlaylist(this, new long[] { mSelectedId });
+                return true;
+            }
+
+            case QUEUE: {
+                MusicUtils.queue(this, new long[] { mSelectedId });
+                return true;
+            }
+
+            case NEW_PLAYLIST: {
+                Intent intent = new Intent();
+                intent.setClass(this, CreatePlaylist.class);
+                startActivityForResult(intent, NEW_PLAYLIST);
+                return true;
+            }
+
+            case PLAYLIST_SELECTED: {
+                long [] list = new long[] { mSelectedId };
+                long playlist = item.getIntent().getLongExtra("playlist", 0);
+                MusicUtils.addToPlaylist(this, list, playlist);
+                return true;
+            }
+
+            case USE_AS_RINGTONE:
+                // Set the system setting to make this the current ringtone
+                MusicUtils.setRingtone(this, mSelectedId);
+                return true;
+
+            case DELETE_ITEM: {
+                long [] list = new long[1];
+                list[0] = (int) mSelectedId;
+                Bundle b = new Bundle();
+                String f;
+                if (android.os.Environment.isExternalStorageRemovable()) {
+                    f = getString(R.string.delete_song_desc);
+                } else {
+                    f = getString(R.string.delete_song_desc_nosdcard);
+                }
+                String desc = String.format(f,
+                        mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+                b.putString("description", desc);
+                b.putLongArray("items", list);
+                Intent intent = new Intent();
+                intent.setClass(this, DeleteItems.class);
+                intent.putExtras(b);
+                startActivityForResult(intent, -1);
+                return true;
+            }
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
         // Dialog doesn't allow us to wait for a result, so we need to store
         // the info we need for when the dialog posts its result
         mQueryCursor.moveToPosition(position);
@@ -286,8 +346,7 @@ implements MusicUtils.Defs, ServiceConnection
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0){
-            long [] list = new long[] { id };
-            MusicUtils.playAll(this, list, 0);
+            MusicUtils.queue(this, new long[] { id });
         } else {
             Log.e("QueryBrowser", "invalid position/id: " + position + "/" + id);
         }
