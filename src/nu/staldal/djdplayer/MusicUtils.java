@@ -106,10 +106,6 @@ public class MusicUtils {
         }
     }
 
-    public static ServiceToken bindToService(Activity context) {
-        return bindToService(context, null);
-    }
-
     public static ServiceToken bindToService(Activity context, ServiceConnection callback) {
         Activity realActivity = context.getParent();
         if (realActivity == null) {
@@ -654,11 +650,6 @@ public class MusicUtils {
         }
     }
 
-    static protected Uri getContentURIForPath(String path) {
-        return Uri.fromFile(new File(path));
-    }
-
-    
     /*  Try to use String.format() as little as possible, because it creates a
      *  new Formatter every time you call it, which is very inefficient.
      *  Reusing an existing Formatter more than tripled the speed of
