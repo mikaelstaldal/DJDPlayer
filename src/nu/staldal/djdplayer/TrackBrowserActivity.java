@@ -16,7 +16,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.*;
 import android.database.AbstractCursor;
@@ -36,9 +35,7 @@ import android.widget.*;
 
 import java.util.Arrays;
 
-public class TrackBrowserActivity extends ListActivity
-        implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection
-{
+public class TrackBrowserActivity extends BrowserActivity implements ServiceConnection {
     private static final int Q_SELECTED = CHILD_MENU_BASE;
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -72,10 +69,6 @@ public class TrackBrowserActivity extends ListActivity
     private static int mLastListPosFine = -1;
     private boolean mUseLastListPos = false;
     private MusicUtils.ServiceToken mToken;
-
-    public TrackBrowserActivity()
-    {
-    }
 
     /** Called when the activity is first created. */
     @Override
@@ -190,7 +183,7 @@ public class TrackBrowserActivity extends ListActivity
                 getTrackCursor(mAdapter.getQueryHandler(), null, true);
             }
         }
-        MusicUtils.updateNowPlaying(this);
+        updateNowPlaying();
     }
     
     public void onServiceDisconnected(ComponentName name) {
@@ -537,7 +530,7 @@ public class TrackBrowserActivity extends ListActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
+            updateNowPlaying();
         }
     };
 

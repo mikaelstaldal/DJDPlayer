@@ -17,7 +17,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.*;
 import android.database.Cursor;
@@ -32,8 +31,7 @@ import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-public abstract class CategoryBrowserActivity extends ListActivity
-        implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
+public abstract class CategoryBrowserActivity extends BrowserActivity implements ServiceConnection {
     long mCurrentId;
     String mCurrentName;
     boolean mIsUnknown;
@@ -49,7 +47,7 @@ public abstract class CategoryBrowserActivity extends ListActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            MusicUtils.updateNowPlaying(CategoryBrowserActivity.this);
+            updateNowPlaying();
         }
     };
 
@@ -430,7 +428,7 @@ public abstract class CategoryBrowserActivity extends ListActivity
     }
 
     public void onServiceConnected(ComponentName name, IBinder service) {
-        MusicUtils.updateNowPlaying(this);
+        updateNowPlaying();
     }
 
     public void onServiceDisconnected(ComponentName name) {
