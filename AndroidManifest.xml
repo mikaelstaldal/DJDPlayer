@@ -193,30 +193,6 @@
             </intent-filter>
 
         </activity-alias>
-        <activity android:name="nu.staldal.djdplayer.MediaPickerActivity"
-                android:label="@string/mediapickerlabel" android:exported="false" >
-<!--
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="media/*"/>
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-                <data android:mimeType="video/*"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <data android:mimeType="media/*"/>
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-                <data android:mimeType="video/*"/>
-            </intent-filter>
--->
-        </activity>
         <activity android:name="nu.staldal.djdplayer.MusicPicker"
                 android:label="@string/music_picker_title" android:exported="true" >
             <!-- First way to invoke us: someone asks to get content of
