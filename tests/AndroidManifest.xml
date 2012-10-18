@@ -21,14 +21,4 @@
         <uses-library android:name="android.test.runner"/>
     </application>
 
-    <instrumentation android:name="nu.staldal.djdplayer.tests.MusicPlayerFunctionalTestRunner"
-                     android:targetPackage="nu.staldal.djdplayer"
-                     android:label="Music Player Functional Test">
-    </instrumentation>
-
-    <instrumentation android:name="nu.staldal.djdplayer.tests.MusicPlayerStressTestRunner"
-                     android:targetPackage="nu.staldal.djdplayer"
-                     android:label="Music Player Stress Test">
-    </instrumentation>
-
-</manifest> 
+</manifest>
