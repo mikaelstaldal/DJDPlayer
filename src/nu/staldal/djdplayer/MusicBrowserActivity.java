@@ -23,13 +23,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-public class MusicBrowserActivity extends Activity
-    implements MusicUtils.Defs {
+public class MusicBrowserActivity extends Activity implements MusicUtils.Defs {
 
     private MusicUtils.ServiceToken mToken;
-
-    public MusicBrowserActivity() {
-    }
 
     /**
      * Called when the activity is first created.
