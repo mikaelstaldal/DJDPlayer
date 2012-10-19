@@ -32,6 +32,7 @@ import android.widget.ListView;
 
 public abstract class CategoryBrowserActivity extends BrowserActivity {
     protected final static int SEARCH = CHILD_MENU_BASE;
+
     protected static int mLastListPosCourse = -1;
     protected static int mLastListPosFine = -1;
 
