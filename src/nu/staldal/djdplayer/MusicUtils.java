@@ -255,6 +255,43 @@ public class MusicUtils {
         return false;
     }
 
+    public static boolean isPlaying() {
+        if (MusicUtils.sService != null) {
+            try {
+                return sService.isPlaying();
+            } catch (RemoteException ex) {
+            }
+        }
+        return false;
+    }
+
+    public static void play() {
+        if (MusicUtils.sService != null) {
+            try {
+                sService.play();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public static void pause() {
+        if (MusicUtils.sService != null) {
+            try {
+                sService.pause();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public static void next() {
+        if (MusicUtils.sService != null) {
+            try {
+                sService.next();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public final static long [] sEmptyList = new long[0];
 
     public static long [] getSongListForCursor(Cursor cursor) {

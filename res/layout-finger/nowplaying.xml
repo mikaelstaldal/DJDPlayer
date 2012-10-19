@@ -56,14 +56,31 @@
             />
         </LinearLayout>
 
-        <ImageView android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dip"
-            android:background="@drawable/indicator_ic_mp_playing_large"
-        />
+        <LinearLayout
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:orientation="horizontal">
+                >
+            <ImageButton
+                android:id="@+id/control_play"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_appwidget_music_play"
+                android:background="@drawable/appwidget_button_center"
+                />
 
+            <ImageButton
+                android:id="@+id/control_next"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_appwidget_music_next"
+                android:background="@drawable/appwidget_button_right"
+                />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>   
 

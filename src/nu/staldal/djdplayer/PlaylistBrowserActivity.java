@@ -134,7 +134,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
             finish();
             return;
         }
-        updateNowPlaying();
+        super.onServiceConnected(classname, obj);
     }
 
     @Override

@@ -178,7 +178,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 getTrackCursor(mAdapter.getQueryHandler(), null, true);
             }
         }
-        updateNowPlaying();
+        super.onServiceConnected(name, service);
     }
     
     @Override
