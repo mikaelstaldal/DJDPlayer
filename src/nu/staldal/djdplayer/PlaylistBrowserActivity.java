@@ -52,12 +52,10 @@ public class PlaylistBrowserActivity extends BrowserActivity {
     private static int mLastListPosFine = -1;
 
     private boolean mCreateShortcut;
-    private MusicUtils.ServiceToken mToken;
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle icicle)
-    {
+    public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
         final Intent intent = getIntent();
@@ -69,32 +67,6 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        mToken = MusicUtils.bindToService(this, new ServiceConnection() {
-            public void onServiceConnected(ComponentName classname, IBinder obj) {
-                if (Intent.ACTION_VIEW.equals(action)) {
-                    long id = Long.parseLong(intent.getExtras().getString("playlist"));
-                    if (id == RECENTLY_ADDED_PLAYLIST) {
-                        playRecentlyAdded();
-                    } else if (id == PODCASTS_PLAYLIST) {
-                        playPodcasts();
-                    } else if (id == ALL_SONGS_PLAYLIST) {
-                        long [] list = MusicUtils.getAllSongs(PlaylistBrowserActivity.this);
-                        if (list != null) {
-                            MusicUtils.playAll(PlaylistBrowserActivity.this, list, 0);
-                        }
-                    } else {
-                        MusicUtils.playPlaylist(PlaylistBrowserActivity.this, id);
-                    }
-                    finish();
-                    return;
-                }
-                updateNowPlaying();
-            }
-
-            public void onServiceDisconnected(ComponentName classname) {
-            }
-        
-        });
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
@@ -138,8 +110,33 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 getPlaylistCursor(mAdapter.getQueryHandler(), null);
             }
         }
+        mToken = MusicUtils.bindToService(this, this);
     }
-    
+
+    @Override
+    public void onServiceConnected(ComponentName classname, IBinder obj) {
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            long id = Long.parseLong(intent.getExtras().getString("playlist"));
+            if (id == RECENTLY_ADDED_PLAYLIST) {
+                playRecentlyAdded();
+            } else if (id == PODCASTS_PLAYLIST) {
+                playPodcasts();
+            } else if (id == ALL_SONGS_PLAYLIST) {
+                long [] list = MusicUtils.getAllSongs(PlaylistBrowserActivity.this);
+                if (list != null) {
+                    MusicUtils.playAll(PlaylistBrowserActivity.this, list, 0);
+                }
+            } else {
+                MusicUtils.playPlaylist(PlaylistBrowserActivity.this, id);
+            }
+            finish();
+            return;
+        }
+        updateNowPlaying();
+    }
+
     @Override
     public Object onRetainNonConfigurationInstance() {
         PlaylistListAdapter a = mAdapter;

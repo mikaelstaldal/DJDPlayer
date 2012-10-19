@@ -16,15 +16,28 @@
 package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.TextView;
 
 public abstract class BrowserActivity extends ListActivity
-        implements View.OnCreateContextMenuListener, MusicUtils.Defs {
+        implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
+
+    protected MusicUtils.ServiceToken mToken;
+
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        updateNowPlaying();
+    }
+
+    public void onServiceDisconnected(ComponentName name) {
+        finish();
+    }
 
     protected void updateNowPlaying() {
         View nowPlayingView = findViewById(R.id.nowplaying);

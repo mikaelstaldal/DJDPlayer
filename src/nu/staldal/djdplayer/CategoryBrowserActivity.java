@@ -24,24 +24,23 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-public abstract class CategoryBrowserActivity extends BrowserActivity implements ServiceConnection {
-    long mCurrentId;
-    String mCurrentName;
-    boolean mIsUnknown;
-    CategoryListAdapter mAdapter;
-    boolean mAdapterSent;
-    final static int SEARCH = CHILD_MENU_BASE;
-    static int mLastListPosCourse = -1;
-    static int mLastListPosFine = -1;
-    MusicUtils.ServiceToken mToken;
-    Cursor mCursor;
+public abstract class CategoryBrowserActivity extends BrowserActivity {
+    protected final static int SEARCH = CHILD_MENU_BASE;
+    protected static int mLastListPosCourse = -1;
+    protected static int mLastListPosFine = -1;
+
+    protected long mCurrentId;
+    protected String mCurrentName;
+    protected boolean mIsUnknown;
+    protected CategoryListAdapter mAdapter;
+    protected boolean mAdapterSent;
+    protected Cursor mCursor;
 
     BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
         @Override
@@ -106,6 +105,55 @@ public abstract class CategoryBrowserActivity extends BrowserActivity implements
      */
     protected void addExtraSearchData(Intent i) { }
 
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        if (icicle != null) {
+            mCurrentId = icicle.getLong(getSelectedCategoryId());
+        }
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        IntentFilter f = new IntentFilter();
+        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+        f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        f.addDataScheme("file");
+        registerReceiver(mScanListener, f);
+
+        setContentView(R.layout.media_picker_activity);
+        MusicUtils.updateButtonBar(this, getTabId());
+        ListView lv = getListView();
+        lv.setOnCreateContextMenuListener(this);
+        lv.setTextFilterEnabled(true);
+
+        mAdapter = (CategoryListAdapter)getLastNonConfigurationInstance();
+        if (mAdapter == null) {
+            //Log.i("@@@", "starting query");
+            mAdapter = new CategoryListAdapter(
+                    getApplication(),
+                    R.layout.track_list_item,
+                    mCursor,
+                    new String[] {},
+                    new int[] {},
+                    this);
+            setListAdapter(mAdapter);
+            setTitle(getWorkingCategoryStringId());
+            getCursor(mAdapter.getQueryHandler(), null);
+        } else {
+            mAdapter.setActivity(this);
+            setListAdapter(mAdapter);
+            mCursor = mAdapter.getCursor();
+            if (mCursor != null) {
+                init(mCursor);
+            } else {
+                getCursor(mAdapter.getQueryHandler(), null);
+            }
+        }
+        mToken = MusicUtils.bindToService(this, this);
+    }
+
     protected void doSearch() {
         Intent i = new Intent();
         i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
@@ -164,56 +212,6 @@ public abstract class CategoryBrowserActivity extends BrowserActivity implements
         MusicUtils.hideDatabaseError(this);
         MusicUtils.updateButtonBar(this, getTabId());
         setTitle();
-    }
-
-    @Override
-    public void onCreate(Bundle icicle)
-    {
-        if (icicle != null) {
-            mCurrentId = icicle.getLong(getSelectedCategoryId());
-        }
-        super.onCreate(icicle);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        mToken = MusicUtils.bindToService(this, this);
-
-        IntentFilter f = new IntentFilter();
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
-        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
-
-        setContentView(R.layout.media_picker_activity);
-        MusicUtils.updateButtonBar(this, getTabId());
-        ListView lv = getListView();
-        lv.setOnCreateContextMenuListener(this);
-        lv.setTextFilterEnabled(true);
-
-        mAdapter = (CategoryListAdapter)getLastNonConfigurationInstance();
-        if (mAdapter == null) {
-            //Log.i("@@@", "starting query");
-            mAdapter = new CategoryListAdapter(
-                    getApplication(),
-                    R.layout.track_list_item,
-                    mCursor,
-                    new String[] {},
-                    new int[] {},
-                    this);
-            setListAdapter(mAdapter);
-            setTitle(getWorkingCategoryStringId());
-            getCursor(mAdapter.getQueryHandler(), null);
-        } else {
-            mAdapter.setActivity(this);
-            setListAdapter(mAdapter);
-            mCursor = mAdapter.getCursor();
-            if (mCursor != null) {
-                init(mCursor);
-            } else {
-                getCursor(mAdapter.getQueryHandler(), null);
-            }
-        }
     }
 
     @Override
@@ -425,13 +423,5 @@ public abstract class CategoryBrowserActivity extends BrowserActivity implements
 
         }
         return super.onContextItemSelected(item);
-    }
-
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        updateNowPlaying();
-    }
-
-    public void onServiceDisconnected(ComponentName name) {
-        finish();
     }
 }

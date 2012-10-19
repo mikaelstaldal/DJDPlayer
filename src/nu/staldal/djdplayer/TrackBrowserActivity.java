@@ -35,7 +35,7 @@ import android.widget.*;
 
 import java.util.Arrays;
 
-public class TrackBrowserActivity extends BrowserActivity implements ServiceConnection {
+public class TrackBrowserActivity extends BrowserActivity {
     private static final int Q_SELECTED = CHILD_MENU_BASE;
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -44,11 +44,30 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
     private static final int REMOVE = CHILD_MENU_BASE + 5;
     private static final int SEARCH = CHILD_MENU_BASE + 6;
 
-
     private static final String LOGTAG = "TrackBrowser";
 
-    private String[] mCursorCols;
-    private String[] mPlaylistMemberCols;
+    private static final String[] CURSOR_COLS = new String[] {
+        MediaStore.Audio.Media._ID,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.ALBUM,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ARTIST_ID,
+        MediaStore.Audio.Media.DURATION
+    };
+    private static final String[] PLAYLIST_MEMBER_COLS = new String[] {
+        MediaStore.Audio.Playlists.Members._ID,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.ALBUM,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ARTIST_ID,
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Playlists.Members.PLAY_ORDER,
+        MediaStore.Audio.Playlists.Members.AUDIO_ID,
+        MediaStore.Audio.Media.IS_MUSIC
+    };
+
     private boolean mDeletedOneRow = false;
     private boolean mEditMode = false;
     private String mCurrentTrackName;
@@ -68,12 +87,10 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
     private static int mLastListPosCourse = -1;
     private static int mLastListPosFine = -1;
     private boolean mUseLastListPos = false;
-    private MusicUtils.ServiceToken mToken;
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle icicle)
-    {
+    public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         Intent intent = getIntent();
@@ -100,28 +117,6 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
             mEditMode = intent.getAction().equals(Intent.ACTION_EDIT);
         }
 
-        mCursorCols = new String[] {
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ARTIST_ID,
-                MediaStore.Audio.Media.DURATION
-        };
-        mPlaylistMemberCols = new String[] {
-                MediaStore.Audio.Playlists.Members._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ARTIST_ID,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Playlists.Members.PLAY_ORDER,
-                MediaStore.Audio.Playlists.Members.AUDIO_ID,
-                MediaStore.Audio.Media.IS_MUSIC
-        };
-
         setContentView(R.layout.media_picker_activity);
         mUseLastListPos = MusicUtils.updateButtonBar(this, R.id.songtab);
         mTrackList = getListView();
@@ -144,8 +139,8 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
         mToken = MusicUtils.bindToService(this, this);
     }
 
-    public void onServiceConnected(ComponentName name, IBinder service)
-    {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
@@ -186,11 +181,6 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
         updateNowPlaying();
     }
     
-    public void onServiceDisconnected(ComponentName name) {
-        // we can't really function without the service, so don't
-        finish();
-    }
-
     @Override
     public Object onRetainNonConfigurationInstance() {
         TrackListAdapter a = mAdapter;
@@ -554,7 +544,7 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
                     return;
                 }
                 if (mAdapter != null) {
-                    Cursor c = new NowPlayingCursor(MusicUtils.sService, mCursorCols);
+                    Cursor c = new NowPlayingCursor(MusicUtils.sService, CURSOR_COLS);
                     if (c.getCount() == 0) {
                         finish();
                         return;
@@ -987,11 +977,11 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
             }
             mSortOrder = MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER;
             ret = queryhandler.doQuery(uri,
-                    mCursorCols, where.toString(), null, mSortOrder, async);
+                    CURSOR_COLS, where.toString(), null, mSortOrder, async);
         } else if (mPlaylist != null) {
             if (mPlaylist.equals("nowplaying")) {
                 if (MusicUtils.sService != null) {
-                    ret = new NowPlayingCursor(MusicUtils.sService, mCursorCols);
+                    ret = new NowPlayingCursor(MusicUtils.sService, CURSOR_COLS);
                     if (ret.getCount() == 0) {
                         finish();
                     }
@@ -1005,7 +995,7 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
                     uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
                 }
                 ret = queryhandler.doQuery(uri,
-                        mCursorCols, where.toString(), null,
+                        CURSOR_COLS, where.toString(), null,
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER, async);
             } else if (mPlaylist.equals("recentlyadded")) {
                 // do a query for all songs added in the last X weeks
@@ -1017,7 +1007,7 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
                 where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">");
                 where.append(System.currentTimeMillis() / 1000 - X);
                 ret = queryhandler.doQuery(uri,
-                        mCursorCols, where.toString(), null,
+                        CURSOR_COLS, where.toString(), null,
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER, async);
             } else {
                 Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
@@ -1026,7 +1016,7 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
                     uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
                 }
                 mSortOrder = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
-                ret = queryhandler.doQuery(uri, mPlaylistMemberCols,
+                ret = queryhandler.doQuery(uri, PLAYLIST_MEMBER_COLS,
                         where.toString(), null, mSortOrder, async);
             }
         } else {
@@ -1043,7 +1033,7 @@ public class TrackBrowserActivity extends BrowserActivity implements ServiceConn
                 uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
             }
             ret = queryhandler.doQuery(uri,
-                    mCursorCols, where.toString() , null, mSortOrder, async);
+                    CURSOR_COLS, where.toString() , null, mSortOrder, async);
         }
         
         // This special case is for the "nowplaying" cursor, which cannot be handled
