@@ -337,8 +337,4 @@
 
     <string name="rename_playlist_diff_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
 
-    <string name="nextsonglabel">Next song:</string>
-
-    <string name="nextsong"><xliff:g id="songName">%s</xliff:g>, <xliff:g id="artistName">%s</xliff:g></string>
-
 </resources>

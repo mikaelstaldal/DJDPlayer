@@ -36,9 +36,8 @@ import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 
-public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
-    View.OnTouchListener, View.OnLongClickListener
-{
+public class MediaPlaybackActivity extends Activity
+        implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener {
     private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
 
     private boolean mSeeking = false;
@@ -56,14 +55,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private int mTouchSlop;
     private MusicUtils.ServiceToken mToken;
 
-    public MediaPlaybackActivity()
-    {
-    }
-
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle icicle)
-    {
+    public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -77,7 +71,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mAlbumName = (TextView) findViewById(R.id.albumname);
         mGenreName = (TextView) findViewById(R.id.genrename);
         mTrackName = (TextView) findViewById(R.id.trackname);
-        mNextSong = (TextView) findViewById(R.id.nextsong);
+        mNextTrackName = (TextView) findViewById(R.id.nexttrackname);
+        mNextArtistName = (TextView) findViewById(R.id.nextartistname);
+        mNextGenreName = (TextView) findViewById(R.id.nextgenrename);
 
         View v = (View)mArtistName.getParent(); 
         v.setOnTouchListener(this);
@@ -1124,7 +1120,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private TextView mAlbumName;
     private TextView mGenreName;
     private TextView mTrackName;
-    private TextView mNextSong;
+    private TextView mNextTrackName;
+    private TextView mNextArtistName;
+    private TextView mNextGenreName;
     private ProgressBar mProgress;
     private long mPosOverride = -1;
     private boolean mFromTouch = false;
@@ -1240,12 +1238,16 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
                 ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
                 mTrackName.setText(path);
-                ((View) mNextSong.getParent()).setVisibility(View.INVISIBLE);
+                ((View) mNextTrackName.getParent()).setVisibility(View.INVISIBLE);
+                ((View) mNextArtistName.getParent()).setVisibility(View.INVISIBLE);
+                ((View) mNextGenreName.getParent()).setVisibility(View.INVISIBLE);
             } else {
                 ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
                 ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mNextSong.getParent()).setVisibility(View.VISIBLE);
+                ((View) mNextTrackName.getParent()).setVisibility(View.VISIBLE);
+                ((View) mNextArtistName.getParent()).setVisibility(View.VISIBLE);
+                ((View) mNextGenreName.getParent()).setVisibility(View.VISIBLE);
                 String artistName = mService.getArtistName();
                 if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
                     artistName = getString(R.string.unknown_artist_name);
@@ -1265,10 +1267,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
                 String nextTrackName = mService.getNextTrackName();
                 if (nextTrackName != null) {
-                    mNextSong.setText(getResources().getString(R.string.nextsong,
-                            nextTrackName, mService.getNextArtistName()));
+                    mNextTrackName.setText(nextTrackName);
+                    mNextArtistName.setText(mService.getNextArtistName());
+                    mNextGenreName.setText(mService.getNextGenreName());
                 } else {
-                    mNextSong.setText("");
+                    mNextTrackName.setText("");
+                    mNextArtistName.setText("");
+                    mNextGenreName.setText("");
                 }
             }
             mDuration = mService.duration();

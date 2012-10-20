@@ -20,15 +20,16 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingTop="10dip">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
            <ImageButton android:id="@+id/curplaylist"
@@ -50,8 +51,9 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
+            android:layout_weight="3"
             android:orientation="vertical">
 
             <LinearLayout
@@ -150,29 +152,88 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:orientation="horizontal">
+        </LinearLayout>
 
-                <TextView
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:singleLine="true"
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:paddingLeft="11dip"
+                android:paddingTop="4dip"
+                android:paddingBottom="4dip">
+
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="4dip"
-                    android:text="@string/nextsonglabel" />
+                    android:src="@drawable/ic_mp_song_playback" />
 
-                <TextView android:id="@+id/nextsong"
+                <TextView android:id="@+id/nexttrackname"
                     android:textSize="14sp"
                     android:singleLine="true"
                     android:ellipsize="end"
+                    android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:paddingLeft="11dip"
+                android:paddingTop="4dip"
+                android:paddingBottom="4dip">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="4dip"
+                    android:src="@drawable/ic_mp_artist_playback" />
+
+                <TextView android:id="@+id/nextartistname"
+                    android:textSize="12sp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:paddingLeft="11dip"
+                android:paddingTop="4dip"
+                android:paddingBottom="4dip">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="4dip"
+                    android:src="@drawable/ic_mp_genre_playback" />
+
+                <TextView android:id="@+id/nextgenrename"
+                    android:textSize="12sp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
