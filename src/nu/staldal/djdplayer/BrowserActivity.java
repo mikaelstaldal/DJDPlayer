@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 public abstract class BrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
+    private static final String TAG = "BrowserActivity";
 
     protected MusicUtils.ServiceToken mToken;
 
@@ -36,72 +37,103 @@ public abstract class BrowserActivity extends ListActivity
 
     public void onServiceConnected(ComponentName name, IBinder service) {
         nowPlayingView = findViewById(R.id.nowplaying);
-        titleView = (TextView) nowPlayingView.findViewById(R.id.title);
-        artistView = (TextView) nowPlayingView.findViewById(R.id.artist);
-        playButton = (ImageButton) nowPlayingView.findViewById(R.id.control_play);
-        ImageButton nextButton = (ImageButton) nowPlayingView.findViewById(R.id.control_next);
+        if (nowPlayingView != null) {
+            titleView = (TextView) nowPlayingView.findViewById(R.id.title);
+            artistView = (TextView) nowPlayingView.findViewById(R.id.artist);
+            playButton = (ImageButton) nowPlayingView.findViewById(R.id.control_play);
+            ImageButton prevButton = (ImageButton) nowPlayingView.findViewById(R.id.control_prev);
+            ImageButton nextButton = (ImageButton) nowPlayingView.findViewById(R.id.control_next);
 
-        nowPlayingView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Context c = v.getContext();
-                c.startActivity(new Intent(c, MediaPlaybackActivity.class));
-            }
-        });
-
-        playButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (MusicUtils.isPlaying()) {
-                    MusicUtils.pause();
-                } else {
-                    MusicUtils.play();
+            nowPlayingView.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Context c = v.getContext();
+                    c.startActivity(new Intent(c, MediaPlaybackActivity.class));
                 }
-            }
-        });
+            });
 
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                MusicUtils.next();
-            }
-        });
+            playButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (MusicUtils.isPlaying()) {
+                        MusicUtils.pause();
+                    } else {
+                        MusicUtils.play();
+                    }
+                }
+            });
 
+            if (prevButton != null) {
+                prevButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        MusicUtils.prev();
+                    }
+                });
+            }
+
+            if (nextButton != null) {
+                nextButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        MusicUtils.next();
+                    }
+                });
+            }
+        }
+        updateNowPlaying();
+    }
+
+    public void onServiceDisconnected(ComponentName name) {
+        finish();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
+        f.addAction(MediaPlaybackService.META_CHANGED);
+        f.addAction(MediaPlaybackService.QUEUE_CHANGED);
         registerReceiver(mStatusListener, new IntentFilter(f));
+    }
 
-        updateNowPlaying();
+    @Override
+    public void onPause() {
+        unregisterReceiver(mStatusListener);
+        super.onPause();
     }
 
     private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
-                if (MusicUtils.isPlaying()) {
-                    playButton.setImageResource(R.drawable.music_pause);
-                } else {
-                    playButton.setImageResource(R.drawable.music_play);
+                if (nowPlayingView != null) {
+                    if (MusicUtils.isPlaying()) {
+                        playButton.setImageResource(R.drawable.music_pause);
+                    } else {
+                        playButton.setImageResource(R.drawable.music_play);
+                    }
                 }
+            } else if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
+                updateNowPlaying();
+            } else if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
+                updateNowPlaying();
             }
         }
     };
 
-    public void onServiceDisconnected(ComponentName name) {
-        unregisterReceiver(mStatusListener);
-        finish();
-    }
-
-    protected final void updateNowPlaying() {
-        try {
-            if (MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
-                titleView.setText(MusicUtils.sService.getTrackName());
-                String artistName = MusicUtils.sService.getArtistName();
-                if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-                    artistName = getString(R.string.unknown_artist_name);
+    private void updateNowPlaying() {
+        if (nowPlayingView != null) {
+            try {
+                if (MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
+                    titleView.setText(MusicUtils.sService.getTrackName());
+                    String artistName = MusicUtils.sService.getArtistName();
+                    if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
+                        artistName = getString(R.string.unknown_artist_name);
+                    }
+                    artistView.setText(artistName);
+                    nowPlayingView.setVisibility(View.VISIBLE);
                 }
-                artistView.setText(artistName);
-                nowPlayingView.setVisibility(View.VISIBLE);
+            } catch (RemoteException ex) {
+                nowPlayingView.setVisibility(View.GONE);
             }
-        } catch (RemoteException ex) {
-            nowPlayingView.setVisibility(View.GONE);
         }
     }
 

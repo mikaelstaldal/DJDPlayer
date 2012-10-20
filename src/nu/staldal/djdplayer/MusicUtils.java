@@ -283,6 +283,15 @@ public class MusicUtils {
         }
     }
 
+    public static void prev() {
+        if (MusicUtils.sService != null) {
+            try {
+                sService.prev();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public static void next() {
         if (MusicUtils.sService != null) {
             try {

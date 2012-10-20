@@ -47,7 +47,6 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            updateNowPlaying();
         }
     };
 

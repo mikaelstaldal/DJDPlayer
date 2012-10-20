@@ -115,6 +115,8 @@ public class PlaylistBrowserActivity extends BrowserActivity {
 
     @Override
     public void onServiceConnected(ComponentName classname, IBinder obj) {
+        super.onServiceConnected(classname, obj);
+
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
@@ -132,9 +134,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 MusicUtils.playPlaylist(PlaylistBrowserActivity.this, id);
             }
             finish();
-            return;
         }
-        super.onServiceConnected(classname, obj);
     }
 
     @Override
@@ -174,9 +174,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
     @Override
     public void onResume() {
         super.onResume();
-
         MusicUtils.setSpinnerState(this);
-        updateNowPlaying();
     }
 
     @Override

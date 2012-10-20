@@ -141,6 +141,8 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+        super.onServiceConnected(name, service);
+
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
@@ -178,7 +180,6 @@ public class TrackBrowserActivity extends BrowserActivity {
                 getTrackCursor(mAdapter.getQueryHandler(), null, true);
             }
         }
-        super.onServiceConnected(name, service);
     }
     
     @Override
@@ -520,7 +521,6 @@ public class TrackBrowserActivity extends BrowserActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            updateNowPlaying();
         }
     };
 
