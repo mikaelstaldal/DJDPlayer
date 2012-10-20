@@ -76,9 +76,9 @@ public abstract class BrowserActivity extends ListActivity
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
                 if (MusicUtils.isPlaying()) {
-                    playButton.setImageResource(R.drawable.ic_appwidget_music_pause);
+                    playButton.setImageResource(R.drawable.music_pause);
                 } else {
-                    playButton.setImageResource(R.drawable.ic_appwidget_music_play);
+                    playButton.setImageResource(R.drawable.music_play);
                 }
             }
         }
