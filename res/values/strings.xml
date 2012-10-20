@@ -265,14 +265,11 @@
     <!-- menu item to clear the current playlist -->
     <string name="clear_playlist">Clear playlist</string>
 
-    <!-- Activity label. This might show up in the activity-picker -->
-    <string name="musicbrowserlabel">DJD Player</string>
+    <!-- Application label. This might show up in the activity-picker -->
+    <string name="applabel">DJD Player</string>
+
     <!-- Activity label. This might show up in the activity-picker -->
     <string name="musicshortcutlabel">Music playlist</string>
-    <!-- Activity label. This might show up in the activity-picker -->
-    <string name="mediaplaybacklabel">DJD Player</string>
-    <!-- Activity label. This might show up in the activity-picker -->
-    <string name="mediapickerlabel">DJD Player</string>
 
     <!-- Shown as a transient message whenever a file fails to play -->
     <string name="playback_failed">Sorry, the player does not support this type of audio file.</string>

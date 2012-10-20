@@ -18,21 +18,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="nu.staldal.djdplayer">
 
-    <original-package android:name="nu.staldal.djdplayer" />
-
+    <!-- Android 2.3.3 -->
     <uses-sdk android:minSdkVersion="10"/>
 
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <!-- To inform activities about music playback status -->
+    <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
+
+    <!-- To prevent device from going to sleep while playing music in background -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- To set ring tone -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+
+    <!-- To delete music files, and manipulate play lists -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application android:icon="@drawable/app_music"
-        android:label="@string/musicbrowserlabel"
-        android:taskAffinity="android.task.music"
+        android:label="@string/applabel"
         android:allowTaskReparenting="true">
         <meta-data
             android:name="android.app.default_searchable"
@@ -68,7 +70,6 @@
              appropriate. -->
         <activity android:name="nu.staldal.djdplayer.MediaPlaybackActivity"
                 android:theme="@android:style/Theme.NoTitleBar"
-                android:label="@string/mediaplaybacklabel"
                 android:taskAffinity=""
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
@@ -168,7 +169,6 @@
             />
         </activity>
         <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity"
-                android:label="@string/musicbrowserlabel" 
                 android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
