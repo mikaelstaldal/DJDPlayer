@@ -5,6 +5,7 @@ Enhancements over the standard Music Player:
 * Genre support:
    - genre browsing tab
    - show genre of currently playing song
+   - show genre instead of album in notification
 
 * Do not pretend that album is a proper subcategory of artist (one album can contain songs from different artists)
 
@@ -17,5 +18,3 @@ Enhancements over the standard Music Player:
 * Always show currently playing song footer in lists
 
 * Play/pause and next button in currently playing song footer
-
-* Show genre instead of album in notification
