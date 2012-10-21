@@ -250,7 +250,7 @@ public class QueryBrowserActivity extends ListActivity
 
         if (!"artist".equals(selectedType) && !"album".equals(selectedType) && mi.position >= 0 && mi.id >= 0) {
             menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
-            menu.add(0, QUEUE, 0, R.string.queue);
+            // TODO [mikes] menu.add(0, QUEUE, 0, R.string.queue);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
             MusicUtils.makePlaylistMenu(this, sub);
             menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
@@ -345,7 +345,7 @@ public class QueryBrowserActivity extends ListActivity
             intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
-        } else if (position >= 0 && id >= 0){
+        } else if (position >= 0 && id >= 0) {
             MusicUtils.queue(this, new long[] { id });
         } else {
             Log.e("QueryBrowser", "invalid position/id: " + position + "/" + id);
