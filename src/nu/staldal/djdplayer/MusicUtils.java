@@ -496,6 +496,23 @@ public class MusicUtils {
         // TODO [mikes] queue
     }
 
+    public static void queueAndPlayIfNotAlreadyPlaying(Context context, long id) {
+        // TODO [mikes] queueAndPlayIfNotAlreadyPlaying - queue+next
+        if (sService != null) {
+            try {
+                if (!sService.isPlaying()) {
+                    playAll(context, new long[] { id }, 0, false);
+                }
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public static void queueAndPlayImmediately(Context context, long id) {
+        // TODO [mikes] queueAndPlayImmediately
+        playAll(context, new long[] { id }, 0, false);
+    }
+
     private static ContentValues[] sContentValuesCache = null;
 
     /**
@@ -523,7 +540,7 @@ public class MusicUtils {
             sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, ids[offset + i]);
         }
     }
-    
+
     public static void addToPlaylist(Context context, long [] ids, long playlistid) {
         if (ids == null) {
             // this shouldn't happen (the menuitems shouldn't be visible
@@ -568,28 +585,29 @@ public class MusicUtils {
          } catch (UnsupportedOperationException ex) {
             return null;
         }
-        
+
     }
+
     public static Cursor query(Context context, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
         return query(context, uri, projection, selection, selectionArgs, sortOrder, 0);
     }
-    
+
     public static boolean isMediaScannerScanning(Context context) {
         boolean result = false;
-        Cursor cursor = query(context, MediaStore.getMediaScannerUri(), 
+        Cursor cursor = query(context, MediaStore.getMediaScannerUri(),
                 new String [] { MediaStore.MEDIA_SCANNER_VOLUME }, null, null, null);
         if (cursor != null) {
             if (cursor.getCount() == 1) {
                 cursor.moveToFirst();
                 result = "external".equals(cursor.getString(0));
             }
-            cursor.close(); 
-        } 
+            cursor.close();
+        }
 
         return result;
     }
-    
+
     public static void setSpinnerState(Activity a) {
         if (isMediaScannerScanning(a)) {
             // start the progress spinner
@@ -607,7 +625,7 @@ public class MusicUtils {
                     Window.PROGRESS_VISIBILITY_OFF);
         }
     }
-    
+
     private static String mLastSdStatus;
 
     public static void displayDatabaseError(Activity a) {
@@ -628,7 +646,7 @@ public class MusicUtils {
             title = R.string.sdcard_error_title_nosdcard;
             message = R.string.sdcard_error_message_nosdcard;
         }
-        
+
         if (status.equals(Environment.MEDIA_SHARED) ||
                 status.equals(Environment.MEDIA_UNMOUNTED)) {
             if (android.os.Environment.isExternalStorageRemovable()) {
@@ -680,7 +698,7 @@ public class MusicUtils {
         TextView tv = (TextView) a.findViewById(R.id.sd_message);
         tv.setText(message);
     }
-    
+
     public static void hideDatabaseError(Activity a) {
         View v = a.findViewById(R.id.sd_message);
         if (v != null) {
@@ -709,7 +727,7 @@ public class MusicUtils {
     public static String makeTimeString(Context context, long secs) {
         String durationformat = context.getString(
                 secs < 3600 ? R.string.durationformatshort : R.string.durationformatlong);
-        
+
         /* Provide multiple arguments so the format can be changed easily
          * by modifying the xml.
          */
@@ -724,7 +742,7 @@ public class MusicUtils {
 
         return sFormatter.format(durationformat, timeArgs).toString();
     }
-    
+
     public static void shuffleAll(Context context, Cursor cursor) {
         playAll(context, cursor, 0, true);
     }
@@ -732,21 +750,16 @@ public class MusicUtils {
     public static void playAll(Context context, Cursor cursor) {
         playAll(context, cursor, 0, false);
     }
-    
-    public static void playAll(Context context, Cursor cursor, int position) {
-        playAll(context, cursor, position, false);
-    }
-    
+
     public static void playAll(Context context, long [] list, int position) {
         playAll(context, list, position, false);
     }
-    
+
     private static void playAll(Context context, Cursor cursor, int position, boolean force_shuffle) {
-    
         long [] list = getSongListForCursor(cursor);
         playAll(context, list, position, force_shuffle);
     }
-    
+
     private static void playAll(Context context, long [] list, int position, boolean force_shuffle) {
         if (list.length == 0 || sService == null) {
             Log.d("MusicUtils", "attempt to play empty song list");
@@ -784,20 +797,20 @@ public class MusicUtils {
             context.startActivity(intent);
         }
     }
-    
+
     public static void clearQueue() {
         try {
             sService.removeTracks(0, Integer.MAX_VALUE);
         } catch (RemoteException ex) {
         }
     }
-    
+
     static int getIntPref(Context context, String name, int def) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         return prefs.getInt(name, def);
     }
-    
+
     static void setIntPref(Context context, String name, int value) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
@@ -844,7 +857,7 @@ public class MusicUtils {
             }
         }
     }
-    
+
     static int sActiveTabIndex = -1;
     
     static boolean updateButtonBar(Activity a, int highlight) {

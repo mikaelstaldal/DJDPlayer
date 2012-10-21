@@ -620,33 +620,29 @@ public class TrackBrowserActivity extends BrowserActivity {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_SELECTION: {
-                // play the track
-                int position = mSelectedPosition;
                 // When selecting a track from the queue, just jump there instead of
                 // reloading the queue. This is both faster, and prevents accidentally
                 // dropping out of party shuffle.
                 if (mTrackCursor instanceof NowPlayingCursor) {
                     if (MusicUtils.sService != null) {
                         try {
-                            MusicUtils.sService.setQueuePosition(position);
-                            return true;
+                            MusicUtils.sService.setQueuePosition(mSelectedPosition);
                         } catch (RemoteException ex) {
                         }
                     }
+                } else {
+                    MusicUtils.queueAndPlayImmediately(this, mSelectedId);
                 }
-                MusicUtils.playAll(this, mTrackCursor, position);
                 return true;
             }
 
             case ADD_TO_CURRENT_PLAYLIST: {
-                long [] list = new long[] { mSelectedId };
-                MusicUtils.addToCurrentPlaylist(this, list);
+                MusicUtils.addToCurrentPlaylist(this, new long[] { mSelectedId });
                 return true;
             }
 
             case QUEUE: {
-                long [] list = new long[] { mSelectedId };
-                MusicUtils.queue(this, list);
+                MusicUtils.queue(this, new long[] { mSelectedId });
                 return true;
             }
 
@@ -658,9 +654,8 @@ public class TrackBrowserActivity extends BrowserActivity {
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = new long[] { mSelectedId };
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(this, list, playlist);
+                MusicUtils.addToPlaylist(this, new long[] { mSelectedId }, playlist);
                 return true;
             }
 
@@ -702,20 +697,19 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-/*
         // When selecting a track from the queue, just jump there instead of
         // reloading the queue. This is both faster, and prevents accidentally
         // dropping out of party shuffle.
-        if (mTrackCursor instanceof NowPlayingCursor) {
-          if (MusicUtils.sService != null) {
-              try {
-                  MusicUtils.sService.setQueuePosition(position);
-                  return;
-              } catch (RemoteException ex) {
-              }
-          }
-        } */
-        MusicUtils.queue(this, new long[] { id });
+        if (mTrackCursor instanceof NowPlayingCursor && !MusicUtils.isPlaying()) {
+            if (MusicUtils.sService != null) {
+                try {
+                    MusicUtils.sService.setQueuePosition(mSelectedPosition);
+                } catch (RemoteException ex) {
+                }
+            }
+        } else {
+            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, id);
+        }
     }
 
     void doSearch() {

@@ -265,7 +265,7 @@ public class QueryBrowserActivity extends ListActivity
         switch (item.getItemId()) {
             case PLAY_SELECTION: {
                 // play the track
-                MusicUtils.playAll(this, new long[] { mSelectedId }, 0);
+                MusicUtils.queueAndPlayImmediately(this, mSelectedId);
                 return true;
             }
 
@@ -346,7 +346,7 @@ public class QueryBrowserActivity extends ListActivity
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0) {
-            MusicUtils.queue(this, new long[] { id });
+            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, id);
         } else {
             Log.e("QueryBrowser", "invalid position/id: " + position + "/" + id);
         }
