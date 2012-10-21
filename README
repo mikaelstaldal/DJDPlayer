@@ -15,6 +15,8 @@ Enhancements over the standard Music Player:
 
 * Show next song in currently playing song view
 
-* Always show currently playing song in lists
+* Always show currently playing song footer in lists
+
+* Play/pause and next button in currently playing song footer
 
 * Show genre instead of album in notification
