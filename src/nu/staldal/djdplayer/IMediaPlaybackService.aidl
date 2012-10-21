@@ -17,10 +17,7 @@
 
 package nu.staldal.djdplayer;
 
-import android.graphics.Bitmap;
-
-interface IMediaPlaybackService
-{
+interface IMediaPlaybackService {
     void openFile(String path);
     void open(in long [] list, int position);
     int getQueuePosition();
@@ -40,9 +37,14 @@ interface IMediaPlaybackService
     String getGenreName();
     long getAlbumId();
     String getAlbumName();
+    long getNextTrackId();
     String getNextTrackName();
+    long getNextArtistId();
     String getNextArtistName();
+    long getNextGenreId();
     String getNextGenreName();
+    long getNextAlbumId();
+    String getNextAlbumName();
     void enqueue(in long [] list, int action);
     long [] getQueue();
     void moveQueueItem(int from, int to);
@@ -58,4 +60,3 @@ interface IMediaPlaybackService
     int getMediaMountedCount();
     int getAudioSessionId();
 }
-

@@ -90,7 +90,19 @@ public class MediaPlaybackActivity extends Activity
         v = (View)mTrackName.getParent();
         v.setOnTouchListener(this);
         v.setOnLongClickListener(this);
-        
+
+        v = (View)mNextTrackName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        v = (View)mNextArtistName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        v = (View)mNextGenreName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
         mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
         mPrevButton.setOnClickListener(mPrevListener);
         mPrevButton.setRepeatListener(mRewListener, 260);
@@ -229,22 +241,32 @@ public class MediaPlaybackActivity extends Activity
     };
     
     public boolean onLongClick(View view) {
+        long audioId;
         long artistId;
-        long albumId;
         long genreId;
+        long albumId;
+        String song;
         String artist;
         String album;
-        String song;
-        long audioId;
-        
+        long nextArtistId;
+        long nextGenreId;
+        String nextSong;
+        String nextArtist;
+        String nextAlbum;
+
         try {
+            audioId = mService.getAudioId();
             artistId = mService.getArtistId();
-            albumId = mService.getAlbumId();
             genreId = mService.getGenreId();
+            albumId = mService.getAlbumId();
+            song = mService.getTrackName();
             artist = mService.getArtistName();
             album = mService.getAlbumName();
-            song = mService.getTrackName();
-            audioId = mService.getAudioId();
+            nextArtistId = mService.getNextArtistId();
+            nextGenreId = mService.getNextGenreId();
+            nextSong = mService.getNextTrackName();
+            nextArtist = mService.getNextArtistName();
+            nextAlbum = mService.getNextAlbumName();
         } catch (RemoteException ex) {
             return true;
         } catch (NullPointerException ex) {
@@ -278,12 +300,6 @@ public class MediaPlaybackActivity extends Activity
             return false;
         }
 
-        boolean knownArtist =
-            (artist != null) && !MediaStore.UNKNOWN_STRING.equals(artist);
-
-        boolean knownAlbum =
-            (album != null) && !MediaStore.UNKNOWN_STRING.equals(album);
-
         if (view.equals(mArtistName.getParent())) {
             browseCategory("artist", artistId);
             return true;
@@ -293,39 +309,16 @@ public class MediaPlaybackActivity extends Activity
         } else if (view.equals(mGenreName.getParent())) {
             browseCategory("genre", genreId);
             return true;
-        } else if (view.equals(mTrackName.getParent())) {
-            if ((song == null) || MediaStore.UNKNOWN_STRING.equals(song)) {
-                // A popup of the form "Search for null/'' using ..." is pretty
-                // unhelpful, plus, we won't find any way to buy it anyway.
-                return false;
-            }
-
-            String query;
-            CharSequence title = song;
-            if (knownArtist) {
-                query = artist + " " + song;
-            } else {
-                query = song;
-            }
-            String mime = "audio/*"; // the specific type doesn't matter, so don't bother retrieving it
-
-            title = getString(R.string.mediasearch, title);
-
-            Intent i = new Intent();
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-            i.putExtra(SearchManager.QUERY, query);
-            if(knownArtist) {
-                i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
-            }
-            if(knownAlbum) {
-                i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
-            }
-            i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, song);
-            i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, mime);
-
-            startActivity(Intent.createChooser(i, title));
+        } else if (view.equals(mNextArtistName.getParent())) {
+            browseCategory("artist", nextArtistId);
             return true;
+        } else if (view.equals(mNextGenreName.getParent())) {
+            browseCategory("genre", nextGenreId);
+            return true;
+        } else if (view.equals(mTrackName.getParent())) {
+            return searchSong(artist, album, song);
+        } else if (view.equals(mNextTrackName.getParent())) {
+            return searchSong(nextArtist, nextAlbum, nextSong);
         } else {
             throw new RuntimeException("shouldn't be here");
         }
@@ -336,6 +329,47 @@ public class MediaPlaybackActivity extends Activity
         intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
         intent.putExtra(categoryId, String.valueOf(id));
         startActivity(intent);
+    }
+
+    private boolean searchSong(String artist, String album, String song) {
+        if ((song == null) || MediaStore.UNKNOWN_STRING.equals(song)) {
+            // A popup of the form "Search for null/'' using ..." is pretty
+            // unhelpful, plus, we won't find any way to buy it anyway.
+            return false;
+        }
+
+        boolean knownArtist =
+            (artist != null) && !MediaStore.UNKNOWN_STRING.equals(artist);
+
+        boolean knownAlbum =
+            (album != null) && !MediaStore.UNKNOWN_STRING.equals(album);
+
+        String query;
+        CharSequence title = song;
+        if (knownArtist) {
+            query = artist + " " + song;
+        } else {
+            query = song;
+        }
+        String mime = "audio/*"; // the specific type doesn't matter, so don't bother retrieving it
+
+        title = getString(R.string.mediasearch, title);
+
+        Intent i = new Intent();
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+        i.putExtra(SearchManager.QUERY, query);
+        if(knownArtist) {
+            i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
+        }
+        if(knownAlbum) {
+            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
+        }
+        i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, song);
+        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, mime);
+
+        startActivity(Intent.createChooser(i, title));
+        return true;
     }
 
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
@@ -366,7 +400,7 @@ public class MediaPlaybackActivity extends Activity
             mFromTouch = false;
         }
     };
-    
+
     private View.OnClickListener mQueueListener = new View.OnClickListener() {
         public void onClick(View v) {
             startActivity(
@@ -376,7 +410,7 @@ public class MediaPlaybackActivity extends Activity
             );
         }
     };
-    
+
     private View.OnClickListener mShuffleListener = new View.OnClickListener() {
         public void onClick(View v) {
             toggleShuffle();

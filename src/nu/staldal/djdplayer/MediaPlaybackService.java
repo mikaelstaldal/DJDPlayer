@@ -114,9 +114,14 @@ public class MediaPlaybackService extends Service {
     private Cursor mCursor;
     private long mGenreId = -1;
     private String mGenreName = null;
+    private long mNextTrackId = -1;
     private String mNextTrackName = null;
+    private long mNextArtistId = -1;
     private String mNextArtistName = null;
+    private long mNextGenreId = -1;
     private String mNextGenreName = null;
+    private long mNextAlbumId = -1;
+    private String mNextAlbumName = null;
     private int mPlayPos = -1;
     private static final String LOGTAG = "MediaPlaybackService";
     private final Shuffler mRand = new Shuffler();
@@ -353,9 +358,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            mNextTrackName = null;
-            mNextArtistName = null;
-            mNextGenreName = null;
+            clearNextSongData();
         }
 
         unregisterReceiver(mIntentReceiver);
@@ -366,7 +369,18 @@ public class MediaPlaybackService extends Service {
         mWakeLock.release();
         super.onDestroy();
     }
-    
+
+    private void clearNextSongData() {
+        mNextTrackId = -1;
+        mNextTrackName = null;
+        mNextArtistId = -1;
+        mNextArtistName = null;
+        mNextGenreId = -1;
+        mNextGenreName = null;
+        mNextAlbumId = -1;
+        mNextAlbumName = null;
+    }
+
     private final char hexdigits [] = new char [] {
             '0', '1', '2', '3',
             '4', '5', '6', '7',
@@ -818,9 +832,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            mNextTrackName = null;
-            mNextArtistName = null;
-            mNextGenreName = null;
+            clearNextSongData();
             notifyChange(META_CHANGED);
         }
     }
@@ -967,9 +979,7 @@ public class MediaPlaybackService extends Service {
                 mCursor = null;
                 mGenreId = -1;
                 mGenreName = null;
-                mNextTrackName = null;
-                mNextArtistName = null;
-                mNextGenreName = null;
+                clearNextSongData();
             }
 
             if (mPlayListLen == 0) {
@@ -1006,21 +1016,26 @@ public class MediaPlaybackService extends Service {
                     mCursorCols, "_id=" + String.valueOf(nextSongId) , null, null);
             if (c != null) {
                 if (c.moveToFirst()) {
+                    mNextTrackId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                     mNextTrackName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                    mNextArtistId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
                     mNextArtistName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                    mNextAlbumId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+                    mNextAlbumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
                 }
                 c.close();
             }
 
             c = getContentResolver().query(
                     Uri.parse("content://media/external/audio/media/" + String.valueOf(nextSongId) + "/genres"),
-                    new String[] { MediaStore.Audio.Genres.NAME },
+                    new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
                     null,
                     null,
                     null);
             if (c != null) {
                 if (c.getCount() > 0) {
                     c.moveToFirst();
+                    mNextGenreId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
                     mNextGenreName = ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)));
                 }
                 c.close();
@@ -1064,9 +1079,7 @@ public class MediaPlaybackService extends Service {
                             mCursor = null;
                             mGenreId = -1;
                             mGenreName = null;
-                            mNextTrackName = null;
-                            mNextArtistName = null;
-                            mNextGenreName = null;
+                            clearNextSongData();
                         } else {
                             mCursor.moveToNext();
                             fetchGenre();
@@ -1197,9 +1210,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            mNextTrackName = null;
-            mNextArtistName = null;
-            mNextGenreName = null;
+            clearNextSongData();
         }
         if (remove_status_icon) {
             gotoIdleState();
@@ -1571,9 +1582,7 @@ public class MediaPlaybackService extends Service {
                         mCursor = null;
                         mGenreId = -1;
                         mGenreName = null;
-                        mNextTrackName = null;
-                        mNextArtistName = null;
-                        mNextGenreName = null;
+                        clearNextSongData();
                     }
                 } else {
                     if (mPlayPos >= mPlayListLen) {
@@ -1748,6 +1757,15 @@ public class MediaPlaybackService extends Service {
         }
     }
 
+    public long getNextArtistId() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return -1;
+            }
+            return mNextArtistId;
+        }
+    }
+
     public String getNextArtistName() {
         synchronized (this) {
             if (mCursor == null) {
@@ -1757,12 +1775,48 @@ public class MediaPlaybackService extends Service {
         }
     }
 
+    public long getNextGenreId() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return -1;
+            }
+            return mNextGenreId;
+        }
+    }
+
     public String getNextGenreName() {
         synchronized (this) {
             if (mCursor == null) {
                 return null;
             }
             return mNextGenreName;
+        }
+    }
+
+    public long getNextAlbumId() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return -1;
+            }
+            return mNextAlbumId;
+        }
+    }
+
+    public String getNextAlbumName() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            return mNextAlbumName;
+        }
+    }
+
+    public long getNextTrackId() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return -1;
+            }
+            return mNextTrackId;
         }
     }
 
@@ -2056,11 +2110,26 @@ public class MediaPlaybackService extends Service {
         public long getGenreId() {
             return mService.get().getGenreId();
         }
+        public long getNextArtistId() {
+            return mService.get().getNextArtistId();
+        }
         public String getNextArtistName() {
             return mService.get().getNextArtistName();
         }
+        public long getNextGenreId() {
+            return mService.get().getNextGenreId();
+        }
         public String getNextGenreName() {
             return mService.get().getNextGenreName();
+        }
+        public long getNextAlbumId() {
+            return mService.get().getNextAlbumId();
+        }
+        public String getNextAlbumName() {
+            return mService.get().getNextAlbumName();
+        }
+        public long getNextTrackId() {
+            return mService.get().getNextTrackId();
         }
         public String getNextTrackName() {
             return mService.get().getNextTrackName();
