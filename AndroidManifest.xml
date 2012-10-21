@@ -16,7 +16,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="nu.staldal.djdplayer">
+          package="nu.staldal.djdplayer">
 
     <!-- Android 2.3.3 -->
     <uses-sdk android:minSdkVersion="10"/>
