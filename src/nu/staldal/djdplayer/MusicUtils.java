@@ -58,10 +58,9 @@ public class MusicUtils {
         public final static int SHUFFLE_ALL = 9;
         public final static int DELETE_ITEM = 10;
         public final static int SCAN_DONE = 11;
-        public final static int ADD_TO_CURRENT_PLAYLIST = 12;
-        public final static int EFFECTS_PANEL = 13;
-        public final static int QUEUE = 14;
-        public final static int CHILD_MENU_BASE = 15; // this should be the last item
+        public final static int EFFECTS_PANEL = 12;
+        public final static int QUEUE = 13;
+        public final static int CHILD_MENU_BASE = 14; // this should be the last item
     }
 
     /**
@@ -390,7 +389,6 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
-            sub.add(1, Defs.ADD_TO_CURRENT_PLAYLIST, 0, R.string.current_playlist);
             sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
@@ -478,39 +476,35 @@ public class MusicUtils {
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
     }
     
-    public static void addToCurrentPlaylist(Context context, long [] list) {
+    public static void queueAndPlayIfNotAlreadyPlaying(Context context, long id) {
+         if (isPlaying()) {
+             queue(context, id);
+         } else {
+             queueAndPlayImmediately(context, id);
+         }
+    }
+
+    public static void queue(Context context, long id) {
         if (sService == null) {
             return;
         }
         try {
-            sService.enqueue(list, MediaPlaybackService.LAST);
-            String message = context.getResources().getQuantityString(
-                    R.plurals.NNNtrackstoplaylist, list.length, Integer.valueOf(list.length));
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            sService.enqueue(new long[] { id }, MediaPlaybackService.LAST);
         } catch (RemoteException ex) {
         }
-    }
-
-    public static void queue(Context context, long[] list) {
-        Log.i("MusicUtils", "queue: " + Arrays.toString(list));
-        // TODO [mikes] queue
-    }
-
-    public static void queueAndPlayIfNotAlreadyPlaying(Context context, long id) {
-        // TODO [mikes] queueAndPlayIfNotAlreadyPlaying - queue+next
-        if (sService != null) {
-            try {
-                if (!sService.isPlaying()) {
-                    playAll(context, new long[] { id }, 0, false);
-                }
-            } catch (RemoteException ex) {
-            }
-        }
+        String message = context.getResources().getQuantityString(
+                R.plurals.NNNtrackstoplayqueue, 1, 1);
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     public static void queueAndPlayImmediately(Context context, long id) {
-        // TODO [mikes] queueAndPlayImmediately
-        playAll(context, new long[] { id }, 0, false);
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
+        } catch (RemoteException ex) {
+        }
     }
 
     private static ContentValues[] sContentValuesCache = null;

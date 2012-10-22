@@ -249,8 +249,8 @@ public class QueryBrowserActivity extends ListActivity
                 MediaStore.Audio.Media.MIME_TYPE));
 
         if (!"artist".equals(selectedType) && !"album".equals(selectedType) && mi.position >= 0 && mi.id >= 0) {
-            menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
-            // TODO [mikes] menu.add(0, QUEUE, 0, R.string.queue);
+            menu.add(0, PLAY_SELECTION, 0, R.string.play_now);
+            menu.add(0, QUEUE, 0, R.string.queue);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
             MusicUtils.makePlaylistMenu(this, sub);
             menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
@@ -269,13 +269,8 @@ public class QueryBrowserActivity extends ListActivity
                 return true;
             }
 
-            case ADD_TO_CURRENT_PLAYLIST: {
-                MusicUtils.addToCurrentPlaylist(this, new long[] { mSelectedId });
-                return true;
-            }
-
             case QUEUE: {
-                MusicUtils.queue(this, new long[] { mSelectedId });
+                MusicUtils.queue(this, mSelectedId);
                 return true;
             }
 

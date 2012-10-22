@@ -406,7 +406,7 @@ public class MediaPlaybackActivity extends Activity
             startActivity(
                     new Intent(Intent.ACTION_EDIT)
                     .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track")
-                    .putExtra("playlist", "nowplaying")
+                    .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE)
             );
         }
     };
@@ -491,9 +491,9 @@ public class MediaPlaybackActivity extends Activity
         
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
+        f.addAction(MediaPlaybackService.QUEUE_CHANGED);
         f.addAction(MediaPlaybackService.META_CHANGED);
         registerReceiver(mStatusListener, new IntentFilter(f));
-        updateTrackInfo();
         long next = refreshNow();
         queueNextRefresh(next);
     }
@@ -1247,6 +1247,8 @@ public class MediaPlaybackActivity extends Activity
                 updateTrackInfo();
                 setPauseButtonImage();
                 queueNextRefresh(1);
+            } else if (action.equals(MediaPlaybackService.QUEUE_CHANGED)) {
+                updateTrackInfo();
             } else if (action.equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
                 setPauseButtonImage();
             }
@@ -1263,7 +1265,7 @@ public class MediaPlaybackActivity extends Activity
                 finish();
                 return;
             }
-            
+
             long songid = mService.getAudioId(); 
             if (songid < 0 && path.toLowerCase().startsWith("http://")) {
                 // Once we can get meta data from MediaPlayer,

@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="1"
-          android:versionName="0.1"
+          android:versionCode="2"
+          android:versionName="0.2"
           android:installLocation="auto">
 
     <!-- Android 2.3.3 -->

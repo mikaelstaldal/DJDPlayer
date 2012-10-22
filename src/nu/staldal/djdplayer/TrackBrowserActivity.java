@@ -36,16 +36,19 @@ import android.widget.*;
 import java.util.Arrays;
 
 public class TrackBrowserActivity extends BrowserActivity {
+    private static final String LOGTAG = "TrackBrowser";
+
+    public static final String PLAYQUEUE = "playqueue";
+
     private static final int Q_SELECTED = CHILD_MENU_BASE;
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int PLAY_ALL = CHILD_MENU_BASE + 3;
     private static final int CLEAR_PLAYLIST = CHILD_MENU_BASE + 4;
+
     private static final int REMOVE = CHILD_MENU_BASE + 5;
+
     private static final int SEARCH = CHILD_MENU_BASE + 6;
-
-    private static final String LOGTAG = "TrackBrowser";
-
     private static final String[] CURSOR_COLS = new String[] {
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
@@ -159,7 +162,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     null, // cursor
                     new String[] {},
                     new int[] {},
-                    "nowplaying".equals(mPlaylist),
+                    PLAYQUEUE.equals(mPlaylist),
                     mPlaylist != null &&
                     !(mPlaylist.equals("podcasts") || mPlaylist.equals("recentlyadded")));
             setListAdapter(mAdapter);
@@ -209,7 +212,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         MusicUtils.unbindFromService(mToken);
         try {
-            if ("nowplaying".equals(mPlaylist)) {
+            if (PLAYQUEUE.equals(mPlaylist)) {
                 unregisterReceiverSafe(mNowPlayingListener);
             } else {
                 unregisterReceiverSafe(mTrackListListener);
@@ -338,7 +341,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        if ("nowplaying".equals(mPlaylist)) {
+        if (PLAYQUEUE.equals(mPlaylist)) {
             try {
                 int cur = MusicUtils.sService.getQueuePosition();
                 setSelection(cur);
@@ -411,11 +414,11 @@ public class TrackBrowserActivity extends BrowserActivity {
                 cursor.deactivate();
             }
         } else if (mPlaylist != null) {
-            if (mPlaylist.equals("nowplaying")) {
+            if (mPlaylist.equals(PLAYQUEUE)) {
                 if (MusicUtils.getCurrentShuffleMode() == MediaPlaybackService.SHUFFLE_AUTO) {
                     fancyName = getText(R.string.partyshuffle_title);
                 } else {
-                    fancyName = getText(R.string.nowplaying_title);
+                    fancyName = getText(R.string.play_queue_title);
                 }
             } else if (mPlaylist.equals("podcasts")){
                 fancyName = getText(R.string.podcasts_title);
@@ -462,9 +465,9 @@ public class TrackBrowserActivity extends BrowserActivity {
     private TouchInterceptor.DropListener mDropListener =
         new TouchInterceptor.DropListener() {
         public void drop(int from, int to) {
-            if (mTrackCursor instanceof NowPlayingCursor) {
+            if (mTrackCursor instanceof PlayQueueCursor) {
                 // update the currently playing list
-                NowPlayingCursor c = (NowPlayingCursor) mTrackCursor;
+                PlayQueueCursor c = (PlayQueueCursor) mTrackCursor;
                 c.moveItem(from, to);
                 ((TrackListAdapter)getListAdapter()).notifyDataSetChanged();
                 getListView().invalidateViews();
@@ -501,8 +504,8 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
         v.setVisibility(View.GONE);
         mTrackList.invalidateViews();
-        if (mTrackCursor instanceof NowPlayingCursor) {
-            ((NowPlayingCursor)mTrackCursor).removeItem(which);
+        if (mTrackCursor instanceof PlayQueueCursor) {
+            ((PlayQueueCursor)mTrackCursor).removeItem(which);
         } else {
             int colidx = mTrackCursor.getColumnIndexOrThrow(
                     MediaStore.Audio.Playlists.Members._ID);
@@ -544,7 +547,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     return;
                 }
                 if (mAdapter != null) {
-                    Cursor c = new NowPlayingCursor(MusicUtils.sService, CURSOR_COLS);
+                    Cursor c = new PlayQueueCursor(MusicUtils.sService, CURSOR_COLS);
                     if (c.getCount() == 0) {
                         finish();
                         return;
@@ -584,12 +587,14 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
-        // TODO [mikes] menu.add(0, QUEUE, 0, R.string.queue);
+        menu.add(0, PLAY_SELECTION, 0, R.string.play_now);
+        if (!(mTrackCursor instanceof PlayQueueCursor)) {
+            menu.add(0, QUEUE, 0, R.string.queue);
+        }
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
         if (mEditMode) {
-            menu.add(0, REMOVE, 0, R.string.remove_from_playlist);
+            menu.add(0, REMOVE, 0, R.string.remove);
         }
         menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
@@ -623,7 +628,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 // When selecting a track from the queue, just jump there instead of
                 // reloading the queue. This is both faster, and prevents accidentally
                 // dropping out of party shuffle.
-                if (mTrackCursor instanceof NowPlayingCursor) {
+                if (mTrackCursor instanceof PlayQueueCursor) {
                     if (MusicUtils.sService != null) {
                         try {
                             MusicUtils.sService.setQueuePosition(mSelectedPosition);
@@ -636,13 +641,8 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
             }
 
-            case ADD_TO_CURRENT_PLAYLIST: {
-                MusicUtils.addToCurrentPlaylist(this, new long[] { mSelectedId });
-                return true;
-            }
-
             case QUEUE: {
-                MusicUtils.queue(this, new long[] { mSelectedId });
+                MusicUtils.queue(this, mSelectedId);
                 return true;
             }
 
@@ -697,17 +697,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        // When selecting a track from the queue, just jump there instead of
-        // reloading the queue. This is both faster, and prevents accidentally
-        // dropping out of party shuffle.
-        if (mTrackCursor instanceof NowPlayingCursor && !MusicUtils.isPlaying()) {
-            if (MusicUtils.sService != null) {
-                try {
-                    MusicUtils.sService.setQueuePosition(mSelectedPosition);
-                } catch (RemoteException ex) {
-                }
-            }
-        } else {
+        if (!(mTrackCursor instanceof PlayQueueCursor)) {
             MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, id);
         }
     }
@@ -767,7 +757,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             return;
         }
         
-        if ("nowplaying".equals(mPlaylist)) {
+        if (PLAYQUEUE.equals(mPlaylist)) {
             // remove track from queue
 
             // Work around bug 902971. To get quick visual feedback
@@ -781,7 +771,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             View v = mTrackList.getSelectedView();
             v.setVisibility(View.GONE);
             mTrackList.invalidateViews();
-            ((NowPlayingCursor)mTrackCursor).removeItem(curpos);
+            ((PlayQueueCursor)mTrackCursor).removeItem(curpos);
             v.setVisibility(View.VISIBLE);
             mTrackList.invalidateViews();
         } else {
@@ -810,8 +800,8 @@ public class TrackBrowserActivity extends BrowserActivity {
             return;
         }
 
-        if (mTrackCursor instanceof NowPlayingCursor) {
-            NowPlayingCursor c = (NowPlayingCursor) mTrackCursor;
+        if (mTrackCursor instanceof PlayQueueCursor) {
+            PlayQueueCursor c = (PlayQueueCursor) mTrackCursor;
             c.moveItem(curpos, up ? curpos - 1 : curpos + 1);
             ((TrackListAdapter)getListAdapter()).notifyDataSetChanged();
             getListView().invalidateViews();
@@ -864,7 +854,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
         if (mPlaylist != null) {
             menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
-            if (mPlaylist.equals("nowplaying")) {
+            if (mPlaylist.equals(PLAYQUEUE)) {
                 menu.add(0, CLEAR_PLAYLIST, 0, R.string.clear_playlist).setIcon(R.drawable.ic_menu_clear_playlist);
             }
         }
@@ -973,9 +963,9 @@ public class TrackBrowserActivity extends BrowserActivity {
             ret = queryhandler.doQuery(uri,
                     CURSOR_COLS, where.toString(), null, mSortOrder, async);
         } else if (mPlaylist != null) {
-            if (mPlaylist.equals("nowplaying")) {
+            if (mPlaylist.equals(PLAYQUEUE)) {
                 if (MusicUtils.sService != null) {
-                    ret = new NowPlayingCursor(MusicUtils.sService, CURSOR_COLS);
+                    ret = new PlayQueueCursor(MusicUtils.sService, CURSOR_COLS);
                     if (ret.getCount() == 0) {
                         finish();
                     }
@@ -1030,7 +1020,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     CURSOR_COLS, where.toString() , null, mSortOrder, async);
         }
         
-        // This special case is for the "nowplaying" cursor, which cannot be handled
+        // This special case is for the "play queue" cursor, which cannot be handled
         // asynchronously using AsyncQueryHandler, so we do some extra initialization here.
         if (ret != null && async) {
             init(ret, false);
@@ -1039,14 +1029,14 @@ public class TrackBrowserActivity extends BrowserActivity {
         return ret;
     }
 
-    private class NowPlayingCursor extends AbstractCursor
-    {
-        public NowPlayingCursor(IMediaPlaybackService service, String [] cols)
-        {
+    private class PlayQueueCursor extends AbstractCursor {
+
+        public PlayQueueCursor(IMediaPlaybackService service, String[] cols) {
             mCols = cols;
             mService  = service;
             makeNowPlayingCursor();
         }
+
         private void makeNowPlayingCursor() {
             mCurrentPlaylistCursor = null;
             try {
@@ -1180,7 +1170,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 }
             }
             where += ")";
-            Log.i("NowPlayingCursor: ", where);
+            Log.i("PlayQueueCursor: ", where);
         }
 
         @Override

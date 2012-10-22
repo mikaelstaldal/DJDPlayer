@@ -20,28 +20,16 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.SystemClock;
+import android.os.*;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -358,7 +346,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            clearNextSongData();
+            clearNextSong();
         }
 
         unregisterReceiver(mIntentReceiver);
@@ -370,7 +358,7 @@ public class MediaPlaybackService extends Service {
         super.onDestroy();
     }
 
-    private void clearNextSongData() {
+    private void clearNextSong() {
         mNextTrackId = -1;
         mNextTrackName = null;
         mNextArtistId = -1;
@@ -832,9 +820,12 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            clearNextSongData();
+            clearNextSong();
             notifyChange(META_CHANGED);
+        } else {
+            fetchNextSong();
         }
+        notifyChange(QUEUE_CHANGED);
     }
     
     /**
@@ -850,11 +841,9 @@ public class MediaPlaybackService extends Service {
         synchronized(this) {
             if (action == NEXT && mPlayPos + 1 < mPlayListLen) {
                 addToPlayList(list, mPlayPos + 1);
-                notifyChange(QUEUE_CHANGED);
             } else {
                 // action == LAST || action == NOW || mPlayPos + 1 == mPlayListLen
                 addToPlayList(list, Integer.MAX_VALUE);
-                notifyChange(QUEUE_CHANGED);
                 if (action == NOW) {
                     mPlayPos = mPlayListLen - list.length;
                     openCurrent();
@@ -899,7 +888,6 @@ public class MediaPlaybackService extends Service {
             }
             if (newlist) {
                 addToPlayList(list, -1);
-                notifyChange(QUEUE_CHANGED);
             }
             int oldpos = mPlayPos;
             if (position >= 0) {
@@ -953,6 +941,7 @@ public class MediaPlaybackService extends Service {
                         mPlayPos++;
                 }
             }
+            fetchNextSong();
             notifyChange(QUEUE_CHANGED);
         }
     }
@@ -979,7 +968,7 @@ public class MediaPlaybackService extends Service {
                 mCursor = null;
                 mGenreId = -1;
                 mGenreName = null;
-                clearNextSongData();
+                clearNextSong();
             }
 
             if (mPlayListLen == 0) {
@@ -1079,7 +1068,7 @@ public class MediaPlaybackService extends Service {
                             mCursor = null;
                             mGenreId = -1;
                             mGenreName = null;
-                            clearNextSongData();
+                            clearNextSong();
                         } else {
                             mCursor.moveToNext();
                             fetchGenre();
@@ -1210,7 +1199,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
             mGenreId = -1;
             mGenreName = null;
-            clearNextSongData();
+            clearNextSong();
         }
         if (remove_status_icon) {
             gotoIdleState();
@@ -1467,6 +1456,7 @@ public class MediaPlaybackService extends Service {
             notify = true;
         }
         if (notify) {
+            fetchNextSong();
             notifyChange(QUEUE_CHANGED);
         }
     }
@@ -1549,6 +1539,7 @@ public class MediaPlaybackService extends Service {
     public int removeTracks(int first, int last) {
         int numremoved = removeTracksInternal(first, last);
         if (numremoved > 0) {
+            fetchNextSong();
             notifyChange(QUEUE_CHANGED);
         }
         return numremoved;
@@ -1582,7 +1573,7 @@ public class MediaPlaybackService extends Service {
                         mCursor = null;
                         mGenreId = -1;
                         mGenreName = null;
-                        clearNextSongData();
+                        clearNextSong();
                     }
                 } else {
                     if (mPlayPos >= mPlayListLen) {
@@ -1618,6 +1609,7 @@ public class MediaPlaybackService extends Service {
             }
         }
         if (numremoved > 0) {
+            fetchNextSong();
             notifyChange(QUEUE_CHANGED);
         }
         return numremoved;

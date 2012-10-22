@@ -55,15 +55,16 @@
 
     <!-- Menu item that takes the user back to the top level screen of the music player -->
     <string name="goto_start">Library</string>
-    <!-- Menu item that takes the user to the "now playing" screen of the music player -->
-    <string name="goto_playback">Playback</string>
     <!-- Menu item that switches the music player in to party shuffle mode -->
     <string name="party_shuffle">Party shuffle</string>
     <!-- Menu item that switches the music player out of party shuffle mode -->
     <string name="party_shuffle_off">Party shuffle off</string>
-    <!-- Menu item that deletes the currently selected item, which might be a single song, or a collection of songs.
+    <!-- Menu item that deletes the currently selected song.
          The user will be prompted to confirm before deletion actually takes place -->
     <string name="delete_item">Delete</string>
+    <!-- Menu item that deletes all items in the currently selected category.
+         The user will be prompted to confirm before deletion actually takes place -->
+    <string name="delete_all">Delete all</string>
     <!-- Menu item to play back all the songs in the currently showing list in shuffle mode -->
     <string name="shuffle_all">Shuffle all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order -->
@@ -104,8 +105,8 @@
     <!-- shown in dialog while the media scanner is starting up -->
     <string name="scanning_nosdcard" msgid="3529383847223198502">Scanning USB storage\u2026</string>
 
-    <!-- title of the "current playlist" screen when not in party shuffle mode -->
-    <string name="nowplaying_title">Now playing</string>
+    <!-- title of the play queue screen when not in party shuffle mode -->
+    <string name="play_queue_title">Play queue</string>
     <!-- title of the "current playlist" screen when in party shuffle mode-->
     <string name="partyshuffle_title">Party shuffle</string>
     <!-- Artist screen title -->
@@ -205,9 +206,11 @@
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
     <!-- Context menu item -->
-    <string name="play_selection">Play now</string>
+    <string name="play_now">Play now</string>
     <!-- Context menu item -->
     <string name="add_to_playlist">Add to playlist</string>
+    <!-- Context menu item -->
+    <string name="add_all_to_playlist">Add all to playlist</string>
     <!-- Context menu item -->
     <string name="current_playlist">Current playlist</string>
     <!-- Context menu item -->
@@ -222,6 +225,13 @@
         <item quantity="one">1 song added to playlist.</item>
         <!-- message shown when zero or more than one song was added -->
         <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to playlist.</item>
+    </plurals>
+    <!-- Toasts after adding song(s) to play queue -->
+    <plurals name="NNNtrackstoplayqueue">
+        <!-- message shown when one song was added -->
+        <item quantity="one">1 song added to queue.</item>
+        <!-- message shown when zero or more than one song was added -->
+        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to queue.</item>
     </plurals>
     <!-- Toast after selecting an empty playlist -->
     <string name="emptyplaylist">Selected playlist is empty.</string>
@@ -279,6 +289,9 @@
 
     <!-- context menu item to remove the selected item from the playlist -->
     <string name="remove_from_playlist">Remove from playlist</string>
+
+    <!-- context menu item -->
+    <string name="remove">Remove</string>
 
     <!-- shown when connecting to a music stream, before it starts playing -->
     <string name="streamloadingtext">Connecting to <xliff:g id="host">%s</xliff:g></string>

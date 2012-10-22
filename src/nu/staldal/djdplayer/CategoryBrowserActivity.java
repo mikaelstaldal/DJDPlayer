@@ -345,11 +345,10 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
-        // TODO [mikes] menu.add(0, QUEUE, 0, R.string.queue);
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
+        menu.add(0, PLAY_SELECTION, 0, R.string.play_all);
+        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+        menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mCursor.moveToPosition(mi.position);
@@ -371,18 +370,6 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
             case PLAY_SELECTION: {
                 long [] list = fetchSongList(mCurrentId);
                 MusicUtils.playAll(this, list, 0);
-                return true;
-            }
-
-            case QUEUE: {
-                long [] list = fetchSongList(mCurrentId);
-                MusicUtils.queue(this, list);
-                return true;
-            }
-
-            case ADD_TO_CURRENT_PLAYLIST: {
-                long [] list = fetchSongList(mCurrentId);
-                MusicUtils.addToCurrentPlaylist(this, list);
                 return true;
             }
 

@@ -67,6 +67,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
@@ -259,7 +260,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
 
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
 
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
+        menu.add(0, PLAY_SELECTION, 0, R.string.play_all);
 
         if (mi.id >= 0 /*|| mi.id == PODCASTS_PLAYLIST*/) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
