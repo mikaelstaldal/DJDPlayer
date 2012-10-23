@@ -299,8 +299,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
     }
 
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id)
-    {
+    protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
         intent.putExtra(getCategoryId(), String.valueOf(id));

@@ -618,8 +618,8 @@ public class MusicPicker extends ListActivity
         return null;
     }
     
-    @Override protected void onListItemClick(ListView l, View v, int position,
-            long id) {
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
         mCursor.moveToPosition(position);
         if (DBG) Log.v(TAG, "Click on " + position + " (id=" + id
                 + ", cursid="
