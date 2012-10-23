@@ -839,10 +839,16 @@ public class MediaPlaybackService extends Service {
      */
     public void enqueue(long [] list, int action) {
         synchronized(this) {
-            if (action == NEXT && mPlayPos + 1 < mPlayListLen) {
+            if ((action == NEXT || action == NOW) && mPlayPos + 1 < mPlayListLen) {
                 addToPlayList(list, mPlayPos + 1);
+                if (action == NOW) {
+                    mPlayPos++;
+                    openCurrent();
+                    play();
+                    notifyChange(META_CHANGED);
+                    return;
+                }
             } else {
-                // action == LAST || action == NOW || mPlayPos + 1 == mPlayListLen
                 addToPlayList(list, Integer.MAX_VALUE);
                 if (action == NOW) {
                     mPlayPos = mPlayListLen - list.length;
