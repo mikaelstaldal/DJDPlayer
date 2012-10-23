@@ -687,6 +687,8 @@ public class TrackBrowserActivity extends BrowserActivity {
             case REMOVE:
                 removePlaylistItem(mSelectedPosition);
                 return true;
+
+            // TODO [mikes] context option to show info about the song (title, artist, genre, album, length, filename)
                 
             case SEARCH:
                 doSearch();
@@ -862,7 +864,10 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
         menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
         menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+
+        // TODO [mikes] Use add to playlist instead, show some activity to pick an existing playlist
         menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
+
         if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
         }
