@@ -599,7 +599,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
-        mSelectedPosition =  mi.position;
+        mSelectedPosition = mi.position;
         mTrackCursor.moveToPosition(mSelectedPosition);
         try {
             int id_idx = mTrackCursor.getColumnIndexOrThrow(
@@ -697,8 +697,17 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
+        mSelectedPosition = position;
+        mTrackCursor.moveToPosition(mSelectedPosition);
+        try {
+            int id_idx = mTrackCursor.getColumnIndexOrThrow(
+                    MediaStore.Audio.Playlists.Members.AUDIO_ID);
+            mSelectedId = mTrackCursor.getLong(id_idx);
+        } catch (IllegalArgumentException ex) {
+            mSelectedId = id;
+        }
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
-            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, id);
+            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, mSelectedId);
         }
     }
 
