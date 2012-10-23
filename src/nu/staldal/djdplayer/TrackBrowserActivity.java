@@ -852,11 +852,12 @@ public class TrackBrowserActivity extends BrowserActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         /* This activity is used for a number of different browsing modes, and the menu can
          * be different for each of them:
-         * - all tracks, optionally restricted to an album, artist or playlist
-         * - the list of currently playing songs
+         * - all tracks, optionally restricted to an album, artist or genre
+         * - the tracks of a stored playlist
+         * - the list of current play queue
          */
         super.onCreateOptionsMenu(menu);
-        if (mPlaylist == null) {
+        if (!(mTrackCursor instanceof PlayQueueCursor)) {
             menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
         }
         menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
