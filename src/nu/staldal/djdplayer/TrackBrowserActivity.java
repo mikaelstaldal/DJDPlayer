@@ -862,11 +862,9 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
         menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
         menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
-        if (mPlaylist != null) {
-            menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
-            if (mPlaylist.equals(PLAYQUEUE)) {
-                menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
-            }
+        menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
+        if (mTrackCursor instanceof PlayQueueCursor) {
+            menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
         }
         return true;
     }
@@ -910,7 +908,6 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
                 
             case CLEAR_QUEUE:
-                // We only clear the current playlist
                 MusicUtils.clearQueue();
                 return true;
         }
