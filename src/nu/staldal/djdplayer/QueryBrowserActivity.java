@@ -249,7 +249,8 @@ public class QueryBrowserActivity extends ListActivity
                 MediaStore.Audio.Media.MIME_TYPE));
 
         if (!"artist".equals(selectedType) && !"album".equals(selectedType) && mi.position >= 0 && mi.id >= 0) {
-            menu.add(0, PLAY_SELECTION, 0, R.string.play_now);
+            menu.add(0, PLAY_NOW, 0, R.string.play_now);
+            menu.add(0, PLAY_NEXT, 0, R.string.play_next);
             menu.add(0, QUEUE, 0, R.string.queue);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
             MusicUtils.makePlaylistMenu(this, sub);
@@ -263,9 +264,13 @@ public class QueryBrowserActivity extends ListActivity
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_SELECTION: {
-                // play the track
+            case PLAY_NOW: {
                 MusicUtils.queueAndPlayImmediately(this, mSelectedId);
+                return true;
+            }
+
+            case PLAY_NEXT: {
+                MusicUtils.queueNext(this, mSelectedId);
                 return true;
             }
 

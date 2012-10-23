@@ -344,7 +344,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_all);
+        menu.add(0, PLAY_ALL, 0, R.string.play_all);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
@@ -366,7 +366,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_SELECTION: {
+            case PLAY_ALL: {
                 long [] list = fetchSongList(mCurrentId);
                 MusicUtils.playAll(this, list, 0);
                 return true;

@@ -260,7 +260,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
 
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
 
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_all);
+        menu.add(0, PLAY_ALL, 0, R.string.play_all);
 
         if (mi.id >= 0 /*|| mi.id == PODCASTS_PLAYLIST*/) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
@@ -283,7 +283,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
-            case PLAY_SELECTION:
+            case PLAY_ALL:
                 if (mi.id == RECENTLY_ADDED_PLAYLIST) {
                     playRecentlyAdded();
                 } else if (mi.id == PODCASTS_PLAYLIST) {

@@ -46,21 +46,21 @@ public class MusicUtils {
     private static final String TAG = "MusicUtils";
 
     public interface Defs {
-        public final static int OPEN_URL = 0;
         public final static int ADD_TO_PLAYLIST = 1;
         public final static int USE_AS_RINGTONE = 2;
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
-        public final static int PLAY_SELECTION = 5;
+        public final static int PLAY_ALL = 5;
         public final static int GOTO_START = 6;
-        public final static int GOTO_PLAYBACK = 7;
-        public final static int PARTY_SHUFFLE = 8;
-        public final static int SHUFFLE_ALL = 9;
-        public final static int DELETE_ITEM = 10;
-        public final static int SCAN_DONE = 11;
-        public final static int EFFECTS_PANEL = 12;
-        public final static int QUEUE = 13;
-        public final static int CHILD_MENU_BASE = 14; // this should be the last item
+        public final static int PARTY_SHUFFLE = 7;
+        public final static int SHUFFLE_ALL = 8;
+        public final static int DELETE_ITEM = 9;
+        public final static int SCAN_DONE = 10;
+        public final static int EFFECTS_PANEL = 11;
+        public final static int QUEUE = 12;
+        public final static int PLAY_NOW = 13;
+        public final static int PLAY_NEXT = 14;
+        public final static int CHILD_MENU_BASE = 15; // this should be the last item
     }
 
     /**
@@ -495,6 +495,17 @@ public class MusicUtils {
         String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplayqueue, 1, 1);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void queueNext(Context context, long id) {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.enqueue(new long[] { id }, MediaPlaybackService.NEXT);
+        } catch (RemoteException ex) {
+        }
+        Toast.makeText(context, R.string.will_play_next, Toast.LENGTH_SHORT).show();
     }
 
     public static void queueAndPlayImmediately(Context context, long id) {

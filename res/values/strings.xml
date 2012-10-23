@@ -202,6 +202,8 @@
     <!-- Context menu item -->
     <string name="play_now">Play now</string>
     <!-- Context menu item -->
+    <string name="play_next">Play next</string>
+    <!-- Context menu item -->
     <string name="add_to_playlist">Add to playlist</string>
     <!-- Context menu item -->
     <string name="add_all_to_playlist">Add all to playlist</string>
@@ -211,6 +213,8 @@
     <string name="new_playlist">New</string>
     <!-- Template for newly created playlist name -->
     <string name="new_playlist_name_template">New playlist <xliff:g id="number">%d</xliff:g></string>
+    <!-- Toasts after queue next -->
+    <string name="will_play_next">Will play next</string>
     <!-- Toasts after adding song(s) to playlists -->
     <plurals name="NNNtrackstoplaylist">
         <!-- message shown when one song was added -->

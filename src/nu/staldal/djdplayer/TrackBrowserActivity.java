@@ -40,10 +40,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     public static final String PLAYQUEUE = "playqueue";
 
-    private static final int Q_SELECTED = CHILD_MENU_BASE;
-    private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
-    private static final int PLAY_ALL = CHILD_MENU_BASE + 3;
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
 
     private static final int REMOVE = CHILD_MENU_BASE + 5;
@@ -587,8 +584,9 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
-        menu.add(0, PLAY_SELECTION, 0, R.string.play_now);
+        menu.add(0, PLAY_NOW, 0, R.string.play_now);
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
+            menu.add(0, PLAY_NEXT, 0, R.string.play_next);
             menu.add(0, QUEUE, 0, R.string.queue);
         }
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
@@ -624,7 +622,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_SELECTION: {
+            case PLAY_NOW: {
                 // When selecting a track from the queue, just jump there instead of
                 // reloading the queue. This is both faster, and prevents accidentally
                 // dropping out of party shuffle.
@@ -638,6 +636,11 @@ public class TrackBrowserActivity extends BrowserActivity {
                 } else {
                     MusicUtils.queueAndPlayImmediately(this, mSelectedId);
                 }
+                return true;
+            }
+
+            case PLAY_NEXT: {
+                MusicUtils.queueNext(this, mSelectedId);
                 return true;
             }
 
@@ -699,16 +702,17 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        mSelectedPosition = position;
-        mTrackCursor.moveToPosition(mSelectedPosition);
-        try {
-            int id_idx = mTrackCursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            mSelectedId = mTrackCursor.getLong(id_idx);
-        } catch (IllegalArgumentException ex) {
-            mSelectedId = id;
-        }
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
+            mSelectedPosition = position;
+            mTrackCursor.moveToPosition(mSelectedPosition);
+            try {
+                int id_idx = mTrackCursor.getColumnIndexOrThrow(
+                        MediaStore.Audio.Playlists.Members.AUDIO_ID);
+                mSelectedId = mTrackCursor.getLong(id_idx);
+            } catch (IllegalArgumentException ex) {
+                mSelectedId = id;
+            }
+
             MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, mSelectedId);
         }
     }
