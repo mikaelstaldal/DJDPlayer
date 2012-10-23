@@ -44,7 +44,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int PLAY_ALL = CHILD_MENU_BASE + 3;
-    private static final int CLEAR_PLAYLIST = CHILD_MENU_BASE + 4;
+    private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
 
     private static final int REMOVE = CHILD_MENU_BASE + 5;
 
@@ -865,7 +865,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         if (mPlaylist != null) {
             menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
             if (mPlaylist.equals(PLAYQUEUE)) {
-                menu.add(0, CLEAR_PLAYLIST, 0, R.string.clear_playlist).setIcon(R.drawable.ic_menu_clear_playlist);
+                menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
             }
         }
         return true;
@@ -909,7 +909,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 startActivityForResult(intent, SAVE_AS_PLAYLIST);
                 return true;
                 
-            case CLEAR_PLAYLIST:
+            case CLEAR_QUEUE:
                 // We only clear the current playlist
                 MusicUtils.clearQueue();
                 return true;
