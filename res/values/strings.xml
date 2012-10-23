@@ -107,7 +107,7 @@
 
     <!-- title of the play queue screen when not in party shuffle mode -->
     <string name="play_queue_title">Play queue</string>
-    <!-- title of the "current playlist" screen when in party shuffle mode-->
+    <!-- title of the play queue screen when in party shuffle mode-->
     <string name="partyshuffle_title">Party shuffle</string>
     <!-- Artist screen title -->
     <string name="artists_title">Artists</string>
@@ -127,18 +127,12 @@
     <string name="playlists_menu">Playlists</string>
     <!-- Playlists screen title -->
     <string name="playlists_title">Playlists</string>
-    <!-- Videos screen title -->
-    <string name="videos_title">Videos</string>
-    <!-- All media screen title -->
-    <string name="all_title">All media</string>
     <!-- Category label on Library screen -->
     <string name="browse_menu">Artists</string>
     <!-- Library screen, menu item -->
     <string name="search_title">Search</string>
     <!-- Title of screen when there are no songs, or if the SD card is busy -->
     <string name="no_tracks_title">No songs</string>
-    <!-- Title of screen when there are no videos, or if the SD card is busy -->
-    <string name="no_videos_title">No videos</string>
     <!-- Title of screen when there are no playlists, or if the SD card is busy -->
     <string name="no_playlists_title">No playlists</string>
     <!-- Playlist context menu item to delete the selected playlist. -->
@@ -212,8 +206,6 @@
     <!-- Context menu item -->
     <string name="add_all_to_playlist">Add all to playlist</string>
     <!-- Context menu item -->
-    <string name="current_playlist">Current playlist</string>
-    <!-- Context menu item -->
     <string name="queue">Queue</string>
     <!-- Context menu item -->
     <string name="new_playlist">New</string>
@@ -272,8 +264,8 @@
 
     <!-- menu item to save the current list as a new playlist -->
     <string name="save_as_playlist">Save as playlist</string>
-    <!-- menu item to clear the current playlist -->
-    <string name="clear_playlist">Clear playlist</string>
+    <!-- menu item to clear the queue -->
+    <string name="clear_queue">Clear queue</string>
 
     <!-- Application label. This might show up in the activity-picker -->
     <string name="applabel">DJD Player</string>
