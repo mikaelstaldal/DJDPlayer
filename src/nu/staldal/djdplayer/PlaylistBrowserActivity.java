@@ -380,7 +380,6 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         
         if (cursor == null) {
-            // Todo: show a message
             return;
         }
         try {
@@ -405,7 +404,6 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         
         if (cursor == null) {
-            // Todo: show a message
             return;
         }
         try {
