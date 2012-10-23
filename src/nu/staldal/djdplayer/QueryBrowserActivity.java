@@ -346,7 +346,7 @@ public class QueryBrowserActivity extends ListActivity
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0) {
-            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, id);
+            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, id);
         } else {
             Log.e("QueryBrowser", "invalid position/id: " + position + "/" + id);
         }

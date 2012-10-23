@@ -476,9 +476,9 @@ public class MusicUtils {
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
     }
     
-    public static void queueAndPlayIfNotAlreadyPlaying(Context context, long id) {
+    public static void queueNextAndPlayIfNotAlreadyPlaying(Context context, long id) {
          if (isPlaying()) {
-             queue(context, id);
+             queueNext(context, id);
          } else {
              queueAndPlayImmediately(context, id);
          }

@@ -713,7 +713,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 mSelectedId = id;
             }
 
-            MusicUtils.queueAndPlayIfNotAlreadyPlaying(this, mSelectedId);
+            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, mSelectedId);
         }
     }
 
