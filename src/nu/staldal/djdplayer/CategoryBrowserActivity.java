@@ -307,44 +307,9 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MusicUtils.setPartyShuffleMenuIcon(menu);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Cursor cursor;
-        switch (item.getItemId()) {
-            case PARTY_SHUFFLE:
-                MusicUtils.togglePartyShuffle();
-                break;
-
-            case SHUFFLE_ALL:
-                cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        new String [] { MediaStore.Audio.Media._ID},
-                        MediaStore.Audio.Media.IS_MUSIC + "=1", null,
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                if (cursor != null) {
-                    MusicUtils.shuffleAll(this, cursor);
-                    cursor.close();
-                }
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
@@ -368,7 +333,13 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
         switch (item.getItemId()) {
             case PLAY_ALL: {
                 long [] list = fetchSongList(mCurrentId);
-                MusicUtils.playAll(this, list, 0);
+                MusicUtils.playAll(this, list, false);
+                return true;
+            }
+
+            case SHUFFLE_ALL: {
+                long [] list = fetchSongList(mCurrentId);
+                MusicUtils.playAll(this, list, true);
                 return true;
             }
 
@@ -385,6 +356,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
                 MusicUtils.addToPlaylist(this, list, playlist);
                 return true;
             }
+
             case DELETE_ITEM: {
                 long [] list = fetchSongList(mCurrentId);
                 String f;

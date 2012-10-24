@@ -32,6 +32,7 @@
             android:layout_height="54dip" />
 
        <ImageButton android:id="@+id/shuffle"
+            android:src="@drawable/ic_mp_shuffle_off_btn"
             android:layout_width="85dip"
             android:layout_height="54dip" />
 

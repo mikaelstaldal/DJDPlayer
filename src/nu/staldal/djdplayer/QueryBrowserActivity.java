@@ -73,7 +73,7 @@ public class QueryBrowserActivity extends ListActivity
                 // This is a specific file
                 String id = uri.getLastPathSegment();
                 long [] list = new long[] { Long.valueOf(id) };
-                MusicUtils.playAll(this, list, 0);
+                MusicUtils.playAll(this, list, false);
                 finish();
                 return;
             } else if (path.startsWith("content://media/external/audio/albums/")) {

@@ -412,11 +412,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             }
         } else if (mPlaylist != null) {
             if (mPlaylist.equals(PLAYQUEUE)) {
-                if (MusicUtils.getCurrentShuffleMode() == MediaPlaybackService.SHUFFLE_AUTO) {
-                    fancyName = getText(R.string.partyshuffle_title);
-                } else {
-                    fancyName = getText(R.string.play_queue_title);
-                }
+                fancyName = getText(R.string.play_queue_title);
             } else if (mPlaylist.equals("podcasts")){
                 fancyName = getText(R.string.podcasts_title);
             } else if (mPlaylist.equals("recentlyadded")){
@@ -624,8 +620,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         switch (item.getItemId()) {
             case PLAY_NOW: {
                 // When selecting a track from the queue, just jump there instead of
-                // reloading the queue. This is both faster, and prevents accidentally
-                // dropping out of party shuffle.
+                // reloading the queue. This is faster
                 if (mTrackCursor instanceof PlayQueueCursor) {
                     if (MusicUtils.sService != null) {
                         try {
@@ -811,7 +806,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     private void moveItem(boolean up) {
         int curcount = mTrackCursor.getCount(); 
         int curpos = mTrackList.getSelectedItemPosition();
-        if ( (up && curpos < 1) || (!up  && curpos >= curcount - 1)) {
+        if ((up && curpos < 1) || (!up  && curpos >= curcount - 1)) {
             return;
         }
 
@@ -865,9 +860,10 @@ public class TrackBrowserActivity extends BrowserActivity {
         super.onCreateOptionsMenu(menu);
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
             menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
+            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+        } else {
+            // TODO [mikes] menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
         }
-        menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
 
         // TODO [mikes] Use add to playlist instead, show some activity to pick an existing playlist
         menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
@@ -879,39 +875,24 @@ public class TrackBrowserActivity extends BrowserActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MusicUtils.setPartyShuffleMenuIcon(menu);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        Cursor cursor;
         switch (item.getItemId()) {
             case PLAY_ALL: {
-                MusicUtils.playAll(this, mTrackCursor);
+                MusicUtils.playAll(this, mTrackCursor, false);
                 return true;
             }
 
-            case PARTY_SHUFFLE:
-                MusicUtils.togglePartyShuffle();
-                break;
-                
-            case SHUFFLE_ALL:
-                // Should 'shuffle all' shuffle ALL, or only the tracks shown?
-                cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        new String [] { MediaStore.Audio.Media._ID}, 
-                        MediaStore.Audio.Media.IS_MUSIC + "=1", null,
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                if (cursor != null) {
-                    MusicUtils.shuffleAll(this, cursor);
-                    cursor.close();
-                }
+            case SHUFFLE_ALL: {
+                MusicUtils.playAll(this, mTrackCursor, true);
+                return true;
+            }
+
+            case SHUFFLE:
+                // TODO [mst] shuffle play queue
                 return true;
                 
             case SAVE_AS_PLAYLIST:
-                intent = new Intent();
+                Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
                 startActivityForResult(intent, SAVE_AS_PLAYLIST);
                 return true;

@@ -57,10 +57,6 @@ public class MediaPlaybackService extends Service {
     public static final int LAST = 3;
     public static final int PLAYBACKSERVICE_STATUS = 1;
     
-    public static final int SHUFFLE_NONE = 0;
-    public static final int SHUFFLE_NORMAL = 1;
-    public static final int SHUFFLE_AUTO = 2;
-    
     public static final int REPEAT_NONE = 0;
     public static final int REPEAT_CURRENT = 1;
     public static final int REPEAT_ALL = 2;
@@ -92,10 +88,8 @@ public class MediaPlaybackService extends Service {
     
     private MultiPlayer mPlayer;
     private String mFileToPlay;
-    private int mShuffleMode = SHUFFLE_NONE;
     private int mRepeatMode = REPEAT_NONE;
     private int mMediaMountedCount = 0;
-    private long [] mAutoShuffleList = null;
     private long [] mPlayList = null;
     private int mPlayListLen = 0;
     private Vector<Integer> mHistory = new Vector<Integer>(MAX_HISTORY_SIZE);
@@ -411,32 +405,12 @@ public class MediaPlaybackService extends Service {
             //Log.i("@@@@ service", "created queue string in " + (System.currentTimeMillis() - start) + " ms");
             ed.putString("queue", q.toString());
             ed.putInt("cardid", mCardId);
-            if (mShuffleMode != SHUFFLE_NONE) {
-                // In shuffle mode we need to save the history too
-                len = mHistory.size();
-                q.setLength(0);
-                for (int i = 0; i < len; i++) {
-                    int n = mHistory.get(i);
-                    if (n == 0) {
-                        q.append("0;");
-                    } else {
-                        while (n != 0) {
-                            int digit = (n & 0xf);
-                            n >>>= 4;
-                            q.append(hexdigits[digit]);
-                        }
-                        q.append(";");
-                    }
-                }
-                ed.putString("history", q.toString());
-            }
         }
         ed.putInt("curpos", mPlayPos);
         if (mPlayer.isInitialized()) {
             ed.putLong("seekpos", mPlayer.position());
         }
         ed.putInt("repeatmode", mRepeatMode);
-        ed.putInt("shufflemode", mShuffleMode);
         SharedPreferencesCompat.apply(ed);
 
         //Log.i("@@@@ service", "saved state in " + (System.currentTimeMillis() - start) + " ms");
@@ -543,52 +517,6 @@ public class MediaPlaybackService extends Service {
                 repmode = REPEAT_NONE;
             }
             mRepeatMode = repmode;
-
-            int shufmode = mPreferences.getInt("shufflemode", SHUFFLE_NONE);
-            if (shufmode != SHUFFLE_AUTO && shufmode != SHUFFLE_NORMAL) {
-                shufmode = SHUFFLE_NONE;
-            }
-            if (shufmode != SHUFFLE_NONE) {
-                // in shuffle mode we need to restore the history too
-                q = mPreferences.getString("history", "");
-                qlen = q != null ? q.length() : 0;
-                if (qlen > 1) {
-                    plen = 0;
-                    n = 0;
-                    shift = 0;
-                    mHistory.clear();
-                    for (int i = 0; i < qlen; i++) {
-                        char c = q.charAt(i);
-                        if (c == ';') {
-                            if (n >= mPlayListLen) {
-                                // bogus history data
-                                mHistory.clear();
-                                break;
-                            }
-                            mHistory.add(n);
-                            n = 0;
-                            shift = 0;
-                        } else {
-                            if (c >= '0' && c <= '9') {
-                                n += ((c - '0') << shift);
-                            } else if (c >= 'a' && c <= 'f') {
-                                n += ((10 + c - 'a') << shift);
-                            } else {
-                                // bogus history data
-                                mHistory.clear();
-                                break;
-                            }
-                            shift += 4;
-                        }
-                    }
-                }
-            }
-            if (shufmode == SHUFFLE_AUTO) {
-                if (! makeAutoShuffleList()) {
-                    shufmode = SHUFFLE_NONE;
-                }
-            }
-            mShuffleMode = shufmode;
         }
     }
     
@@ -686,7 +614,7 @@ public class MediaPlaybackService extends Service {
             }
             // save the queue again, because it might have changed
             // since the user exited the music app (because of
-            // party-shuffle or because the play-position changed)
+            // the play-position changed)
             saveQueue(true);
             stopSelf(mServiceStartId);
         }
@@ -871,14 +799,11 @@ public class MediaPlaybackService extends Service {
      * Replaces the current playlist with a new list,
      * and prepares for starting playback at the specified
      * position in the list, or a random position if the
-     * specified position is 0.
+     * specified position is -1.
      * @param list The new list of tracks.
      */
     public void open(long [] list, int position) {
         synchronized (this) {
-            if (mShuffleMode == SHUFFLE_AUTO) {
-                mShuffleMode = SHUFFLE_NORMAL;
-            }
             long oldId = getAudioId();
             int listlength = list.length;
             boolean newlist = true;
@@ -1187,11 +1112,6 @@ public class MediaPlaybackService extends Service {
                 notifyChange(PLAYSTATE_CHANGED);
             }
 
-        } else if (mPlayListLen <= 0) {
-            // This is mostly so that if you press 'play' on a bluetooth headset
-            // without every having played anything before, it will still play
-            // something.
-            setShuffleMode(SHUFFLE_AUTO);
         }
     }
     
@@ -1249,47 +1169,12 @@ public class MediaPlaybackService extends Service {
         return mIsSupposedToBePlaying;
     }
 
-    /*
-      Desired behavior for prev/next/shuffle:
-
-      - NEXT will move to the next track in the list when not shuffling, and to
-        a track randomly picked from the not-yet-played tracks when shuffling.
-        If all tracks have already been played, pick from the full set, but
-        avoid picking the previously played track if possible.
-      - when shuffling, PREV will go to the previously played track. Hitting PREV
-        again will go to the track played before that, etc. When the start of the
-        history has been reached, PREV is a no-op.
-        When not shuffling, PREV will go to the sequentially previous track (the
-        difference with the shuffle-case is mainly that when not shuffling, the
-        user can back up to tracks that are not in the history).
-
-        Example:
-        When playing an album with 10 tracks from the start, and enabling shuffle
-        while playing track 5, the remaining tracks (6-10) will be shuffled, e.g.
-        the final play order might be 1-2-3-4-5-8-10-6-9-7.
-        When hitting 'prev' 8 times while playing track 7 in this example, the
-        user will go to tracks 9-6-10-8-5-4-3-2. If the user then hits 'next',
-        a random track will be picked again. If at any time user disables shuffling
-        the next/previous track will be picked in sequential order again.
-     */
-
     public void prev() {
         synchronized (this) {
-            if (mShuffleMode == SHUFFLE_NORMAL) {
-                // go to previously-played track and remove it from the history
-                int histsize = mHistory.size();
-                if (histsize == 0) {
-                    // prev is a no-op
-                    return;
-                }
-                Integer pos = mHistory.remove(histsize - 1);
-                mPlayPos = pos.intValue();
+            if (mPlayPos > 0) {
+                mPlayPos--;
             } else {
-                if (mPlayPos > 0) {
-                    mPlayPos--;
-                } else {
-                    mPlayPos = mPlayListLen - 1;
-                }
+                mPlayPos = mPlayListLen - 1;
             }
             saveBookmarkIfNeeded();
             stop(false);
@@ -1306,85 +1191,19 @@ public class MediaPlaybackService extends Service {
                 return;
             }
 
-            if (mShuffleMode == SHUFFLE_NORMAL) {
-                // Pick random next track from the not-yet-played ones
-                // TODO: make it work right after adding/removing items in the queue.
-
-                // Store the current file in the history, but keep the history at a
-                // reasonable size
-                if (mPlayPos >= 0) {
-                    mHistory.add(mPlayPos);
+            if (mPlayPos >= mPlayListLen - 1) {
+                // we're at the end of the list
+                if (mRepeatMode == REPEAT_NONE && !force) {
+                    // all done
+                    gotoIdleState();
+                    mIsSupposedToBePlaying = false;
+                    notifyChange(PLAYSTATE_CHANGED);
+                    return;
+                } else if (mRepeatMode == REPEAT_ALL || force) {
+                    mPlayPos = 0;
                 }
-                if (mHistory.size() > MAX_HISTORY_SIZE) {
-                    mHistory.removeElementAt(0);
-                }
-
-                int numTracks = mPlayListLen;
-                int[] tracks = new int[numTracks];
-                for (int i=0;i < numTracks; i++) {
-                    tracks[i] = i;
-                }
-
-                int numHistory = mHistory.size();
-                int numUnplayed = numTracks;
-                for (int i=0;i < numHistory; i++) {
-                    int idx = mHistory.get(i).intValue();
-                    if (idx < numTracks && tracks[idx] >= 0) {
-                        numUnplayed--;
-                        tracks[idx] = -1;
-                    }
-                }
-
-                // 'numUnplayed' now indicates how many tracks have not yet
-                // been played, and 'tracks' contains the indices of those
-                // tracks.
-                if (numUnplayed <=0) {
-                    // everything's already been played
-                    if (mRepeatMode == REPEAT_ALL || force) {
-                        //pick from full set
-                        numUnplayed = numTracks;
-                        for (int i=0;i < numTracks; i++) {
-                            tracks[i] = i;
-                        }
-                    } else {
-                        // all done
-                        gotoIdleState();
-                        if (mIsSupposedToBePlaying) {
-                            mIsSupposedToBePlaying = false;
-                            notifyChange(PLAYSTATE_CHANGED);
-                        }
-                        return;
-                    }
-                }
-                int skip = mRand.nextInt(numUnplayed);
-                int cnt = -1;
-                while (true) {
-                    while (tracks[++cnt] < 0)
-                        ;
-                    skip--;
-                    if (skip < 0) {
-                        break;
-                    }
-                }
-                mPlayPos = cnt;
-            } else if (mShuffleMode == SHUFFLE_AUTO) {
-                doAutoShuffleUpdate();
-                mPlayPos++;
             } else {
-                if (mPlayPos >= mPlayListLen - 1) {
-                    // we're at the end of the list
-                    if (mRepeatMode == REPEAT_NONE && !force) {
-                        // all done
-                        gotoIdleState();
-                        mIsSupposedToBePlaying = false;
-                        notifyChange(PLAYSTATE_CHANGED);
-                        return;
-                    } else if (mRepeatMode == REPEAT_ALL || force) {
-                        mPlayPos = 0;
-                    }
-                } else {
-                    mPlayPos++;
-                }
+                mPlayPos++;
             }
             saveBookmarkIfNeeded();
             stop(false);
@@ -1429,44 +1248,6 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    // Make sure there are at least 5 items after the currently playing item
-    // and no more than 10 items before.
-    private void doAutoShuffleUpdate() {
-        boolean notify = false;
-
-        // remove old entries
-        if (mPlayPos > 10) {
-            removeTracks(0, mPlayPos - 9);
-            notify = true;
-        }
-        // add new entries if needed
-        int to_add = 7 - (mPlayListLen - (mPlayPos < 0 ? -1 : mPlayPos));
-        for (int i = 0; i < to_add; i++) {
-            // pick something at random from the list
-
-            int lookback = mHistory.size();
-            int idx = -1;
-            while(true) {
-                idx = mRand.nextInt(mAutoShuffleList.length);
-                if (!wasRecentlyUsed(idx, lookback)) {
-                    break;
-                }
-                lookback /= 2;
-            }
-            mHistory.add(idx);
-            if (mHistory.size() > MAX_HISTORY_SIZE) {
-                mHistory.remove(0);
-            }
-            ensurePlayListCapacity(mPlayListLen + 1);
-            mPlayList[mPlayListLen++] = mAutoShuffleList[idx];
-            notify = true;
-        }
-        if (notify) {
-            fetchNextSong();
-            notifyChange(QUEUE_CHANGED);
-        }
-    }
-
     // check that the specified idx is not in the history (but only look at at
     // most lookbacksize entries in the history)
     private boolean wasRecentlyUsed(int idx, int lookbacksize) {
@@ -1507,33 +1288,6 @@ public class MediaPlaybackService extends Service {
         }
     };
 
-    private boolean makeAutoShuffleList() {
-        ContentResolver res = getContentResolver();
-        Cursor c = null;
-        try {
-            c = res.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
-                    null, null);
-            if (c == null || c.getCount() == 0) {
-                return false;
-            }
-            int len = c.getCount();
-            long [] list = new long[len];
-            for (int i = 0; i < len; i++) {
-                c.moveToNext();
-                list[i] = c.getLong(0);
-            }
-            mAutoShuffleList = list;
-            return true;
-        } catch (RuntimeException ex) {
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return false;
-    }
-    
     /**
      * Removes the range of tracks specified from the play list. If a file within the range is
      * the file currently being played, playback will move to the next file after the
@@ -1621,33 +1375,11 @@ public class MediaPlaybackService extends Service {
         return numremoved;
     }
     
-    public void setShuffleMode(int shufflemode) {
+    public void doShuffle() {
         synchronized(this) {
-            if (mShuffleMode == shufflemode && mPlayListLen > 0) {
-                return;
-            }
-            mShuffleMode = shufflemode;
-            if (mShuffleMode == SHUFFLE_AUTO) {
-                if (makeAutoShuffleList()) {
-                    mPlayListLen = 0;
-                    doAutoShuffleUpdate();
-                    mPlayPos = 0;
-                    openCurrent();
-                    play();
-                    notifyChange(META_CHANGED);
-                    return;
-                } else {
-                    // failed to build a list of files to shuffle
-                    mShuffleMode = SHUFFLE_NONE;
-                }
-            }
-            saveQueue(false);
+            // TODO [mst] doShuffle
         }
     }
-    public int getShuffleMode() {
-        return mShuffleMode;
-    }
-    
     public void setRepeatMode(int repeatmode) {
         synchronized(this) {
             mRepeatMode = repeatmode;
@@ -1704,9 +1436,6 @@ public class MediaPlaybackService extends Service {
             openCurrent();
             play();
             notifyChange(META_CHANGED);
-            if (mShuffleMode == SHUFFLE_AUTO) {
-                doAutoShuffleUpdate();
-            }
         }
     }
 
@@ -2162,11 +1891,8 @@ public class MediaPlaybackService extends Service {
         public long seek(long pos) {
             return mService.get().seek(pos);
         }
-        public void setShuffleMode(int shufflemode) {
-            mService.get().setShuffleMode(shufflemode);
-        }
-        public int getShuffleMode() {
-            return mService.get().getShuffleMode();
+        public void doShuffle() {
+            mService.get().doShuffle();
         }
         public int removeTracks(int first, int last) {
             return mService.get().removeTracks(first, last);
@@ -2198,7 +1924,6 @@ public class MediaPlaybackService extends Service {
         writer.println(getPath());
         writer.println("playing: " + mIsSupposedToBePlaying);
         writer.println("actual: " + mPlayer.mMediaPlayer.isPlaying());
-        writer.println("shuffle mode: " + mShuffleMode);
         MusicUtils.debugDump(writer);
     }
 

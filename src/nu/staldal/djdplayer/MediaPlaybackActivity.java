@@ -413,7 +413,7 @@ public class MediaPlaybackActivity extends Activity
 
     private View.OnClickListener mShuffleListener = new View.OnClickListener() {
         public void onClick(View v) {
-            toggleShuffle();
+            shuffle();
         }
     };
 
@@ -526,7 +526,6 @@ public class MediaPlaybackActivity extends Activity
         // modes, instead of tailoring them to the specific file being played.
         if (MusicUtils.getCurrentAudioId() >= 0) {
             menu.add(0, GOTO_START, 0, R.string.goto_start).setIcon(R.drawable.ic_menu_music_library);
-            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             // these next two are in a separate group, so they can be shown/hidden as needed
@@ -549,19 +548,8 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (mService == null) return false;
-        MenuItem item = menu.findItem(PARTY_SHUFFLE);
-        if (item != null) {
-            int shuffle = MusicUtils.getCurrentShuffleMode();
-            if (shuffle == MediaPlaybackService.SHUFFLE_AUTO) {
-                item.setIcon(R.drawable.ic_menu_party_shuffle);
-                item.setTitle(R.string.party_shuffle_off);
-            } else {
-                item.setIcon(R.drawable.ic_menu_party_shuffle);
-                item.setTitle(R.string.party_shuffle);
-            }
-        }
 
-        item = menu.findItem(ADD_TO_PLAYLIST);
+        MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
         if (item != null) {
             SubMenu sub = item.getSubMenu();
             MusicUtils.makePlaylistMenu(this, sub);
@@ -585,6 +573,7 @@ public class MediaPlaybackActivity extends Activity
                     startActivity(intent);
                     finish();
                     break;
+
                 case USE_AS_RINGTONE: {
                     // Set the system setting to make this the current ringtone
                     if (mService != null) {
@@ -592,10 +581,6 @@ public class MediaPlaybackActivity extends Activity
                     }
                     return true;
                 }
-                case PARTY_SHUFFLE:
-                    MusicUtils.togglePartyShuffle();
-                    setShuffleButtonImage();
-                    break;
                     
                 case NEW_PLAYLIST: {
                     intent = new Intent();
@@ -871,7 +856,7 @@ public class MediaPlaybackActivity extends Activity
                 return true;
 
             case KeyEvent.KEYCODE_S:
-                toggleShuffle();
+                shuffle();
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -975,27 +960,13 @@ public class MediaPlaybackActivity extends Activity
         }
     }
     
-    private void toggleShuffle() {
+    private void shuffle() {
+        // TODO [mikes] shuffle play queue
         if (mService == null) {
             return;
         }
         try {
-            int shuffle = mService.getShuffleMode();
-            if (shuffle == MediaPlaybackService.SHUFFLE_NONE) {
-                mService.setShuffleMode(MediaPlaybackService.SHUFFLE_NORMAL);
-                if (mService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT) {
-                    mService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
-                    setRepeatButtonImage();
-                }
-                showToast(R.string.shuffle_on_notif);
-            } else if (shuffle == MediaPlaybackService.SHUFFLE_NORMAL ||
-                    shuffle == MediaPlaybackService.SHUFFLE_AUTO) {
-                mService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
-                showToast(R.string.shuffle_off_notif);
-            } else {
-                Log.e("MediaPlaybackActivity", "Invalid shuffle mode: " + shuffle);
-            }
-            setShuffleButtonImage();
+            mService.doShuffle();
         } catch (RemoteException ex) {
         }
     }
@@ -1011,10 +982,6 @@ public class MediaPlaybackActivity extends Activity
                 showToast(R.string.repeat_all_notif);
             } else if (mode == MediaPlaybackService.REPEAT_ALL) {
                 mService.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
-                if (mService.getShuffleMode() != MediaPlaybackService.SHUFFLE_NONE) {
-                    mService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
-                    setShuffleButtonImage();
-                }
                 showToast(R.string.repeat_current_notif);
             } else {
                 mService.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
@@ -1079,7 +1046,6 @@ public class MediaPlaybackActivity extends Activity
                         mShuffleButton.setVisibility(View.VISIBLE);
                         mQueueButton.setVisibility(View.VISIBLE);
                         setRepeatButtonImage();
-                        setShuffleButtonImage();
                         setPauseButtonImage();
                         return;
                     }
@@ -1113,24 +1079,6 @@ public class MediaPlaybackActivity extends Activity
                     break;
                 default:
                     mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
-                    break;
-            }
-        } catch (RemoteException ex) {
-        }
-    }
-    
-    private void setShuffleButtonImage() {
-        if (mService == null) return;
-        try {
-            switch (mService.getShuffleMode()) {
-                case MediaPlaybackService.SHUFFLE_NONE:
-                    mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_off_btn);
-                    break;
-                case MediaPlaybackService.SHUFFLE_AUTO:
-                    mShuffleButton.setImageResource(R.drawable.ic_mp_partyshuffle_on_btn);
-                    break;
-                default:
-                    mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_on_btn);
                     break;
             }
         } catch (RemoteException ex) {

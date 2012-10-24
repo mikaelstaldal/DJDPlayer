@@ -29,17 +29,16 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
-import android.view.*;
+import android.view.SubMenu;
+import android.view.View;
+import android.view.Window;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.*;
 
 public class MusicUtils {
 
@@ -52,7 +51,7 @@ public class MusicUtils {
         public final static int NEW_PLAYLIST = 4;
         public final static int PLAY_ALL = 5;
         public final static int GOTO_START = 6;
-        public final static int PARTY_SHUFFLE = 7;
+        public final static int SHUFFLE = 7;
         public final static int SHUFFLE_ALL = 8;
         public final static int DELETE_ITEM = 9;
         public final static int SCAN_DONE = 10;
@@ -201,59 +200,6 @@ public class MusicUtils {
         return -1;
     }
     
-    public static int getCurrentShuffleMode() {
-        int mode = MediaPlaybackService.SHUFFLE_NONE;
-        if (sService != null) {
-            try {
-                mode = sService.getShuffleMode();
-            } catch (RemoteException ex) {
-            }
-        }
-        return mode;
-    }
-    
-    public static void togglePartyShuffle() {
-        if (sService != null) {
-            int shuffle = getCurrentShuffleMode();
-            try {
-                if (shuffle == MediaPlaybackService.SHUFFLE_AUTO) {
-                    sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
-                } else {
-                    sService.setShuffleMode(MediaPlaybackService.SHUFFLE_AUTO);
-                }
-            } catch (RemoteException ex) {
-            }
-        }
-    }
-    
-    public static void setPartyShuffleMenuIcon(Menu menu) {
-        MenuItem item = menu.findItem(Defs.PARTY_SHUFFLE);
-        if (item != null) {
-            int shuffle = MusicUtils.getCurrentShuffleMode();
-            if (shuffle == MediaPlaybackService.SHUFFLE_AUTO) {
-                item.setIcon(R.drawable.ic_menu_party_shuffle);
-                item.setTitle(R.string.party_shuffle_off);
-            } else {
-                item.setIcon(R.drawable.ic_menu_party_shuffle);
-                item.setTitle(R.string.party_shuffle);
-            }
-        }
-    }
-    
-    /*
-     * Returns true if a file is currently opened for playback (regardless
-     * of whether it's playing or paused).
-     */
-    public static boolean isMusicLoaded() {
-        if (MusicUtils.sService != null) {
-            try {
-                return sService.getPath() != null;
-            } catch (RemoteException ex) {
-            }
-        }
-        return false;
-    }
-
     public static boolean isPlaying() {
         if (MusicUtils.sService != null) {
             try {
@@ -335,13 +281,6 @@ public class MusicUtils {
         return sEmptyList;
     }
     
-    public static void playPlaylist(Context context, long plid) {
-        long [] list = getSongListForPlaylist(context, plid);
-        if (list != null) {
-            playAll(context, list, -1, false);
-        }
-    }
-
     public static long [] getAllSongs(Context context) {
         Cursor c = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[] {MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
@@ -748,24 +687,12 @@ public class MusicUtils {
         return sFormatter.format(durationformat, timeArgs).toString();
     }
 
-    public static void shuffleAll(Context context, Cursor cursor) {
-        playAll(context, cursor, 0, true);
-    }
-
-    public static void playAll(Context context, Cursor cursor) {
-        playAll(context, cursor, 0, false);
-    }
-
-    public static void playAll(Context context, long [] list, int position) {
-        playAll(context, list, position, false);
-    }
-
-    private static void playAll(Context context, Cursor cursor, int position, boolean force_shuffle) {
+    public static void playAll(Context context, Cursor cursor, boolean shuffle) {
         long [] list = getSongListForCursor(cursor);
-        playAll(context, list, position, force_shuffle);
+        playAll(context, list, shuffle);
     }
 
-    private static void playAll(Context context, long [] list, int position, boolean force_shuffle) {
+    public static void playAll(Context context, long [] list, boolean shuffle) {
         if (list.length == 0 || sService == null) {
             Log.d("MusicUtils", "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
@@ -774,32 +701,26 @@ public class MusicUtils {
             return;
         }
         try {
-            if (force_shuffle) {
-                sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NORMAL);
+            if (shuffle) {
+                shuffleArray(list);
             }
-            long curid = sService.getAudioId();
-            int curpos = sService.getQueuePosition();
-            if (position != -1 && curpos == position && curid == list[position]) {
-                // The selected file is the file that's currently playing;
-                // figure out if we need to restart with a new playlist,
-                // or just launch the playback activity.
-                long [] playlist = sService.getQueue();
-                if (Arrays.equals(list, playlist)) {
-                    // we don't need to set a new list, but we should resume playback if needed
-                    sService.play();
-                    return; // the 'finally' block will still run
-                }
-            }
-            if (position < 0) {
-                position = 0;
-            }
-            sService.open(list, force_shuffle ? -1 : position);
+            sService.open(list, 0);
             sService.play();
         } catch (RemoteException ex) {
         } finally {
             Intent intent = new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(intent);
+        }
+    }
+
+    public static void shuffleArray(long[] array) {
+        Random random = new Random();
+        for (int i=0; i < array.length; i++) {
+            int randomPosition = random.nextInt(array.length);
+            long temp = array[i];
+            array[i] = array[randomPosition];
+            array[randomPosition] = temp;
         }
     }
 

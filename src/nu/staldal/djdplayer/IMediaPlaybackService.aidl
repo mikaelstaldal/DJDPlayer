@@ -51,8 +51,7 @@ interface IMediaPlaybackService {
     void setQueuePosition(int index);
     String getPath();
     long getAudioId();
-    void setShuffleMode(int shufflemode);
-    int getShuffleMode();
+    void doShuffle();
     int removeTracks(int first, int last);
     int removeTrack(long id);
     void setRepeatMode(int repeatmode);

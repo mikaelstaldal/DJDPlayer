@@ -55,10 +55,6 @@
 
     <!-- Menu item that takes the user back to the top level screen of the music player -->
     <string name="goto_start">Library</string>
-    <!-- Menu item that switches the music player in to party shuffle mode -->
-    <string name="party_shuffle">Party shuffle</string>
-    <!-- Menu item that switches the music player out of party shuffle mode -->
-    <string name="party_shuffle_off">Party shuffle off</string>
     <!-- Menu item that deletes the currently selected song.
          The user will be prompted to confirm before deletion actually takes place -->
     <string name="delete_item">Delete</string>
@@ -69,6 +65,8 @@
     <string name="shuffle_all">Shuffle all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order -->
     <string name="play_all">Play all</string>
+    <!-- Menu item to shuffle all songs in play queue -->
+    <string name="shuffle">Shuffle</string>
 
     <!-- Delete confirmation dialog when deleting an entire artist -->
     <string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from the SD card.</string>
@@ -105,10 +103,8 @@
     <!-- shown in dialog while the media scanner is starting up -->
     <string name="scanning_nosdcard" msgid="3529383847223198502">Scanning USB storage\u2026</string>
 
-    <!-- title of the play queue screen when not in party shuffle mode -->
+    <!-- title of the play queue screen -->
     <string name="play_queue_title">Play queue</string>
-    <!-- title of the play queue screen when in party shuffle mode-->
-    <string name="partyshuffle_title">Party shuffle</string>
     <!-- Artist screen title -->
     <string name="artists_title">Artists</string>
     <!-- Category label on Library screen -->

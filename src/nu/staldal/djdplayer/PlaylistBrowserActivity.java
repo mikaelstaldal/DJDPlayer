@@ -123,16 +123,16 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         if (Intent.ACTION_VIEW.equals(action)) {
             long id = Long.parseLong(intent.getExtras().getString("playlist"));
             if (id == RECENTLY_ADDED_PLAYLIST) {
-                playRecentlyAdded();
+                playRecentlyAdded(false);
             } else if (id == PODCASTS_PLAYLIST) {
-                playPodcasts();
+                playPodcasts(false);
             } else if (id == ALL_SONGS_PLAYLIST) {
                 long [] list = MusicUtils.getAllSongs(PlaylistBrowserActivity.this);
                 if (list != null) {
-                    MusicUtils.playAll(PlaylistBrowserActivity.this, list, 0);
+                    MusicUtils.playAll(PlaylistBrowserActivity.this, list, false);
                 }
             } else {
-                MusicUtils.playPlaylist(PlaylistBrowserActivity.this, id);
+                playPlaylist(id, false);
             }
             finish();
         }
@@ -228,31 +228,6 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         setTitle(R.string.playlists_title);
     }
     
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mCreateShortcut) {
-            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MusicUtils.setPartyShuffleMenuIcon(menu);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        switch (item.getItemId()) {
-            case PARTY_SHUFFLE:
-                MusicUtils.togglePartyShuffle();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
         if (mCreateShortcut) {
             return;
@@ -261,6 +236,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
 
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all);
 
         if (mi.id >= 0 /*|| mi.id == PODCASTS_PLAYLIST*/) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
@@ -285,11 +261,20 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         switch (item.getItemId()) {
             case PLAY_ALL:
                 if (mi.id == RECENTLY_ADDED_PLAYLIST) {
-                    playRecentlyAdded();
+                    playRecentlyAdded(false);
                 } else if (mi.id == PODCASTS_PLAYLIST) {
-                    playPodcasts();
+                    playPodcasts(false);
                 } else {
-                    MusicUtils.playPlaylist(this, mi.id);
+                    playPlaylist(mi.id, false);
+                }
+                break;
+            case SHUFFLE_ALL:
+                if (mi.id == RECENTLY_ADDED_PLAYLIST) {
+                    playRecentlyAdded(true);
+                } else if (mi.id == PODCASTS_PLAYLIST) {
+                    playPodcasts(true);
+                } else {
+                    playPlaylist(mi.id, true);
                 }
                 break;
             case DELETE_PLAYLIST:
@@ -371,7 +356,14 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         }
     }
 
-    private void playRecentlyAdded() {
+    private void playPlaylist(long plid, boolean shuffle) {
+        long [] list = MusicUtils.getSongListForPlaylist(this, plid);
+        if (list != null) {
+            MusicUtils.playAll(this, list, shuffle);
+        }
+    }
+
+    private void playRecentlyAdded(boolean shuffle) {
         // do a query for all songs added in the last X weeks
         int X = MusicUtils.getIntPref(this, "numweeks", 2) * (3600 * 24 * 7);
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
@@ -389,14 +381,14 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 cursor.moveToNext();
                 list[i] = cursor.getLong(0);
             }
-            MusicUtils.playAll(this, list, 0);
+            MusicUtils.playAll(this, list, shuffle);
         } catch (SQLiteException ex) {
         } finally {
             cursor.close();
         }
     }
 
-    private void playPodcasts() {
+    private void playPodcasts(boolean shuffle) {
         // do a query for all files that are podcasts
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
         Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -413,7 +405,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                 cursor.moveToNext();
                 list[i] = cursor.getLong(0);
             }
-            MusicUtils.playAll(this, list, 0);
+            MusicUtils.playAll(this, list, shuffle);
         } catch (SQLiteException ex) {
         } finally {
             cursor.close();

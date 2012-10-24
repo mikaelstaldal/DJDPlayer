@@ -40,6 +40,7 @@
                 android:nextFocusLeft="@id/curplaylist" />
 
            <ImageButton android:id="@+id/shuffle"
+                android:src="@drawable/ic_mp_shuffle_off_btn"
                 android:layout_width="82dip"
                 android:layout_height="45dip"
                 android:layout_marginRight="8dip" />
