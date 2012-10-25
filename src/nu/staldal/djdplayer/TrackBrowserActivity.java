@@ -40,12 +40,12 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     public static final String PLAYQUEUE = "playqueue";
 
-    private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
+    private static final int NEW_PLAYLIST_ALL = CHILD_MENU_BASE + 2;
+    private static final int NEW_PLAYLIST_SINGLE = CHILD_MENU_BASE + 3;
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
-
     private static final int REMOVE = CHILD_MENU_BASE + 5;
-
     private static final int SEARCH = CHILD_MENU_BASE + 6;
+
     private static final String[] CURSOR_COLS = new String[] {
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
@@ -647,7 +647,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             case NEW_PLAYLIST: {
                 Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                startActivityForResult(intent, NEW_PLAYLIST_SINGLE);
                 return true;
             }
 
@@ -865,11 +865,20 @@ public class TrackBrowserActivity extends BrowserActivity {
             menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
         }
 
-        // TODO [mikes] Use add to playlist instead, show some activity to pick an existing playlist
-        menu.add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist).setIcon(android.R.drawable.ic_menu_save);
+        menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
 
         if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
+        if (item != null) {
+            SubMenu sub = item.getSubMenu();
+            MusicUtils.makePlaylistMenu(this, sub);
         }
         return true;
     }
@@ -891,12 +900,20 @@ public class TrackBrowserActivity extends BrowserActivity {
                 MusicUtils.shuffleQueue();
                 return true;
                 
-            case SAVE_AS_PLAYLIST:
+            case NEW_PLAYLIST: {
                 Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
-                startActivityForResult(intent, SAVE_AS_PLAYLIST);
+                startActivityForResult(intent, NEW_PLAYLIST_ALL);
                 return true;
-                
+            }
+
+            case PLAYLIST_SELECTED: {
+                long [] list = MusicUtils.getSongListForCursor(mTrackCursor);
+                long playlist = item.getIntent().getLongExtra("playlist", 0);
+                MusicUtils.addToPlaylist(this, list, playlist);
+                return true;
+            }
+
             case CLEAR_QUEUE:
                 MusicUtils.clearQueue();
                 return true;
@@ -915,7 +932,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 }
                 break;
                 
-            case NEW_PLAYLIST:
+            case NEW_PLAYLIST_SINGLE:
                 if (resultCode == RESULT_OK) {
                     Uri uri = intent.getData();
                     if (uri != null) {
@@ -925,13 +942,12 @@ public class TrackBrowserActivity extends BrowserActivity {
                 }
                 break;
 
-            case SAVE_AS_PLAYLIST:
+            case NEW_PLAYLIST_ALL:
                 if (resultCode == RESULT_OK) {
                     Uri uri = intent.getData();
                     if (uri != null) {
                         long [] list = MusicUtils.getSongListForCursor(mTrackCursor);
-                        int plid = Integer.parseInt(uri.getLastPathSegment());
-                        MusicUtils.addToPlaylist(this, list, plid);
+                        MusicUtils.addToPlaylist(this, list, Integer.parseInt(uri.getLastPathSegment()));
                     }
                 }
                 break;
