@@ -106,7 +106,6 @@ public class MediaPlaybackService extends Service {
     private String mNextAlbumName = null;
     private int mPlayPos = -1;
     private static final String LOGTAG = "MediaPlaybackService";
-    private final Shuffler mRand = new Shuffler();
     private int mOpenFailedCounter = 0;
     String[] mCursorCols = new String[] {
             "audio._id AS _id",             // index must match IDCOLIDX below
@@ -798,8 +797,7 @@ public class MediaPlaybackService extends Service {
     /**
      * Replaces the current playlist with a new list,
      * and prepares for starting playback at the specified
-     * position in the list, or a random position if the
-     * specified position is -1.
+     * position in the list
      * @param list The new list of tracks.
      */
     public void open(long [] list, int position) {
@@ -824,7 +822,7 @@ public class MediaPlaybackService extends Service {
             if (position >= 0) {
                 mPlayPos = position;
             } else {
-                mPlayPos = mRand.nextInt(mPlayListLen);
+                mPlayPos = 0;
             }
             mHistory.clear();
 
@@ -1272,22 +1270,6 @@ public class MediaPlaybackService extends Service {
         return false;
     }
 
-    // A simple variation of Random that makes sure that the
-    // value it returns is not equal to the value it returned
-    // previously, unless the interval is 1.
-    private static class Shuffler {
-        private int mPrevious;
-        private Random mRandom = new Random();
-        public int nextInt(int interval) {
-            int ret;
-            do {
-                ret = mRandom.nextInt(interval);
-            } while (ret == mPrevious && interval > 1);
-            mPrevious = ret;
-            return ret;
-        }
-    };
-
     /**
      * Removes the range of tracks specified from the play list. If a file within the range is
      * the file currently being played, playback will move to the next file after the
@@ -1377,7 +1359,18 @@ public class MediaPlaybackService extends Service {
     
     public void doShuffle() {
         synchronized(this) {
-            // TODO [mst] doShuffle
+            Random random = new Random();
+            for (int i=0; i < mPlayListLen; i++) {
+                if (i != mPlayPos) {
+                    int randomPosition = random.nextInt(mPlayListLen);
+                    while (randomPosition == mPlayPos) randomPosition = random.nextInt(mPlayListLen);
+                    long temp = mPlayList[i];
+                    mPlayList[i] = mPlayList[randomPosition];
+                    mPlayList[randomPosition] = temp;
+                }
+            }
+            fetchNextSong();
+            notifyChange(QUEUE_CHANGED);
         }
     }
     public void setRepeatMode(int repeatmode) {

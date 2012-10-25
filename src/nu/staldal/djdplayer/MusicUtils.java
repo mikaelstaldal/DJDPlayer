@@ -725,9 +725,20 @@ public class MusicUtils {
     }
 
     public static void clearQueue() {
-        try {
-            sService.removeTracks(0, Integer.MAX_VALUE);
-        } catch (RemoteException ex) {
+        if (sService != null) {
+            try {
+                sService.removeTracks(0, Integer.MAX_VALUE);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public static void shuffleQueue() {
+        if (sService != null) {
+            try {
+                sService.doShuffle();
+            } catch (RemoteException ex) {
+            }
         }
     }
 

@@ -862,7 +862,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
             menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
         } else {
-            // TODO [mikes] menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
         }
 
         // TODO [mikes] Use add to playlist instead, show some activity to pick an existing playlist
@@ -888,7 +888,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             }
 
             case SHUFFLE:
-                // TODO [mst] shuffle play queue
+                MusicUtils.shuffleQueue();
                 return true;
                 
             case SAVE_AS_PLAYLIST:

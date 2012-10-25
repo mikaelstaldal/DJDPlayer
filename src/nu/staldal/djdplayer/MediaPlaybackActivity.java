@@ -961,7 +961,6 @@ public class MediaPlaybackActivity extends Activity
     }
     
     private void shuffle() {
-        // TODO [mikes] shuffle play queue
         if (mService == null) {
             return;
         }
