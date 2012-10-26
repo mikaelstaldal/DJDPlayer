@@ -23,8 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
@@ -36,16 +36,10 @@ import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -358,7 +352,8 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
         updatePlayPause();
     }
-    
+
+/*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -380,7 +375,8 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         item.setVisible(false);
         return false;
     }
-    
+*/
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
