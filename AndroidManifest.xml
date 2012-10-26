@@ -89,15 +89,6 @@
                 <data android:mimeType="application/itunes"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="nu.staldal.djdplayer.PLAYBACK_VIEWER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name="AudioPreview" android:theme="@android:style/Theme.Dialog"
-                android:taskAffinity=""
-                android:excludeFromRecents="true" android:exported="true" >
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file"/>
@@ -106,16 +97,9 @@
                 <data android:mimeType="application/x-ogg"/>
                 <data android:mimeType="application/itunes"/>
             </intent-filter>
-            <intent-filter
-                android:priority="-1">
-                <action android:name="android.intent.action.VIEW" />
+            <intent-filter>
+                <action android:name="nu.staldal.djdplayer.PLAYBACK_VIEWER" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" />
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-                <data android:mimeType="application/itunes"/>
             </intent-filter>
         </activity>
 
