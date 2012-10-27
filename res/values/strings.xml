@@ -65,6 +65,8 @@
     <string name="shuffle_all">Shuffle all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order -->
     <string name="play_all">Play all</string>
+    <!-- Menu item to play back all the songs in the currently showing list in list order after current play queue -->
+    <string name="queue_all">Queue all</string>
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shuffle">Shuffle</string>
 

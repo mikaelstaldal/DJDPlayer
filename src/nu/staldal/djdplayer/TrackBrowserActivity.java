@@ -640,7 +640,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             }
 
             case QUEUE: {
-                MusicUtils.queue(this, mSelectedId);
+                MusicUtils.queue(this, new long[] { mSelectedId });
                 return true;
             }
 
@@ -861,6 +861,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
             menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
             menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
         } else {
             menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
         }
@@ -887,12 +888,17 @@ public class TrackBrowserActivity extends BrowserActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_ALL: {
-                MusicUtils.playAll(this, mTrackCursor, false);
+                MusicUtils.playAll(this, MusicUtils.getSongListForCursor(mTrackCursor), false);
                 return true;
             }
 
             case SHUFFLE_ALL: {
-                MusicUtils.playAll(this, mTrackCursor, true);
+                MusicUtils.playAll(this, MusicUtils.getSongListForCursor(mTrackCursor), true);
+                return true;
+            }
+
+            case QUEUE_ALL: {
+                MusicUtils.queue(this, MusicUtils.getSongListForCursor(mTrackCursor));
                 return true;
             }
 

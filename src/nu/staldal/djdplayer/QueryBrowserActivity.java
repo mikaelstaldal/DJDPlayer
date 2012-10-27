@@ -275,7 +275,7 @@ public class QueryBrowserActivity extends ListActivity
             }
 
             case QUEUE: {
-                MusicUtils.queue(this, mSelectedId);
+                MusicUtils.queue(this, new long[] { mSelectedId });
                 return true;
             }
 

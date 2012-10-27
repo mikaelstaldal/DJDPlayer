@@ -237,6 +237,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
 
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
 
         if (mi.id >= 0 /*|| mi.id == PODCASTS_PLAYLIST*/) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
@@ -277,6 +278,13 @@ public class PlaylistBrowserActivity extends BrowserActivity {
                     playPlaylist(mi.id, true);
                 }
                 break;
+            case QUEUE_ALL: {
+                long [] list = MusicUtils.getSongListForPlaylist(this, mi.id);
+                if (list != null) {
+                    MusicUtils.queue(this, list);
+                }
+                return true;
+            }
             case DELETE_PLAYLIST:
                 Uri uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mi.id);

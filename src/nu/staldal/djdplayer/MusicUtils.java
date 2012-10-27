@@ -53,14 +53,15 @@ public class MusicUtils {
         public final static int GOTO_START = 6;
         public final static int SHUFFLE = 7;
         public final static int SHUFFLE_ALL = 8;
-        public final static int DELETE_ITEM = 9;
-        public final static int SCAN_DONE = 10;
-        public final static int EFFECTS_PANEL = 11;
-        public final static int QUEUE = 12;
-        public final static int PLAY_NOW = 13;
-        public final static int PLAY_NEXT = 14;
-        public final static int RESCAN = 15;
-        public final static int CHILD_MENU_BASE = 16; // this should be the last item
+        public final static int QUEUE_ALL = 9;
+        public final static int DELETE_ITEM = 10;
+        public final static int SCAN_DONE = 11;
+        public final static int EFFECTS_PANEL = 12;
+        public final static int QUEUE = 13;
+        public final static int PLAY_NOW = 14;
+        public final static int PLAY_NEXT = 15;
+        public final static int RESCAN = 16;
+        public final static int CHILD_MENU_BASE = 17; // this should be the last item
     }
 
     /**
@@ -424,16 +425,16 @@ public class MusicUtils {
          }
     }
 
-    public static void queue(Context context, long id) {
+    public static void queue(Context context, long[] list) {
         if (sService == null) {
             return;
         }
         try {
-            sService.enqueue(new long[] { id }, MediaPlaybackService.LAST);
+            sService.enqueue(list, MediaPlaybackService.LAST);
         } catch (RemoteException ex) {
         }
         String message = context.getResources().getQuantityString(
-                R.plurals.NNNtrackstoplayqueue, 1, 1);
+                R.plurals.NNNtrackstoplayqueue, list.length, list.length);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
@@ -686,11 +687,6 @@ public class MusicUtils {
         timeArgs[4] = secs % 60;
 
         return sFormatter.format(durationformat, timeArgs).toString();
-    }
-
-    public static void playAll(Context context, Cursor cursor, boolean shuffle) {
-        long [] list = getSongListForCursor(cursor);
-        playAll(context, list, shuffle);
     }
 
     public static void playAll(Context context, long [] list, boolean shuffle) {
