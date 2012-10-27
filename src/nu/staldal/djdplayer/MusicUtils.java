@@ -59,7 +59,8 @@ public class MusicUtils {
         public final static int QUEUE = 12;
         public final static int PLAY_NOW = 13;
         public final static int PLAY_NEXT = 14;
-        public final static int CHILD_MENU_BASE = 15; // this should be the last item
+        public final static int RESCAN = 15;
+        public final static int CHILD_MENU_BASE = 16; // this should be the last item
     }
 
     /**
@@ -159,7 +160,7 @@ public class MusicUtils {
             sService = null;
         }
     }
-    
+
     public static long getCurrentAlbumId() {
         if (sService != null) {
             try {

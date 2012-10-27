@@ -68,6 +68,9 @@
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shuffle">Shuffle</string>
 
+    <!-- Menu item to rescan music library -->
+    <string name="rescan">Rescan music</string>
+
     <!-- Delete confirmation dialog when deleting an entire artist -->
     <string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from the SD card.</string>
     <!-- Delete confirmation dialog when deleting an entire artist -->

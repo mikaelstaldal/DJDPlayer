@@ -17,9 +17,13 @@ package nu.staldal.djdplayer;
 
 import android.app.ListActivity;
 import android.content.*;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -98,6 +102,26 @@ public abstract class BrowserActivity extends ListActivity
     public void onPause() {
         unregisterReceiver(mStatusListener);
         super.onPause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        menu.add(0, RESCAN, 0, R.string.rescan).setIcon(R.drawable.ic_menu_rescan);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case RESCAN:
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                              Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
