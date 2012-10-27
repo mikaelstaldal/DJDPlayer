@@ -22,3 +22,5 @@ Enhancements over the standard Music Player:
 * Improved play queue
 
 * Improved shuffling
+
+* Possible to force rescan of music library
