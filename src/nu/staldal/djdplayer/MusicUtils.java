@@ -40,7 +40,6 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class MusicUtils {
-
     private static final String TAG = "MusicUtils";
 
     public interface Defs {
@@ -117,19 +116,19 @@ public class MusicUtils {
             sConnectionMap.put(cw, sb);
             return new ServiceToken(cw);
         }
-        Log.e("Music", "Failed to bind to service");
+        Log.e(TAG, "Failed to bind to service");
         return null;
     }
 
     public static void unbindFromService(ServiceToken token) {
         if (token == null) {
-            Log.e("MusicUtils", "Trying to unbind with null token");
+            Log.e(TAG, "Trying to unbind with null token");
             return;
         }
         ContextWrapper cw = token.mWrappedContext;
         ServiceBinder sb = sConnectionMap.remove(cw);
         if (sb == null) {
-            Log.e("MusicUtils", "Trying to unbind for unknown Context");
+            Log.e(TAG, "Trying to unbind for unknown Context");
             return;
         }
         cw.unbindService(sb);
@@ -367,7 +366,7 @@ public class MusicUtils {
                     if (!f.delete()) {
                         // I'm not sure if we'd ever get here (deletion would
                         // have to fail, but no exception thrown)
-                        Log.e("MusicUtils", "Failed to delete file " + name);
+                        Log.e(TAG, "Failed to delete file " + name);
                     }
                     c.moveToNext();
                 } catch (SecurityException ex) {
@@ -651,7 +650,7 @@ public class MusicUtils {
 
     public static void playAll(Context context, long [] list, boolean shuffle) {
         if (list.length == 0 || sService == null) {
-            Log.d("MusicUtils", "attempt to play empty song list");
+            Log.d(TAG, "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
             String message = context.getString(R.string.emptyplaylist, list.length);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
