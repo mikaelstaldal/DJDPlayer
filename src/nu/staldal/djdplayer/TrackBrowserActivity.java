@@ -339,13 +339,10 @@ public class TrackBrowserActivity extends BrowserActivity {
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
         if (PLAYQUEUE.equals(mPlaylist)) {
-            try {
-                int cur = MusicUtils.sService.getQueuePosition();
-                setSelection(cur);
-                registerReceiver(mNowPlayingListener, new IntentFilter(f));
-                mNowPlayingListener.onReceive(this, new Intent(MediaPlaybackService.META_CHANGED));
-            } catch (RemoteException ex) {
-            }
+            int cur = MusicUtils.sService.getQueuePosition();
+            setSelection(cur);
+            registerReceiver(mNowPlayingListener, new IntentFilter(f));
+            mNowPlayingListener.onReceive(this, new Intent(MediaPlaybackService.META_CHANGED));
         } else {
             String key = getIntent().getStringExtra("artist");
             if (key != null) {
@@ -486,13 +483,8 @@ public class TrackBrowserActivity extends BrowserActivity {
             Log.d(LOGTAG, "No view when removing playlist item " + which);
             return;
         }
-        try {
-            if (MusicUtils.sService != null
-                    && which != MusicUtils.sService.getQueuePosition()) {
-                mDeletedOneRow = true;
-            }
-        } catch (RemoteException e) {
-            // Service died, so nothing playing.
+        if (MusicUtils.sService != null
+                && which != MusicUtils.sService.getQueuePosition()) {
             mDeletedOneRow = true;
         }
         v.setVisibility(View.GONE);
@@ -623,10 +615,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 // reloading the queue. This is faster
                 if (mTrackCursor instanceof PlayQueueCursor) {
                     if (MusicUtils.sService != null) {
-                        try {
-                            MusicUtils.sService.setQueuePosition(mSelectedPosition);
-                        } catch (RemoteException ex) {
-                        }
+                        MusicUtils.sService.setQueuePosition(mSelectedPosition);
                     }
                 } else {
                     MusicUtils.queueAndPlayImmediately(this, mSelectedId);
@@ -772,11 +761,8 @@ public class TrackBrowserActivity extends BrowserActivity {
 
             // Work around bug 902971. To get quick visual feedback
             // of the deletion of the item, hide the selected view.
-            try {
-                if (curpos != MusicUtils.sService.getQueuePosition()) {
-                    mDeletedOneRow = true;
-                }
-            } catch (RemoteException ex) {
+            if (curpos != MusicUtils.sService.getQueuePosition()) {
+                mDeletedOneRow = true;
             }
             View v = mTrackList.getSelectedView();
             v.setVisibility(View.GONE);
@@ -1050,7 +1036,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     private class PlayQueueCursor extends AbstractCursor {
 
-        public PlayQueueCursor(IMediaPlaybackService service, String[] cols) {
+        public PlayQueueCursor(MediaPlaybackService service, String[] cols) {
             mCols = cols;
             mService  = service;
             makeNowPlayingCursor();
@@ -1058,11 +1044,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         private void makeNowPlayingCursor() {
             mCurrentPlaylistCursor = null;
-            try {
-                mNowPlaying = mService.getQueue();
-            } catch (RemoteException ex) {
-                mNowPlaying = new long[0];
-            }
+            mNowPlaying = mService.getQueue();
             mSize = mNowPlaying.length;
             if (mSize == 0) {
                 return;
@@ -1102,26 +1084,22 @@ public class TrackBrowserActivity extends BrowserActivity {
             // earlier to make sure that all the items in there still exist
             // in the database, and remove those that aren't. This way we
             // don't get any blank items in the list.
-            try {
-                int removed = 0;
-                for (int i = mNowPlaying.length - 1; i >= 0; i--) {
-                    long trackid = mNowPlaying[i];
-                    int crsridx = Arrays.binarySearch(mCursorIdxs, trackid);
-                    if (crsridx < 0) {
-                        //Log.i("@@@@@", "item no longer exists in db: " + trackid);
-                        removed += mService.removeTrack(trackid);
-                    }
+            int removed = 0;
+            for (int i = mNowPlaying.length - 1; i >= 0; i--) {
+                long trackid = mNowPlaying[i];
+                int crsridx = Arrays.binarySearch(mCursorIdxs, trackid);
+                if (crsridx < 0) {
+                    //Log.i("@@@@@", "item no longer exists in db: " + trackid);
+                    removed += mService.removeTrack(trackid);
                 }
-                if (removed > 0) {
-                    mNowPlaying = mService.getQueue();
-                    mSize = mNowPlaying.length;
-                    if (mSize == 0) {
-                        mCursorIdxs = null;
-                        return;
-                    }
+            }
+            if (removed > 0) {
+                mNowPlaying = mService.getQueue();
+                mSize = mNowPlaying.length;
+                if (mSize == 0) {
+                    mCursorIdxs = null;
+                    return;
                 }
-            } catch (RemoteException ex) {
-                mNowPlaying = new long[0];
             }
         }
 
@@ -1155,29 +1133,23 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         public boolean removeItem(int which)
         {
-            try {
-                if (mService.removeTracks(which, which) == 0) {
-                    return false; // delete failed
-                }
-                int i = (int) which;
-                mSize--;
-                while (i < mSize) {
-                    mNowPlaying[i] = mNowPlaying[i+1];
-                    i++;
-                }
-                onMove(-1, (int) mCurPos);
-            } catch (RemoteException ex) {
+            if (mService.removeTracks(which, which) == 0) {
+                return false; // delete failed
             }
+            int i = (int) which;
+            mSize--;
+            while (i < mSize) {
+                mNowPlaying[i] = mNowPlaying[i+1];
+                i++;
+            }
+            onMove(-1, (int) mCurPos);
             return true;
         }
         
         public void moveItem(int from, int to) {
-            try {
-                mService.moveQueueItem(from, to);
-                mNowPlaying = mService.getQueue();
-                onMove(-1, mCurPos); // update the underlying cursor
-            } catch (RemoteException ex) {
-            }
+            mService.moveQueueItem(from, to);
+            mNowPlaying = mService.getQueue();
+            onMove(-1, mCurPos); // update the underlying cursor
         }
 
         private void dump() {
@@ -1275,7 +1247,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         private long[] mNowPlaying;
         private long[] mCursorIdxs;
         private int mCurPos;
-        private IMediaPlaybackService mService;
+        private MediaPlaybackService mService;
     }
     
     static class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
@@ -1449,14 +1421,10 @@ public class TrackBrowserActivity extends BrowserActivity {
             ImageView iv = vh.play_indicator;
             long id = -1;
             if (MusicUtils.sService != null) {
-                // TODO: IPC call on each bind??
-                try {
-                    if (mIsNowPlaying) {
-                        id = MusicUtils.sService.getQueuePosition();
-                    } else {
-                        id = MusicUtils.sService.getAudioId();
-                    }
-                } catch (RemoteException ex) {
+                if (mIsNowPlaying) {
+                    id = MusicUtils.sService.getQueuePosition();
+                } else {
+                    id = MusicUtils.sService.getAudioId();
                 }
             }
             

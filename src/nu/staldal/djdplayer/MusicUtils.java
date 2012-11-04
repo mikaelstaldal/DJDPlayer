@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -96,7 +95,7 @@ public class MusicUtils {
         return songs_albums.toString();
     }
     
-    public static IMediaPlaybackService sService = null;
+    public static MediaPlaybackService sService = null;
     private static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<Context, ServiceBinder>();
 
     public static class ServiceToken {
@@ -148,7 +147,7 @@ public class MusicUtils {
         }
         
         public void onServiceConnected(ComponentName className, android.os.IBinder service) {
-            sService = IMediaPlaybackService.Stub.asInterface(service);
+            sService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
             if (mCallback != null) {
                 mCallback.onServiceConnected(className, service);
             }
@@ -164,87 +163,60 @@ public class MusicUtils {
 
     public static long getCurrentAlbumId() {
         if (sService != null) {
-            try {
-                return sService.getAlbumId();
-            } catch (RemoteException ex) {
-            }
+            return sService.getAlbumId();
         }
         return -1;
     }
 
     public static long getCurrentGenreId() {
         if (sService != null) {
-            try {
-                return sService.getGenreId();
-            } catch (RemoteException ex) {
-            }
+            return sService.getGenreId();
         }
         return -1;
     }
 
     public static long getCurrentArtistId() {
         if (MusicUtils.sService != null) {
-            try {
-                return sService.getArtistId();
-            } catch (RemoteException ex) {
-            }
+            return sService.getArtistId();
         }
         return -1;
     }
 
     public static long getCurrentAudioId() {
         if (MusicUtils.sService != null) {
-            try {
-                return sService.getAudioId();
-            } catch (RemoteException ex) {
-            }
+            return sService.getAudioId();
         }
         return -1;
     }
     
     public static boolean isPlaying() {
         if (MusicUtils.sService != null) {
-            try {
-                return sService.isPlaying();
-            } catch (RemoteException ex) {
-            }
+            return sService.isPlaying();
         }
         return false;
     }
 
     public static void play() {
         if (MusicUtils.sService != null) {
-            try {
-                sService.play();
-            } catch (RemoteException ex) {
-            }
+            sService.play();
         }
     }
 
     public static void pause() {
         if (MusicUtils.sService != null) {
-            try {
-                sService.pause();
-            } catch (RemoteException ex) {
-            }
+            sService.pause();
         }
     }
 
     public static void prev() {
         if (MusicUtils.sService != null) {
-            try {
-                sService.prev();
-            } catch (RemoteException ex) {
-            }
+            sService.prev();
         }
     }
 
     public static void next() {
         if (MusicUtils.sService != null) {
-            try {
-                sService.next();
-            } catch (RemoteException ex) {
-            }
+            sService.next(true);
         }
     }
 
@@ -375,15 +347,12 @@ public class MusicUtils {
         if (c != null) {
 
             // step 1: remove selected tracks from the current playlist
-            try {
-                c.moveToFirst();
-                while (! c.isAfterLast()) {
-                    // remove from current playlist
-                    long id = c.getLong(0);
-                    sService.removeTrack(id);
-                    c.moveToNext();
-                }
-            } catch (RemoteException ex) {
+            c.moveToFirst();
+            while (! c.isAfterLast()) {
+                // remove from current playlist
+                long id = c.getLong(0);
+                sService.removeTrack(id);
+                c.moveToNext();
             }
 
             // step 2: remove selected tracks from the database
@@ -429,10 +398,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        try {
-            sService.enqueue(list, MediaPlaybackService.LAST);
-        } catch (RemoteException ex) {
-        }
+        sService.enqueue(list, MediaPlaybackService.LAST);
         String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplayqueue, list.length, list.length);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -442,10 +408,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        try {
-            sService.enqueue(new long[] { id }, MediaPlaybackService.NEXT);
-        } catch (RemoteException ex) {
-        }
+        sService.enqueue(new long[] { id }, MediaPlaybackService.NEXT);
         Toast.makeText(context, R.string.will_play_next, Toast.LENGTH_SHORT).show();
     }
 
@@ -453,10 +416,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        try {
-            sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
-        } catch (RemoteException ex) {
-        }
+        sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
     }
 
     private static ContentValues[] sContentValuesCache = null;
@@ -697,18 +657,14 @@ public class MusicUtils {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             return;
         }
-        try {
-            if (shuffle) {
-                shuffleArray(list);
-            }
-            sService.open(list, 0);
-            sService.play();
-        } catch (RemoteException ex) {
-        } finally {
-            Intent intent = new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            context.startActivity(intent);
+        if (shuffle) {
+            shuffleArray(list);
         }
+        sService.open(list, 0);
+        sService.play();
+        Intent intent = new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
+            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
     }
 
     public static void shuffleArray(long[] array) {
@@ -723,19 +679,13 @@ public class MusicUtils {
 
     public static void clearQueue() {
         if (sService != null) {
-            try {
-                sService.removeTracks(0, Integer.MAX_VALUE);
-            } catch (RemoteException ex) {
-            }
+            sService.removeTracks(0, Integer.MAX_VALUE);
         }
     }
 
     public static void shuffleQueue() {
         if (sService != null) {
-            try {
-                sService.doShuffle();
-            } catch (RemoteException ex) {
-            }
+            sService.doShuffle();
         }
     }
 

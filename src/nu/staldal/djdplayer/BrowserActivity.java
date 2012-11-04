@@ -20,7 +20,6 @@ import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -145,18 +144,14 @@ public abstract class BrowserActivity extends ListActivity
 
     private void updateNowPlaying() {
         if (nowPlayingView != null) {
-            try {
-                if (MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
-                    titleView.setText(MusicUtils.sService.getTrackName());
-                    String artistName = MusicUtils.sService.getArtistName();
-                    if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-                        artistName = getString(R.string.unknown_artist_name);
-                    }
-                    artistView.setText(artistName);
-                    nowPlayingView.setVisibility(View.VISIBLE);
+            if (MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
+                titleView.setText(MusicUtils.sService.getTrackName());
+                String artistName = MusicUtils.sService.getArtistName();
+                if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
+                    artistName = getString(R.string.unknown_artist_name);
                 }
-            } catch (RemoteException ex) {
-                nowPlayingView.setVisibility(View.GONE);
+                artistView.setText(artistName);
+                nowPlayingView.setVisibility(View.VISIBLE);
             }
         }
     }

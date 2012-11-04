@@ -39,7 +39,6 @@ import android.widget.Toast;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.Random;
 import java.util.Vector;
 
@@ -85,7 +84,15 @@ public class MediaPlaybackService extends Service {
     private static final int FADEDOWN = 5;
     private static final int FADEUP = 6;
     private static final int MAX_HISTORY_SIZE = 100;
-    
+
+    private final IBinder mBinder = new MediaPlaybackServiceBinder();
+
+    public class MediaPlaybackServiceBinder extends Binder {
+      public MediaPlaybackService getService() {
+          return MediaPlaybackService.this;
+      }
+    }
+
     private MultiPlayer mPlayer;
     private String mFileToPlay;
     private int mRepeatMode = REPEAT_NONE;
@@ -1772,141 +1779,6 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    /*
-     * By making this a static class with a WeakReference to the Service, we
-     * ensure that the Service can be GCd even when the system process still
-     * has a remote reference to the stub.
-     */
-    static class ServiceStub extends IMediaPlaybackService.Stub {
-        WeakReference<MediaPlaybackService> mService;
-        
-        ServiceStub(MediaPlaybackService service) {
-            mService = new WeakReference<MediaPlaybackService>(service);
-        }
-
-        public void openFile(String path)
-        {
-            mService.get().open(path);
-        }
-        public void open(long [] list, int position) {
-            mService.get().open(list, position);
-        }
-        public int getQueuePosition() {
-            return mService.get().getQueuePosition();
-        }
-        public void setQueuePosition(int index) {
-            mService.get().setQueuePosition(index);
-        }
-        public boolean isPlaying() {
-            return mService.get().isPlaying();
-        }
-        public void stop() {
-            mService.get().stop();
-        }
-        public void pause() {
-            mService.get().pause();
-        }
-        public void play() {
-            mService.get().play();
-        }
-        public void prev() {
-            mService.get().prev();
-        }
-        public void next() {
-            mService.get().next(true);
-        }
-        public String getTrackName() {
-            return mService.get().getTrackName();
-        }
-        public String getAlbumName() {
-            return mService.get().getAlbumName();
-        }
-        public long getAlbumId() {
-            return mService.get().getAlbumId();
-        }
-        public String getGenreName() {
-            return mService.get().getGenreName();
-        }
-        public long getGenreId() {
-            return mService.get().getGenreId();
-        }
-        public long getNextArtistId() {
-            return mService.get().getNextArtistId();
-        }
-        public String getNextArtistName() {
-            return mService.get().getNextArtistName();
-        }
-        public long getNextGenreId() {
-            return mService.get().getNextGenreId();
-        }
-        public String getNextGenreName() {
-            return mService.get().getNextGenreName();
-        }
-        public long getNextAlbumId() {
-            return mService.get().getNextAlbumId();
-        }
-        public String getNextAlbumName() {
-            return mService.get().getNextAlbumName();
-        }
-        public long getNextTrackId() {
-            return mService.get().getNextTrackId();
-        }
-        public String getNextTrackName() {
-            return mService.get().getNextTrackName();
-        }
-        public String getArtistName() {
-            return mService.get().getArtistName();
-        }
-        public long getArtistId() {
-            return mService.get().getArtistId();
-        }
-        public void enqueue(long [] list , int action) {
-            mService.get().enqueue(list, action);
-        }
-        public long [] getQueue() {
-            return mService.get().getQueue();
-        }
-        public void moveQueueItem(int from, int to) {
-            mService.get().moveQueueItem(from, to);
-        }
-        public String getPath() {
-            return mService.get().getPath();
-        }
-        public long getAudioId() {
-            return mService.get().getAudioId();
-        }
-        public long position() {
-            return mService.get().position();
-        }
-        public long duration() {
-            return mService.get().duration();
-        }
-        public long seek(long pos) {
-            return mService.get().seek(pos);
-        }
-        public void doShuffle() {
-            mService.get().doShuffle();
-        }
-        public int removeTracks(int first, int last) {
-            return mService.get().removeTracks(first, last);
-        }
-        public int removeTrack(long id) {
-            return mService.get().removeTrack(id);
-        }
-        public void setRepeatMode(int repeatmode) {
-            mService.get().setRepeatMode(repeatmode);
-        }
-        public int getRepeatMode() {
-            return mService.get().getRepeatMode();
-        }
-        public int getMediaMountedCount() {
-            return mService.get().getMediaMountedCount();
-        }
-        public int getAudioSessionId() {
-            return mService.get().getAudioSessionId();
-        }
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.println("" + mPlayListLen + " items in queue, currently at index " + mPlayPos);
@@ -1919,6 +1791,4 @@ public class MediaPlaybackService extends Service {
         writer.println("actual: " + mPlayer.mMediaPlayer.isPlaying());
         MusicUtils.debugDump(writer);
     }
-
-    private final IBinder mBinder = new ServiceStub(this);
 }

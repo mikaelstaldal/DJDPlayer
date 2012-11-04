@@ -44,7 +44,7 @@ public class MediaPlaybackActivity extends Activity
     private boolean mDeviceHasDpad;
     private long mStartSeekPos = 0;
     private long mLastSeekEventTime;
-    private IMediaPlaybackService mService = null;
+    private MediaPlaybackService mService = null;
     private RepeatingImageButton mPrevButton;
     private ImageButton mPauseButton;
     private RepeatingImageButton mNextButton;
@@ -241,38 +241,20 @@ public class MediaPlaybackActivity extends Activity
     };
     
     public boolean onLongClick(View view) {
-        long audioId;
-        long artistId;
-        long genreId;
-        long albumId;
-        String song;
-        String artist;
-        String album;
-        long nextArtistId;
-        long nextGenreId;
-        String nextSong;
-        String nextArtist;
-        String nextAlbum;
+        if (mService == null) return true;
 
-        try {
-            audioId = mService.getAudioId();
-            artistId = mService.getArtistId();
-            genreId = mService.getGenreId();
-            albumId = mService.getAlbumId();
-            song = mService.getTrackName();
-            artist = mService.getArtistName();
-            album = mService.getAlbumName();
-            nextArtistId = mService.getNextArtistId();
-            nextGenreId = mService.getNextGenreId();
-            nextSong = mService.getNextTrackName();
-            nextArtist = mService.getNextArtistName();
-            nextAlbum = mService.getNextAlbumName();
-        } catch (RemoteException ex) {
-            return true;
-        } catch (NullPointerException ex) {
-            // we might not actually have the service yet
-            return true;
-        }
+        long audioId = mService.getAudioId();
+        long artistId = mService.getArtistId();
+        long genreId = mService.getGenreId();
+        long albumId = mService.getAlbumId();
+        String song = mService.getTrackName();
+        String artist = mService.getArtistName();
+        String album = mService.getAlbumName();
+        long nextArtistId = mService.getNextArtistId();
+        long nextGenreId = mService.getNextGenreId();
+        String nextSong = mService.getNextTrackName();
+        String nextArtist = mService.getNextArtistName();
+        String nextAlbum = mService.getNextAlbumName();
 
         if (MediaStore.UNKNOWN_STRING.equals(album) &&
                 MediaStore.UNKNOWN_STRING.equals(artist) &&
@@ -383,10 +365,7 @@ public class MediaPlaybackActivity extends Activity
             if ((now - mLastSeekEventTime) > 250) {
                 mLastSeekEventTime = now;
                 mPosOverride = mDuration * progress / 1000;
-                try {
-                    mService.seek(mPosOverride);
-                } catch (RemoteException ex) {
-                }
+                mService.seek(mPosOverride);
 
                 // trackball event, allow progress updates
                 if (!mFromTouch) {
@@ -432,14 +411,11 @@ public class MediaPlaybackActivity extends Activity
     private View.OnClickListener mPrevListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (mService == null) return;
-            try {
-                if (mService.position() < 2000) {
-                    mService.prev();
-                } else {
-                    mService.seek(0);
-                    mService.play();
-                }
-            } catch (RemoteException ex) {
+            if (mService.position() < 2000) {
+                mService.prev();
+            } else {
+                mService.seek(0);
+                mService.play();
             }
         }
     };
@@ -447,10 +423,7 @@ public class MediaPlaybackActivity extends Activity
     private View.OnClickListener mNextListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (mService == null) return;
-            try {
-                mService.next();
-            } catch (RemoteException ex) {
-            }
+            mService.next(true);
         }
     };
 
@@ -564,68 +537,65 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
-        try {
-            switch (item.getItemId()) {
-                case GOTO_START:
-                    intent = new Intent();
-                    intent.setClass(this, MusicBrowserActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                    break;
+        switch (item.getItemId()) {
+            case GOTO_START:
+                intent = new Intent();
+                intent.setClass(this, MusicBrowserActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+                break;
 
-                case USE_AS_RINGTONE: {
-                    // Set the system setting to make this the current ringtone
-                    if (mService != null) {
-                        MusicUtils.setRingtone(this, mService.getAudioId());
-                    }
-                    return true;
+            case USE_AS_RINGTONE: {
+                // Set the system setting to make this the current ringtone
+                if (mService != null) {
+                    MusicUtils.setRingtone(this, mService.getAudioId());
                 }
-                    
-                case NEW_PLAYLIST: {
-                    intent = new Intent();
-                    intent.setClass(this, CreatePlaylist.class);
-                    startActivityForResult(intent, NEW_PLAYLIST);
-                    return true;
-                }
+                return true;
+            }
 
-                case PLAYLIST_SELECTED: {
+            case NEW_PLAYLIST: {
+                intent = new Intent();
+                intent.setClass(this, CreatePlaylist.class);
+                startActivityForResult(intent, NEW_PLAYLIST);
+                return true;
+            }
+
+            case PLAYLIST_SELECTED: {
+                long [] list = new long[1];
+                list[0] = MusicUtils.getCurrentAudioId();
+                long playlist = item.getIntent().getLongExtra("playlist", 0);
+                MusicUtils.addToPlaylist(this, list, playlist);
+                return true;
+            }
+
+            case DELETE_ITEM: {
+                if (mService != null) {
                     long [] list = new long[1];
                     list[0] = MusicUtils.getCurrentAudioId();
-                    long playlist = item.getIntent().getLongExtra("playlist", 0);
-                    MusicUtils.addToPlaylist(this, list, playlist);
-                    return true;
-                }
-                
-                case DELETE_ITEM: {
-                    if (mService != null) {
-                        long [] list = new long[1];
-                        list[0] = MusicUtils.getCurrentAudioId();
-                        Bundle b = new Bundle();
-                        String f;
-                        if (android.os.Environment.isExternalStorageRemovable()) {
-                            f = getString(R.string.delete_song_desc, mService.getTrackName());
-                        } else {
-                            f = getString(R.string.delete_song_desc_nosdcard, mService.getTrackName());
-                        }
-                        b.putString("description", f);
-                        b.putLongArray("items", list);
-                        intent = new Intent();
-                        intent.setClass(this, DeleteItems.class);
-                        intent.putExtras(b);
-                        startActivityForResult(intent, -1);
+                    Bundle b = new Bundle();
+                    String f;
+                    if (android.os.Environment.isExternalStorageRemovable()) {
+                        f = getString(R.string.delete_song_desc, mService.getTrackName());
+                    } else {
+                        f = getString(R.string.delete_song_desc_nosdcard, mService.getTrackName());
                     }
-                    return true;
+                    b.putString("description", f);
+                    b.putLongArray("items", list);
+                    intent = new Intent();
+                    intent.setClass(this, DeleteItems.class);
+                    intent.putExtras(b);
+                    startActivityForResult(intent, -1);
                 }
-
-                case EFFECTS_PANEL: {
-                    Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                    i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                    startActivityForResult(i, EFFECTS_PANEL);
-                    return true;
-                }
+                return true;
             }
-        } catch (RemoteException ex) {
+
+            case EFFECTS_PANEL: {
+                Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
+                startActivityForResult(i, EFFECTS_PANEL);
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -712,10 +682,7 @@ public class MediaPlaybackActivity extends Activity
                     else if (y > lastY && x >= 5) dir = 1; 
                     lastX = x;
                     lastY = y;
-                    try {
-                        mService.seek(mService.position() + dir * 5);
-                    } catch (RemoteException ex) {
-                    }
+                    mService.seek(mService.position() + dir * 5);
                     refreshNow();
                     return true;
                 }
@@ -732,10 +699,7 @@ public class MediaPlaybackActivity extends Activity
         for(int i=0;i<10;i++) {
             if(keyboard[0][i] == keyCode) {
                 int seekpercentage = 100*i/10;
-                try {
-                    mService.seek(mService.duration() * seekpercentage / 100);
-                } catch (RemoteException ex) {
-                }
+                mService.seek(mService.duration() * seekpercentage / 100);
                 refreshNow();
                 return true;
             }
@@ -745,49 +709,46 @@ public class MediaPlaybackActivity extends Activity
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        try {
-            switch(keyCode)
-            {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (!useDpadMusicControl()) {
-                        break;
-                    }
-                    if (mService != null) {
-                        if (!mSeeking && mStartSeekPos >= 0) {
-                            mPauseButton.requestFocus();
-                            if (mStartSeekPos < 1000) {
-                                mService.prev();
-                            } else {
-                                mService.seek(0);
-                            }
+        switch(keyCode)
+        {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (!useDpadMusicControl()) {
+                    break;
+                }
+                if (mService != null) {
+                    if (!mSeeking && mStartSeekPos >= 0) {
+                        mPauseButton.requestFocus();
+                        if (mStartSeekPos < 1000) {
+                            mService.prev();
                         } else {
-                            scanBackward(-1, event.getEventTime() - event.getDownTime());
-                            mPauseButton.requestFocus();
-                            mStartSeekPos = -1;
+                            mService.seek(0);
                         }
+                    } else {
+                        scanBackward(-1, event.getEventTime() - event.getDownTime());
+                        mPauseButton.requestFocus();
+                        mStartSeekPos = -1;
                     }
-                    mSeeking = false;
-                    mPosOverride = -1;
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (!useDpadMusicControl()) {
-                        break;
+                }
+                mSeeking = false;
+                mPosOverride = -1;
+                return true;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (!useDpadMusicControl()) {
+                    break;
+                }
+                if (mService != null) {
+                    if (!mSeeking && mStartSeekPos >= 0) {
+                        mPauseButton.requestFocus();
+                        mService.next(true);
+                    } else {
+                        scanForward(-1, event.getEventTime() - event.getDownTime());
+                        mPauseButton.requestFocus();
+                        mStartSeekPos = -1;
                     }
-                    if (mService != null) {
-                        if (!mSeeking && mStartSeekPos >= 0) {
-                            mPauseButton.requestFocus();
-                            mService.next();
-                        } else {
-                            scanForward(-1, event.getEventTime() - event.getDownTime());
-                            mPauseButton.requestFocus();
-                            mStartSeekPos = -1;
-                        }
-                    }
-                    mSeeking = false;
-                    mPosOverride = -1;
-                    return true;
-            }
-        } catch (RemoteException ex) {
+                }
+                mSeeking = false;
+                mPosOverride = -1;
+                return true;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -869,94 +830,85 @@ public class MediaPlaybackActivity extends Activity
     
     private void scanBackward(int repcnt, long delta) {
         if(mService == null) return;
-        try {
-            if(repcnt == 0) {
-                mStartSeekPos = mService.position();
-                mLastSeekEventTime = 0;
-                mSeeking = false;
+        if(repcnt == 0) {
+            mStartSeekPos = mService.position();
+            mLastSeekEventTime = 0;
+            mSeeking = false;
+        } else {
+            mSeeking = true;
+            if (delta < 5000) {
+                // seek at 10x speed for the first 5 seconds
+                delta = delta * 10;
             } else {
-                mSeeking = true;
-                if (delta < 5000) {
-                    // seek at 10x speed for the first 5 seconds
-                    delta = delta * 10; 
-                } else {
-                    // seek at 40x after that
-                    delta = 50000 + (delta - 5000) * 40;
-                }
-                long newpos = mStartSeekPos - delta;
-                if (newpos < 0) {
-                    // move to previous track
-                    mService.prev();
-                    long duration = mService.duration();
-                    mStartSeekPos += duration;
-                    newpos += duration;
-                }
-                if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
-                    mService.seek(newpos);
-                    mLastSeekEventTime = delta;
-                }
-                if (repcnt >= 0) {
-                    mPosOverride = newpos;
-                } else {
-                    mPosOverride = -1;
-                }
-                refreshNow();
+                // seek at 40x after that
+                delta = 50000 + (delta - 5000) * 40;
             }
-        } catch (RemoteException ex) {
+            long newpos = mStartSeekPos - delta;
+            if (newpos < 0) {
+                // move to previous track
+                mService.prev();
+                long duration = mService.duration();
+                mStartSeekPos += duration;
+                newpos += duration;
+            }
+            if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
+                mService.seek(newpos);
+                mLastSeekEventTime = delta;
+            }
+            if (repcnt >= 0) {
+                mPosOverride = newpos;
+            } else {
+                mPosOverride = -1;
+            }
+            refreshNow();
         }
     }
 
     private void scanForward(int repcnt, long delta) {
         if(mService == null) return;
-        try {
-            if(repcnt == 0) {
-                mStartSeekPos = mService.position();
-                mLastSeekEventTime = 0;
-                mSeeking = false;
+        if(repcnt == 0) {
+            mStartSeekPos = mService.position();
+            mLastSeekEventTime = 0;
+            mSeeking = false;
+        } else {
+            mSeeking = true;
+            if (delta < 5000) {
+                // seek at 10x speed for the first 5 seconds
+                delta = delta * 10;
             } else {
-                mSeeking = true;
-                if (delta < 5000) {
-                    // seek at 10x speed for the first 5 seconds
-                    delta = delta * 10; 
-                } else {
-                    // seek at 40x after that
-                    delta = 50000 + (delta - 5000) * 40;
-                }
-                long newpos = mStartSeekPos + delta;
-                long duration = mService.duration();
-                if (newpos >= duration) {
-                    // move to next track
-                    mService.next();
-                    mStartSeekPos -= duration; // is OK to go negative
-                    newpos -= duration;
-                }
-                if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
-                    mService.seek(newpos);
-                    mLastSeekEventTime = delta;
-                }
-                if (repcnt >= 0) {
-                    mPosOverride = newpos;
-                } else {
-                    mPosOverride = -1;
-                }
-                refreshNow();
+                // seek at 40x after that
+                delta = 50000 + (delta - 5000) * 40;
             }
-        } catch (RemoteException ex) {
+            long newpos = mStartSeekPos + delta;
+            long duration = mService.duration();
+            if (newpos >= duration) {
+                // move to next track
+                mService.next(true);
+                mStartSeekPos -= duration; // is OK to go negative
+                newpos -= duration;
+            }
+            if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
+                mService.seek(newpos);
+                mLastSeekEventTime = delta;
+            }
+            if (repcnt >= 0) {
+                mPosOverride = newpos;
+            } else {
+                mPosOverride = -1;
+            }
+            refreshNow();
         }
     }
     
     private void doPauseResume() {
-        try {
-            if(mService != null) {
-                if (mService.isPlaying()) {
-                    mService.pause();
-                } else {
-                    mService.play();
-                }
-                refreshNow();
-                setPauseButtonImage();
+        if(mService != null) {
+            if (mService.isPlaying()) {
+                mService.pause();
+            } else {
+                mService.play();
             }
-        } catch (RemoteException ex) {
+            refreshNow();
+            setPauseButtonImage();
         }
     }
     
@@ -964,32 +916,25 @@ public class MediaPlaybackActivity extends Activity
         if (mService == null) {
             return;
         }
-        try {
-            mService.doShuffle();
-        } catch (RemoteException ex) {
-        }
+        mService.doShuffle();
     }
     
     private void cycleRepeat() {
         if (mService == null) {
             return;
         }
-        try {
-            int mode = mService.getRepeatMode();
-            if (mode == MediaPlaybackService.REPEAT_NONE) {
-                mService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
-                showToast(R.string.repeat_all_notif);
-            } else if (mode == MediaPlaybackService.REPEAT_ALL) {
-                mService.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
-                showToast(R.string.repeat_current_notif);
-            } else {
-                mService.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
-                showToast(R.string.repeat_off_notif);
-            }
-            setRepeatButtonImage();
-        } catch (RemoteException ex) {
+        int mode = mService.getRepeatMode();
+        if (mode == MediaPlaybackService.REPEAT_NONE) {
+            mService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+            showToast(R.string.repeat_all_notif);
+        } else if (mode == MediaPlaybackService.REPEAT_ALL) {
+            mService.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
+            showToast(R.string.repeat_current_notif);
+        } else {
+            mService.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
+            showToast(R.string.repeat_off_notif);
         }
-        
+        setRepeatButtonImage();
     }
     
     private void showToast(int resid) {
@@ -1018,7 +963,7 @@ public class MediaPlaybackActivity extends Activity
             }
             try {
                 mService.stop();
-                mService.openFile(filename);
+                mService.open(filename);
                 mService.play();
                 setIntent(new Intent());
             } catch (Exception ex) {
@@ -1032,23 +977,20 @@ public class MediaPlaybackActivity extends Activity
     }
 
     private ServiceConnection osc = new ServiceConnection() {
-            public void onServiceConnected(ComponentName classname, IBinder obj) {
-                mService = IMediaPlaybackService.Stub.asInterface(obj);
+            public void onServiceConnected(ComponentName classname, IBinder service) {
+                mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
                 startPlayback();
-                try {
-                    // Assume something is playing when the service says it is,
-                    // but also if the audio ID is valid but the service is paused.
-                    if (mService.getAudioId() >= 0 || mService.isPlaying() ||
-                            mService.getPath() != null) {
-                        // something is playing now, we're done
-                        mRepeatButton.setVisibility(View.VISIBLE);
-                        mShuffleButton.setVisibility(View.VISIBLE);
-                        mQueueButton.setVisibility(View.VISIBLE);
-                        setRepeatButtonImage();
-                        setPauseButtonImage();
-                        return;
-                    }
-                } catch (RemoteException ex) {
+                // Assume something is playing when the service says it is,
+                // but also if the audio ID is valid but the service is paused.
+                if (mService.getAudioId() >= 0 || mService.isPlaying() ||
+                        mService.getPath() != null) {
+                    // something is playing now, we're done
+                    mRepeatButton.setVisibility(View.VISIBLE);
+                    mShuffleButton.setVisibility(View.VISIBLE);
+                    mQueueButton.setVisibility(View.VISIBLE);
+                    setRepeatButtonImage();
+                    setPauseButtonImage();
+                    return;
                 }
                 // Service is dead or not playing anything. If we got here as part
                 // of a "play this file" Intent, exit. Otherwise go to the Music
@@ -1068,30 +1010,24 @@ public class MediaPlaybackActivity extends Activity
 
     private void setRepeatButtonImage() {
         if (mService == null) return;
-        try {
-            switch (mService.getRepeatMode()) {
-                case MediaPlaybackService.REPEAT_ALL:
-                    mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_all_btn);
-                    break;
-                case MediaPlaybackService.REPEAT_CURRENT:
-                    mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
-                    break;
-                default:
-                    mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
-                    break;
-            }
-        } catch (RemoteException ex) {
+        switch (mService.getRepeatMode()) {
+            case MediaPlaybackService.REPEAT_ALL:
+                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_all_btn);
+                break;
+            case MediaPlaybackService.REPEAT_CURRENT:
+                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
+                break;
+            default:
+                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
+                break;
         }
     }
     
     private void setPauseButtonImage() {
-        try {
-            if (mService != null && mService.isPlaying()) {
-                mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
-            } else {
-                mPauseButton.setImageResource(android.R.drawable.ic_media_play);
-            }
-        } catch (RemoteException ex) {
+        if (mService != null && mService.isPlaying()) {
+            mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            mPauseButton.setImageResource(android.R.drawable.ic_media_play);
         }
     }
     
@@ -1125,32 +1061,28 @@ public class MediaPlaybackActivity extends Activity
     private long refreshNow() {
         if(mService == null)
             return 500;
-        try {
-            long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
-            long remaining = 1000 - (pos % 1000);
-            if ((pos >= 0) && (mDuration > 0)) {
-                mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
-                
-                if (mService.isPlaying()) {
-                    mCurrentTime.setVisibility(View.VISIBLE);
-                } else {
-                    // blink the counter
-                    int vis = mCurrentTime.getVisibility();
-                    mCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE);
-                    remaining = 500;
-                }
+        long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
+        long remaining = 1000 - (pos % 1000);
+        if ((pos >= 0) && (mDuration > 0)) {
+            mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
 
-                mProgress.setProgress((int) (1000 * pos / mDuration));
+            if (mService.isPlaying()) {
+                mCurrentTime.setVisibility(View.VISIBLE);
             } else {
-                mCurrentTime.setText("--:--");
-                mProgress.setProgress(1000);
+                // blink the counter
+                int vis = mCurrentTime.getVisibility();
+                mCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE);
+                remaining = 500;
             }
-            // return the number of milliseconds until the next full second, so
-            // the counter can be updated at just the right time
-            return remaining;
-        } catch (RemoteException ex) {
+
+            mProgress.setProgress((int) (1000 * pos / mDuration));
+        } else {
+            mCurrentTime.setText("--:--");
+            mProgress.setProgress(1000);
         }
-        return 500;
+        // return the number of milliseconds until the next full second, so
+        // the counter can be updated at just the right time
+        return remaining;
     }
     
     private final Handler mHandler = new Handler() {
@@ -1206,64 +1138,60 @@ public class MediaPlaybackActivity extends Activity
         if (mService == null) {
             return;
         }
-        try {
-            String path = mService.getPath();
-            if (path == null) {
-                finish();
-                return;
-            }
-
-            long songid = mService.getAudioId(); 
-            if (songid < 0 && path.toLowerCase().startsWith("http://")) {
-                // Once we can get meta data from MediaPlayer,
-                // we can show that info again when streaming.
-                ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
-                ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
-                ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
-                mTrackName.setText(path);
-                ((View) mNextTrackName.getParent()).setVisibility(View.INVISIBLE);
-                ((View) mNextArtistName.getParent()).setVisibility(View.INVISIBLE);
-                ((View) mNextGenreName.getParent()).setVisibility(View.INVISIBLE);
-            } else {
-                ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mNextTrackName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mNextArtistName.getParent()).setVisibility(View.VISIBLE);
-                ((View) mNextGenreName.getParent()).setVisibility(View.VISIBLE);
-                String artistName = mService.getArtistName();
-                if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-                    artistName = getString(R.string.unknown_artist_name);
-                }
-                mArtistName.setText(artistName);
-                String albumName = mService.getAlbumName();
-                if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
-                    albumName = getString(R.string.unknown_album_name);
-                }
-                mAlbumName.setText(albumName);
-                String genreName = mService.getGenreName();
-                if (MediaStore.UNKNOWN_STRING.equals(genreName)) {
-                    genreName = getString(R.string.unknown_genre_name);
-                }
-                mGenreName.setText(genreName);
-                mTrackName.setText(mService.getTrackName());
-
-                String nextTrackName = mService.getNextTrackName();
-                if (nextTrackName != null) {
-                    mNextTrackName.setText(nextTrackName);
-                    mNextArtistName.setText(mService.getNextArtistName());
-                    mNextGenreName.setText(mService.getNextGenreName());
-                } else {
-                    mNextTrackName.setText("");
-                    mNextArtistName.setText("");
-                    mNextGenreName.setText("");
-                }
-            }
-            mDuration = mService.duration();
-            mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
-        } catch (RemoteException ex) {
+        String path = mService.getPath();
+        if (path == null) {
             finish();
+            return;
         }
+
+        long songid = mService.getAudioId();
+        if (songid < 0 && path.toLowerCase().startsWith("http://")) {
+            // Once we can get meta data from MediaPlayer,
+            // we can show that info again when streaming.
+            ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
+            ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
+            ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
+            mTrackName.setText(path);
+            ((View) mNextTrackName.getParent()).setVisibility(View.INVISIBLE);
+            ((View) mNextArtistName.getParent()).setVisibility(View.INVISIBLE);
+            ((View) mNextGenreName.getParent()).setVisibility(View.INVISIBLE);
+        } else {
+            ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
+            ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
+            ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
+            ((View) mNextTrackName.getParent()).setVisibility(View.VISIBLE);
+            ((View) mNextArtistName.getParent()).setVisibility(View.VISIBLE);
+            ((View) mNextGenreName.getParent()).setVisibility(View.VISIBLE);
+            String artistName = mService.getArtistName();
+            if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
+                artistName = getString(R.string.unknown_artist_name);
+            }
+            mArtistName.setText(artistName);
+            String albumName = mService.getAlbumName();
+            if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
+                albumName = getString(R.string.unknown_album_name);
+            }
+            mAlbumName.setText(albumName);
+            String genreName = mService.getGenreName();
+            if (MediaStore.UNKNOWN_STRING.equals(genreName)) {
+                genreName = getString(R.string.unknown_genre_name);
+            }
+            mGenreName.setText(genreName);
+            mTrackName.setText(mService.getTrackName());
+
+            String nextTrackName = mService.getNextTrackName();
+            if (nextTrackName != null) {
+                mNextTrackName.setText(nextTrackName);
+                mNextArtistName.setText(mService.getNextArtistName());
+                mNextGenreName.setText(mService.getNextGenreName());
+            } else {
+                mNextTrackName.setText("");
+                mNextArtistName.setText("");
+                mNextGenreName.setText("");
+            }
+        }
+        mDuration = mService.duration();
+        mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
     }
 }
 
