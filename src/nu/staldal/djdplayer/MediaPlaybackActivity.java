@@ -148,6 +148,12 @@ public class MediaPlaybackActivity extends Activity
         if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.trackname);
         if (vv != null) return (TextView) vv;
+        vv = v.findViewById(R.id.nexttrackname);
+        if (vv != null) return (TextView) vv;
+        vv = v.findViewById(R.id.nextartistname);
+        if (vv != null) return (TextView) vv;
+        vv = v.findViewById(R.id.nextgenrename);
+        if (vv != null) return (TextView) vv;
         return null;
     }
     
