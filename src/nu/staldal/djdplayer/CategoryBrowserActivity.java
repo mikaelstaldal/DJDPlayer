@@ -20,7 +20,6 @@ package nu.staldal.djdplayer;
 import android.app.SearchManager;
 import android.content.*;
 import android.database.Cursor;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -108,12 +107,10 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
         if (icicle != null) {
             mCurrentId = icicle.getLong(getSelectedCategoryId());
         }
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
@@ -122,8 +119,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
         f.addDataScheme("file");
         registerReceiver(mScanListener, f);
 
-        setContentView(R.layout.media_picker_activity);
-        MusicUtils.updateButtonBar(this, getTabId());
+        updateButtonBar(getTabId());
         ListView lv = getListView();
         lv.setOnCreateContextMenuListener(this);
         lv.setTextFilterEnabled(true);
@@ -210,7 +206,7 @@ public abstract class CategoryBrowserActivity extends BrowserActivity {
         }
 
         MusicUtils.hideDatabaseError(this);
-        MusicUtils.updateButtonBar(this, getTabId());
+        updateButtonBar(getTabId());
         setTitle();
     }
 

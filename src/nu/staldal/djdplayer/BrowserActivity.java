@@ -15,21 +15,29 @@
  */
 package nu.staldal.djdplayer;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.*;
+import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.TabWidget;
 import android.widget.TextView;
 
 public abstract class BrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
     private static final String TAG = "BrowserActivity";
+
+    private static int sActiveTabIndex = -1;
 
     protected MusicUtils.ServiceToken mToken;
 
@@ -37,6 +45,96 @@ public abstract class BrowserActivity extends ListActivity
     private TextView titleView;
     private TextView artistView;
     private ImageButton playButton;
+
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        if (getIntent().getBooleanExtra("withtabs", false)) {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        setContentView(R.layout.media_picker_activity);
+    }
+
+    protected boolean updateButtonBar(int highlight) {
+        final TabWidget ll = (TabWidget) findViewById(R.id.buttonbar);
+        boolean withtabs = false;
+        Intent intent = getIntent();
+        if (intent != null) {
+            withtabs = intent.getBooleanExtra("withtabs", false);
+        }
+
+        if (highlight == 0 || !withtabs) {
+            ll.setVisibility(View.GONE);
+            return withtabs;
+        } else if (withtabs) {
+            ll.setVisibility(View.VISIBLE);
+        }
+
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ARTISTS_TAB, true)) {
+            findViewById(R.id.artisttab).setVisibility(View.GONE);
+        }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, true)) {
+            findViewById(R.id.albumtab).setVisibility(View.GONE);
+        }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
+            findViewById(R.id.genretab).setVisibility(View.GONE);
+        }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
+            findViewById(R.id.songtab).setVisibility(View.GONE);
+        }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {
+            findViewById(R.id.playlisttab).setVisibility(View.GONE);
+        }
+
+        for (int i = ll.getChildCount() - 1; i >= 0; i--) {
+            View v = ll.getChildAt(i);
+            boolean isActive = (v.getId() == highlight);
+            if (isActive) {
+                ll.setCurrentTab(i);
+                sActiveTabIndex = i;
+            }
+            v.setTag(i);
+            v.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        for (int i = 0; i < ll.getTabCount(); i++) {
+                            if (ll.getChildTabViewAt(i) == v) {
+                                ll.setCurrentTab(i);
+                                processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
+                                break;
+                            }
+                        }
+                    }
+                }});
+
+            v.setOnClickListener(new View.OnClickListener() {
+
+                public void onClick(View v) {
+                    processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
+                }});
+        }
+        return withtabs;
+    }
+
+    protected void processTabClick(Activity a, View v, int current) {
+        int id = v.getId();
+        if (id == current) {
+            return;
+        }
+
+        final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
+
+        MusicUtils.activateTab(a, id);
+        if (id != R.id.nowplayingtab) {
+            ll.setCurrentTab((Integer) v.getTag());
+            MusicUtils.setIntPref(a, "activetab", id);
+        }
+    }
 
     public void onServiceConnected(ComponentName name, IBinder service) {
         nowPlayingView = findViewById(R.id.nowplaying);
@@ -108,6 +206,7 @@ public abstract class BrowserActivity extends ListActivity
         super.onCreateOptionsMenu(menu);
 
         menu.add(0, RESCAN, 0, R.string.rescan).setIcon(R.drawable.ic_menu_rescan);
+        menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
 
         return true;
     }
@@ -118,6 +217,9 @@ public abstract class BrowserActivity extends ListActivity
             case RESCAN:
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
                               Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                return true;
+            case SETTINGS:
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -155,5 +257,4 @@ public abstract class BrowserActivity extends ListActivity
             }
         }
     }
-
 }

@@ -201,8 +201,10 @@
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="nu.staldal.djdplayer.ScanningProgress"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
-        <service android:name="nu.staldal.djdplayer.MediaPlaybackService"
-            android:exported="false" />
+
+        <activity android:name="nu.staldal.djdplayer.SettingsActivity" android:exported="false" />
+
+        <service android:name="nu.staldal.djdplayer.MediaPlaybackService" android:exported="false" />
 
         <receiver android:name="nu.staldal.djdplayer.MediaAppWidgetProvider">
             <intent-filter>

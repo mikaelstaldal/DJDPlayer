@@ -21,9 +21,11 @@ import android.content.*;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.media.AudioManager;
 import android.net.Uri;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
@@ -88,18 +90,10 @@ public class TrackBrowserActivity extends BrowserActivity {
     private static int mLastListPosFine = -1;
     private boolean mUseLastListPos = false;
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.getBooleanExtra("withtabs", false)) {
-                requestWindowFeature(Window.FEATURE_NO_TITLE);
-            }
-        }
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         if (icicle != null) {
             mSelectedId = icicle.getLong("selectedtrack");
             mAlbumId = icicle.getString("album");
@@ -108,17 +102,16 @@ public class TrackBrowserActivity extends BrowserActivity {
             mGenre = icicle.getString("genre");
             mEditMode = icicle.getBoolean("editmode", false);
         } else {
-            mAlbumId = intent.getStringExtra("album");
+            mAlbumId = getIntent().getStringExtra("album");
             // If we have an album, show everything on the album, not just stuff
             // by a particular artist.
-            mArtistId = intent.getStringExtra("artist");
-            mPlaylist = intent.getStringExtra("playlist");
-            mGenre = intent.getStringExtra("genre");
-            mEditMode = intent.getAction().equals(Intent.ACTION_EDIT);
+            mArtistId = getIntent().getStringExtra("artist");
+            mPlaylist = getIntent().getStringExtra("playlist");
+            mGenre = getIntent().getStringExtra("genre");
+            mEditMode = getIntent().getAction().equals(Intent.ACTION_EDIT);
         }
 
-        setContentView(R.layout.media_picker_activity);
-        mUseLastListPos = MusicUtils.updateButtonBar(this, R.id.songtab);
+        mUseLastListPos = updateButtonBar(R.id.songtab);
         mTrackList = getListView();
         mTrackList.setOnCreateContextMenuListener(this);
         mTrackList.setCacheColorHint(0);
@@ -318,7 +311,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
 
         MusicUtils.hideDatabaseError(this);
-        mUseLastListPos = MusicUtils.updateButtonBar(this, R.id.songtab);
+        mUseLastListPos = updateButtonBar(R.id.songtab);
         setTitle();
 
         // Restore previous position

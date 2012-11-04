@@ -21,7 +21,6 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.database.sqlite.SQLiteException;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,20 +52,13 @@ public class PlaylistBrowserActivity extends BrowserActivity {
 
     private boolean mCreateShortcut;
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        final Intent intent = getIntent();
-        final String action = intent.getAction();
-        if (Intent.ACTION_CREATE_SHORTCUT.equals(action)) {
+        if (Intent.ACTION_CREATE_SHORTCUT.equals(getIntent().getAction())) {
             mCreateShortcut = true;
         }
-
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
@@ -75,8 +67,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
         f.addDataScheme("file");
         registerReceiver(mScanListener, f);
 
-        setContentView(R.layout.media_picker_activity);
-        MusicUtils.updateButtonBar(this, R.id.playlisttab);
+        updateButtonBar(R.id.playlisttab);
         ListView lv = getListView();
         lv.setOnCreateContextMenuListener(this);
         lv.setTextFilterEnabled(true);
@@ -220,7 +211,7 @@ public class PlaylistBrowserActivity extends BrowserActivity {
             mLastListPosCourse = -1;
         }
         MusicUtils.hideDatabaseError(this);
-        MusicUtils.updateButtonBar(this, R.id.playlisttab);
+        updateButtonBar(R.id.playlisttab);
         setTitle();
     }
 

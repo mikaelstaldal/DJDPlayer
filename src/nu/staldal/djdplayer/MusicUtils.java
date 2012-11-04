@@ -31,13 +31,15 @@ import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
-import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Random;
 
 public class MusicUtils {
     private static final String TAG = "MusicUtils";
@@ -59,7 +61,8 @@ public class MusicUtils {
         public final static int PLAY_NOW = 14;
         public final static int PLAY_NEXT = 15;
         public final static int RESCAN = 16;
-        public final static int CHILD_MENU_BASE = 17; // this should be the last item
+        public final static int SETTINGS = 17;
+        public final static int CHILD_MENU_BASE = 18; // this should be the last item
     }
 
     /**
@@ -741,69 +744,6 @@ public class MusicUtils {
         }
     }
 
-    static int sActiveTabIndex = -1;
-    
-    static boolean updateButtonBar(Activity a, int highlight) {
-        final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
-        boolean withtabs = false;
-        Intent intent = a.getIntent();
-        if (intent != null) {
-            withtabs = intent.getBooleanExtra("withtabs", false);
-        }
-        
-        if (highlight == 0 || !withtabs) {
-            ll.setVisibility(View.GONE);
-            return withtabs;
-        } else if (withtabs) {
-            ll.setVisibility(View.VISIBLE);
-        }
-        for (int i = ll.getChildCount() - 1; i >= 0; i--) {
-            
-            View v = ll.getChildAt(i);
-            boolean isActive = (v.getId() == highlight);
-            if (isActive) {
-                ll.setCurrentTab(i);
-                sActiveTabIndex = i;
-            }
-            v.setTag(i);
-            v.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        for (int i = 0; i < ll.getTabCount(); i++) {
-                            if (ll.getChildTabViewAt(i) == v) {
-                                ll.setCurrentTab(i);
-                                processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
-                                break;
-                            }
-                        }
-                    }
-                }});
-            
-            v.setOnClickListener(new View.OnClickListener() {
-
-                public void onClick(View v) {
-                    processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
-                }});
-        }
-        return withtabs;
-    }
-
-    static void processTabClick(Activity a, View v, int current) {
-        int id = v.getId();
-        if (id == current) {
-            return;
-        }
-
-        final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
-
-        activateTab(a, id);
-        if (id != R.id.nowplayingtab) {
-            ll.setCurrentTab((Integer) v.getTag());
-            setIntPref(a, "activetab", id);
-        }
-    }
-    
     static void activateTab(Activity a, int id) {
         Intent intent = new Intent(Intent.ACTION_PICK);
         switch (id) {

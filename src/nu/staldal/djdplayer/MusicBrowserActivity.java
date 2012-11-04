@@ -18,11 +18,15 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
         int activeTab = MusicUtils.getIntPref(this, "activetab", R.id.artisttab);
         if (activeTab != R.id.artisttab
                 && activeTab != R.id.albumtab
