@@ -23,16 +23,8 @@ import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LevelListDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -77,7 +69,8 @@ public class TouchInterceptor extends ListView {
 
     public TouchInterceptor(Context context, AttributeSet attrs) {
         super(context, attrs);
-        SharedPreferences pref = context.getSharedPreferences("Music", 3);
+        SharedPreferences pref =
+                context.getSharedPreferences("Music", Context.MODE_WORLD_READABLE | Context.MODE_WORLD_WRITEABLE);
         mRemoveMode = pref.getInt("deletemode", -1);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         Resources res = getResources();
