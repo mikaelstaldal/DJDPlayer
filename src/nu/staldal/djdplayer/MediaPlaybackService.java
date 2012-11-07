@@ -292,7 +292,7 @@ public class MediaPlaybackService extends Service {
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
         
-        mPreferences = getSharedPreferences("Music", MODE_WORLD_READABLE | MODE_WORLD_WRITEABLE);
+        mPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         mCardId = MusicUtils.getCardId(this);
         
         registerExternalStorageListener();
