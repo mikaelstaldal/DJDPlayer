@@ -22,7 +22,6 @@ import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -266,13 +265,11 @@ public class TouchInterceptor extends ListView {
                     stopDragging();
                     if (ev.getX() > r.right * 3 / 4) {
                         if (mRemoveListener != null) {
-                            Log.i("TouchInterceptor", "remove "+ mSrcDragPos);
                             mRemoveListener.remove(mSrcDragPos);
                         }
                         unExpandViews(true);
                     } else {
                         if (mDropListener != null && mDragPos >= 0 && mDragPos < getCount()) {
-                            Log.i("TouchInterceptor", "drop "+ mSrcDragPos + "->" + mDragPos);
                             mDropListener.drop(mSrcDragPos, mDragPos);
                         }
                         unExpandViews(false);
