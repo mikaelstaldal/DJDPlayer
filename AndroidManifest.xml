@@ -204,6 +204,8 @@
 
         <activity android:name="nu.staldal.djdplayer.SettingsActivity" android:exported="false" />
 
+        <activity android:name="nu.staldal.djdplayer.RescanActivity" android:exported="false" />
+
         <service android:name="nu.staldal.djdplayer.MediaPlaybackService" android:exported="false" />
 
         <receiver android:name="nu.staldal.djdplayer.MediaAppWidgetProvider">

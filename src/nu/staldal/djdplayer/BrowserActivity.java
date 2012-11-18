@@ -19,9 +19,7 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.content.*;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -205,7 +203,6 @@ public abstract class BrowserActivity extends ListActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, RESCAN, 0, R.string.rescan).setIcon(R.drawable.ic_menu_rescan);
         menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
 
         return true;
@@ -214,10 +211,6 @@ public abstract class BrowserActivity extends ListActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case RESCAN:
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                              Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-                return true;
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;

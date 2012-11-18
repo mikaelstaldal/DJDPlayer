@@ -60,9 +60,8 @@ public class MusicUtils {
         public final static int QUEUE = 13;
         public final static int PLAY_NOW = 14;
         public final static int PLAY_NEXT = 15;
-        public final static int RESCAN = 16;
-        public final static int SETTINGS = 17;
-        public final static int CHILD_MENU_BASE = 18; // this should be the last item
+        public final static int SETTINGS = 16;
+        public final static int CHILD_MENU_BASE = 17; // this should be the last item
     }
 
     /**

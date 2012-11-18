@@ -22,4 +22,11 @@
             android:title="@string/show_playlists_tab"
             android:defaultValue="true" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/rescan">
+        <Preference android:title="@string/rescan" >
+            <intent
+                android:targetPackage="nu.staldal.djdplayer"
+                android:targetClass="nu.staldal.djdplayer.RescanActivity" />
+        </Preference>
+    </PreferenceCategory>
 </PreferenceScreen>
