@@ -39,6 +39,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 public class MediaPlaybackActivity extends Activity
         implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener {
     private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
+    private static final int TRACK_INFO = CHILD_MENU_BASE+1;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -506,6 +507,7 @@ public class MediaPlaybackActivity extends Activity
         if (MusicUtils.getCurrentAudioId() >= 0) {
             menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
             menu.add(0, GOTO_START, 0, R.string.goto_start).setIcon(R.drawable.ic_menu_music_library);
+            menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             // these next two are in a separate group, so they can be shown/hidden as needed
@@ -556,6 +558,14 @@ public class MediaPlaybackActivity extends Activity
                 startActivity(intent);
                 finish();
                 break;
+
+            case TRACK_INFO:
+                intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()),
+                    "vnd.android.cursor.item/djd.track");
+                startActivity(intent);
+                return true;
 
             case USE_AS_RINGTONE: {
                 // Set the system setting to make this the current ringtone
@@ -1075,7 +1085,7 @@ public class MediaPlaybackActivity extends Activity
         long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
         long remaining = 1000 - (pos % 1000);
         if ((pos >= 0) && (mDuration > 0)) {
-            mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
+            mCurrentTime.setText(MusicUtils.formatDuration(this, pos));
 
             if (mService.isPlaying()) {
                 mCurrentTime.setVisibility(View.VISIBLE);
@@ -1202,7 +1212,7 @@ public class MediaPlaybackActivity extends Activity
             }
         }
         mDuration = mService.duration();
-        mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
+        mTotalTime.setText(MusicUtils.formatDuration(this, mDuration));
     }
 }
 

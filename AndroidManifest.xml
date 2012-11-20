@@ -202,6 +202,14 @@
         <activity android:name="nu.staldal.djdplayer.ScanningProgress"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
 
+        <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/djd.track"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="nu.staldal.djdplayer.SettingsActivity" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.RescanActivity" android:exported="false" />

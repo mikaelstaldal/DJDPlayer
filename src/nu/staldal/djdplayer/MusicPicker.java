@@ -233,11 +233,11 @@ public class MusicPicker extends ListActivity
             cursor.copyStringToBuffer(mTitleIdx, vh.buffer1);
             vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied);
             
-            int secs = cursor.getInt(mDurationIdx) / 1000;
+            int secs = cursor.getInt(mDurationIdx);
             if (secs == 0) {
                 vh.duration.setText("");
             } else {
-                vh.duration.setText(MusicUtils.makeTimeString(context, secs));
+                vh.duration.setText(MusicUtils.formatDuration(context, secs));
             }
             
             final StringBuilder builder = mBuilder;

@@ -918,8 +918,13 @@ public class MediaPlaybackService extends Service {
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     mCursorCols, "_id=" + id , null, null);
             if (mCursor != null) {
-                mCursor.moveToFirst();
-                fetchGenre();
+                if (mCursor.moveToFirst()) {
+                    IdAndName idAndName = MusicUtils.fetchGenre(this, mCursor.getLong(IDCOLIDX));
+                    if (idAndName != null) {
+                        mGenreId = idAndName.id;
+                        mGenreName = idAndName.name;
+                    }
+                }
                 fetchNextSong();
                 open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
                 // go to bookmark if needed
@@ -951,19 +956,10 @@ public class MediaPlaybackService extends Service {
                 c.close();
             }
 
-            c = getContentResolver().query(
-                    Uri.parse("content://media/external/audio/media/" + String.valueOf(nextSongId) + "/genres"),
-                    new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
-                    null,
-                    null,
-                    null);
-            if (c != null) {
-                if (c.getCount() > 0) {
-                    c.moveToFirst();
-                    mNextGenreId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
-                    mNextGenreName = ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)));
-                }
-                c.close();
+            IdAndName idAndName = MusicUtils.fetchGenre(this, nextSongId);
+            if (idAndName != null) {
+                mNextGenreId = idAndName.id;
+                mNextGenreName = idAndName.name;
             }
         }
     }
@@ -1006,8 +1002,13 @@ public class MediaPlaybackService extends Service {
                             mGenreName = null;
                             clearNextSong();
                         } else {
-                            mCursor.moveToNext();
-                            fetchGenre();
+                            if (mCursor.moveToNext()) {
+                                IdAndName idAndName = MusicUtils.fetchGenre(this, mCursor.getLong(IDCOLIDX));
+                                if (idAndName != null) {
+                                    mGenreId = idAndName.id;
+                                    mGenreName = idAndName.name;
+                                }
+                            }
                             ensurePlayListCapacity(1);
                             mPlayListLen = 1;
                             mPlayList[0] = mCursor.getLong(IDCOLIDX);
@@ -1036,26 +1037,6 @@ public class MediaPlaybackService extends Service {
             } else {
                 mOpenFailedCounter = 0;
             }
-        }
-    }
-
-    private void fetchGenre() {
-        if (mCursor.getCount() == 0) {
-            return;
-        }
-        Cursor c = getContentResolver().query(
-                Uri.parse("content://media/external/audio/media/" + String.valueOf(mCursor.getLong(IDCOLIDX)) + "/genres"),
-                new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
-                null,
-                null,
-                null);
-        if (c != null) {
-            if (c.getCount() > 0) {
-                c.moveToFirst();
-                mGenreId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
-                mGenreName = ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)));
-            }
-            c.close();
         }
     }
 

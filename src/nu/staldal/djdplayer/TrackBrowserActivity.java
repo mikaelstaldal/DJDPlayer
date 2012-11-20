@@ -46,7 +46,8 @@ public class TrackBrowserActivity extends BrowserActivity {
     private static final int NEW_PLAYLIST_SINGLE = CHILD_MENU_BASE + 3;
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
     private static final int REMOVE = CHILD_MENU_BASE + 5;
-    private static final int SEARCH = CHILD_MENU_BASE + 6;
+    private static final int TRACK_INFO = CHILD_MENU_BASE + 6;
+    private static final int SEARCH = CHILD_MENU_BASE + 7;
 
     private static final String[] CURSOR_COLS = new String[] {
         MediaStore.Audio.Media._ID,
@@ -587,6 +588,9 @@ public class TrackBrowserActivity extends BrowserActivity {
         } catch (IllegalArgumentException ex) {
             mSelectedId = mi.id;
         }
+
+        menu.add(0, TRACK_INFO, 0, R.string.info);
+
         // only add the 'search' menu if the selected item is music
         if (isMusic(mTrackCursor)) {
             menu.add(0, SEARCH, 0, R.string.search_title);
@@ -668,8 +672,14 @@ public class TrackBrowserActivity extends BrowserActivity {
                 removePlaylistItem(mSelectedPosition);
                 return true;
 
-            // TODO [mikes] context option to show info about the song (title, artist, genre, album, length, filename)
-                
+            case TRACK_INFO:
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
+                    "vnd.android.cursor.item/djd.track");
+                startActivity(intent);
+                return true;
+
             case SEARCH:
                 doSearch();
                 return true;
@@ -1388,11 +1398,11 @@ public class TrackBrowserActivity extends BrowserActivity {
             cursor.copyStringToBuffer(mTitleIdx, vh.buffer1);
             vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied);
             
-            int secs = cursor.getInt(mDurationIdx) / 1000;
+            int secs = cursor.getInt(mDurationIdx);
             if (secs == 0) {
                 vh.duration.setText("");
             } else {
-                vh.duration.setText(MusicUtils.makeTimeString(context, secs));
+                vh.duration.setText(MusicUtils.formatDuration(context, secs));
             }
             
             final StringBuilder builder = mBuilder;

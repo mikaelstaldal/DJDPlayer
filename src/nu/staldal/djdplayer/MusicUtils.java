@@ -624,14 +624,15 @@ public class MusicUtils {
     /*  Try to use String.format() as little as possible, because it creates a
      *  new Formatter every time you call it, which is very inefficient.
      *  Reusing an existing Formatter more than tripled the speed of
-     *  makeTimeString().
+     *  formatDuration().
      *  This Formatter/StringBuilder are also used by makeAlbumSongsLabel()
      */
     private static StringBuilder sFormatBuilder = new StringBuilder();
     private static Formatter sFormatter = new Formatter(sFormatBuilder, Locale.getDefault());
     private static final Object[] sTimeArgs = new Object[5];
 
-    public static String makeTimeString(Context context, long secs) {
+    public static String formatDuration(Context context, long millis) {
+        long secs = millis / 1000;
         String durationformat = context.getString(
                 secs < 3600 ? R.string.durationformatshort : R.string.durationformatlong);
 
@@ -785,6 +786,30 @@ public class MusicUtils {
             c.close();
         }
         return id;
+    }
+
+    static IdAndName fetchGenre(Context context, long songId) {
+        Cursor c = context.getContentResolver().query(
+                Uri.parse("content://media/external/audio/media/" + String.valueOf(songId) + "/genres"),
+                new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
+                null,
+                null,
+                null);
+        if (c != null) {
+            try {
+                if (c.moveToFirst()) {
+                    return new IdAndName(
+                            c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID)),
+                            ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME))));
+                } else {
+                    return null;
+                }
+            } finally {
+                c.close();
+            }
+        } else {
+            return null;
+        }
     }
 
     static class LogEntry {

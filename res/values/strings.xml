@@ -130,6 +130,8 @@
     <string name="playlists_title">Playlists</string>
     <!-- Category label on Library screen -->
     <string name="browse_menu">Artists</string>
+    <!-- Menu item -->
+    <string name="info">Info</string>
     <!-- Library screen, menu item -->
     <string name="search_title">Search</string>
     <!-- Title of screen when there are no songs, or if the SD card is busy -->
@@ -355,5 +357,18 @@
     <string name="show_genres_tab">Show genres tab</string>
     <string name="show_songs_tab">Show songs tab</string>
     <string name="show_playlists_tab">Show playlists tab</string>
+
+    <!-- Info -->
+    <string name="artist">Artist</string>
+    <string name="composer">Composer</string>
+    <string name="genre">Genre</string>
+    <string name="album">Album</string>
+    <string name="year">Year</string>
+    <string name="duration">Duration</string>
+    <string name="folder">Folder</string>
+    <string name="filename">Filename</string>
+    <string name="filesize">Size</string>
+    <string name="mimetype">Mime Type</string>
+    <string name="id">ID</string>
 
 </resources>
