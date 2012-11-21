@@ -39,8 +39,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/line1"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#ffe0d090"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorTertiary"
         android:paddingLeft="4dip"
         android:paddingRight="5dip"
         android:singleLine="true" />
