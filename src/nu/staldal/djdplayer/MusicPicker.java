@@ -21,7 +21,6 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -32,41 +31,27 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.SectionIndexer;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.io.IOException;
-import java.util.Formatter;
-import java.util.Locale;
 
 /**
  * Activity allowing the user to select a music track on the device, and
  * return it to its caller.  The music picker user interface is fairly
  * extensive, providing information about each track like the music
- * application (title, author, album, duration), as well as the ability to
+ * application (title, author, duration), as well as the ability to
  * previous tracks and sort them in different orders.
  * 
  * <p>This class also illustrates how you can load data from a content
  * provider asynchronously, providing a good UI while doing so, perform
- * indexing of the content for use inside of a {@link FastScrollView}, and
+ * indexing of the content for use inside of a FastScrollView, and
  * perform filtering of the data as the user presses keys.
  */
 public class MusicPicker extends ListActivity
         implements View.OnClickListener, MediaPlayer.OnCompletionListener,
         MusicUtils.Defs {
-    static final boolean DBG = false;
-    static final String TAG = "MusicPicker";
-    
     /** Holds the previous state of the list, to restore after the async
      * query has completed. */
     static final String LIST_STATE_KEY = "liststate";
@@ -80,10 +65,8 @@ public class MusicPicker extends ListActivity
     
     /** Menu item to sort the music list by track title. */
     static final int TRACK_MENU = Menu.FIRST;
-    /** Menu item to sort the music list by album title. */
-    static final int ALBUM_MENU = Menu.FIRST+1;
     /** Menu item to sort the music list by artist name. */
-    static final int ARTIST_MENU = Menu.FIRST+2;
+    static final int ARTIST_MENU = Menu.FIRST+1;
     
     /** These are the columns in the music cursor that we are interested in. */
     static final String[] CURSOR_COLS = new String[] {
@@ -91,20 +74,12 @@ public class MusicPicker extends ListActivity
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.TITLE_KEY,
             MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ARTIST_ID,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.TRACK
     };
     
-    /** Formatting optimization to avoid creating many temporary objects. */
-    static StringBuilder sFormatBuilder = new StringBuilder();
-    /** Formatting optimization to avoid creating many temporary objects. */
-    static Formatter sFormatter = new Formatter(sFormatBuilder, Locale.getDefault());
-    /** Formatting optimization to avoid creating many temporary objects. */
-    static final Object[] sTimeArgs = new Object[5];
-
     /** Uri to the directory of all music being displayed. */
     Uri mBaseUri;
     
@@ -160,14 +135,11 @@ public class MusicPicker extends ListActivity
             implements SectionIndexer {
         final ListView mListView;
         
-        private final StringBuilder mBuilder = new StringBuilder();
         private final String mUnknownArtist;
-        private final String mUnknownAlbum;
 
         private int mIdIdx;
         private int mTitleIdx;
         private int mArtistIdx;
-        private int mAlbumIdx;
         private int mDurationIdx;
 
         private boolean mLoading = true;
@@ -180,8 +152,6 @@ public class MusicPicker extends ListActivity
             TextView duration;
             RadioButton radio;
             ImageView play_indicator;
-            CharArrayBuffer buffer1;
-            char [] buffer2;
         }
         
         TrackListAdapter(Context context, ListView listView, int layout,
@@ -189,7 +159,6 @@ public class MusicPicker extends ListActivity
             super(context, layout, null, from, to);
             mListView = listView;
             mUnknownArtist = context.getString(R.string.unknown_artist_name);
-            mUnknownAlbum = context.getString(R.string.unknown_album_name);
         }
 
         /**
@@ -220,8 +189,6 @@ public class MusicPicker extends ListActivity
             vh.duration = (TextView) v.findViewById(R.id.duration);
             vh.radio = (RadioButton) v.findViewById(R.id.radio);
             vh.play_indicator = (ImageView) v.findViewById(R.id.play_indicator);
-            vh.buffer1 = new CharArrayBuffer(100);
-            vh.buffer2 = new char[200];
             v.setTag(vh);
             return v;
         }
@@ -230,8 +197,7 @@ public class MusicPicker extends ListActivity
         public void bindView(View view, Context context, Cursor cursor) {
             ViewHolder vh = (ViewHolder) view.getTag();
             
-            cursor.copyStringToBuffer(mTitleIdx, vh.buffer1);
-            vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied);
+            vh.line1.setText(cursor.getString(mTitleIdx));
             
             int secs = cursor.getInt(mDurationIdx);
             if (secs == 0) {
@@ -240,28 +206,11 @@ public class MusicPicker extends ListActivity
                 vh.duration.setText(MusicUtils.formatDuration(context, secs));
             }
             
-            final StringBuilder builder = mBuilder;
-            builder.delete(0, builder.length());
-
-            String name = cursor.getString(mAlbumIdx);
+            String name = cursor.getString(mArtistIdx);
             if (name == null || name.equals("<unknown>")) {
-                builder.append(mUnknownAlbum);
-            } else {
-                builder.append(name);
+                name = mUnknownArtist;
             }
-            builder.append('\n');
-            name = cursor.getString(mArtistIdx);
-            if (name == null || name.equals("<unknown>")) {
-                builder.append(mUnknownArtist);
-            } else {
-                builder.append(name);
-            }
-            int len = builder.length();
-            if (vh.buffer2.length < len) {
-                vh.buffer2 = new char[len];
-            }
-            builder.getChars(0, len, vh.buffer2, 0);
-            vh.line2.setText(vh.buffer2, 0, len);
+            vh.line2.setText(name);
 
             // Update the checkbox of the item, based on which the user last
             // selected.  Note that doing it this way means we must have the
@@ -269,9 +218,7 @@ public class MusicPicker extends ListActivity
             // changes.
             final long id = cursor.getLong(mIdIdx);
             vh.radio.setChecked(id == mSelectedId);
-            if (DBG) Log.v(TAG, "Binding id=" + id + " sel=" + mSelectedId
-                    + " playing=" + mPlayingId + " cursor=" + cursor);
-            
+
             // Likewise, display the "now playing" icon if this item is
             // currently being previewed for the user.
             ImageView iv = vh.play_indicator;
@@ -291,9 +238,6 @@ public class MusicPicker extends ListActivity
         @Override
         public void changeCursor(Cursor cursor) {
             super.changeCursor(cursor);
-            if (DBG) Log.v(TAG, "Setting cursor to: " + cursor
-                    + " from: " + MusicPicker.this.mCursor);
-            
             MusicPicker.this.mCursor = cursor;
             
             if (cursor != null) {
@@ -301,7 +245,6 @@ public class MusicPicker extends ListActivity
                 mIdIdx = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
                 mTitleIdx = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
                 mArtistIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                mAlbumIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
                 mDurationIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
 
                 // If the sort mode has changed, or we haven't yet created an
@@ -313,9 +256,6 @@ public class MusicPicker extends ListActivity
                     switch (mIndexerSortMode) {
                         case ARTIST_MENU:
                             idx = mArtistIdx;
-                            break;
-                        case ALBUM_MENU:
-                            idx = mAlbumIdx;
                             break;
                     }
                     mIndexer = new MusicAlphabetIndexer(cursor, idx,
@@ -341,7 +281,6 @@ public class MusicPicker extends ListActivity
          */
         @Override
         public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-            if (DBG) Log.v(TAG, "Getting new cursor...");
             return doQuery(true, constraint.toString());
         }
         
@@ -471,9 +410,6 @@ public class MusicPicker extends ListActivity
             }
             builder.encodedPath(path);
             Uri baseSelectedUri = builder.build();
-            if (DBG) Log.v(TAG, "Selected Uri: " + mSelectedUri);
-            if (DBG) Log.v(TAG, "Selected base Uri: " + baseSelectedUri);
-            if (DBG) Log.v(TAG, "Base Uri: " + mBaseUri);
             if (baseSelectedUri.equals(mBaseUri)) {
                 // If the base Uri of the selected Uri is the same as our
                 // content's base Uri, then use the selection!
@@ -499,7 +435,6 @@ public class MusicPicker extends ListActivity
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(Menu.NONE, TRACK_MENU, Menu.NONE, R.string.sort_by_track);
-        menu.add(Menu.NONE, ALBUM_MENU, Menu.NONE, R.string.sort_by_album);
         menu.add(Menu.NONE, ARTIST_MENU, Menu.NONE, R.string.sort_by_artist);
         return true;
     }
@@ -541,17 +476,9 @@ public class MusicPicker extends ListActivity
                     mSortOrder = MediaStore.Audio.Media.TITLE_KEY;
                     doQuery(false, null);
                     return true;
-                case ALBUM_MENU:
-                    mSortMode = sortMode;
-                    mSortOrder = MediaStore.Audio.Media.ALBUM_KEY + " ASC, "
-                            + MediaStore.Audio.Media.TRACK + " ASC, "
-                            + MediaStore.Audio.Media.TITLE_KEY + " ASC";
-                    doQuery(false, null);
-                    return true;
                 case ARTIST_MENU:
                     mSortMode = sortMode;
                     mSortOrder = MediaStore.Audio.Media.ARTIST_KEY + " ASC, "
-                            + MediaStore.Audio.Media.ALBUM_KEY + " ASC, "
                             + MediaStore.Audio.Media.TRACK + " ASC, "
                             + MediaStore.Audio.Media.TITLE_KEY + " ASC";
                     doQuery(false, null);
@@ -621,11 +548,6 @@ public class MusicPicker extends ListActivity
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         mCursor.moveToPosition(position);
-        if (DBG) Log.v(TAG, "Click on " + position + " (id=" + id
-                + ", cursid="
-                + mCursor.getLong(mCursor.getColumnIndex(MediaStore.Audio.Media._ID))
-                + ") in cursor " + mCursor
-                + " adapter=" + l.getAdapter());
         setSelected(mCursor);
     }
     
