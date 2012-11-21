@@ -163,7 +163,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Link up various button actions using {@link PendingIntents}.
+     * Link up various button actions using pending intents.
      * 
      * @param playerActive True if player is active in background, which means
      *            widget click will launch {@link MediaPlaybackActivity},
