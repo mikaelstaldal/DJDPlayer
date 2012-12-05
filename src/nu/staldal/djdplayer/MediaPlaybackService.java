@@ -36,6 +36,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1543,6 +1544,15 @@ public class MediaPlaybackService extends Service {
                 return -1;
             }
             return mGenreId;
+        }
+    }
+
+    public File getFolder() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            return new File(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))).getParentFile();
         }
     }
 

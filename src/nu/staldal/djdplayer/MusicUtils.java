@@ -176,6 +176,13 @@ public class MusicUtils {
         return -1;
     }
 
+    public static File getCurrentFolder() {
+        if (sService != null) {
+            return sService.getFolder();
+        }
+        return null;
+    }
+
     public static long getCurrentArtistId() {
         if (MusicUtils.sService != null) {
             return sService.getArtistId();
@@ -755,6 +762,9 @@ public class MusicUtils {
                 break;
             case R.id.genretab:
                 intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Genres.CONTENT_TYPE);
+                break;
+            case R.id.foldertab:
+                intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.folder");
                 break;
             case R.id.songtab:
                 intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");

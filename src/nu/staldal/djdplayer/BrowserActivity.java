@@ -57,7 +57,7 @@ public abstract class BrowserActivity extends ListActivity
         setContentView(R.layout.media_picker_activity);
     }
 
-    protected boolean updateButtonBar(int highlight) {
+    protected boolean updateButtonBar(int tabId) {
         final TabWidget ll = (TabWidget) findViewById(R.id.buttonbar);
         boolean withtabs = false;
         Intent intent = getIntent();
@@ -65,10 +65,10 @@ public abstract class BrowserActivity extends ListActivity
             withtabs = intent.getBooleanExtra("withtabs", false);
         }
 
-        if (highlight == 0 || !withtabs) {
+        if (!withtabs) {
             ll.setVisibility(View.GONE);
             return withtabs;
-        } else if (withtabs) {
+        } else {
             ll.setVisibility(View.VISIBLE);
         }
 
@@ -81,6 +81,9 @@ public abstract class BrowserActivity extends ListActivity
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
             findViewById(R.id.genretab).setVisibility(View.GONE);
         }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_FOLDERS_TAB, true)) {
+            findViewById(R.id.foldertab).setVisibility(View.GONE);
+        }
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
             findViewById(R.id.songtab).setVisibility(View.GONE);
         }
@@ -90,7 +93,7 @@ public abstract class BrowserActivity extends ListActivity
 
         for (int i = ll.getChildCount() - 1; i >= 0; i--) {
             View v = ll.getChildAt(i);
-            boolean isActive = (v.getId() == highlight);
+            boolean isActive = (v.getId() == tabId);
             if (isActive) {
                 ll.setCurrentTab(i);
                 sActiveTabIndex = i;

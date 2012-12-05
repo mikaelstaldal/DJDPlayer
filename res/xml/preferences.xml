@@ -14,6 +14,10 @@
             android:title="@string/show_genres_tab"
             android:defaultValue="true" />
         <CheckBoxPreference
+            android:key="show_folders_tab"
+            android:title="@string/show_folders_tab"
+            android:defaultValue="true" />
+        <CheckBoxPreference
             android:key="show_songs_tab"
             android:title="@string/show_songs_tab"
             android:defaultValue="true" />

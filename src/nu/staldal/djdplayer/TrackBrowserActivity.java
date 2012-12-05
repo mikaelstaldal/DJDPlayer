@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +23,7 @@ import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
+import android.os.*;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
@@ -35,6 +33,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.*;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class TrackBrowserActivity extends BrowserActivity {
@@ -84,6 +83,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     private String mArtistId;
     private String mPlaylist;
     private String mGenre;
+    private String mFolder;
     private String mSortOrder;
     private int mSelectedPosition;
     private long mSelectedId;
@@ -101,14 +101,16 @@ public class TrackBrowserActivity extends BrowserActivity {
             mArtistId = icicle.getString("artist");
             mPlaylist = icicle.getString("playlist");
             mGenre = icicle.getString("genre");
+            mFolder = icicle.getString("folder");
             mEditMode = icicle.getBoolean("editmode", false);
         } else {
             mAlbumId = getIntent().getStringExtra("album");
             // If we have an album, show everything on the album, not just stuff
             // by a particular artist.
             mArtistId = getIntent().getStringExtra("artist");
-            mPlaylist = getIntent().getStringExtra("playlist");
+            mPlaylist = getIntent().getStringExtra(PlaylistBrowserActivity.CATEGORY_ID);
             mGenre = getIntent().getStringExtra("genre");
+            mFolder = getIntent().getStringExtra(FolderBrowserActivity.CATEGORY_ID);
             mEditMode = getIntent().getAction().equals(Intent.ACTION_EDIT);
         }
 
@@ -293,6 +295,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         outcicle.putString("album", mAlbumId);
         outcicle.putString("playlist", mPlaylist);
         outcicle.putString("genre", mGenre);
+        outcicle.putString("folder", mFolder);
         outcicle.putBoolean("editmode", mEditMode);
         super.onSaveInstanceState(outcicle);
     }
@@ -437,6 +440,9 @@ public class TrackBrowserActivity extends BrowserActivity {
                 }
                 cursor.deactivate();
             }
+        } else if (mFolder != null) {
+            File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+            fancyName = mFolder.substring(root.getAbsolutePath().length() + 1);
         }
 
         if (fancyName != null) {
@@ -842,7 +848,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         /* This activity is used for a number of different browsing modes, and the menu can
          * be different for each of them:
-         * - all tracks, optionally restricted to an album, artist or genre
+         * - all tracks, optionally restricted to an album, artist, genre or folder
          * - the tracks of a stored playlist
          * - the list of current play queue
          */
@@ -949,9 +955,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     }
     
-    private Cursor getTrackCursor(TrackListAdapter.TrackQueryHandler queryhandler, String filter,
-            boolean async) {
-
+    private Cursor getTrackCursor(TrackListAdapter.TrackQueryHandler queryhandler, String filter, boolean async) {
         if (queryhandler == null) {
             throw new IllegalArgumentException();
         }
@@ -1011,6 +1015,15 @@ public class TrackBrowserActivity extends BrowserActivity {
                 ret = queryhandler.doQuery(uri, PLAYLIST_MEMBER_COLS,
                         where.toString(), null, mSortOrder, async);
             }
+        } else if (mFolder != null) {
+            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            if (!TextUtils.isEmpty(filter)) {
+                uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
+            }
+            mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+            where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE \'" + mFolder + "%\'");
+            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
+            ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), null, mSortOrder, async);
         } else {
             if (mAlbumId != null) {
                 where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);

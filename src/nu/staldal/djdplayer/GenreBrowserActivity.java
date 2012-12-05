@@ -22,7 +22,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-public class GenreBrowserActivity extends CategoryBrowserActivity {
+public class GenreBrowserActivity extends MetadataCategoryBrowserActivity {
     @Override
     protected String getCategoryId() {
         return "genre";

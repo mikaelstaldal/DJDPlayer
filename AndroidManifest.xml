@@ -124,6 +124,13 @@
                 <data android:mimeType="vnd.android.cursor.dir/genre"/>
             </intent-filter>
         </activity>
+        <activity android:name="nu.staldal.djdplayer.FolderBrowserActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/djd.folder"/>
+            </intent-filter>
+        </activity>
         <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity" android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
@@ -222,5 +229,9 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
         </receiver>
+
+        <provider android:authorities="nu.staldal.djdplayer"
+                  android:exported="false"
+                  android:name="nu.staldal.djdplayer.FolderProvider"/>
     </application>
 </manifest>

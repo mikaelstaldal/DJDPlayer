@@ -27,15 +27,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
-public class CategoryListAdapter extends SimpleCursorAdapter implements SectionIndexer {
+public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements SectionIndexer {
     protected final Drawable mNowPlayingOverlay;
     protected final Resources mResources;
     protected final String mUnknown;
     protected AlphabetIndexer mIndexer;
-    protected CategoryBrowserActivity mActivity;
-    protected AsyncQueryHandler mQueryHandler;
     protected String mConstraint = null;
     protected boolean mConstraintIsValid = false;
+    protected AsyncQueryHandler mQueryHandler;
+    protected MetadataCategoryBrowserActivity mActivity = null;
+
+    public void setActivity(MetadataCategoryBrowserActivity activity) {
+        mActivity = activity;
+    }
 
     protected static class ViewHolder {
         TextView line1;
@@ -55,8 +59,8 @@ public class CategoryListAdapter extends SimpleCursorAdapter implements SectionI
         }
     }
 
-    public CategoryListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
-                               CategoryBrowserActivity currentActivity) {
+    public MetadataCategoryListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
+                                       MetadataCategoryBrowserActivity currentActivity) {
         super(context, layout, cursor, from, to);
         this.mActivity = currentActivity;
         this.mUnknown = context.getString(mActivity.getUnknownStringId());
@@ -67,10 +71,6 @@ public class CategoryListAdapter extends SimpleCursorAdapter implements SectionI
 
         getIndexer(cursor);
         mResources = context.getResources();
-    }
-
-    public void setActivity(CategoryBrowserActivity newActivity) {
-        mActivity = newActivity;
     }
 
     public AsyncQueryHandler getQueryHandler() {

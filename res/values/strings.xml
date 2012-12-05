@@ -83,6 +83,11 @@
     <!-- Delete confirmation dialog when deleting an entire grene -->
     <string name="delete_genre_desc_nosdcard">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted from USB storage.</string>
 
+    <!-- Delete confirmation dialog when deleting an entire folder -->
+    <string name="delete_folder_desc">All songs in <xliff:g id="folder">%s</xliff:g> will be permanently deleted from the SD card.</string>
+    <!-- Delete confirmation dialog when deleting an entire folder -->
+    <string name="delete_folder_desc_nosdcard">All songs in <xliff:g id="folder">%s</xliff:g> will be permanently deleted from USB storage.</string>
+
     <!-- Delete confirmation dialog when deleting an entire album -->
     <string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from the SD card.</string>
     <!-- Delete confirmation dialog when deleting an entire album -->
@@ -116,9 +121,13 @@
     <string name="albums_menu">Albums</string>
     <!-- Category label on Library screen -->
     <string name="genres_menu">Genres</string>
+    <!-- Category label on Library screen -->
+    <string name="folders_menu">Folders</string>
     <!-- Albums screen title -->
+    <string name="folders_title">Folders</string>
+    <!-- Genre screen title -->
     <string name="albums_title">Albums</string>
-    <!-- Albums screen title -->
+    <!-- Genre screen title -->
     <string name="genres_title">Genres</string>
     <!-- Category label on Library screen -->
     <string name="tracks_menu">Songs</string>
@@ -302,8 +311,10 @@
     <string name="working_artists">Artists\u2026</string>
     <!-- Shown in the title bar while the list of albums is being retrieved in the background -->
     <string name="working_albums">Albums\u2026</string>
-    <!-- Shown in the title bar while the list of albums is being retrieved in the background -->
+    <!-- Shown in the title bar while the list of genres is being retrieved in the background -->
     <string name="working_genres">Genres\u2026</string>
+    <!-- Shown in the title bar while the list of folders is being retrieved in the background -->
+    <string name="working_folders">Folders\u2026</string>
     <!-- Shown in the title bar while the list of songs is being retrieved in the background -->
     <string name="working_songs">Songs\u2026</string>
     <!-- Shown in the title bar while the list of playlists is being retrieved in the background -->
@@ -355,6 +366,7 @@
     <string name="show_artists_tab">Show artists tab</string>
     <string name="show_albums_tab">Show albums tab</string>
     <string name="show_genres_tab">Show genres tab</string>
+    <string name="show_folders_tab">Show folders tab</string>
     <string name="show_songs_tab">Show songs tab</string>
     <string name="show_playlists_tab">Show playlists tab</string>
 

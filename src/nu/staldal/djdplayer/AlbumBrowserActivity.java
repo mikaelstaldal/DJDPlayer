@@ -23,7 +23,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-public class AlbumBrowserActivity extends CategoryBrowserActivity {
+public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
     @Override
     protected String getCategoryId() {
         return "album";
