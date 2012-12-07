@@ -23,7 +23,10 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -33,6 +36,8 @@ import android.widget.*;
 
 public class QueryBrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
+    private static final int TRACK_INFO = CHILD_MENU_BASE + 1;
+
     private QueryListAdapter mAdapter;
     private boolean mAdapterSent;
     private String mFilterString = "";
@@ -64,9 +69,8 @@ public class QueryBrowserActivity extends ListActivity
             String path = uri.toString();
             if (path.startsWith("content://media/external/audio/media/")) {
                 // This is a specific file
-                String id = uri.getLastPathSegment();
-                long[] list = new long[]{Long.valueOf(id)};
-                MusicUtils.playAll(this, list, false);
+                long id = Long.valueOf(uri.getLastPathSegment());
+                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, id);
                 finish();
                 return;
             } else if (path.startsWith("content://media/external/audio/albums/")) {
@@ -78,9 +82,9 @@ public class QueryBrowserActivity extends ListActivity
                 finish();
                 return;
             } else if (path.startsWith("content://media/external/audio/artists/")) {
-                // This is an artist, show the albums for that artist
+                // This is an artist, show the songs for that artist
                 Intent i = new Intent(Intent.ACTION_PICK);
-                i.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
+                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
                 i.putExtra("artist", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -216,7 +220,6 @@ public class QueryBrowserActivity extends ListActivity
     }
 
     public void init(Cursor c) {
-
         if (mAdapter == null) {
             return;
         }
@@ -249,6 +252,7 @@ public class QueryBrowserActivity extends ListActivity
             MusicUtils.makePlaylistMenu(this, sub);
             menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
             menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+            menu.add(0, TRACK_INFO, 0, R.string.info);
             mSelectedId = mi.id;
             menu.setHeaderTitle(mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
         }
@@ -311,6 +315,14 @@ public class QueryBrowserActivity extends ListActivity
                 startActivityForResult(intent, -1);
                 return true;
             }
+
+            case TRACK_INFO:
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
+                    "vnd.android.cursor.item/djd.track");
+                startActivity(intent);
+                return true;
         }
         return super.onContextItemSelected(item);
     }
@@ -527,4 +539,3 @@ public class QueryBrowserActivity extends ListActivity
     private ListView mTrackList;
     private Cursor mQueryCursor;
 }
-

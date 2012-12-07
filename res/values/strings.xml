@@ -341,7 +341,7 @@
     <string name="search_settings_description">Artists, albums, and tracks</string>
 
     <!-- Shown in the search box as a hint -->
-    <string name="search_hint">Search Music</string>
+    <string name="search_hint">Search music</string>
 
     <!--The fast scroll thumb will show one character from this string depending on the position in the list -->
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>

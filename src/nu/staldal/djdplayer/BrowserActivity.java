@@ -207,6 +207,7 @@ public abstract class BrowserActivity extends ListActivity
         super.onCreateOptionsMenu(menu);
 
         menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+        menu.add(0, SEARCH, 0, R.string.search_title).setIcon(android.R.drawable.ic_menu_search);
 
         return true;
     }
@@ -217,6 +218,9 @@ public abstract class BrowserActivity extends ListActivity
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
+
+            case SEARCH:
+                return onSearchRequested();
         }
         return super.onOptionsItemSelected(item);
     }
