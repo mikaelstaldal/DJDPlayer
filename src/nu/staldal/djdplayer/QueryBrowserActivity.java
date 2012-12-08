@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +30,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
@@ -40,9 +40,9 @@ public class QueryBrowserActivity extends ListActivity
 
     private QueryListAdapter mAdapter;
     private boolean mAdapterSent;
-    private String mFilterString = "";
     private MusicUtils.ServiceToken mToken;
     private long mSelectedId;
+    private Cursor mQueryCursor;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -92,7 +92,7 @@ public class QueryBrowserActivity extends ListActivity
             }
         }
 
-        mFilterString = intent.getStringExtra(SearchManager.QUERY);
+        String mFilterString = intent.getStringExtra(SearchManager.QUERY);
         if (MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(action)) {
             String focus = intent.getStringExtra(MediaStore.EXTRA_MEDIA_FOCUS);
             String artist = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ARTIST);
@@ -117,9 +117,7 @@ public class QueryBrowserActivity extends ListActivity
         }
 
         setContentView(R.layout.query_activity);
-        mTrackList = getListView();
-        mTrackList.setOnCreateContextMenuListener(this);
-        mTrackList.setTextFilterEnabled(true);
+        getListView().setOnCreateContextMenuListener(this);
         if (mAdapter == null) {
             mAdapter = new QueryListAdapter(
                     getApplication(),
@@ -129,12 +127,7 @@ public class QueryBrowserActivity extends ListActivity
                     new String[]{},
                     new int[]{});
             setListAdapter(mAdapter);
-            if (TextUtils.isEmpty(mFilterString)) {
-                getQueryCursor(mAdapter.getQueryHandler(), null);
-            } else {
-                mTrackList.setFilterText(mFilterString);
-                mFilterString = null;
-            }
+            getQueryCursor(mAdapter.getQueryHandler(), mFilterString);
         } else {
             mAdapter.setActivity(this);
             setListAdapter(mAdapter);
@@ -521,7 +514,4 @@ public class QueryBrowserActivity extends ListActivity
             return c;
         }
     }
-
-    private ListView mTrackList;
-    private Cursor mQueryCursor;
 }
