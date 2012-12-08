@@ -1168,18 +1168,6 @@ public class TrackBrowserActivity extends BrowserActivity {
             onMove(-1, mCurPos); // update the underlying cursor
         }
 
-        private void dump() {
-            String where = "(";
-            for (int i = 0; i < mSize; i++) {
-                where += mNowPlaying[i];
-                if (i < mSize - 1) {
-                    where += ",";
-                }
-            }
-            where += ")";
-            Log.i("PlayQueueCursor: ", where);
-        }
-
         @Override
         public String getString(int column)
         {

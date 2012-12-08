@@ -967,8 +967,7 @@ public class MediaPlaybackActivity extends Activity
     }
 
     private void startPlayback() {
-
-        if(mService == null)
+        if (mService == null)
             return;
         Intent intent = getIntent();
         String filename = "";

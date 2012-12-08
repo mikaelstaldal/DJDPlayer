@@ -515,9 +515,7 @@ public class MediaPlaybackService extends Service {
             
             long seekpos = mPreferences.getLong("seekpos", 0);
             seek(seekpos >= 0 && seekpos < duration() ? seekpos : 0);
-            Log.d(LOGTAG, "restored queue, currently at position "
-                    + position() + "/" + duration()
-                    + " (requested " + seekpos + ")");
+            //Log.d(LOGTAG, "restored queue, currently at position " + position() + "/" + duration() + " (requested " + seekpos + ")");
             
             int repmode = mPreferences.getInt("repeatmode", REPEAT_NONE);
             if (repmode != REPEAT_ALL && repmode != REPEAT_CURRENT) {
@@ -1174,7 +1172,7 @@ public class MediaPlaybackService extends Service {
     public void next(boolean force) {
         synchronized (this) {
             if (mPlayListLen <= 0) {
-                Log.d(LOGTAG, "No play queue");
+                //Log.d(LOGTAG, "No play queue");
                 return;
             }
 
@@ -1238,7 +1236,6 @@ public class MediaPlaybackService extends Service {
     // check that the specified idx is not in the history (but only look at at
     // most lookbacksize entries in the history)
     private boolean wasRecentlyUsed(int idx, int lookbacksize) {
-
         // early exit to prevent infinite loops in case idx == mPlayPos
         if (lookbacksize == 0) {
             return false;
@@ -1246,7 +1243,7 @@ public class MediaPlaybackService extends Service {
 
         int histsize = mHistory.size();
         if (histsize < lookbacksize) {
-            Log.d(LOGTAG, "lookback too big");
+            // Log.d(LOGTAG, "lookback too big");
             lookbacksize = histsize;
         }
         int maxidx = histsize - 1;
