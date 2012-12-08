@@ -1,5 +1,7 @@
 gen/*
 out/*
+bin/*
+local.properties
 tests/gen/*
 .idea
 *.iml
