@@ -357,19 +357,6 @@ public class QueryBrowserActivity extends ListActivity
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case USE_AS_RINGTONE: {
-                // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(this, mTrackList.getSelectedItemId());
-                return true;
-            }
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private Cursor getQueryCursor(AsyncQueryHandler async, String filter) {
         if (filter == null) {
             filter = "";
@@ -430,7 +417,6 @@ public class QueryBrowserActivity extends ListActivity
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-
             TextView tv1 = (TextView) view.findViewById(R.id.line1);
             TextView tv2 = (TextView) view.findViewById(R.id.line2);
             ImageView iv = (ImageView) view.findViewById(R.id.icon);
