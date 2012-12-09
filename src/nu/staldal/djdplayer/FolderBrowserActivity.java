@@ -329,7 +329,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
 
             File currentFolder = MusicUtils.getCurrentFolder();
             ImageView iv = vh.play_indicator;
-            if (currentFolder.getAbsolutePath().equals(folder)) {
+            if (currentFolder != null && currentFolder.getAbsolutePath().equals(folder)) {
                 iv.setImageDrawable(mNowPlayingOverlay);
             } else {
                 iv.setImageDrawable(null);
