@@ -25,10 +25,9 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import java.io.File;
+import java.io.FileFilter;
 
 public class FolderProvider extends ContentProvider {
-    private static final String TAG = "FolderProvider";
-
     private static final int FOLDER = 1;
     // private static final int FOLDER_ID = 2;
 
@@ -57,22 +56,26 @@ public class FolderProvider extends ContentProvider {
                     FolderContract.Folder.PATH,
                     FolderContract.Folder.NAME,
             });
-            for (File folder : root.listFiles()) {
-                if (folder.isDirectory()) addToCursor(cursor, new int[1], folder);
-            }
+            int[] counter = new int[1];
+            processFolder(cursor, counter, root);
             return cursor;
         default:
             return null;
         }
     }
 
-    private void addToCursor(MatrixCursor cursor, int[] counter, File start) {
-        counter[0]++;
-        String path = start.getAbsolutePath();
-        cursor.addRow(new Object[]{ counter[0], fetchCount(path), path, fetchName(path)});
-        for (File folder : start.listFiles()) {
-            if (folder.isDirectory()) addToCursor(cursor, counter, folder);
+    private void processFolder(MatrixCursor cursor, int[] counter, File start) {
+        File[] subFolders = start.listFiles(DIRECTORY_FILTER);
+        if (subFolders.length == 0 && !start.equals(root)) addToCursor(cursor, counter, start);
+        for (File folder : subFolders) {
+            processFolder(cursor, counter, folder);
         }
+    }
+
+    private void addToCursor(MatrixCursor cursor, int[] counter, File folder) {
+        counter[0]++;
+        String path = folder.getAbsolutePath();
+        cursor.addRow(new Object[]{ counter[0], fetchCount(path), path, fetchName(path)});
     }
 
     private int fetchCount(String path) {
@@ -116,5 +119,14 @@ public class FolderProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    static final FileFilter DIRECTORY_FILTER = new DirectoryFilter();
+
+    static class DirectoryFilter implements FileFilter {
+        @Override
+        public boolean accept(File file) {
+            return file.isDirectory();
+        }
     }
 }
