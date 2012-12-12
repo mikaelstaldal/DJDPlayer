@@ -25,6 +25,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String SHOW_FOLDERS_TAB = "show_folders_tab";
     public static final String SHOW_SONGS_TAB = "show_songs_tab";
     public static final String SHOW_PLAYLISTS_TAB = "show_playlists_tab";
+    public static final String MUSIC_FOLDER = "music_folder";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

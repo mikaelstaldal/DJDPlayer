@@ -165,6 +165,7 @@
     <string name="podcasts_listitem">Podcasts</string>
     <!-- The name of the pseudo-playlist that holds all the podcasts, shown in title bar of songs list -->
     <string name="podcasts_title">Podcasts</string>
+
     <!-- Title of screen when no sd card is present -->
     <string name="sdcard_missing_title">No SD card</string>
     <!-- Title of screen when no sd card is present -->
@@ -189,6 +190,15 @@
     <string name="sdcard_error_message">An error was encountered on your SD card.</string>
     <!-- label underneath icon used to indicate there was an error accessing the sd card -->
     <string name="sdcard_error_message_nosdcard" msgid="4574563894036627855">An error was encountered on your USB storage.</string>
+    <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
+    <string name="sdcard_scanning_title">SD card not ready yet</string>
+    <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
+    <string name="sdcard_scanning_title_nosdcard" msgid="1162763571147174655">USB storage not ready yet</string>
+    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
+    <string name="sdcard_scanning_message">Sorry, your SD card is not ready yet, please wait for a while.</string>
+    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
+    <string name="sdcard_scanning_message_nosdcard" msgid="8071868348072728830">Sorry, your USB storage is not ready yet, please wait for a while.</string>
+
     <!-- Default name of artist that doesn't have a name in the metadata -->
     <string name="unknown_artist_name">Unknown artist</string>
     <!-- Default name of genre that doesn't have a name in the metadata -->
@@ -369,6 +379,9 @@
     <string name="show_folders_tab">Show folders tab</string>
     <string name="show_songs_tab">Show songs tab</string>
     <string name="show_playlists_tab">Show playlists tab</string>
+    <string name="music_folder">Music folder</string>
+    <string name="select_music_folder">Select music folder</string>
+    <string name="pick_music_folder">Use as music folder</string>
 
     <!-- Info -->
     <string name="artist">Artist</string>

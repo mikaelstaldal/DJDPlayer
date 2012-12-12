@@ -55,14 +55,13 @@ public class MusicUtils {
         public final static int SHUFFLE_ALL = 8;
         public final static int QUEUE_ALL = 9;
         public final static int DELETE_ITEM = 10;
-        public final static int SCAN_DONE = 11;
-        public final static int EFFECTS_PANEL = 12;
-        public final static int QUEUE = 13;
-        public final static int PLAY_NOW = 14;
-        public final static int PLAY_NEXT = 15;
-        public final static int SETTINGS = 16;
-        public final static int SEARCH = 17;
-        public final static int CHILD_MENU_BASE = 18; // this should be the last item
+        public final static int EFFECTS_PANEL = 11;
+        public final static int QUEUE = 12;
+        public final static int PLAY_NOW = 13;
+        public final static int PLAY_NEXT = 14;
+        public final static int SETTINGS = 15;
+        public final static int SEARCH = 16;
+        public final static int CHILD_MENU_BASE = 17; // this should be the last item
     }
 
     /**
@@ -580,33 +579,24 @@ public class MusicUtils {
                 message = R.string.sdcard_missing_message_nosdcard;
             }
         } else if (status.equals(Environment.MEDIA_MOUNTED)){
-            // The card is mounted, but we didn't get a valid cursor.
-            // This probably means the mediascanner hasn't started scanning the
-            // card yet (there is a small window of time during boot where this
-            // will happen).
-            a.setTitle("");
-            Intent intent = new Intent();
-            intent.setClass(a, ScanningProgress.class);
-            a.startActivityForResult(intent, Defs.SCAN_DONE);
+            if (android.os.Environment.isExternalStorageRemovable()) {
+                title = R.string.sdcard_scanning_title;
+                message = R.string.sdcard_scanning_message;
+            } else {
+                title = R.string.sdcard_scanning_title_nosdcard;
+                message = R.string.sdcard_scanning_message_nosdcard;
+            }
         } else if (!TextUtils.equals(mLastSdStatus, status)) {
             mLastSdStatus = status;
             Log.d(TAG, "sd card: " + status);
         }
 
         a.setTitle(title);
-        View v = a.findViewById(R.id.sd_message);
-        if (v != null) {
-            v.setVisibility(View.VISIBLE);
-        }
-        v = a.findViewById(R.id.sd_icon);
+        View v = a.findViewById(R.id.sd_error);
         if (v != null) {
             v.setVisibility(View.VISIBLE);
         }
         v = a.findViewById(android.R.id.list);
-        if (v != null) {
-            v.setVisibility(View.GONE);
-        }
-        v = a.findViewById(R.id.buttonbar);
         if (v != null) {
             v.setVisibility(View.GONE);
         }
@@ -615,11 +605,7 @@ public class MusicUtils {
     }
 
     public static void hideDatabaseError(Activity a) {
-        View v = a.findViewById(R.id.sd_message);
-        if (v != null) {
-            v.setVisibility(View.GONE);
-        }
-        v = a.findViewById(R.id.sd_icon);
+        View v = a.findViewById(R.id.sd_error);
         if (v != null) {
             v.setVisibility(View.GONE);
         }

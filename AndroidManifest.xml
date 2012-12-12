@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="13"
-          android:versionName="1.0-rc2"
+          android:versionCode="14"
+          android:versionName="1.0-rc3"
           android:installLocation="auto">
 
     <!-- Android 2.3.3 -->
@@ -204,8 +204,6 @@
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="nu.staldal.djdplayer.DeleteItems"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
-        <activity android:name="nu.staldal.djdplayer.ScanningProgress"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
             <intent-filter>
@@ -218,6 +216,10 @@
         <activity android:name="nu.staldal.djdplayer.SettingsActivity" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.RescanActivity" android:exported="false" />
+
+        <activity android:name="nu.staldal.djdplayer.PickMusicFolderActivity"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:exported="false" />
 
         <service android:name="nu.staldal.djdplayer.MediaPlaybackService" android:exported="false" />
 

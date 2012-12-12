@@ -33,4 +33,11 @@
                 android:targetClass="nu.staldal.djdplayer.RescanActivity" />
         </Preference>
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/music_folder">
+        <Preference android:title="@string/select_music_folder">
+            <intent
+                android:targetPackage="nu.staldal.djdplayer"
+                android:targetClass="nu.staldal.djdplayer.PickMusicFolderActivity" />
+        </Preference>
+    </PreferenceCategory>
 </PreferenceScreen>

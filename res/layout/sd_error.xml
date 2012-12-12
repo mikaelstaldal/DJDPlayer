@@ -15,22 +15,26 @@
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-     <ImageView
-        android:id="@+id/sd_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/ic_mp_sd_card"
-        android:visibility="gone" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/sd_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+         <ImageView
+            android:id="@+id/sd_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/ic_mp_sd_card" />
 
-    <TextView
-        android:id="@+id/sd_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:padding="8dip"
-        android:text="@string/sdcard_missing_message"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:visibility="gone" />
-
+        <TextView
+            android:id="@+id/sd_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:padding="8dip"
+            android:text="@string/sdcard_missing_message"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
 </merge>

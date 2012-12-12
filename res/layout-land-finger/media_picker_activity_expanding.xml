@@ -20,9 +20,9 @@
     android:orientation="vertical"
     android:gravity="center_vertical" >
 
-    <include layout="@layout/sd_error" />
-
     <include layout="@layout/buttonbar" />
+
+    <include layout="@layout/sd_error" />
 
     <ExpandableListView
         android:id="@android:id/list"

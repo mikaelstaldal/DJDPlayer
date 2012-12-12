@@ -925,14 +925,6 @@ public class TrackBrowserActivity extends BrowserActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         switch (requestCode) {
-            case SCAN_DONE:
-                if (resultCode == RESULT_CANCELED) {
-                    finish();
-                } else {
-                    getTrackCursor(mAdapter.getQueryHandler(), null, true);
-                }
-                break;
-                
             case NEW_PLAYLIST_SINGLE:
                 if (resultCode == RESULT_OK) {
                     Uri uri = intent.getData();

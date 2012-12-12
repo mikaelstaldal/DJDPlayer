@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 
 import java.io.File;
@@ -38,16 +39,14 @@ public class FolderProvider extends ContentProvider {
         // sURIMatcher.addURI(FolderContract.AUTHORITY, FolderContract.Folder.FOLDER_PATH+"/#", FOLDER_ID);
     }
 
-    private File root;
-
     @Override
     public boolean onCreate() {
-        root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        File root = fetchRoot();
         switch (sURIMatcher.match(uri)) {
         case FOLDER:
             MatrixCursor cursor = new MatrixCursor(new String[] {
@@ -57,25 +56,30 @@ public class FolderProvider extends ContentProvider {
                     FolderContract.Folder.NAME,
             });
             int[] counter = new int[1];
-            processFolder(cursor, counter, root);
+            processFolder(cursor, counter, root, root);
             return cursor;
         default:
             return null;
         }
     }
 
-    private void processFolder(MatrixCursor cursor, int[] counter, File start) {
+    private File fetchRoot() {
+        return new File(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SettingsActivity.MUSIC_FOLDER,
+                           Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath()));
+    }
+
+    private void processFolder(MatrixCursor cursor, int[] counter, File start, File root) {
         File[] subFolders = start.listFiles(DIRECTORY_FILTER);
-        if (subFolders.length == 0 && !start.equals(root)) addToCursor(cursor, counter, start);
+        if (subFolders.length == 0 && !start.equals(root)) addToCursor(cursor, counter, start, root);
         for (File folder : subFolders) {
-            processFolder(cursor, counter, folder);
+            processFolder(cursor, counter, folder, root);
         }
     }
 
-    private void addToCursor(MatrixCursor cursor, int[] counter, File folder) {
+    private void addToCursor(MatrixCursor cursor, int[] counter, File folder, File root) {
         counter[0]++;
         String path = folder.getAbsolutePath();
-        cursor.addRow(new Object[]{ counter[0], fetchCount(path), path, fetchName(path)});
+        cursor.addRow(new Object[]{ counter[0], fetchCount(path), path, path.substring(root.getAbsolutePath().length() + 1)});
     }
 
     private int fetchCount(String path) {
@@ -90,10 +94,6 @@ public class FolderProvider extends ContentProvider {
             cursor.close();
         }
         return count;
-    }
-
-    private String fetchName(String path) {
-        return path.substring(root.getAbsolutePath().length() + 1);
     }
 
     @Override
