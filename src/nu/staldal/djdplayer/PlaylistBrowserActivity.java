@@ -26,11 +26,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.ContextMenu;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.*;
 
@@ -46,6 +43,8 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     private static final int EDIT_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
     private static final int CHANGE_WEEKS = CHILD_MENU_BASE + 4;
+    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 5;
+
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
     private static final long PODCASTS_PLAYLIST = -3;
@@ -248,6 +247,25 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
             intent.putExtra(CATEGORY_ID, Long.valueOf(id).toString());
             startActivity(intent);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        menu.add(0, CREATE_NEW_PLAYLIST, 0, R.string.create_new_playlist).setIcon(android.R.drawable.ic_menu_add);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case CREATE_NEW_PLAYLIST:
+                startActivity(new Intent(this, CreatePlaylist.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void playPlaylist(long plid, boolean shuffle) {
