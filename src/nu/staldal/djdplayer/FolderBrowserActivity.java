@@ -228,7 +228,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             case DELETE_ITEM: {
                 long [] list = fetchSongList(mCurrentFolder);
                 String f;
-                if (android.os.Environment.isExternalStorageRemovable()) {
+                if (MusicUtils.isExternalStorageRemovable()) {
                     f = getString(R.string.delete_folder_desc);
                 } else {
                     f = getString(R.string.delete_folder_desc_nosdcard);

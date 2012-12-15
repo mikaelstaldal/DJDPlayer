@@ -517,9 +517,11 @@ public class MediaPlaybackActivity extends Activity
             menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                     .setIcon(R.drawable.ic_menu_delete);
 
-            Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            if (getPackageManager().resolveActivity(i, 0) != null) {
-                menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
+                Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                if (getPackageManager().resolveActivity(i, 0) != null) {
+                    menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
+                }
             }
 
             return true;
@@ -596,7 +598,7 @@ public class MediaPlaybackActivity extends Activity
                     list[0] = MusicUtils.getCurrentAudioId();
                     Bundle b = new Bundle();
                     String f;
-                    if (android.os.Environment.isExternalStorageRemovable()) {
+                    if (MusicUtils.isExternalStorageRemovable()) {
                         f = getString(R.string.delete_song_desc, mService.getTrackName());
                     } else {
                         f = getString(R.string.delete_song_desc_nosdcard, mService.getTrackName());

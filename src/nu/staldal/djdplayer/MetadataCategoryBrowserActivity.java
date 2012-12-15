@@ -260,7 +260,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
             case DELETE_ITEM: {
                 long [] list = fetchSongList(mCurrentId);
                 String f;
-                if (android.os.Environment.isExternalStorageRemovable()) {
+                if (MusicUtils.isExternalStorageRemovable()) {
                     f = getString(getDeleteDescStringId());
                 } else {
                     f = getString(getDeleteDescNoSdCardStringId());

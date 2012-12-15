@@ -21,8 +21,8 @@
           android:versionName="1.0-rc3"
           android:installLocation="auto">
 
-    <!-- Android 2.3.3 -->
-    <uses-sdk android:minSdkVersion="10"/>
+    <!-- Require 2.2, target 2.3.3 -->
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10"/>
 
     <!-- To inform activities about music playback status -->
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>

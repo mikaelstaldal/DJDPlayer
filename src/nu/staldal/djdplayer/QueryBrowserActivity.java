@@ -280,7 +280,7 @@ public class QueryBrowserActivity extends ListActivity
                 list[0] = (int) mSelectedId;
                 Bundle b = new Bundle();
                 String f;
-                if (android.os.Environment.isExternalStorageRemovable()) {
+                if (MusicUtils.isExternalStorageRemovable()) {
                     f = getString(R.string.delete_song_desc);
                 } else {
                     f = getString(R.string.delete_song_desc_nosdcard);

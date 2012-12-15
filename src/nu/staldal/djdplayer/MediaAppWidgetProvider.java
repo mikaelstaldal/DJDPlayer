@@ -121,13 +121,13 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         String status = Environment.getExternalStorageState();
         if (status.equals(Environment.MEDIA_SHARED) ||
                 status.equals(Environment.MEDIA_UNMOUNTED)) {
-            if (android.os.Environment.isExternalStorageRemovable()) {
+            if (MusicUtils.isExternalStorageRemovable()) {
                 errorState = res.getText(R.string.sdcard_busy_title);
             } else {
                 errorState = res.getText(R.string.sdcard_busy_title_nosdcard);
             }
         } else if (status.equals(Environment.MEDIA_REMOVED)) {
-            if (android.os.Environment.isExternalStorageRemovable()) {
+            if (MusicUtils.isExternalStorageRemovable()) {
                 errorState = res.getText(R.string.sdcard_missing_title);
             } else {
                 errorState = res.getText(R.string.sdcard_missing_title_nosdcard);
