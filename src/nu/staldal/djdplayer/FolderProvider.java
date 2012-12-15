@@ -24,11 +24,14 @@ import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
 
 public class FolderProvider extends ContentProvider {
+    private static final String TAG = "FolderProvider";
+
     private static final int FOLDER = 1;
     // private static final int FOLDER_ID = 2;
 
@@ -70,6 +73,10 @@ public class FolderProvider extends ContentProvider {
 
     private void processFolder(MatrixCursor cursor, int[] counter, File start, File root) {
         File[] subFolders = start.listFiles(DIRECTORY_FILTER);
+        if (subFolders == null) {
+            Log.w(TAG, "Music folder not found: " + start.getAbsolutePath());
+            return;
+        }
         if (subFolders.length == 0 && !start.equals(root)) addToCursor(cursor, counter, start, root);
         for (File folder : subFolders) {
             processFolder(cursor, counter, folder, root);
