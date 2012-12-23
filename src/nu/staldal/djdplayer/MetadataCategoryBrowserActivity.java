@@ -225,23 +225,15 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL: {
-                long [] list = fetchSongList(mCurrentId);
-                MusicUtils.playAll(this, list, false);
+            case PLAY_ALL:
+                MusicUtils.playAll(this, fetchSongList(mCurrentId), false);
                 return true;
-            }
-
-            case SHUFFLE_ALL: {
-                long [] list = fetchSongList(mCurrentId);
-                MusicUtils.playAll(this, list, true);
+            case SHUFFLE_ALL:
+                MusicUtils.playAll(this, fetchSongList(mCurrentId), true);
                 return true;
-            }
-
-            case QUEUE_ALL: {
-                long [] list = fetchSongList(mCurrentId);
-                MusicUtils.queue(this, list);
+            case QUEUE_ALL:
+                MusicUtils.queue(this, fetchSongList(mCurrentId));
                 return true;
-            }
 
             case NEW_PLAYLIST: {
                 Intent intent = new Intent();

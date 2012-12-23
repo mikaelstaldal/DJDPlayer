@@ -150,13 +150,13 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         switch (item.getItemId()) {
             case PLAY_ALL:
                 MusicUtils.playAll(this, fetchSongList(mi.id), false);
-                break;
+                return true;
             case SHUFFLE_ALL:
                 MusicUtils.playAll(this, fetchSongList(mi.id), true);
-                break;
+                return true;
             case QUEUE_ALL:
                 MusicUtils.queue(this, fetchSongList(mi.id));
-                break;
+                return true;
             case DELETE_PLAYLIST:
                 Uri uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mi.id);
@@ -165,7 +165,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 if (mCursor.getCount() == 0) {
                     setTitle(R.string.no_playlists_title);
                 }
-                break;
+                return true;
             case EDIT_PLAYLIST:
                 if (mi.id == RECENTLY_ADDED_PLAYLIST) {
                     Intent intent = new Intent();
@@ -175,15 +175,15 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 } else {
                     Log.e(TAG, "should not be here");
                 }
-                break;
+                return true;
             case RENAME_PLAYLIST:
                 Intent intent = new Intent();
                 intent.setClass(this, RenamePlaylist.class);
                 intent.putExtra("rename", mi.id);
                 startActivityForResult(intent, RENAME_PLAYLIST);
-                break;
+                return true;
         }
-        return true;
+        return super.onContextItemSelected(item);
     }
 
     @Override
