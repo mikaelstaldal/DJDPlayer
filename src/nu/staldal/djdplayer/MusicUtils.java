@@ -250,42 +250,6 @@ public class MusicUtils {
         return list;
     }
 
-    public static long [] getSongListForPlaylist(Context context, long plid) {
-        final String[] ccols = new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID };
-        Cursor cursor = query(context, MediaStore.Audio.Playlists.Members.getContentUri("external", plid),
-                ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-        
-        if (cursor != null) {
-            long [] list = getSongListForCursor(cursor);
-            cursor.close();
-            return list;
-        }
-        return sEmptyList;
-    }
-    
-    public static long [] getAllSongs(Context context) {
-        Cursor c = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[] {MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
-                null, null);
-        try {
-            if (c == null || c.getCount() == 0) {
-                return null;
-            }
-            int len = c.getCount();
-            long [] list = new long[len];
-            for (int i = 0; i < len; i++) {
-                c.moveToNext();
-                list[i] = c.getLong(0);
-            }
-
-            return list;
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
     /**
      * Fills out the given submenu with items for "new playlist" and
      * any existing playlists. When the user selects an item, the
