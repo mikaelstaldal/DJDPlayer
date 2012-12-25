@@ -69,10 +69,7 @@
     <string name="queue_all">Queue all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order interleaved with the current play queue -->
     <string name="interleave_all">Interleave</string>
-    <plurals name="interleaveNNN">
-        <item quantity="one">Interleave every other</item>
-        <item quantity="other">Interleave every <xliff:g id="interleave">%d</xliff:g>th</item>
-    </plurals>
+    <string name="interleaveNNN">Interleave <xliff:g id="src">%d</xliff:g>-<xliff:g id="dest">%d</xliff:g></string>
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shuffle">Shuffle</string>
 

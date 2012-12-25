@@ -378,11 +378,11 @@ public class MusicUtils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static void interleave(Context context, long[] list, int count) {
+    public static void interleave(Context context, long[] list, int srcCount, int destCount) {
         if (sService == null) {
             return;
         }
-        sService.interleave(list, count);
+        sService.interleave(list, srcCount); // TODO add destCount
         String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplayqueue, list.length, list.length);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

@@ -144,7 +144,9 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
-            interleave.add(2, INTERLEAVE_ALL+i, i, getResources().getQuantityString(R.plurals.interleaveNNN, i, i));
+            for (int j = 1; j<=1; j++) {
+                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+            }
         }
 
         if (mCurrentId >= 0) {
@@ -205,7 +207,9 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
 
             default:
                 if (item.getItemId() > INTERLEAVE_ALL) {
-                    MusicUtils.interleave(this, fetchSongList(mCurrentId), item.getItemId()-INTERLEAVE_ALL);
+                    int srcCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
+                    int destCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
+                    MusicUtils.interleave(this, fetchSongList(mCurrentId), srcCount, destCount);
                     return true;
                 }
         }

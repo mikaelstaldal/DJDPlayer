@@ -181,7 +181,9 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
-            interleave.add(2, INTERLEAVE_ALL+i, i, getResources().getQuantityString(R.plurals.interleaveNNN, i, i));
+            for (int j = 1; j<=1; j++) {
+                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+            }
         }
 
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
@@ -241,7 +243,9 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
 
             default:
                 if (item.getItemId() > INTERLEAVE_ALL) {
-                    MusicUtils.interleave(this, fetchSongList(mCurrentFolder), item.getItemId()-INTERLEAVE_ALL);
+                    int srcCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
+                    int destCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
+                    MusicUtils.interleave(this, fetchSongList(mCurrentFolder), srcCount, destCount);
                     return true;
                 }
 
