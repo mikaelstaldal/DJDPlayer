@@ -729,27 +729,34 @@ public class MediaPlaybackService extends Service {
     
     // insert the list of songs at the specified position in the playlist
     private void addToPlayList(long [] list, int position) {
-        int addlen = list.length;
+        addToPlaylistInternal(list, position);
+        updatePlaylist();
+    }
+
+    private void addToPlaylistInternal(long[] list, int position) {
         if (position < 0) { // overwrite
             mPlayListLen = 0;
             position = 0;
         }
-        ensurePlayListCapacity(mPlayListLen + addlen);
+        ensurePlayListCapacity(mPlayListLen + list.length);
         if (position > mPlayListLen) {
             position = mPlayListLen;
         }
-        
+
         // move part of list after insertion point
         int tailsize = mPlayListLen - position;
         for (int i = tailsize ; i > 0 ; i--) {
-            mPlayList[position + i] = mPlayList[position + i - addlen]; 
+            mPlayList[position + i] = mPlayList[position + i - list.length];
         }
-        
+
         // copy list into playlist
-        for (int i = 0; i < addlen; i++) {
+        for (int i = 0; i < list.length; i++) {
             mPlayList[position + i] = list[i];
         }
-        mPlayListLen += addlen;
+        mPlayListLen += list.length;
+    }
+
+    private void updatePlaylist() {
         if (mPlayListLen == 0) {
             mCursor.close();
             mCursor = null;
@@ -762,7 +769,7 @@ public class MediaPlaybackService extends Service {
         }
         notifyChange(QUEUE_CHANGED);
     }
-    
+
     /**
      * Appends a list of tracks to the current playlist.
      * If nothing is playing currently, playback will be started at
@@ -800,6 +807,19 @@ public class MediaPlaybackService extends Service {
                 notifyChange(META_CHANGED);
             }
         }
+    }
+
+    public void interleave(long [] list, int count) {
+        long[] sublist = new long[count];
+        for (int i = 0, j = count; i<list.length; i+=count, j+=count*2) {
+            if (i+count >= list.length) {
+                System.arraycopy(list, i, sublist, 0, list.length-i-1);
+            } else {
+                System.arraycopy(list, i, sublist, 0, count);
+            }
+            addToPlaylistInternal(sublist, j);
+        }
+        updatePlaylist();
     }
 
     /**

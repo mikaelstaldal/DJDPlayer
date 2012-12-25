@@ -39,16 +39,19 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
 
     public static final String CATEGORY_ID = "playlist";
 
+    private static final String CURRENT_PLAYLIST = "currentplaylist";
+
     private static final int DELETE_PLAYLIST = CHILD_MENU_BASE + 1;
     private static final int EDIT_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
     private static final int CHANGE_WEEKS = CHILD_MENU_BASE + 4;
-    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 5;
 
+    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 5;
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
     private static final long PODCASTS_PLAYLIST = -3;
 
+    private long mCurrentId;
     private boolean mCreateShortcut;
 
     @Override
@@ -59,6 +62,10 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        if (icicle != null) {
+            mCurrentId = icicle.getLong(CURRENT_PLAYLIST);
+        }
 
         if (Intent.ACTION_CREATE_SHORTCUT.equals(getIntent().getAction())) {
             mCreateShortcut = true;
@@ -111,6 +118,15 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outcicle) {
+        // need to store the selected item so we don't lose it in case
+        // of an orientation switch. Otherwise we could lose it while
+        // in the middle of specifying a playlist to add the item to.
+        outcicle.putLong(CURRENT_PLAYLIST, mCurrentId);
+        super.onSaveInstanceState(outcicle);
+    }
+
+    @Override
     protected void setTitle() {
         setTitle(R.string.playlists_title);
     }
@@ -122,20 +138,24 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         }
 
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
+        mCurrentId = mi.id;
 
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
+        for (int i = 1; i<=5; i++) {
+            interleave.add(2, INTERLEAVE_ALL+i, i, getResources().getQuantityString(R.plurals.interleaveNNN, i, i));
+        }
 
-        if (mi.id >= 0 /*|| mi.id == PODCASTS_PLAYLIST*/) {
+        if (mCurrentId >= 0) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
         }
 
-        if (mi.id == RECENTLY_ADDED_PLAYLIST) {
+        if (mCurrentId == RECENTLY_ADDED_PLAYLIST) {
             menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
         }
 
-        if (mi.id >= 0) {
+        if (mCurrentId >= 0) {
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
         }
 
@@ -146,28 +166,27 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo mi = (AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case PLAY_ALL:
-                MusicUtils.playAll(this, fetchSongList(mi.id), false);
+                MusicUtils.playAll(this, fetchSongList(mCurrentId), false);
                 return true;
-            case SHUFFLE_ALL:
-                MusicUtils.playAll(this, fetchSongList(mi.id), true);
-                return true;
+
             case QUEUE_ALL:
-                MusicUtils.queue(this, fetchSongList(mi.id));
+                MusicUtils.queue(this, fetchSongList(mCurrentId));
                 return true;
+
             case DELETE_PLAYLIST:
                 Uri uri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mi.id);
+                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mCurrentId);
                 getContentResolver().delete(uri, null, null);
                 Toast.makeText(this, R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
                 if (mCursor.getCount() == 0) {
                     setTitle(R.string.no_playlists_title);
                 }
                 return true;
+
             case EDIT_PLAYLIST:
-                if (mi.id == RECENTLY_ADDED_PLAYLIST) {
+                if (mCurrentId == RECENTLY_ADDED_PLAYLIST) {
                     Intent intent = new Intent();
                     intent.setClass(this, WeekSelector.class);
                     startActivityForResult(intent, CHANGE_WEEKS);
@@ -176,12 +195,19 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                     Log.e(TAG, "should not be here");
                 }
                 return true;
+
             case RENAME_PLAYLIST:
                 Intent intent = new Intent();
                 intent.setClass(this, RenamePlaylist.class);
-                intent.putExtra("rename", mi.id);
+                intent.putExtra("rename", mCurrentId);
                 startActivityForResult(intent, RENAME_PLAYLIST);
                 return true;
+
+            default:
+                if (item.getItemId() > INTERLEAVE_ALL) {
+                    MusicUtils.interleave(this, fetchSongList(mCurrentId), item.getItemId()-INTERLEAVE_ALL);
+                    return true;
+                }
         }
         return super.onContextItemSelected(item);
     }

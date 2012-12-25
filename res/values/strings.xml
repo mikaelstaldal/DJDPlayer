@@ -62,11 +62,17 @@
          The user will be prompted to confirm before deletion actually takes place -->
     <string name="delete_all">Delete all</string>
     <!-- Menu item to play back all the songs in the currently showing list in shuffle mode -->
-    <string name="shuffle_all">Shuffle all</string>
+    <string name="shuffle_playlist">Shuffle playlist</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order -->
     <string name="play_all">Play all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order after current play queue -->
     <string name="queue_all">Queue all</string>
+    <!-- Menu item to play back all the songs in the currently showing list in list order interleaved with the current play queue -->
+    <string name="interleave_all">Interleave</string>
+    <plurals name="interleaveNNN">
+        <item quantity="one">Interleave every other</item>
+        <item quantity="other">Interleave every <xliff:g id="interleave">%d</xliff:g>th</item>
+    </plurals>
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shuffle">Shuffle</string>
 

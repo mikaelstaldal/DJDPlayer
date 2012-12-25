@@ -52,7 +52,7 @@ public class MusicUtils {
         public final static int PLAY_ALL = 5;
         public final static int GOTO_START = 6;
         public final static int SHUFFLE = 7;
-        public final static int SHUFFLE_ALL = 8;
+        public final static int SHUFFLE_PLAYLIST = 8;
         public final static int QUEUE_ALL = 9;
         public final static int DELETE_ITEM = 10;
         public final static int EFFECTS_PANEL = 11;
@@ -62,6 +62,8 @@ public class MusicUtils {
         public final static int SETTINGS = 15;
         public final static int SEARCH = 16;
         public final static int CHILD_MENU_BASE = 17; // this should be the last item
+
+        public final static int INTERLEAVE_ALL = 1000;
     }
 
     /**
@@ -371,6 +373,16 @@ public class MusicUtils {
             return;
         }
         sService.enqueue(list, MediaPlaybackService.LAST);
+        String message = context.getResources().getQuantityString(
+                R.plurals.NNNtrackstoplayqueue, list.length, list.length);
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void interleave(Context context, long[] list, int count) {
+        if (sService == null) {
+            return;
+        }
+        sService.interleave(list, count);
         String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplayqueue, list.length, list.length);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

@@ -178,10 +178,15 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
+        for (int i = 1; i<=5; i++) {
+            interleave.add(2, INTERLEAVE_ALL+i, i, getResources().getQuantityString(R.plurals.interleaveNNN, i, i));
+        }
+
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
+
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
@@ -196,9 +201,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             case PLAY_ALL:
                 MusicUtils.playAll(this, fetchSongList(mCurrentFolder), false);
                 return true;
-            case SHUFFLE_ALL:
-                MusicUtils.playAll(this, fetchSongList(mCurrentFolder), true);
-                return true;
+
             case QUEUE_ALL:
                 MusicUtils.queue(this, fetchSongList(mCurrentFolder));
                 return true;
@@ -235,6 +238,12 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
                 startActivityForResult(intent, -1);
                 return true;
             }
+
+            default:
+                if (item.getItemId() > INTERLEAVE_ALL) {
+                    MusicUtils.interleave(this, fetchSongList(mCurrentFolder), item.getItemId()-INTERLEAVE_ALL);
+                    return true;
+                }
 
         }
         return super.onContextItemSelected(item);

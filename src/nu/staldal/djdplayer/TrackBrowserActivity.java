@@ -35,6 +35,7 @@ import android.widget.*;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Random;
 
 public class TrackBrowserActivity extends BrowserActivity {
     private static final String LOGTAG = "TrackBrowser";
@@ -452,8 +453,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     }
     
-    private TouchInterceptor.DropListener mDropListener =
-        new TouchInterceptor.DropListener() {
+    private TouchInterceptor.DropListener mDropListener = new TouchInterceptor.DropListener() {
         public void drop(int from, int to) {
             if (mTrackCursor instanceof PlayQueueCursor) {
                 // update the currently playing list
@@ -470,8 +470,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     };
     
-    private TouchInterceptor.RemoveListener mRemoveListener =
-        new TouchInterceptor.RemoveListener() {
+    private TouchInterceptor.RemoveListener mRemoveListener = new TouchInterceptor.RemoveListener() {
         public void remove(int which) {
             removePlaylistItem(which);
         }
@@ -855,9 +854,13 @@ public class TrackBrowserActivity extends BrowserActivity {
         super.onCreateOptionsMenu(menu);
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
             menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
-            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
             menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
-        } else {
+            if (mEditMode) {
+                menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+            }
+        }
+
+        if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
         }
 
@@ -887,20 +890,27 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
             }
 
-            case SHUFFLE_ALL: {
-                MusicUtils.playAll(this, MusicUtils.getSongListForCursor(mTrackCursor), true);
-                return true;
-            }
-
             case QUEUE_ALL: {
                 MusicUtils.queue(this, MusicUtils.getSongListForCursor(mTrackCursor));
                 return true;
             }
 
-            case SHUFFLE:
+            case SHUFFLE_PLAYLIST: {
+                Random random = new Random();
+                long[] songs = MusicUtils.getSongListForCursor(mTrackCursor);
+                for (int i=0; i < songs.length; i++) {
+                    int randomPosition = random.nextInt(songs.length);
+                    MediaStore.Audio.Playlists.Members.moveItem(getContentResolver(),
+                            Long.valueOf(mPlaylist), i, randomPosition);
+                }
+                return true;
+            }
+
+            case SHUFFLE: {
                 MusicUtils.shuffleQueue();
                 return true;
-                
+            }
+
             case NEW_PLAYLIST: {
                 Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
@@ -915,9 +925,10 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
             }
 
-            case CLEAR_QUEUE:
+            case CLEAR_QUEUE: {
                 MusicUtils.clearQueue();
                 return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
