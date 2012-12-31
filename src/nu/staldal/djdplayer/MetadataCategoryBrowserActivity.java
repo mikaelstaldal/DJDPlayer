@@ -205,7 +205,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
-            for (int j = 1; j<=1; j++) {
+            for (int j = 1; j<=5; j++) {
                 interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
@@ -279,9 +279,9 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
 
             default:
                 if (item.getItemId() > INTERLEAVE_ALL) {
-                    int srcCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
-                    int destCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    MusicUtils.interleave(this, fetchSongList(mCurrentId), srcCount, destCount);
+                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
+                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
+                    MusicUtils.interleave(this, fetchSongList(mCurrentId), currentCount, newCount);
                     return true;
                 }
         }

@@ -692,7 +692,7 @@ public class MediaPlaybackService extends Service {
      * or that the play-state changed (paused/resumed).
      */
     private void notifyChange(String what) {
-        
+
         Intent i = new Intent(what);
         i.putExtra("id", Long.valueOf(getAudioId()));
         i.putExtra("artist", getArtistName());
@@ -809,17 +809,28 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    public void interleave(long [] list, int count) {
-        long[] sublist = new long[count];
-        for (int i = 0, j = count; i<list.length; i+=count, j+=count*2) {
-            if (i+count >= list.length) {
-                System.arraycopy(list, i, sublist, 0, list.length-i-1);
-            } else {
-                System.arraycopy(list, i, sublist, 0, count);
+    public void interleave(long[] newList, int currentCount, int newCount) {
+        synchronized (this) {
+            long[] destList = new long[mPlayListLen + newList.length];
+
+            int destI = 0;
+            int currentI = 0;
+            int newI = 0;
+            while (destI<destList.length) {
+                for (int i = 0; i<currentCount; i++) {
+                    if (currentI >= mPlayListLen) break;
+                    destList[destI++] = mPlayList[currentI++];
+                }
+                for (int i = 0; i<newCount; i++) {
+                    if (newI >= newList.length) break;
+                    destList[destI++] = newList[newI++];
+                }
             }
-            addToPlaylistInternal(sublist, j);
+
+            mPlayList = destList;
+            mPlayListLen = mPlayList.length;
+            updatePlaylist();
         }
-        updatePlaylist();
     }
 
     /**
