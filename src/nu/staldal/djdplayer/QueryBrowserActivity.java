@@ -167,11 +167,13 @@ public class QueryBrowserActivity extends ListActivity
         if (!mAdapterSent && mAdapter != null) {
             mAdapter.changeCursor(null);
         }
-        // Because we pass the adapter to the next activity, we need to make
-        // sure it doesn't keep a reference to this activity. We can do this
-        // by clearing its DatasetObservers, which setListAdapter(null) does.
-        setListAdapter(null);
-        mAdapter = null;
+        if (mAdapter != null) {
+            // Because we pass the adapter to the next activity, we need to make
+            // sure it doesn't keep a reference to this activity. We can do this
+            // by clearing its DatasetObservers, which setListAdapter(null) does.
+            setListAdapter(null);
+            mAdapter = null;
+        }
         super.onDestroy();
     }
 
