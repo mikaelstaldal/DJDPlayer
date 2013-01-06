@@ -31,7 +31,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserActivity<MetadataCategoryListAdapter> {
-    protected final static int SEARCH = CHILD_MENU_BASE;
+    protected final static int SEARCH_FOR = CHILD_MENU_BASE;
 
     protected long mCurrentId;
     protected String mCurrentName;
@@ -225,7 +225,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
             menu.setHeaderTitle(getString(getUnknownStringId()));
         } else {
             menu.setHeaderTitle(mCurrentName);
-            menu.add(0, SEARCH, 0, R.string.search_title);
+            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
     }
 
@@ -273,7 +273,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
                 return true;
             }
 
-            case SEARCH:
+            case SEARCH_FOR:
                 doSearch();
                 return true;
 

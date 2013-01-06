@@ -47,7 +47,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
     private static final int REMOVE = CHILD_MENU_BASE + 5;
     private static final int TRACK_INFO = CHILD_MENU_BASE + 6;
-    private static final int SEARCH = CHILD_MENU_BASE + 7;
+    private static final int SEARCH_FOR = CHILD_MENU_BASE + 7;
 
     private static final String[] CURSOR_COLS = new String[] {
         MediaStore.Audio.Media._ID,
@@ -598,7 +598,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         // only add the 'search' menu if the selected item is music
         if (isMusic(mTrackCursor)) {
-            menu.add(0, SEARCH, 0, R.string.search_title);
+            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
         mCurrentAlbumName = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
                 MediaStore.Audio.Media.ALBUM));
@@ -685,7 +685,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 startActivity(intent);
                 return true;
 
-            case SEARCH:
+            case SEARCH_FOR:
                 doSearch();
                 return true;
         }

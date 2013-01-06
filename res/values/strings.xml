@@ -147,6 +147,8 @@
     <!-- Library screen, menu item -->
     <string name="search_title">Search</string>
     <!-- Menu item -->
+    <string name="search_for">Search for</string>
+    <!-- Menu item -->
     <string name="create_new_playlist">Create playlist</string>
     <!-- Title of screen when there are no songs, or if the SD card is busy -->
     <string name="no_tracks_title">No songs</string>
