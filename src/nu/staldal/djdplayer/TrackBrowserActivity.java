@@ -80,10 +80,10 @@ public class TrackBrowserActivity extends BrowserActivity {
     private Cursor mTrackCursor;
     private TrackListAdapter mAdapter;
     private boolean mAdapterSent = false;
-    private String mAlbumId;
-    private String mArtistId;
+    private long mAlbumId;
+    private long mArtistId;
     private String mPlaylist;
-    private String mGenre;
+    private long mGenreId;
     private String mFolder;
     private String mSortOrder;
     private int mSelectedPosition;
@@ -98,19 +98,19 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         if (icicle != null) {
             mSelectedId = icicle.getLong("selectedtrack");
-            mAlbumId = icicle.getString("album");
-            mArtistId = icicle.getString("artist");
+            mAlbumId = icicle.getLong("album");
+            mArtistId = icicle.getLong("artist");
             mPlaylist = icicle.getString("playlist");
-            mGenre = icicle.getString("genre");
+            mGenreId = icicle.getLong("genre");
             mFolder = icicle.getString("folder");
             mEditMode = icicle.getBoolean("editmode", false);
         } else {
-            mAlbumId = getIntent().getStringExtra("album");
+            mAlbumId = parseLong(getIntent().getStringExtra("album"));
             // If we have an album, show everything on the album, not just stuff
             // by a particular artist.
-            mArtistId = getIntent().getStringExtra("artist");
+            mArtistId = parseLong(getIntent().getStringExtra("artist"));
             mPlaylist = getIntent().getStringExtra(PlaylistBrowserActivity.CATEGORY_ID);
-            mGenre = getIntent().getStringExtra("genre");
+            mGenreId = parseLong(getIntent().getStringExtra("genre"));
             mFolder = getIntent().getStringExtra(FolderBrowserActivity.CATEGORY_ID);
             mEditMode = getIntent().getAction().equals(Intent.ACTION_EDIT);
         }
@@ -134,6 +134,10 @@ public class TrackBrowserActivity extends BrowserActivity {
             setListAdapter(mAdapter);
         }
         mToken = MusicUtils.bindToService(this, this);
+    }
+
+    private long parseLong(String s) {
+        return (s == null) ? -1 : Long.parseLong(s);
     }
 
     @Override
@@ -292,10 +296,10 @@ public class TrackBrowserActivity extends BrowserActivity {
         // of an orientation switch. Otherwise we could lose it while
         // in the middle of specifying a playlist to add the item to.
         outcicle.putLong("selectedtrack", mSelectedId);
-        outcicle.putString("artist", mArtistId);
-        outcicle.putString("album", mAlbumId);
+        outcicle.putLong("artist", mArtistId);
+        outcicle.putLong("album", mAlbumId);
         outcicle.putString("playlist", mPlaylist);
-        outcicle.putString("genre", mGenre);
+        outcicle.putLong("genre", mGenreId);
         outcicle.putString("folder", mFolder);
         outcicle.putBoolean("editmode", mEditMode);
         super.onSaveInstanceState(outcicle);
@@ -362,7 +366,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     private void setTitle() {
         CharSequence fancyName = null;
-        if (mAlbumId != null) {
+        if (mAlbumId != -1) {
             int numresults = mTrackCursor != null ? mTrackCursor.getCount() : 0;
             if (numresults > 0) {
                 mTrackCursor.moveToFirst();
@@ -391,12 +395,12 @@ public class TrackBrowserActivity extends BrowserActivity {
                     fancyName = getString(R.string.unknown_album_name);
                 }
             }
-        } else if (mArtistId != null) {
+        } else if (mArtistId != -1) {
             String [] cols = new String [] {
                 MediaStore.Audio.Artists.ARTIST
             };
             Cursor cursor = MusicUtils.query(this,
-                    ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, Long.valueOf(mArtistId)),
+                    ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, mArtistId),
                     cols, null, null, null);
             if (cursor != null) {
                 if (cursor.getCount() != 0) {
@@ -427,12 +431,12 @@ public class TrackBrowserActivity extends BrowserActivity {
                     cursor.deactivate();
                 }
             }
-        } else if (mGenre != null) {
+        } else if (mGenreId != -1) {
             String [] cols = new String [] {
                 MediaStore.Audio.Genres.NAME
             };
             Cursor cursor = MusicUtils.query(this,
-                    ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, Long.valueOf(mGenre)),
+                    ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, mGenreId),
                     cols, null, null, null);
             if (cursor != null) {
                 if (cursor.getCount() != 0) {
@@ -968,9 +972,8 @@ public class TrackBrowserActivity extends BrowserActivity {
         StringBuilder where = new StringBuilder();
         where.append(MediaStore.Audio.Media.TITLE + " != ''");
 
-        if (mGenre != null) {
-            Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external",
-                    Integer.valueOf(mGenre));
+        if (mGenreId != -1) {
+            Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId);
             if (!TextUtils.isEmpty(filter)) {
                 uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
             }
@@ -1028,11 +1031,11 @@ public class TrackBrowserActivity extends BrowserActivity {
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
             ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), null, mSortOrder, async);
         } else {
-            if (mAlbumId != null) {
+            if (mAlbumId != -1) {
                 where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);
                 mSortOrder = MediaStore.Audio.Media.TRACK + ", " + mSortOrder;
             }
-            if (mArtistId != null) {
+            if (mArtistId != -1) {
                 where.append(" AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + mArtistId);
             }
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
@@ -1369,7 +1372,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
-                } else if (!mActivity.mEditMode && mActivity.mAlbumId == null) {
+                } else if (!mActivity.mEditMode && mActivity.mAlbumId == -1) {
                     String alpha = mActivity.getString(R.string.fast_scroll_alphabet);
                 
                     mIndexer = new MusicAlphabetIndexer(cursor, mTitleIdx, alpha);

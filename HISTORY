@@ -2,3 +2,4 @@
 ---
 * Shuffle stored playlist
 * Interleave category/folder/playlist with play queue
+* Fix occasional crash
