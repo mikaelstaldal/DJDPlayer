@@ -3,3 +3,7 @@
 * Shuffle stored playlist
 * Interleave category/folder/playlist with play queue
 * Fix occasional crash
+
+1.1.1
+-----
+* Fix handling of special characters in folder names
