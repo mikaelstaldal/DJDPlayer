@@ -154,8 +154,8 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
     private long[] fetchSongList(String folder) {
         Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID},
-                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE \'" + folder + "%\'",
-                null, null);
+                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE ?",
+                new String[] { folder + "%" }, null);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);

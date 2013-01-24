@@ -1027,9 +1027,9 @@ public class TrackBrowserActivity extends BrowserActivity {
                 uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
             }
             mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
-            where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE \'" + mFolder + "%\'");
+            where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE ?");
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), null, mSortOrder, async);
+            ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), new String[] { mFolder + "%" }, mSortOrder, async);
         } else {
             if (mAlbumId != -1) {
                 where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);

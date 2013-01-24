@@ -92,8 +92,8 @@ public class FolderProvider extends ContentProvider {
     private int fetchCount(String path) {
         Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[] { MediaStore.Audio.Media._ID },
-                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE \'" + path + "%\'",
-                null, null);
+                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE ?",
+                new String[] { path + "%" }, null);
 
         int count = 0;
         if (cursor != null) {
