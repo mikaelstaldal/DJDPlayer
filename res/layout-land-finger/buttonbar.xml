@@ -94,7 +94,7 @@
         android:id="@+id/foldertab"
         android:focusable="true"
         android:background="@drawable/buttonbarbackground"
-        android:drawableTop="@drawable/ic_tab_songs"
+        android:drawableTop="@drawable/ic_tab_folders"
         android:text="@string/folders_menu"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/tab_indicator_text"
