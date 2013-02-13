@@ -11,3 +11,4 @@
 1.2
 ---
 * Show current music folder when selecting a new
+* Automatically refresh folder view when changing music folder
