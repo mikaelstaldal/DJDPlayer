@@ -40,9 +40,12 @@ public class PickMusicFolderActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        String currentFolder = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.MUSIC_FOLDER,
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
+
         Intent intent = new Intent("org.openintents.action.PICK_DIRECTORY");
         if (getPackageManager().resolveActivity(intent, 0) != null) {
-            intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
+            intent.setData(Uri.fromFile(new File(currentFolder)));
             intent.putExtra("org.openintents.extra.TITLE", getResources().getString(R.string.music_folder));
             intent.putExtra("org.openintents.extra.BUTTON_TEXT", getResources().getString(R.string.pick_music_folder));
             startActivityForResult(intent, PICK_DIRECTORY);
@@ -73,7 +76,7 @@ public class PickMusicFolderActivity extends Activity {
 
             mPrompt.setText(R.string.select_music_folder);
             mSaveButton.setText(R.string.pick_music_folder);
-            editor.setText(Environment.getExternalStorageDirectory().getAbsolutePath());
+            editor.setText(currentFolder);
         }
     }
 

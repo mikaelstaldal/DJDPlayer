@@ -7,3 +7,7 @@
 1.1.1
 -----
 * Fix handling of special characters in folder names
+
+1.2
+---
+* Show current music folder when selecting a new
