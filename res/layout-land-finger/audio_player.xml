@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2007 The Android Open Source Project
+     Copyright (C) 2012-2013 Mikael Ståldal
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -48,6 +49,12 @@
            <ImageButton android:id="@+id/repeat"
                 android:layout_width="82dip"
                 android:layout_height="45dip" />
+
+           <ImageButton android:id="@+id/library"
+                android:src="@drawable/ic_menu_music_library"
+                android:layout_width="82dip"
+                android:layout_height="45dip"
+                android:layout_marginRight="8dip" />
 
         </LinearLayout>
 

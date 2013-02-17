@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +51,6 @@ public class MusicUtils {
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
         public final static int PLAY_ALL = 5;
-        public final static int GOTO_START = 6;
         public final static int SHUFFLE = 7;
         public final static int SHUFFLE_PLAYLIST = 8;
         public final static int QUEUE_ALL = 9;

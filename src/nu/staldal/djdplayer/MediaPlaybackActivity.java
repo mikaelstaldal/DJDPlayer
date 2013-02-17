@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +53,7 @@ public class MediaPlaybackActivity extends Activity
     private ImageButton mRepeatButton;
     private ImageButton mShuffleButton;
     private ImageButton mQueueButton;
+    private ImageButton mLibraryButton;
     private Toast mToast;
     private int mTouchSlop;
     private MusicUtils.ServiceToken mToken;
@@ -105,26 +107,81 @@ public class MediaPlaybackActivity extends Activity
         v.setOnLongClickListener(this);
 
         mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
-        mPrevButton.setOnClickListener(mPrevListener);
-        mPrevButton.setRepeatListener(mRewListener, 260);
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (mService == null) return;
+                if (mService.position() < 2000) {
+                    mService.prev();
+                } else {
+                    mService.seek(0);
+                    mService.play();
+                }
+            }
+        });
+        mPrevButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
+            public void onRepeat(View v, long howlong, int repcnt) {
+                scanBackward(repcnt, howlong);
+            }
+        }, 260);
         mPauseButton = (ImageButton) findViewById(R.id.pause);
         mPauseButton.requestFocus();
-        mPauseButton.setOnClickListener(mPauseListener);
+        mPauseButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                doPauseResume();
+            }
+        });
         mNextButton = (RepeatingImageButton) findViewById(R.id.next);
-        mNextButton.setOnClickListener(mNextListener);
-        mNextButton.setRepeatListener(mFfwdListener, 260);
+        mNextButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (mService == null) return;
+                mService.next(true);
+            }
+        });
+        mNextButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
+            public void onRepeat(View v, long howlong, int repcnt) {
+                scanForward(repcnt, howlong);
+            }
+        }, 260);
         seekmethod = 1;
 
         mDeviceHasDpad = (getResources().getConfiguration().navigation ==
             Configuration.NAVIGATION_DPAD);
         
         mQueueButton = (ImageButton) findViewById(R.id.curplaylist);
-        mQueueButton.setOnClickListener(mQueueListener);
+        mQueueButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(
+                        new Intent(Intent.ACTION_EDIT)
+                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track")
+                        .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE)
+                );
+            }
+        });
+
         mShuffleButton = ((ImageButton) findViewById(R.id.shuffle));
-        mShuffleButton.setOnClickListener(mShuffleListener);
+        mShuffleButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                shuffle();
+            }
+        });
+
         mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
-        mRepeatButton.setOnClickListener(mRepeatListener);
-        
+        mRepeatButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                cycleRepeat();
+            }
+        });
+        mLibraryButton = ((ImageButton) findViewById(R.id.library));
+        mLibraryButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         if (mProgress instanceof SeekBar) {
             SeekBar seeker = (SeekBar) mProgress;
             seeker.setOnSeekBarChangeListener(mSeekListener);
@@ -387,67 +444,6 @@ public class MediaPlaybackActivity extends Activity
         }
     };
 
-    private View.OnClickListener mQueueListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            startActivity(
-                    new Intent(Intent.ACTION_EDIT)
-                    .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track")
-                    .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE)
-            );
-        }
-    };
-
-    private View.OnClickListener mShuffleListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            shuffle();
-        }
-    };
-
-    private View.OnClickListener mRepeatListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            cycleRepeat();
-        }
-    };
-
-    private View.OnClickListener mPauseListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            doPauseResume();
-        }
-    };
-
-    private View.OnClickListener mPrevListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            if (mService == null) return;
-            if (mService.position() < 2000) {
-                mService.prev();
-            } else {
-                mService.seek(0);
-                mService.play();
-            }
-        }
-    };
-
-    private View.OnClickListener mNextListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            if (mService == null) return;
-            mService.next(true);
-        }
-    };
-
-    private RepeatingImageButton.RepeatListener mRewListener =
-        new RepeatingImageButton.RepeatListener() {
-        public void onRepeat(View v, long howlong, int repcnt) {
-            scanBackward(repcnt, howlong);
-        }
-    };
-    
-    private RepeatingImageButton.RepeatListener mFfwdListener =
-        new RepeatingImageButton.RepeatListener() {
-        public void onRepeat(View v, long howlong, int repcnt) {
-            scanForward(repcnt, howlong);
-        }
-    };
-   
     @Override
     public void onStop() {
         paused = true;
@@ -506,7 +502,6 @@ public class MediaPlaybackActivity extends Activity
         // modes, instead of tailoring them to the specific file being played.
         if (MusicUtils.getCurrentAudioId() >= 0) {
             menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
-            menu.add(0, GOTO_START, 0, R.string.goto_start).setIcon(R.drawable.ic_menu_music_library);
             menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
@@ -552,14 +547,6 @@ public class MediaPlaybackActivity extends Activity
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-
-            case GOTO_START:
-                intent = new Intent();
-                intent.setClass(this, MusicBrowserActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-                break;
 
             case TRACK_INFO:
                 intent = new Intent(Intent.ACTION_VIEW);
@@ -1007,6 +994,7 @@ public class MediaPlaybackActivity extends Activity
                     mRepeatButton.setVisibility(View.VISIBLE);
                     mShuffleButton.setVisibility(View.VISIBLE);
                     mQueueButton.setVisibility(View.VISIBLE);
+                    mLibraryButton.setVisibility(View.VISIBLE);
                     setRepeatButtonImage();
                     setPauseButtonImage();
                     return;
@@ -1213,4 +1201,3 @@ public class MediaPlaybackActivity extends Activity
         mTotalTime.setText(MusicUtils.formatDuration(this, mDuration));
     }
 }
-
