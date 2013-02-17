@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,21 +136,6 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
         super.onPause();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                if (resultCode == RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long [] list = fetchSongList(mCurrentFolder);
-                        MusicUtils.addToPlaylist(this, list, Long.parseLong(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-        }
-    }
-
     private long[] fetchSongList(String folder) {
         Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID},
@@ -200,13 +185,17 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL:
-                MusicUtils.playAll(this, fetchSongList(mCurrentFolder), false);
+            case PLAY_ALL: {
+                long[] songs = fetchSongList(mCurrentFolder);
+                MusicUtils.playAll(this, songs);
                 return true;
+            }
 
-            case QUEUE_ALL:
-                MusicUtils.queue(this, fetchSongList(mCurrentFolder));
+            case QUEUE_ALL: {
+                long[] songs = fetchSongList(mCurrentFolder);
+                MusicUtils.queue(this, songs);
                 return true;
+            }
 
             case NEW_PLAYLIST: {
                 Intent intent = new Intent();
@@ -216,20 +205,17 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = fetchSongList(mCurrentFolder);
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(this, list, playlist);
+                long[] songs = fetchSongList(mCurrentFolder);
+                MusicUtils.addToPlaylist(this, songs, playlist);
                 return true;
             }
 
             case DELETE_ITEM: {
                 long [] list = fetchSongList(mCurrentFolder);
-                String f;
-                if (MusicUtils.isExternalStorageRemovable()) {
-                    f = getString(R.string.delete_folder_desc);
-                } else {
-                    f = getString(R.string.delete_folder_desc_nosdcard);
-                }
+                String f = (MusicUtils.isExternalStorageRemovable())
+                    ? getString(R.string.delete_folder_desc)
+                    : getString(R.string.delete_folder_desc_nosdcard);
                 String desc = String.format(f, mCurrentFolder);
                 Bundle b = new Bundle();
                 b.putString("description", desc);
@@ -245,12 +231,28 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
                 if (item.getItemId() > INTERLEAVE_ALL) {
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    MusicUtils.interleave(this, fetchSongList(mCurrentFolder), currentCount, newCount);
+                    long[] songs = fetchSongList(mCurrentFolder);
+                    MusicUtils.interleave(this, songs, currentCount, newCount);
                     return true;
                 }
 
         }
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        switch (requestCode) {
+            case NEW_PLAYLIST:
+                if (resultCode == RESULT_OK) {
+                    Uri uri = intent.getData();
+                    if (uri != null) {
+                        long[] songs = fetchSongList(mCurrentFolder);
+                        MusicUtils.addToPlaylist(this, songs, Long.parseLong(uri.getLastPathSegment()));
+                    }
+                }
+                break;
+        }
     }
 
     static class FolderListAdapter extends SimpleCursorAdapter {

@@ -629,16 +629,13 @@ public class MusicUtils {
         return sFormatter.format(durationformat, timeArgs).toString();
     }
 
-    public static void playAll(Context context, long [] list, boolean shuffle) {
+    public static void playAll(Context context, long[] list) {
         if (list.length == 0 || sService == null) {
             Log.d(TAG, "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
             String message = context.getString(R.string.emptyplaylist, list.length);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             return;
-        }
-        if (shuffle) {
-            shuffleArray(list);
         }
         sService.open(list, 0);
         sService.play();

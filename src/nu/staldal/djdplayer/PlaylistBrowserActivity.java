@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
             long id = Long.parseLong(intent.getExtras().getString("playlist"));
-            MusicUtils.playAll(this, fetchSongList(id), false);
+            MusicUtils.playAll(this, fetchSongList(id));
             finish();
         }
     }
@@ -170,7 +170,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_ALL:
-                MusicUtils.playAll(this, fetchSongList(mCurrentId), false);
+                MusicUtils.playAll(this, fetchSongList(mCurrentId));
                 return true;
 
             case QUEUE_ALL:

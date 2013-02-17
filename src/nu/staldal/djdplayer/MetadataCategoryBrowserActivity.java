@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,21 +177,6 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                if (resultCode == RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long [] list = fetchSongList(mCurrentId);
-                        MusicUtils.addToPlaylist(this, list, Long.parseLong(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-        }
-    }
-
-    @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
@@ -232,13 +217,19 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL:
-                MusicUtils.playAll(this, fetchSongList(mCurrentId), false);
+            case PLAY_ALL: {
+                long[] songs = fetchSongList(mCurrentId);
+                MusicUtils.shuffleArray(songs);
+                MusicUtils.playAll(this, songs);
                 return true;
+            }
 
-            case QUEUE_ALL:
-                MusicUtils.queue(this, fetchSongList(mCurrentId));
+            case QUEUE_ALL: {
+                long[] songs = fetchSongList(mCurrentId);
+                MusicUtils.shuffleArray(songs);
+                MusicUtils.queue(this, songs);
                 return true;
+            }
 
             case NEW_PLAYLIST: {
                 Intent intent = new Intent();
@@ -248,24 +239,22 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = fetchSongList(mCurrentId);
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(this, list, playlist);
+                long[] songs = fetchSongList(mCurrentId);
+                MusicUtils.shuffleArray(songs);
+                MusicUtils.addToPlaylist(this, songs, playlist);
                 return true;
             }
 
             case DELETE_ITEM: {
-                long [] list = fetchSongList(mCurrentId);
-                String f;
-                if (MusicUtils.isExternalStorageRemovable()) {
-                    f = getString(getDeleteDescStringId());
-                } else {
-                    f = getString(getDeleteDescNoSdCardStringId());
-                }
+                long[] songs = fetchSongList(mCurrentId);
+                String f = (MusicUtils.isExternalStorageRemovable())
+                    ? getString(getDeleteDescStringId())
+                    : getString(getDeleteDescNoSdCardStringId());
                 String desc = String.format(f, mCurrentName);
                 Bundle b = new Bundle();
                 b.putString("description", desc);
-                b.putLongArray("items", list);
+                b.putLongArray("items", songs);
                 Intent intent = new Intent();
                 intent.setClass(this, DeleteItems.class);
                 intent.putExtras(b);
@@ -281,11 +270,29 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
                 if (item.getItemId() > INTERLEAVE_ALL) {
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    MusicUtils.interleave(this, fetchSongList(mCurrentId), currentCount, newCount);
+                    long[] songs = fetchSongList(mCurrentId);
+                    MusicUtils.shuffleArray(songs);
+                    MusicUtils.interleave(this, songs, currentCount, newCount);
                     return true;
                 }
         }
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        switch (requestCode) {
+            case NEW_PLAYLIST:
+                if (resultCode == RESULT_OK) {
+                    Uri uri = intent.getData();
+                    if (uri != null) {
+                        long [] songs = fetchSongList(mCurrentId);
+                        MusicUtils.shuffleArray(songs);
+                        MusicUtils.addToPlaylist(this, songs, Long.parseLong(uri.getLastPathSegment()));
+                    }
+                }
+                break;
+        }
     }
 
     @Override

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,12 +281,9 @@ public class QueryBrowserActivity extends ListActivity
                 long[] list = new long[1];
                 list[0] = (int) mSelectedId;
                 Bundle b = new Bundle();
-                String f;
-                if (MusicUtils.isExternalStorageRemovable()) {
-                    f = getString(R.string.delete_song_desc);
-                } else {
-                    f = getString(R.string.delete_song_desc_nosdcard);
-                }
+                String f = (MusicUtils.isExternalStorageRemovable())
+                    ? getString(R.string.delete_song_desc)
+                    : getString(R.string.delete_song_desc_nosdcard);
                 String desc = String.format(f,
                         mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
                 b.putString("description", desc);

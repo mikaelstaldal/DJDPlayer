@@ -13,3 +13,7 @@
 * Show current music folder when selecting a new
 * Automatically refresh folder view when changing music folder
 * New folder tab icon
+
+1.3
+---
+* Shuffle before play/queue/interleave/add to play list from category
