@@ -858,6 +858,14 @@ public class TrackBrowserActivity extends BrowserActivity {
             menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
             if (mEditMode) {
                 menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+            } else {
+                SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
+                        R.drawable.ic_menu_interleave);
+                for (int i = 1; i<=5; i++) {
+                    for (int j = 1; j<=5; j++) {
+                        interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+                    }
+                }
             }
         }
 
@@ -930,6 +938,16 @@ public class TrackBrowserActivity extends BrowserActivity {
                 MusicUtils.clearQueue();
                 return true;
             }
+
+            default:
+                if (item.getItemId() > INTERLEAVE_ALL) {
+                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
+                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
+                    long[] songs = MusicUtils.getSongListForCursor(mTrackCursor);
+                    MusicUtils.interleave(this, songs, currentCount, newCount);
+                    return true;
+                }
+
         }
         return super.onOptionsItemSelected(item);
     }
