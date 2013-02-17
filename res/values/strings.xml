@@ -73,6 +73,8 @@
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shuffle">Shuffle</string>
 
+    <string name="repeat">Repeat</string>
+
     <!-- Menu item to rescan music library -->
     <string name="rescan">Rescan music</string>
 
