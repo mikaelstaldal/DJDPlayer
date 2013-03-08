@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity {
+    public static final String CLICK_ON_SONG = "clickonsong";
     public static final String SHOW_ARTISTS_TAB = "show_artists_tab";
     public static final String SHOW_ALBUMS_TAB = "show_albums_tab";
     public static final String SHOW_GENRES_TAB = "show_genres_tab";
@@ -26,6 +27,10 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String SHOW_SONGS_TAB = "show_songs_tab";
     public static final String SHOW_PLAYLISTS_TAB = "show_playlists_tab";
     public static final String MUSIC_FOLDER = "music_folder";
+
+    public static final String PLAY_NEXT = "PLAY_NEXT";
+    public static final String PLAY_NOW = "PLAY_NOW";
+    public static final String QUEUE = "QUEUE";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

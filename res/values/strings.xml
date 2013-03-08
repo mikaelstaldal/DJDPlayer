@@ -380,6 +380,8 @@
     <string name="rename_playlist_diff_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
 
     <!-- Preferences -->
+    <string name="behaviour">Behaviour</string>
+    <string name="clickonsong">Clock on song</string>
     <string name="settings">Settings</string>
     <string name="tabs">Tabs</string>
     <string name="show_artists_tab">Show artists tab</string>

@@ -24,6 +24,7 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.*;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
@@ -706,7 +707,15 @@ public class TrackBrowserActivity extends BrowserActivity {
                 mSelectedId = id;
             }
 
-            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, mSelectedId);
+            String clickOnSong = PreferenceManager.getDefaultSharedPreferences(this).getString(
+                    SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT);
+            if (clickOnSong.equals(SettingsActivity.PLAY_NOW)) {
+                MusicUtils.queueAndPlayImmediately(this, mSelectedId);
+            } else if (clickOnSong.equals(SettingsActivity.QUEUE)) {
+                MusicUtils.queue(this, new long[] { mSelectedId });
+            } else {
+                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, mSelectedId);
+            }
         }
     }
 
