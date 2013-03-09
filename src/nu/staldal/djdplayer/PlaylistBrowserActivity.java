@@ -40,18 +40,21 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     public static final String CATEGORY_ID = "playlist";
 
     private static final String CURRENT_PLAYLIST = "currentplaylist";
+    private static final String CURRENT_PLAYLIST_NAME = "currentplaylistname";
 
     private static final int DELETE_PLAYLIST = CHILD_MENU_BASE + 1;
     private static final int EDIT_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
     private static final int CHANGE_WEEKS = CHILD_MENU_BASE + 4;
-
     private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 5;
+    private static final int EXPORT_PLAYLIST = CHILD_MENU_BASE + 6;
+
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
     private static final long PODCASTS_PLAYLIST = -3;
 
     private long mCurrentId;
+    private String mPlaylistName;
     private boolean mCreateShortcut;
 
     @Override
@@ -65,6 +68,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
 
         if (icicle != null) {
             mCurrentId = icicle.getLong(CURRENT_PLAYLIST);
+            mPlaylistName = icicle.getString(CURRENT_PLAYLIST_NAME);
         }
 
         if (Intent.ACTION_CREATE_SHORTCUT.equals(getIntent().getAction())) {
@@ -123,6 +127,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         // of an orientation switch. Otherwise we could lose it while
         // in the middle of specifying a playlist to add the item to.
         outcicle.putLong(CURRENT_PLAYLIST, mCurrentId);
+        outcicle.putString(CURRENT_PLAYLIST_NAME, mPlaylistName);
         super.onSaveInstanceState(outcicle);
     }
 
@@ -161,9 +166,11 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
         }
 
+        menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
+
         mCursor.moveToPosition(mi.position);
-        menu.setHeaderTitle(mCursor.getString(mCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Playlists.NAME)));
+        mPlaylistName = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+        menu.setHeaderTitle(mPlaylistName);
     }
 
     @Override
@@ -203,6 +210,10 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 intent.setClass(this, RenamePlaylist.class);
                 intent.putExtra("rename", mCurrentId);
                 startActivityForResult(intent, RENAME_PLAYLIST);
+                return true;
+
+            case EXPORT_PLAYLIST:
+                MusicUtils.exportPlaylist(this, mPlaylistName, fetchSongList(mCurrentId));
                 return true;
 
             default:
@@ -272,72 +283,31 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     }
 
     private long[] fetchSongList(long playlistId) {
+        return MusicUtils.getSongListForCursorAndClose(fetchSongListCursor(playlistId));
+    }
+
+    private Cursor fetchSongListCursor(long playlistId) {
         if (playlistId == RECENTLY_ADDED_PLAYLIST) {
             // do a query for all songs added in the last X weeks
             int X = MusicUtils.getIntPref(this, "numweeks", 2) * (3600 * 24 * 7);
             final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
             String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
-            Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            return MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
-            if (cursor == null) {
-                return MusicUtils.sEmptyList;
-            }
-            try {
-                int len = cursor.getCount();
-                long [] list = new long[len];
-                for (int i = 0; i < len; i++) {
-                    cursor.moveToNext();
-                    list[i] = cursor.getLong(0);
-                }
-                return list;
-            } finally {
-                cursor.close();
-            }
         } else if (playlistId == PODCASTS_PLAYLIST) {
             // do a query for all files that are podcasts
             final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
-            Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            return MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ccols, MediaStore.Audio.Media.IS_PODCAST + "=1",
                     null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
-            if (cursor == null) {
-                return MusicUtils.sEmptyList;
-            }
-            try {
-                int len = cursor.getCount();
-                long [] list = new long[len];
-                for (int i = 0; i < len; i++) {
-                    cursor.moveToNext();
-                    list[i] = cursor.getLong(0);
-                }
-                return list;
-            } finally {
-                cursor.close();
-            }
         } else if (playlistId == ALL_SONGS_PLAYLIST) {
-            Cursor c = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            return MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
                     null, null);
-            try {
-                if (c == null || c.getCount() == 0) {
-                    return MusicUtils.sEmptyList;
-                }
-                int len = c.getCount();
-                long [] list = new long[len];
-                for (int i = 0; i < len; i++) {
-                    c.moveToNext();
-                    list[i] = c.getLong(0);
-                }
-
-                return list;
-            } finally {
-                if (c != null) {
-                    c.close();
-                }
-            }
         } else {
-            return fetchSongListForPlaylist(playlistId);
+            final String[] ccols = new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID };
+            return MusicUtils.query(this, MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+                    ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
         }
     }
 
@@ -528,25 +498,12 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         }
     }
 
-    private int fetchNumberOfSongs(Cursor cursor, long id) {
-        if (id >= 0)
-            return fetchSongListForPlaylist(id).length; // TODO [mikes] this is quite slow
-        else
-            return 0;
+    private int fetchNumberOfSongs(Cursor playlistCursor, long id) {
+        if (id < 0) return 0;
+        Cursor cursor = fetchSongListCursor(id); // TODO [mikes] this is quite slow
+        if (cursor == null) return 0;
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
-
-    private long [] fetchSongListForPlaylist(long plid) {
-        final String[] ccols = new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID };
-        Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Playlists.Members.getContentUri("external", plid),
-                ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-
-        if (cursor != null) {
-            long [] list = MusicUtils.getSongListForCursor(cursor);
-            cursor.close();
-            return list;
-        }
-        return MusicUtils.sEmptyList;
-    }
-
 }
-

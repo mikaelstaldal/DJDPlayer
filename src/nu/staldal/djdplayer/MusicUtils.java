@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -35,8 +36,7 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -232,11 +232,22 @@ public class MusicUtils {
 
     public final static long [] sEmptyList = new long[0];
 
+    public static long [] getSongListForCursorAndClose(Cursor cursor) {
+        try {
+            return getSongListForCursor(cursor);
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
+
     public static long [] getSongListForCursor(Cursor cursor) {
         if (cursor == null) {
             return sEmptyList;
         }
         int len = cursor.getCount();
+        if (len == 0) {
+            return sEmptyList;
+        }
         long [] list = new long[len];
         cursor.moveToFirst();
         int colidx = -1;
@@ -401,6 +412,39 @@ public class MusicUtils {
             return;
         }
         sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
+    }
+
+    // TODO [mikes] do async
+    public static void exportPlaylist(Context context, String playlistName, long[] songs)  {
+        String dir = PreferenceManager.getDefaultSharedPreferences(context).getString(
+                SettingsActivity.MUSIC_FOLDER,
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
+        int prefix = dir.length()+1;
+        File file = new File(dir, playlistName+".txt");
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+            for (long song : songs) {
+                Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                      new String[] { MediaStore.Audio.Media.DATA },
+                                      MediaStore.Audio.Media._ID + "=" + song,
+                                      null, null);
+                cursor.moveToFirst();
+                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                cursor.close();
+                writer.write(path, prefix, path.length() - prefix);
+                writer.write('\n');
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to export playlist", e);
+        } finally {
+            try {
+                if (writer != null) writer.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to close exported playlist", e);
+            }
+        }
+        Toast.makeText(context, R.string.playlist_exported, Toast.LENGTH_SHORT).show();
     }
 
     private static ContentValues[] sContentValuesCache = null;

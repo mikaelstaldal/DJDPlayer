@@ -162,6 +162,8 @@
     <string name="edit_playlist_menu">Edit</string>
     <!-- Playlist context menu item to rename the selected playlist-->
     <string name="rename_playlist_menu">Rename</string>
+    <!-- Playlist context menu item to export the selected playlist-->
+    <string name="export_playlist_menu">Export</string>
     <!-- Transient popup message shown after deleting a playlist -->
     <string name="playlist_deleted_message">Playlist deleted.</string>
     <!-- Transient popup message shown after renaming a playlist -->
@@ -406,5 +408,7 @@
     <string name="filesize">Size</string>
     <string name="mimetype">Mime Type</string>
     <string name="id">ID</string>
+
+    <string name="playlist_exported">Playlist exported</string>
 
 </resources>
