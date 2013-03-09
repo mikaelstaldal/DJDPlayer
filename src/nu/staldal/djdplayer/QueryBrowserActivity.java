@@ -70,7 +70,7 @@ public class QueryBrowserActivity extends ListActivity
             if (path.startsWith("content://media/external/audio/media/")) {
                 // This is a specific file
                 long id = Long.valueOf(uri.getLastPathSegment());
-                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, id);
+                MusicUtils.playSong(this, id);
                 finish();
                 return;
             } else if (path.startsWith("content://media/external/audio/albums/")) {
@@ -330,7 +330,7 @@ public class QueryBrowserActivity extends ListActivity
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0) {
-            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(this, id);
+            MusicUtils.playSong(this, id);
         } else {
             Log.e("QueryBrowser", "invalid position/id: " + position + "/" + id);
         }

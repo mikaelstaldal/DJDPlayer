@@ -370,7 +370,19 @@ public class MusicUtils {
         // in the media content domain, so update everything.
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
     }
-    
+
+    public static void playSong(Context context, long id) {
+        String clickOnSong = PreferenceManager.getDefaultSharedPreferences(context).getString(
+                SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT);
+        if (clickOnSong.equals(SettingsActivity.PLAY_NOW)) {
+            MusicUtils.queueAndPlayImmediately(context, id);
+        } else if (clickOnSong.equals(SettingsActivity.QUEUE)) {
+            MusicUtils.queue(context, new long[] { id });
+        } else {
+            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(context, id);
+        }
+    }
+
     public static void queueNextAndPlayIfNotAlreadyPlaying(Context context, long id) {
          if (isPlaying()) {
              queueNext(context, id);
