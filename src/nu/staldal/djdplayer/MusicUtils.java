@@ -426,39 +426,6 @@ public class MusicUtils {
         sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
     }
 
-    // TODO [mikes] do async
-    public static void exportPlaylist(Context context, String playlistName, long[] songs)  {
-        String dir = PreferenceManager.getDefaultSharedPreferences(context).getString(
-                SettingsActivity.MUSIC_FOLDER,
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
-        int prefix = dir.length()+1;
-        File file = new File(dir, playlistName+".txt");
-        Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-            for (long song : songs) {
-                Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                      new String[] { MediaStore.Audio.Media.DATA },
-                                      MediaStore.Audio.Media._ID + "=" + song,
-                                      null, null);
-                cursor.moveToFirst();
-                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                cursor.close();
-                writer.write(path, prefix, path.length() - prefix);
-                writer.write('\n');
-            }
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to export playlist", e);
-        } finally {
-            try {
-                if (writer != null) writer.close();
-            } catch (IOException e) {
-                Log.w(TAG, "Unable to close exported playlist", e);
-            }
-        }
-        Toast.makeText(context, R.string.playlist_exported, Toast.LENGTH_SHORT).show();
-    }
-
     private static ContentValues[] sContentValuesCache = null;
 
     /**

@@ -409,6 +409,7 @@
     <string name="mimetype">Mime Type</string>
     <string name="id">ID</string>
 
-    <string name="playlist_exported">Playlist exported</string>
+    <string name="exporting_playlist">Exporting playlist...</string>
+    <string name="playlist_exported">...playlist exported</string>
 
 </resources>

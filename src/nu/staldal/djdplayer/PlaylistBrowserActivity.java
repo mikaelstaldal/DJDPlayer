@@ -213,7 +213,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 return true;
 
             case EXPORT_PLAYLIST:
-                MusicUtils.exportPlaylist(this, mPlaylistName, fetchSongList(mCurrentId));
+                new ExportPlaylistTask(getApplicationContext()).execute(mPlaylistName, fetchSongList(mCurrentId));
                 return true;
 
             default:
