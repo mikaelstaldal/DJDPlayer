@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.content.*;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -55,6 +56,11 @@ public abstract class BrowserActivity extends ListActivity
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.media_picker_activity);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            View divider = findViewById(R.id.tabdivider);
+            divider.setVisibility(View.GONE);
+        }
     }
 
     protected boolean updateButtonBar(int tabId) {
