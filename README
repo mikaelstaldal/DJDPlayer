@@ -40,3 +40,5 @@ Enhancements over the standard Music Player:
 * Shuffle stored playlist
 
 * Interleave category/folder/playlist with play queue
+
+* Export playlist to M3U file in Music folder
