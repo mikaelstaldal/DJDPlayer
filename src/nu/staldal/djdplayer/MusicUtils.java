@@ -52,16 +52,18 @@ public class MusicUtils {
         public final static int NEW_PLAYLIST = 4;
         public final static int PLAY_ALL = 5;
         public final static int SHUFFLE = 7;
-        public final static int SHUFFLE_PLAYLIST = 8;
-        public final static int QUEUE_ALL = 9;
-        public final static int DELETE_ITEM = 10;
-        public final static int EFFECTS_PANEL = 11;
-        public final static int QUEUE = 12;
-        public final static int PLAY_NOW = 13;
-        public final static int PLAY_NEXT = 14;
-        public final static int SETTINGS = 15;
-        public final static int SEARCH = 16;
-        public final static int CHILD_MENU_BASE = 17; // this should be the last item
+        public final static int UNIQUEIFY = 8;
+        public final static int SHUFFLE_PLAYLIST = 9;
+        public final static int UNIQUEIFY_PLAYLIST = 10;
+        public final static int QUEUE_ALL = 11;
+        public final static int DELETE_ITEM = 12;
+        public final static int EFFECTS_PANEL = 13;
+        public final static int QUEUE = 14;
+        public final static int PLAY_NOW = 15;
+        public final static int PLAY_NEXT = 16;
+        public final static int SETTINGS = 17;
+        public final static int SEARCH = 18;
+        public final static int CHILD_MENU_BASE = 19; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -686,6 +688,12 @@ public class MusicUtils {
     public static void shuffleQueue() {
         if (sService != null) {
             sService.doShuffle();
+        }
+    }
+
+    public static void uniqueifyQueue() {
+        if (sService != null) {
+            sService.uniqueify();
         }
     }
 

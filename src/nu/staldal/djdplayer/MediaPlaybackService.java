@@ -40,7 +40,9 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -1392,6 +1394,24 @@ public class MediaPlaybackService extends Service {
             notifyChange(QUEUE_CHANGED);
         }
     }
+
+    public void uniqueify() {
+        synchronized(this) {
+            boolean modified = false;
+            Set<Long> found = new HashSet<Long>();
+            for (int i=0; i < mPlayListLen; i++) {
+                if (!found.add(mPlayList[i]) && i != mPlayPos) {
+                    removeTracksInternal(i, i);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                fetchNextSong();
+                notifyChange(QUEUE_CHANGED);
+            }
+        }
+    }
+
     public void setRepeatMode(int repeatmode) {
         synchronized(this) {
             mRepeatMode = repeatmode;

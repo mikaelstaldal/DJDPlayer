@@ -25,7 +25,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
@@ -35,10 +34,12 @@ import android.widget.*;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class TrackBrowserActivity extends BrowserActivity {
-    private static final String LOGTAG = "TrackBrowser";
+    private static final String LOGTAG = "TrackBrowserActivity";
 
     public static final String PLAYQUEUE = "playqueue";
 
@@ -421,7 +422,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     MediaStore.Audio.Playlists.NAME
                 };
                 Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(Playlists.EXTERNAL_CONTENT_URI, Long.valueOf(mPlaylist)),
+                        ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, Long.valueOf(mPlaylist)),
                         cols, null, null, null);
                 if (cursor != null) {
                     if (cursor.getCount() != 0) {
@@ -480,12 +481,13 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     };
 
-    private void removePlaylistItem(int which) {
+    private boolean removePlaylistItem(int which) {
         View v = mTrackList.getChildAt(which - mTrackList.getFirstVisiblePosition());
         if (v == null) {
             Log.d(LOGTAG, "No view when removing playlist item " + which);
-            return;
+            return false;
         }
+        boolean ret;
         if (MusicUtils.sService != null
                 && which != MusicUtils.sService.getQueuePosition()) {
             mDeletedOneRow = true;
@@ -493,7 +495,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         v.setVisibility(View.GONE);
         mTrackList.invalidateViews();
         if (mTrackCursor instanceof PlayQueueCursor) {
-            ((PlayQueueCursor)mTrackCursor).removeItem(which);
+             ret = ((PlayQueueCursor)mTrackCursor).removeItem(which);
         } else {
             int colidx = mTrackCursor.getColumnIndexOrThrow(
                     MediaStore.Audio.Playlists.Members._ID);
@@ -501,11 +503,12 @@ public class TrackBrowserActivity extends BrowserActivity {
             long id = mTrackCursor.getLong(colidx);
             Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
                     Long.valueOf(mPlaylist));
-            getContentResolver().delete(
-                    ContentUris.withAppendedId(uri, id), null, null);
+            ret = getContentResolver().delete(
+                     ContentUris.withAppendedId(uri, id), null, null) > 0;
         }
         v.setVisibility(View.VISIBLE);
         mTrackList.invalidateViews();
+        return ret;
     }
     
     private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
@@ -780,16 +783,9 @@ public class TrackBrowserActivity extends BrowserActivity {
             v.setVisibility(View.VISIBLE);
             mTrackList.invalidateViews();
         } else {
-            // remove track from playlist
-            int colidx = mTrackCursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Playlists.Members._ID);
-            mTrackCursor.moveToPosition(curpos);
-            long id = mTrackCursor.getLong(colidx);
-            Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                    Long.valueOf(mPlaylist));
-            getContentResolver().delete(
-                    ContentUris.withAppendedId(uri, id), null, null);
-            curcount--;
+            if (removePlaylistItem(curpos)) {
+                curcount--;
+            }
             if (curcount == 0) {
                 finish();
             } else {
@@ -854,11 +850,12 @@ public class TrackBrowserActivity extends BrowserActivity {
          */
         super.onCreateOptionsMenu(menu);
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
-            menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
-            menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
             if (mEditMode) {
                 menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+                menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
             } else {
+                menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
+                menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
                 SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
                         R.drawable.ic_menu_interleave);
                 for (int i = 1; i<=5; i++) {
@@ -871,6 +868,7 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
         }
 
         menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
@@ -915,8 +913,24 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
             }
 
+            case UNIQUEIFY_PLAYLIST: {
+                long[] songs = MusicUtils.getSongListForCursor(mTrackCursor);
+                Set<Long> found = new HashSet<Long>();
+                for (int i = 0; i < songs.length; i++) {
+                    if (!found.add(songs[i])) {
+                        removePlaylistItem(i);
+                    }
+                }
+                return true;
+            }
+
             case SHUFFLE: {
                 MusicUtils.shuffleQueue();
+                return true;
+            }
+
+            case UNIQUEIFY: {
+                MusicUtils.uniqueifyQueue();
                 return true;
             }
 
