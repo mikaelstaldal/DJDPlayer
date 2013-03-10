@@ -144,7 +144,7 @@ public class MusicPicker extends ListActivity
 
         private boolean mLoading = true;
         private int mIndexerSortMode;
-        private MusicAlphabetIndexer mIndexer;
+        private AlphabetIndexer mIndexer;
         
         class ViewHolder {
             TextView line1;

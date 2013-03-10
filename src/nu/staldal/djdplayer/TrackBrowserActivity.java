@@ -1525,8 +1525,11 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
         
         public int getPositionForSection(int section) {
-            int pos = mIndexer.getPositionForSection(section);
-            return pos;
+            if (mIndexer != null) {
+                return mIndexer.getPositionForSection(section);
+            } else {
+                return 0;
+            }
         }
         
         public int getSectionForPosition(int position) {
