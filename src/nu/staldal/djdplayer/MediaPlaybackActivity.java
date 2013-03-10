@@ -501,7 +501,7 @@ public class MediaPlaybackActivity extends Activity
         // useful in those modes, so for consistency we never show them in these
         // modes, instead of tailoring them to the specific file being played.
         if (MusicUtils.getCurrentAudioId() >= 0) {
-            menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+            menu.add(1, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
             menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
             SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
