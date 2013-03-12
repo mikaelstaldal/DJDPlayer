@@ -26,3 +26,7 @@
 * Export playlist to M3U file in Music folder
 * Command to clear duplicates from play queue and playlist
 * Enable Android 4.0 (Ice Cream Sandwich) UI enhancements
+
+1.4.1
+-----
+* Improve system notification layout on Android 2.x
