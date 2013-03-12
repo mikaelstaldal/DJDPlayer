@@ -32,11 +32,11 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.*;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -506,39 +506,6 @@ public class MusicUtils {
     public static Cursor query(Context context, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
         return query(context, uri, projection, selection, selectionArgs, sortOrder, 0);
-    }
-
-    public static boolean isMediaScannerScanning(Context context) {
-        boolean result = false;
-        Cursor cursor = query(context, MediaStore.getMediaScannerUri(),
-                new String [] { MediaStore.MEDIA_SCANNER_VOLUME }, null, null, null);
-        if (cursor != null) {
-            if (cursor.getCount() == 1) {
-                cursor.moveToFirst();
-                result = "external".equals(cursor.getString(0));
-            }
-            cursor.close();
-        }
-
-        return result;
-    }
-
-    public static void setSpinnerState(Activity a) {
-        if (isMediaScannerScanning(a)) {
-            // start the progress spinner
-            a.getWindow().setFeatureInt(
-                    Window.FEATURE_INDETERMINATE_PROGRESS,
-                    Window.PROGRESS_INDETERMINATE_ON);
-
-            a.getWindow().setFeatureInt(
-                    Window.FEATURE_INDETERMINATE_PROGRESS,
-                    Window.PROGRESS_VISIBILITY_ON);
-        } else {
-            // stop the progress spinner
-            a.getWindow().setFeatureInt(
-                    Window.FEATURE_INDETERMINATE_PROGRESS,
-                    Window.PROGRESS_VISIBILITY_OFF);
-        }
     }
 
     private static String mLastSdStatus;

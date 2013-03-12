@@ -184,7 +184,6 @@ public class QueryBrowserActivity extends ListActivity
     private BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            MusicUtils.setSpinnerState(QueryBrowserActivity.this);
             mReScanHandler.sendEmptyMessage(0);
         }
     };

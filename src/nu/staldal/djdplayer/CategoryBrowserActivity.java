@@ -83,12 +83,6 @@ public abstract class CategoryBrowserActivity<A extends CursorAdapter> extends B
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        MusicUtils.setSpinnerState(this);
-    }
-
-    @Override
     public Object onRetainNonConfigurationInstance() {
         mAdapterSent = true;
         return mAdapter;
@@ -131,7 +125,6 @@ public abstract class CategoryBrowserActivity<A extends CursorAdapter> extends B
     private BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            MusicUtils.setSpinnerState(CategoryBrowserActivity.this);
             mReScanHandler.sendEmptyMessage(0);
         }
     };

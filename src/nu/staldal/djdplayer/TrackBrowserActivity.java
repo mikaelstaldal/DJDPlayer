@@ -256,8 +256,8 @@ public class TrackBrowserActivity extends BrowserActivity {
         if (mTrackCursor != null) {
             getListView().invalidateViews();
         }
-        MusicUtils.setSpinnerState(this);
     }
+
     @Override
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
@@ -271,11 +271,6 @@ public class TrackBrowserActivity extends BrowserActivity {
     private BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_MEDIA_SCANNER_STARTED.equals(action) ||
-                    Intent.ACTION_MEDIA_SCANNER_FINISHED.equals(action)) {
-                MusicUtils.setSpinnerState(TrackBrowserActivity.this);
-            }
             mReScanHandler.sendEmptyMessage(0);
         }
     };
