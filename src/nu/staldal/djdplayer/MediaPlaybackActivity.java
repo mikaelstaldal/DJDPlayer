@@ -937,6 +937,9 @@ public class MediaPlaybackActivity extends Activity
         } else if (mode == MediaPlaybackService.REPEAT_ALL) {
             mService.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
             showToast(R.string.repeat_current_notif);
+        } else if (mode == MediaPlaybackService.REPEAT_CURRENT) {
+            mService.setRepeatMode(MediaPlaybackService.REPEAT_STOPAFTER);
+            showToast(R.string.repeat_stopafter_notif);
         } else {
             mService.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
             showToast(R.string.repeat_off_notif);
@@ -1023,6 +1026,9 @@ public class MediaPlaybackActivity extends Activity
                 break;
             case MediaPlaybackService.REPEAT_CURRENT:
                 mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
+                break;
+            case MediaPlaybackService.REPEAT_STOPAFTER:
+                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_stopafter_btn);
                 break;
             default:
                 mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);

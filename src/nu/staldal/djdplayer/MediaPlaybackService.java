@@ -62,6 +62,7 @@ public class MediaPlaybackService extends Service {
     public static final int REPEAT_NONE = 0;
     public static final int REPEAT_CURRENT = 1;
     public static final int REPEAT_ALL = 2;
+    public static final int REPEAT_STOPAFTER = 3;
 
     public static final String PLAYSTATE_CHANGED = "nu.staldal.djdplayer.playstatechanged";
     public static final String META_CHANGED = "nu.staldal.djdplayer.metachanged";
@@ -189,11 +190,20 @@ public class MediaPlaybackService extends Service {
                     }
                     break;
                 case TRACK_ENDED:
-                    if (mRepeatMode == REPEAT_CURRENT) {
-                        seek(0);
-                        play();
-                    } else {
-                        next(false);
+                    switch (mRepeatMode) {
+                        case REPEAT_CURRENT:
+                            seek(0);
+                            play();
+                            break;
+
+                        case REPEAT_STOPAFTER:
+                            gotoIdleState();
+                            mIsSupposedToBePlaying = false;
+                            notifyChange(PLAYSTATE_CHANGED);
+                            break;
+
+                        default:
+                            next(false);
                     }
                     break;
                 case RELEASE_WAKELOCK:

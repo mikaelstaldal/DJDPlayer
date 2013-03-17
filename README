@@ -42,3 +42,5 @@ Enhancements over the standard Music Player:
 * Interleave category/folder/playlist with play queue
 
 * Export playlist to M3U file in Music folder
+
+* Possibility to stop after current song

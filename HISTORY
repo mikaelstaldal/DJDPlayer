@@ -27,6 +27,7 @@
 * Command to clear duplicates from play queue and playlist
 * Enable Android 4.0 (Ice Cream Sandwich) UI enhancements
 
-1.4.1
------
+1.5
+---
 * Improve system notification layout on Android 2.x
+* Possibility to stop after current song

@@ -224,6 +224,8 @@
     <string name="repeat_off_notif">Repeat is off.</string>
     <!-- Toast after turning single repeat on -->
     <string name="repeat_current_notif">Repeating current song.</string>
+    <!-- Toast after turning stop after current song on -->
+    <string name="repeat_stopafter_notif">Stop after current song.</string>
     <!-- Toast after turning repeat all on -->
     <string name="repeat_all_notif">Repeating all songs.</string>
     <!-- Individual song context menu item -->
