@@ -22,6 +22,11 @@
 
     <include layout="@layout/buttonbar" />
 
+    <ImageView android:id="@+id/tabdivider"
+               android:layout_width="match_parent"
+               android:layout_height="2dip"
+               android:src="@drawable/tabdivider"/>
+
     <include layout="@layout/sd_error" />
 
     <nu.staldal.djdplayer.TouchInterceptor
@@ -32,7 +37,5 @@
         android:textSize="18sp"
         android:drawSelectorOnTop="false"
         android:fastScrollEnabled="true" /> 
-
-    <include layout="@layout/nowplaying" />
 
 </LinearLayout>
