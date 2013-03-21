@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.AlertDialog;
 import android.content.*;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -45,9 +46,8 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     private static final int DELETE_PLAYLIST = CHILD_MENU_BASE + 1;
     private static final int EDIT_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
-    private static final int CHANGE_WEEKS = CHILD_MENU_BASE + 4;
-    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 5;
-    private static final int EXPORT_PLAYLIST = CHILD_MENU_BASE + 6;
+    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 4;
+    private static final int EXPORT_PLAYLIST = CHILD_MENU_BASE + 5;
 
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
@@ -196,10 +196,14 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
 
             case EDIT_PLAYLIST:
                 if (mCurrentId == RECENTLY_ADDED_PLAYLIST) {
-                    Intent intent = new Intent();
-                    intent.setClass(this, WeekSelector.class);
-                    startActivityForResult(intent, CHANGE_WEEKS);
-                    return true;
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.weekpicker_title)
+                            .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                  int numweeks = which + 1;
+                                  MusicUtils.setIntPref(PlaylistBrowserActivity.this, "numweeks", numweeks);
+                                }
+                            }).show();
                 } else {
                     Log.e(TAG, "should not be here");
                 }

@@ -521,39 +521,18 @@ public class MusicUtils {
         String status = Environment.getExternalStorageState();
         int title, message;
 
-        if (isExternalStorageRemovable()) {
-            title = R.string.sdcard_error_title;
-            message = R.string.sdcard_error_message;
-        } else {
-            title = R.string.sdcard_error_title_nosdcard;
-            message = R.string.sdcard_error_message_nosdcard;
-        }
+        title = R.string.sdcard_error_title;
+        message = R.string.sdcard_error_message;
 
-        if (status.equals(Environment.MEDIA_SHARED) ||
-                status.equals(Environment.MEDIA_UNMOUNTED)) {
-            if (isExternalStorageRemovable() ) {
-                title = R.string.sdcard_busy_title;
-                message = R.string.sdcard_busy_message;
-            } else {
-                title = R.string.sdcard_busy_title_nosdcard;
-                message = R.string.sdcard_busy_message_nosdcard;
-            }
+        if (status.equals(Environment.MEDIA_SHARED) || status.equals(Environment.MEDIA_UNMOUNTED)) {
+            title = R.string.sdcard_busy_title;
+            message = R.string.sdcard_busy_message;
         } else if (status.equals(Environment.MEDIA_REMOVED)) {
-            if (isExternalStorageRemovable() ) {
-                title = R.string.sdcard_missing_title;
-                message = R.string.sdcard_missing_message;
-            } else {
-                title = R.string.sdcard_missing_title_nosdcard;
-                message = R.string.sdcard_missing_message_nosdcard;
-            }
+            title = R.string.sdcard_missing_title;
+            message = R.string.sdcard_missing_message;
         } else if (status.equals(Environment.MEDIA_MOUNTED)){
-            if (isExternalStorageRemovable() ) {
-                title = R.string.sdcard_scanning_title;
-                message = R.string.sdcard_scanning_message;
-            } else {
-                title = R.string.sdcard_scanning_title_nosdcard;
-                message = R.string.sdcard_scanning_message_nosdcard;
-            }
+            title = R.string.sdcard_scanning_title;
+            message = R.string.sdcard_scanning_message;
         } else if (!TextUtils.equals(mLastSdStatus, status)) {
             mLastSdStatus = status;
             Log.d(TAG, "sd card: " + status);
@@ -570,14 +549,6 @@ public class MusicUtils {
         }
         TextView tv = (TextView) a.findViewById(R.id.sd_message);
         tv.setText(message);
-    }
-
-    public static boolean isExternalStorageRemovable() {
-        try {
-            return Environment.isExternalStorageRemovable();
-        } catch (NoSuchMethodError e) {
-            return true;
-        }
     }
 
     public static void hideDatabaseError(Activity a) {

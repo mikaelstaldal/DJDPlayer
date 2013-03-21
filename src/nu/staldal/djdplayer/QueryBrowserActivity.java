@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.*;
@@ -277,20 +278,26 @@ public class QueryBrowserActivity extends ListActivity
                 return true;
 
             case DELETE_ITEM: {
-                long[] list = new long[1];
+                final long[] list = new long[1];
                 list[0] = (int) mSelectedId;
-                Bundle b = new Bundle();
-                String f = (MusicUtils.isExternalStorageRemovable())
-                    ? getString(R.string.delete_song_desc)
-                    : getString(R.string.delete_song_desc_nosdcard);
+                String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f,
                         mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
-                b.putString("description", desc);
-                b.putLongArray("items", list);
-                Intent intent = new Intent();
-                intent.setClass(this, DeleteItems.class);
-                intent.putExtras(b);
-                startActivityForResult(intent, -1);
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_song_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(QueryBrowserActivity.this, list);
+                            }
+                        }).show();
                 return true;
             }
 

@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.*;
 import android.database.Cursor;
@@ -67,8 +68,6 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     protected abstract int getUnknownStringId();
 
     protected abstract int getDeleteDescStringId();
-
-    protected abstract int getDeleteDescNoSdCardStringId();
 
     protected abstract long fetchCurrentlyPlayingCategoryId();
 
@@ -247,18 +246,24 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
             }
 
             case DELETE_ITEM: {
-                long[] songs = fetchSongList(mCurrentId);
-                String f = (MusicUtils.isExternalStorageRemovable())
-                    ? getString(getDeleteDescStringId())
-                    : getString(getDeleteDescNoSdCardStringId());
+                final long[] songs = fetchSongList(mCurrentId);
+                String f = getString(getDeleteDescStringId());
                 String desc = String.format(f, mCurrentName);
-                Bundle b = new Bundle();
-                b.putString("description", desc);
-                b.putLongArray("items", songs);
-                Intent intent = new Intent();
-                intent.setClass(this, DeleteItems.class);
-                intent.putExtras(b);
-                startActivityForResult(intent, -1);
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_songs_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(MetadataCategoryBrowserActivity.this, songs);
+                            }
+                        }).show();
                 return true;
             }
 

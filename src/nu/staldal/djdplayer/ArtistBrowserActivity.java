@@ -60,11 +60,6 @@ public class ArtistBrowserActivity extends MetadataCategoryBrowserActivity {
     }
 
     @Override
-    protected int getDeleteDescNoSdCardStringId() {
-        return R.string.delete_artist_desc_nosdcard;
-    }
-
-    @Override
     protected long fetchCurrentlyPlayingCategoryId() {
         return MusicUtils.getCurrentArtistId();
     }

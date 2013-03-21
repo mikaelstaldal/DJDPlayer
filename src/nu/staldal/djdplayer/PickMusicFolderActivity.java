@@ -1,47 +1,44 @@
-    /*
- * Copyright (C) 2012 Mikael Ståldal
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+* Copyright (C) 2012 Mikael Ståldal
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package nu.staldal.djdplayer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import java.io.File;
 
 public class PickMusicFolderActivity extends Activity {
     public static final int PICK_DIRECTORY = 1;
 
-    private EditText editor;
-
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
         String currentFolder = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.MUSIC_FOLDER,
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
 
         Intent intent = new Intent("org.openintents.action.PICK_DIRECTORY");
         if (getPackageManager().resolveActivity(intent, 0) != null) {
@@ -50,33 +47,35 @@ public class PickMusicFolderActivity extends Activity {
             intent.putExtra("org.openintents.extra.BUTTON_TEXT", getResources().getString(R.string.pick_music_folder));
             startActivityForResult(intent, PICK_DIRECTORY);
         } else {
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
-            setContentView(R.layout.create_playlist);
-            getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                                  WindowManager.LayoutParams.WRAP_CONTENT);
-
-            TextView mPrompt = (TextView) findViewById(R.id.prompt);
-            editor = (EditText) findViewById(R.id.playlist);
-            Button mSaveButton = (Button) findViewById(R.id.create);
-            mSaveButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    String value = editor.getText().toString();
-                    if (value != null && value.length() > 0) {
-                        setMusicFolder(value);
-                        finish();
-                    }
-                }
-            });
-
-            findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    finish();
-                }
-            });
-
-            mPrompt.setText(R.string.select_music_folder);
-            mSaveButton.setText(R.string.pick_music_folder);
+            View view = getLayoutInflater().inflate(R.layout.select_music_folder, null);
+            final EditText editor = (EditText)view.findViewById(R.id.music_folder);
             editor.setText(currentFolder);
+
+            AlertDialog.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
+            } else {
+                builder = new AlertDialog.Builder(this);
+            }
+
+            builder.setTitle(R.string.select_music_folder)
+                   .setView(view)
+                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                   .setPositiveButton(R.string.select_music_folder, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String value = editor.getText().toString();
+                            if (value != null && value.length() > 0) {
+                                setMusicFolder(value);
+                                finish();
+                            }
+                       }
+                    }).show();
         }
     }
 

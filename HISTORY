@@ -30,4 +30,5 @@
 1.5
 ---
 * Improve system notification layout on Android 2.x
+* Enable more Android 4 UI enhancements, by using Holo theme
 * Possibility to stop after current song

@@ -59,11 +59,6 @@ public class GenreBrowserActivity extends MetadataCategoryBrowserActivity {
     }
 
     @Override
-    protected int getDeleteDescNoSdCardStringId() {
-        return R.string.delete_genre_desc_nosdcard;
-    }
-
-    @Override
     protected long fetchCurrentlyPlayingCategoryId() {
         return MusicUtils.getCurrentGenreId();
     }

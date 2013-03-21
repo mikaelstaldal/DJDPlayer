@@ -44,7 +44,7 @@
             android:value="nu.staldal.djdplayer.QueryBrowserActivity"
         />
         <activity android:name="nu.staldal.djdplayer.MusicBrowserActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
+            android:theme="@style/Theme.NoTitleBar"
             android:exported="true"
         >
             <intent-filter>
@@ -72,7 +72,7 @@
              recents since this is accessible through a notification when
              appropriate. -->
         <activity android:name="nu.staldal.djdplayer.MediaPlaybackActivity"
-                android:theme="@android:style/Theme.NoTitleBar"
+                android:theme="@style/Theme.NoTitleBar"
                 android:taskAffinity=""
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
@@ -187,8 +187,7 @@
                 <data android:mimeType="application/ogg"/>
                 <data android:mimeType="application/x-ogg"/>
             </intent-filter>
-            <!-- Second way to invoke us: someone asks to pick an item from
-                 some media Uri. -->
+            <!-- Second way to invoke us: someone asks to pick an item from some media Uri. -->
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -197,13 +196,9 @@
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.CreatePlaylist"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+            android:theme="@style/Theme.Dialog" android:exported="false" />
         <activity android:name="nu.staldal.djdplayer.RenamePlaylist"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
-        <activity android:name="nu.staldal.djdplayer.WeekSelector"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
-        <activity android:name="nu.staldal.djdplayer.DeleteItems"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+            android:theme="@style/Theme.Dialog" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
             <intent-filter>
@@ -218,8 +213,7 @@
         <activity android:name="nu.staldal.djdplayer.RescanActivity" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.PickMusicFolderActivity"
-                  android:theme="@android:style/Theme.Dialog"
-                  android:exported="false" />
+            android:theme="@style/Theme.Dialog" android:exported="false" />
 
         <service android:name="nu.staldal.djdplayer.MediaPlaybackService" android:exported="false" />
 

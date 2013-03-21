@@ -16,6 +16,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.AlertDialog;
 import android.content.*;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -212,18 +213,25 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             }
 
             case DELETE_ITEM: {
-                long [] list = fetchSongList(mCurrentFolder);
-                String f = (MusicUtils.isExternalStorageRemovable())
-                    ? getString(R.string.delete_folder_desc)
-                    : getString(R.string.delete_folder_desc_nosdcard);
+                final long [] list = fetchSongList(mCurrentFolder);
+                String f = getString(R.string.delete_folder_desc);
                 String desc = String.format(f, mCurrentFolder);
-                Bundle b = new Bundle();
-                b.putString("description", desc);
-                b.putLongArray("items", list);
-                Intent intent = new Intent();
-                intent.setClass(this, DeleteItems.class);
-                intent.putExtras(b);
-                startActivityForResult(intent, -1);
+
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_songs_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(FolderBrowserActivity.this, list);
+                            }
+                        }).show();
                 return true;
             }
 

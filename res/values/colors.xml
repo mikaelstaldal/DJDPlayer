@@ -19,5 +19,7 @@
 
     <color name="transparent">#00000000</color>
 
+    <!-- Background color for albums in the artists list view. -->
+    <color name="expanding_child_background">#ff404040</color>
 </resources>
 

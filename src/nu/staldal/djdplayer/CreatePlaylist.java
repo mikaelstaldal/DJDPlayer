@@ -17,88 +17,66 @@
 package nu.staldal.djdplayer;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Intent;
+import android.app.AlertDialog;
+import android.content.*;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
-public class CreatePlaylist extends Activity
-{
+public class CreatePlaylist extends Activity {
     private EditText mPlaylist;
-    private TextView mPrompt;
-    private Button mSaveButton;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.create_playlist);
-        getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                                    WindowManager.LayoutParams.WRAP_CONTENT);
+        View view = getLayoutInflater().inflate(R.layout.create_playlist, null);
+        mPlaylist = (EditText)view.findViewById(R.id.playlist);
 
-        mPrompt = (TextView)findViewById(R.id.prompt);
-        mPlaylist = (EditText)findViewById(R.id.playlist);
-        mSaveButton = (Button) findViewById(R.id.create);
-        mSaveButton.setOnClickListener(mOpenClicked);
-
-        ((Button)findViewById(R.id.cancel)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        
         String defaultname = icicle != null ? icicle.getString("defaultname") : makePlaylistName();
         if (defaultname == null) {
             finish();
             return;
         }
-        String promptformat = getString(R.string.create_playlist_create_text_prompt);
-        String prompt = String.format(promptformat, defaultname);
-        mPrompt.setText(prompt);
         mPlaylist.setText(defaultname);
         mPlaylist.setSelection(defaultname.length());
-        mPlaylist.addTextChangedListener(mTextWatcher);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.create_playlist_create_text_prompt)
+                .setView(view)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = mPlaylist.getText().toString();
+                        if (name != null && name.length() > 0) {
+                            if (idForPlaylist(name) >= 0) {
+                                Toast.makeText(CreatePlaylist.this, R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
+                                setResult(RESULT_CANCELED);
+                            } else {
+                                ContentValues values = new ContentValues(1);
+                                values.put(MediaStore.Audio.Playlists.NAME, name);
+                                Uri uri = getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
+                                setResult(RESULT_OK, (new Intent()).setData(uri));
+                            }
+                            finish();
+                        }
+                    }
+                }).show();
     }
-    
-    TextWatcher mTextWatcher = new TextWatcher() {
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // don't care about this one
-        }
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            String newText = mPlaylist.getText().toString();
-            if (newText.trim().length() == 0) {
-                mSaveButton.setEnabled(false);
-            } else {
-                mSaveButton.setEnabled(true);
-                // check if playlist with current name exists already, and warn the user if so.
-                if (idForplaylist(newText) >= 0) {
-                    mSaveButton.setText(R.string.create_playlist_overwrite_text);
-                } else {
-                    mSaveButton.setText(R.string.create_playlist_create_text);
-                }
-            }
-        };
-        public void afterTextChanged(Editable s) {
-            // don't care about this one
-        }
-    };
-    
-    private int idForplaylist(String name) {
+
+    private int idForPlaylist(String name) {
         Cursor c = MusicUtils.query(this, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                 new String[] { MediaStore.Audio.Playlists._ID },
                 MediaStore.Audio.Playlists.NAME + "=?",
@@ -114,19 +92,13 @@ public class CreatePlaylist extends Activity
         }
         return id;
     }
-    
+
     @Override
     public void onSaveInstanceState(Bundle outcicle) {
         outcicle.putString("defaultname", mPlaylist.getText().toString());
     }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     private String makePlaylistName() {
-
         String template = getString(R.string.new_playlist_name_template);
         int num = 1;
 
@@ -167,25 +139,4 @@ public class CreatePlaylist extends Activity
         c.close();
         return suggestedname;
     }
-    
-    private View.OnClickListener mOpenClicked = new View.OnClickListener() {
-        public void onClick(View v) {
-            String name = mPlaylist.getText().toString();
-            if (name != null && name.length() > 0) {
-                ContentResolver resolver = getContentResolver();
-                int id = idForplaylist(name);
-                Uri uri;
-                if (id >= 0) {
-                    uri = ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, id);
-                    MusicUtils.clearPlaylist(CreatePlaylist.this, id);
-                } else {
-                    ContentValues values = new ContentValues(1);
-                    values.put(MediaStore.Audio.Playlists.NAME, name);
-                    uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
-                }
-                setResult(RESULT_OK, (new Intent()).setData(uri));
-                finish();
-            }
-        }
-    };
 }

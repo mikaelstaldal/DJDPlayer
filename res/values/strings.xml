@@ -78,45 +78,33 @@
     <!-- Menu item to rescan music library -->
     <string name="rescan">Rescan music</string>
 
+    <string name="delete_song_title">Delete song?</string>
+    <string name="delete_songs_title">Delete songs?</string>
+
     <!-- Delete confirmation dialog when deleting an entire artist -->
-    <string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from the SD card.</string>
-    <!-- Delete confirmation dialog when deleting an entire artist -->
-    <string name="delete_artist_desc_nosdcard" msgid="1843750591006508005">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from USB storage.</string>
+    <string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted.</string>
 
     <!-- Delete confirmation dialog when deleting an entire genre -->
-    <string name="delete_genre_desc">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted from the SD card.</string>
-    <!-- Delete confirmation dialog when deleting an entire grene -->
-    <string name="delete_genre_desc_nosdcard">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted from USB storage.</string>
+    <string name="delete_genre_desc">All <xliff:g id="artist">%s</xliff:g> songs will be permanently deleted.</string>
 
     <!-- Delete confirmation dialog when deleting an entire folder -->
-    <string name="delete_folder_desc">All songs in <xliff:g id="folder">%s</xliff:g> will be permanently deleted from the SD card.</string>
-    <!-- Delete confirmation dialog when deleting an entire folder -->
-    <string name="delete_folder_desc_nosdcard">All songs in <xliff:g id="folder">%s</xliff:g> will be permanently deleted from USB storage.</string>
+    <string name="delete_folder_desc">All songs in <xliff:g id="folder">%s</xliff:g> will be permanently deleted.</string>
 
     <!-- Delete confirmation dialog when deleting an entire album -->
-    <string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from the SD card.</string>
-    <!-- Delete confirmation dialog when deleting an entire album -->
-    <string name="delete_album_desc_nosdcard" msgid="535515999268177079">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from USB storage.</string>
+    <string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted.</string>
 
     <!-- Delete confirmation dialog when deleting a single song -->
-    <string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from the SD card.</string>
-    <!-- Delete confirmation dialog when deleting a single song -->
-    <string name="delete_song_desc_nosdcard" msgid="1856800468541831408">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from USB storage.</string>
+    <string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted.</string>
 
     <!-- Delete confirmation dialog, confirmation button text -->
-    <string name="delete_confirm_button_text">OK</string>
+    <string name="delete_confirm_button_text">Delete</string>
     <!-- Toast confirming that song(s) was/were deleted. -->
     <plurals name="NNNtracksdeleted">
         <!-- delete confirmation message for 1 song -->
-        <item quantity="one">1 song was deleted.</item>
+        <item quantity="one">1 song was deleted</item>
         <!-- delete confirmation message for 0 or more than 1 songs -->
-        <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> songs were deleted.</item>
+        <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> songs were deleted</item>
     </plurals>
-
-    <!-- shown in dialog while the media scanner is starting up -->
-    <string name="scanning">Scanning SD card\u2026</string>
-    <!-- shown in dialog while the media scanner is starting up -->
-    <string name="scanning_nosdcard" msgid="3529383847223198502">Scanning USB storage\u2026</string>
 
     <!-- title of the play queue screen -->
     <string name="play_queue_title">Play queue</string>
@@ -152,6 +140,7 @@
     <string name="search_for">Search for</string>
     <!-- Menu item -->
     <string name="create_new_playlist">Create playlist</string>
+    <string name="playlist_already_exists">Playlist already exists</string>
     <!-- Title of screen when there are no songs, or if the SD card is busy -->
     <string name="no_tracks_title">No songs</string>
     <!-- Title of screen when there are no playlists, or if the SD card is busy -->
@@ -165,9 +154,9 @@
     <!-- Playlist context menu item to export the selected playlist-->
     <string name="export_playlist_menu">Export</string>
     <!-- Transient popup message shown after deleting a playlist -->
-    <string name="playlist_deleted_message">Playlist deleted.</string>
+    <string name="playlist_deleted_message">Playlist deleted</string>
     <!-- Transient popup message shown after renaming a playlist -->
-    <string name="playlist_renamed_message">Playlist renamed.</string>
+    <string name="playlist_renamed_message">Playlist renamed</string>
     <!-- The name of the pseudo-playlist that holds all the recently added files, shown in list view -->
     <string name="recentlyadded">Recently added</string>
     <!-- The name of the pseudo-playlist that holds all the recently added files, shown in title bar of songs list -->
@@ -179,36 +168,20 @@
 
     <!-- Title of screen when no sd card is present -->
     <string name="sdcard_missing_title">No SD card</string>
-    <!-- Title of screen when no sd card is present -->
-    <string name="sdcard_missing_title_nosdcard" msgid="9008284946643270850">No USB storage</string>
     <!-- label underneath icon used to indicate that no sd card is present -->
-    <string name="sdcard_missing_message">Your phone does not have an SD card inserted.</string>
-    <!-- label underneath icon used to indicate that no sd card is present -->
-    <string name="sdcard_missing_message_nosdcard" msgid="1169260755336159747">Your phone does not have USB storage.</string>
+    <string name="sdcard_missing_message">Your phone does not have an SD card inserted</string>
     <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
     <string name="sdcard_busy_title">SD card unavailable</string>
-    <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
-    <string name="sdcard_busy_title_nosdcard" msgid="1162763571147174655">USB storage unavailable</string>
     <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_busy_message">Sorry, your SD card is busy.</string>
-    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_busy_message_nosdcard" msgid="8071868348072728830">Sorry, your USB storage is busy.</string>
+    <string name="sdcard_busy_message">Sorry, your SD card is busy</string>
     <!-- Title of screen when there was an error accessing the sd card -->
     <string name="sdcard_error_title">SD card error</string>
-    <!-- Title of screen when there was an error accessing the sd card -->
-    <string name="sdcard_error_title_nosdcard" msgid="165682155008600643">USB storage error</string>
     <!-- label underneath icon used to indicate there was an error accessing the sd card -->
-    <string name="sdcard_error_message">An error was encountered on your SD card.</string>
-    <!-- label underneath icon used to indicate there was an error accessing the sd card -->
-    <string name="sdcard_error_message_nosdcard" msgid="4574563894036627855">An error was encountered on your USB storage.</string>
+    <string name="sdcard_error_message">An error was encountered on your SD card</string>
     <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
     <string name="sdcard_scanning_title">SD card not ready yet</string>
-    <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
-    <string name="sdcard_scanning_title_nosdcard" msgid="1162763571147174655">USB storage not ready yet</string>
     <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_scanning_message">Sorry, your SD card is not ready yet, please wait for a while.</string>
-    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_scanning_message_nosdcard" msgid="8071868348072728830">Sorry, your USB storage is not ready yet, please wait for a while.</string>
+    <string name="sdcard_scanning_message">Sorry, your SD card is not ready yet, please wait for a while</string>
 
     <!-- Default name of artist that doesn't have a name in the metadata -->
     <string name="unknown_artist_name">Unknown artist</string>
@@ -217,23 +190,23 @@
     <!-- Default name of album that doesn't have a name in the metadata -->
     <string name="unknown_album_name">Unknown album</string>
     <!-- Toast after turning shuffle on -->
-    <string name="shuffle_on_notif">Shuffle is on.</string>
+    <string name="shuffle_on_notif">Shuffle is on</string>
     <!-- Toast after turning shuffle off -->
-    <string name="shuffle_off_notif">Shuffle is off.</string>
+    <string name="shuffle_off_notif">Shuffle is off</string>
     <!-- Toast after turning repeat off -->
-    <string name="repeat_off_notif">Repeat is off.</string>
+    <string name="repeat_off_notif">Repeat is off</string>
     <!-- Toast after turning single repeat on -->
-    <string name="repeat_current_notif">Repeating current song.</string>
+    <string name="repeat_current_notif">Repeating current song</string>
     <!-- Toast after turning stop after current song on -->
-    <string name="repeat_stopafter_notif">Stop after current song.</string>
+    <string name="repeat_stopafter_notif">Stop after current song</string>
     <!-- Toast after turning repeat all on -->
-    <string name="repeat_all_notif">Repeating all songs.</string>
+    <string name="repeat_all_notif">Repeating all songs</string>
     <!-- Individual song context menu item -->
     <string name="ringtone_menu">Use as phone ringtone</string>
     <!-- Menu item -->
     <string name="ringtone_menu_short">Use as ringtone</string>
     <!-- Toast after setting a song as phone ringtone -->
-    <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
+    <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone</string>
     <!-- Context menu item -->
     <string name="play_now">Play now</string>
     <!-- Context menu item -->
@@ -253,19 +226,19 @@
     <!-- Toasts after adding song(s) to playlists -->
     <plurals name="NNNtrackstoplaylist">
         <!-- message shown when one song was added -->
-        <item quantity="one">1 song added to playlist.</item>
+        <item quantity="one">1 song added to playlist</item>
         <!-- message shown when zero or more than one song was added -->
-        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to playlist.</item>
+        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to playlist</item>
     </plurals>
     <!-- Toasts after adding song(s) to play queue -->
     <plurals name="NNNtrackstoplayqueue">
         <!-- message shown when one song was added -->
-        <item quantity="one">1 song added to queue.</item>
+        <item quantity="one">1 song added to queue</item>
         <!-- message shown when zero or more than one song was added -->
-        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to queue.</item>
+        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> songs added to queue</item>
     </plurals>
     <!-- Toast after selecting an empty playlist -->
-    <string name="emptyplaylist">Selected playlist is empty.</string>
+    <string name="emptyplaylist">Selected playlist is empty</string>
     <!-- Button name when saving a playlist -->
     <string name="create_playlist_create_text">Save</string>
     <!-- Button name when saving a playlist and the new playlist will overwrite an existing one -->
@@ -292,14 +265,8 @@
         <item>"11 weeks"</item>
         <item>"12 weeks"</item>
     </string-array>
-    <!-- Button name in time span picker -->
-    <string name="weekpicker_set">Done</string>
     <!-- Title of time span picker -->
     <string name="weekpicker_title">Set time</string>
-    <!-- Do not translate. Background color for currently dragged item in playlist edit mode. -->
-    <color name="dragndrop_background">#e0103010</color>
-    <!-- Do not translate. Background color for albums in the artists list view. -->
-    <color name="expanding_child_background">#ff404040</color>
 
     <!-- menu item to save the current list as a new playlist -->
     <string name="save_as_playlist">Save as playlist</string>
@@ -379,13 +346,11 @@
 
     <string name="notification_artist_genre"><xliff:g id="ARTIST">%1$s</xliff:g> (<xliff:g id="GENRE">%2$s</xliff:g>)</string>
 
-    <string name="rename_playlist_same_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
-
-    <string name="rename_playlist_diff_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
+    <string name="rename_playlist_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
 
     <!-- Preferences -->
     <string name="behaviour">Behaviour</string>
-    <string name="clickonsong">Clock on song</string>
+    <string name="clickonsong">Click on song</string>
     <string name="settings">Settings</string>
     <string name="tabs">Tabs</string>
     <string name="show_artists_tab">Show artists tab</string>
