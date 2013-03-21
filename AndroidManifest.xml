@@ -197,8 +197,6 @@
         </activity>
         <activity android:name="nu.staldal.djdplayer.CreatePlaylist"
             android:theme="@style/Theme.Dialog" android:exported="false" />
-        <activity android:name="nu.staldal.djdplayer.RenamePlaylist"
-            android:theme="@style/Theme.Dialog" android:exported="false" />
 
         <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
             <intent-filter>

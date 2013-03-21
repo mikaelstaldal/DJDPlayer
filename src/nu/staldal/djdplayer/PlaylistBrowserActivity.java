@@ -209,13 +209,33 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 }
                 return true;
 
-            case RENAME_PLAYLIST:
-                Intent intent = new Intent();
-                intent.setClass(this, RenamePlaylist.class);
-                intent.putExtra("rename", mCurrentId);
-                startActivityForResult(intent, RENAME_PLAYLIST);
-                return true;
+            case RENAME_PLAYLIST: {
+                View view = getLayoutInflater().inflate(R.layout.rename_playlist, null);
+                final EditText mPlaylist = (EditText)view.findViewById(R.id.playlist);
+                final long playlistId = mCurrentId;
 
+                if (playlistId >= 0 && mPlaylistName != null) {
+                    mPlaylist.setText(mPlaylistName);
+                    mPlaylist.setSelection(mPlaylistName.length());
+
+                    new AlertDialog.Builder(this)
+                            .setTitle(String.format(PlaylistBrowserActivity.this.getString(R.string.rename_playlist_prompt),
+                                    mPlaylistName))
+                            .setView(view)
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    renamePlaylist(playlistId, mPlaylist.getText().toString());
+                                }
+                            }).show();
+                }
+                return true;
+            }
             case EXPORT_PLAYLIST:
                 new ExportPlaylistTask(getApplicationContext()).execute(mPlaylistName, fetchSongList(mCurrentId));
                 return true;
@@ -229,6 +249,40 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                 }
         }
         return super.onContextItemSelected(item);
+    }
+
+    private void renamePlaylist(long playlistId, String name) {
+        if (name != null && name.length() > 0) {
+            if (idForPlaylist(name) >= 0) {
+                Toast.makeText(this, R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
+            } else {
+                ContentValues values = new ContentValues(1);
+                values.put(MediaStore.Audio.Playlists.NAME, name);
+                getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                        values,
+                        MediaStore.Audio.Playlists._ID + "=?",
+                        new String[]{Long.valueOf(playlistId).toString()});
+
+                Toast.makeText(this, R.string.playlist_renamed_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private int idForPlaylist(String name) {
+        Cursor c = MusicUtils.query(this, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Audio.Playlists._ID },
+                MediaStore.Audio.Playlists.NAME + "=?",
+                new String[] { name },
+                MediaStore.Audio.Playlists.NAME);
+        int id = -1;
+        if (c != null) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                id = c.getInt(0);
+            }
+            c.close();
+        }
+        return id;
     }
 
     @Override
