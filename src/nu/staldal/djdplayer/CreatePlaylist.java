@@ -22,6 +22,7 @@ import android.content.*;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -47,16 +48,22 @@ public class CreatePlaylist extends Activity {
         mPlaylist.setText(defaultname);
         mPlaylist.setSelection(defaultname.length());
 
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.create_playlist_create_text_prompt)
-                .setView(view)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+
+        builder.setTitle(R.string.create_playlist_create_text_prompt)
+               .setView(view)
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
                     }
                 })
-                .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
+               .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String name = mPlaylist.getText().toString();
@@ -72,7 +79,7 @@ public class CreatePlaylist extends Activity {
                             }
                             finish();
                         }
-                    }
+                   }
                 }).show();
     }
 
