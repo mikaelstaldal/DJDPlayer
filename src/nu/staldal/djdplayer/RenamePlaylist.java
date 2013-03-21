@@ -68,7 +68,6 @@ public class RenamePlaylist extends Activity {
                 .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // TODO [mikes] do not overwrite existing playlist
                         String name = mPlaylist.getText().toString();
                         if (name != null && name.length() > 0) {
                             if (idForPlaylist(name) >= 0) {
