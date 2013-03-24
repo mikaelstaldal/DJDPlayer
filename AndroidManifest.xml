@@ -38,6 +38,7 @@
 
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
+                 android:theme="@style/Theme.Default"
                  android:allowTaskReparenting="true">
         <meta-data
             android:name="android.app.default_searchable"

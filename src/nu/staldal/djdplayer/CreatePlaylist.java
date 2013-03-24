@@ -18,11 +18,13 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -48,14 +50,8 @@ public class CreatePlaylist extends Activity {
         mPlaylist.setText(defaultname);
         mPlaylist.setSelection(defaultname.length());
 
-        AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
-        } else {
-            builder = new AlertDialog.Builder(this);
-        }
-
-        builder.setTitle(R.string.create_playlist_create_text_prompt)
+        new AlertDialog.Builder(this)
+               .setTitle(R.string.create_playlist_create_text_prompt)
                .setView(view)
                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override

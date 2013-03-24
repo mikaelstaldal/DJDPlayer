@@ -21,7 +21,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -51,14 +50,8 @@ public class PickMusicFolderActivity extends Activity {
             final EditText editor = (EditText)view.findViewById(R.id.music_folder);
             editor.setText(currentFolder);
 
-            AlertDialog.Builder builder;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
-            } else {
-                builder = new AlertDialog.Builder(this);
-            }
-
-            builder.setTitle(R.string.select_music_folder)
+            new AlertDialog.Builder(this)
+                   .setTitle(R.string.select_music_folder)
                    .setView(view)
                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
