@@ -69,7 +69,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@drawable/music_prev"
+                android:src="@android:drawable/ic_media_previous"
                 android:background="@drawable/appwidget_button_center"
                 />
             <ImageButton
@@ -78,7 +78,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@drawable/music_play"
+                android:src="@android:drawable/ic_media_play"
                 android:background="@drawable/appwidget_button_center"
                 />
             <ImageButton
@@ -87,7 +87,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@drawable/music_next"
+                android:src="@android:drawable/ic_media_next"
                 android:background="@drawable/appwidget_button_center"
                 />
         </LinearLayout>

@@ -230,9 +230,9 @@ public abstract class BrowserActivity extends ListActivity
             if (intent.getAction().equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
                 if (nowPlayingView != null) {
                     if (MusicUtils.isPlaying()) {
-                        playButton.setImageResource(R.drawable.music_pause);
+                        playButton.setImageResource(android.R.drawable.ic_media_pause);
                     } else {
-                        playButton.setImageResource(R.drawable.music_play);
+                        playButton.setImageResource(android.R.drawable.ic_media_play);
                     }
                 }
             } else if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
