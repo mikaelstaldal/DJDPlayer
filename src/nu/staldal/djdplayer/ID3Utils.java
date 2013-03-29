@@ -175,9 +175,17 @@ public class ID3Utils {
                 return GENRE_NAMES[Integer.parseInt(genre.substring(1, genre.length()-1))];
             } catch (NumberFormatException e) {
                 return genre;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                return genre;
             }
         } else {
-            return genre;
+            try {
+                return GENRE_NAMES[Integer.parseInt(genre)];
+            } catch (NumberFormatException e) {
+                return genre;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                return genre;
+            }
         }
     }
 }
