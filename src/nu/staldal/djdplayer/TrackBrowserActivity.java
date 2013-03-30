@@ -386,7 +386,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                         // compilation album
                         fancyName = mTrackCursor.getString(idx);
                     }    
-                    cursor.deactivate();
+                    cursor.close();
                 }
                 if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
                     fancyName = getString(R.string.unknown_album_name);
@@ -404,7 +404,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     cursor.moveToFirst();
                     fancyName = cursor.getString(0);
                 }
-                cursor.deactivate();
+                cursor.close();
             }
         } else if (mPlaylist != null) {
             if (mPlaylist.equals(PLAYQUEUE)) {
@@ -425,7 +425,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                         cursor.moveToFirst();
                         fancyName = cursor.getString(0);
                     }
-                    cursor.deactivate();
+                    cursor.close();
                 }
             }
         } else if (mGenreId != -1) {
@@ -440,7 +440,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     cursor.moveToFirst();
                     fancyName = ID3Utils.decodeGenre(cursor.getString(0));
                 }
-                cursor.deactivate();
+                cursor.close();
             }
         } else if (mFolder != null) {
             File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
