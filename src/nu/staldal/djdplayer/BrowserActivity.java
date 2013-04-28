@@ -130,10 +130,8 @@ public abstract class BrowserActivity extends ListActivity
         final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
 
         MusicUtils.activateTab(a, id);
-        if (id != R.id.nowplayingtab) {
-            ll.setCurrentTab((Integer) v.getTag());
-            MusicUtils.setIntPref(a, "activetab", id);
-        }
+        ll.setCurrentTab((Integer) v.getTag());
+        MusicUtils.setIntPref(a, "activetab", id);
     }
 
     public void onServiceConnected(ComponentName name, IBinder service) {
