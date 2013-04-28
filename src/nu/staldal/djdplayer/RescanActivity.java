@@ -26,8 +26,7 @@ public class RescanActivity extends Activity {
     protected void onStart() {
         super.onStart();
         Log.i("RescanActivity", "Rescanning music");
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
         finish();
     }
 }
