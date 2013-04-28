@@ -375,6 +375,7 @@
     <string name="filesize">Size</string>
     <string name="mimetype">Mime Type</string>
     <string name="id">ID</string>
+    <string name="date_added">Added</string>
 
     <string name="exporting_playlist">Exporting playlist...</string>
     <string name="playlist_exported">...playlist exported</string>

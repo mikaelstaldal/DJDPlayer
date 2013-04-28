@@ -23,9 +23,14 @@ import android.provider.MediaStore;
 import android.widget.TextView;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TrackInfoActivity extends Activity {
     private static final String TAG = "TrackInfoActivity";
+
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private final static String[] COLUMNS = new String[] {
             MediaStore.Audio.Media._ID,
@@ -36,7 +41,8 @@ public class TrackInfoActivity extends Activity {
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.COMPOSER,
             MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.YEAR
+            MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.DATE_ADDED
     };
 
     @Override
@@ -62,32 +68,38 @@ public class TrackInfoActivity extends Activity {
     private void bindView(Cursor cursor) {
         long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
         File file = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
+        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
         String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+        String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
         String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
         String composer = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.COMPOSER));
-        String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-        String year = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR));
         int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        String year = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR));
+        Date dateAdded = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED))*1000);
 
         setTitle(title);
         ((TextView)findViewById(R.id.artist)).setText(artist);
         ((TextView)findViewById(R.id.composer)).setText(composer);
+        ((TextView)findViewById(R.id.album)).setText(album);
         IdAndName genre = MusicUtils.fetchGenre(this, id);
         if (genre != null) {
             ((TextView)findViewById(R.id.genre)).setText(genre.name);
         }
-        ((TextView)findViewById(R.id.album)).setText(album);
         ((TextView)findViewById(R.id.year)).setText(year);
         ((TextView)findViewById(R.id.duration)).setText(MusicUtils.formatDuration(this, duration));
         ((TextView)findViewById(R.id.folder)).setText(file.getParent());
         ((TextView)findViewById(R.id.filename)).setText(file.getName());
         ((TextView)findViewById(R.id.filesize)).setText(formatFileSize(file.length()));
         ((TextView)findViewById(R.id.mimetype)).setText(mimeType);
+        ((TextView)findViewById(R.id.date_added)).setText(formatDate(dateAdded));
         ((TextView)findViewById(R.id.id)).setText(String.valueOf(id));
     }
 
     private String formatFileSize(long size) {
         return (size/1024) + " KB";
+    }
+
+    private String formatDate(Date timestamp) {
+        return dateFormat.format(timestamp);
     }
 }
