@@ -218,6 +218,8 @@ public class QueryBrowserActivity extends ListActivity
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mQueryCursor.moveToPosition(mi.position);
         if (mQueryCursor.isBeforeFirst() || mQueryCursor.isAfterLast()) {

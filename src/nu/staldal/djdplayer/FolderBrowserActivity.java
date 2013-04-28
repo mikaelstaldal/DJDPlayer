@@ -163,6 +163,8 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);

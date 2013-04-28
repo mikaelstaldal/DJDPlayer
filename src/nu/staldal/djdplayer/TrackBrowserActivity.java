@@ -574,6 +574,8 @@ public class TrackBrowserActivity extends BrowserActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
             menu.add(0, PLAY_NEXT, 0, R.string.play_next);

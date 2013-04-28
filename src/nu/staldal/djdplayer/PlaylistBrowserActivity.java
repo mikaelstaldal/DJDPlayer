@@ -138,6 +138,8 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+
         if (mCreateShortcut) {
             return;
         }
