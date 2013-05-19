@@ -71,7 +71,6 @@ public class MediaPlaybackActivity extends Activity
         mTotalTime = (TextView) findViewById(R.id.totaltime);
         mProgress = (ProgressBar) findViewById(android.R.id.progress);
         mArtistName = (TextView) findViewById(R.id.artistname);
-        mAlbumName = (TextView) findViewById(R.id.albumname);
         mGenreName = (TextView) findViewById(R.id.genrename);
         mTrackName = (TextView) findViewById(R.id.trackname);
         mNextTrackName = (TextView) findViewById(R.id.nexttrackname);
@@ -79,10 +78,6 @@ public class MediaPlaybackActivity extends Activity
         mNextGenreName = (TextView) findViewById(R.id.nextgenrename);
 
         View v = (View)mArtistName.getParent(); 
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
-
-        v = (View)mAlbumName.getParent();
         v.setOnTouchListener(this);
         v.setOnLongClickListener(this);
 
@@ -200,8 +195,6 @@ public class MediaPlaybackActivity extends Activity
     TextView textViewForContainer(View v) {
         View vv = v.findViewById(R.id.artistname);
         if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.albumname);
-        if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.genrename);
         if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.trackname);
@@ -310,7 +303,6 @@ public class MediaPlaybackActivity extends Activity
         long audioId = mService.getAudioId();
         long artistId = mService.getArtistId();
         long genreId = mService.getGenreId();
-        long albumId = mService.getAlbumId();
         String song = mService.getTrackName();
         String artist = mService.getArtistName();
         String album = mService.getAlbumName();
@@ -348,9 +340,6 @@ public class MediaPlaybackActivity extends Activity
 
         if (view.equals(mArtistName.getParent())) {
             browseCategory("artist", artistId);
-            return true;
-        } else if (view.equals(mAlbumName.getParent())) {
-            browseCategory("album", albumId);
             return true;
         } else if (view.equals(mGenreName.getParent())) {
             browseCategory("genre", genreId);
@@ -1053,7 +1042,6 @@ public class MediaPlaybackActivity extends Activity
     private TextView mCurrentTime;
     private TextView mTotalTime;
     private TextView mArtistName;
-    private TextView mAlbumName;
     private TextView mGenreName;
     private TextView mTrackName;
     private TextView mNextTrackName;
@@ -1168,7 +1156,6 @@ public class MediaPlaybackActivity extends Activity
             // Once we can get meta data from MediaPlayer,
             // we can show that info again when streaming.
             ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
-            ((View) mAlbumName.getParent()).setVisibility(View.INVISIBLE);
             ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
             mTrackName.setText(path);
             ((View) mNextTrackName.getParent()).setVisibility(View.INVISIBLE);
@@ -1176,7 +1163,6 @@ public class MediaPlaybackActivity extends Activity
             ((View) mNextGenreName.getParent()).setVisibility(View.INVISIBLE);
         } else {
             ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
-            ((View) mAlbumName.getParent()).setVisibility(View.VISIBLE);
             ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
             ((View) mNextTrackName.getParent()).setVisibility(View.VISIBLE);
             ((View) mNextArtistName.getParent()).setVisibility(View.VISIBLE);
@@ -1186,11 +1172,6 @@ public class MediaPlaybackActivity extends Activity
                 artistName = getString(R.string.unknown_artist_name);
             }
             mArtistName.setText(artistName);
-            String albumName = mService.getAlbumName();
-            if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
-                albumName = getString(R.string.unknown_album_name);
-            }
-            mAlbumName.setText(albumName);
             String genreName = mService.getGenreName();
             if (MediaStore.UNKNOWN_STRING.equals(genreName)) {
                 genreName = getString(R.string.unknown_genre_name);

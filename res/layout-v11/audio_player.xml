@@ -174,32 +174,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:paddingLeft="11dip"
-        android:paddingTop="4dip"
-        android:paddingBottom="8dip">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="4dip"
-            android:src="@drawable/ic_mp_album_playback" />
-
-        <TextView android:id="@+id/albumname"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:layout_gravity="center_vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"

@@ -74,7 +74,7 @@ public abstract class BrowserActivity extends ListActivity
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ARTISTS_TAB, true)) {
             findViewById(R.id.artisttab).setVisibility(View.GONE);
         }
-        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, true)) {
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, false)) {
             findViewById(R.id.albumtab).setVisibility(View.GONE);
         }
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
