@@ -46,7 +46,6 @@
         />
         <activity android:name="nu.staldal.djdplayer.MusicBrowserActivity"
             android:theme="@style/Theme.NoTitleBar"
-            android:exported="true"
         >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -78,7 +77,7 @@
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
                 android:excludeFromRecents="true"
-                android:exported="true" >
+                >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -104,21 +103,21 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/artists"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/albums"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -140,19 +139,7 @@
                 <data android:mimeType="vnd.android.cursor.dir/djd.track"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.QueryBrowserActivity" android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.MEDIA_SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable"
-            />
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity"
-                android:exported="true" >
+        <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity">
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -164,11 +151,21 @@
                 <data android:mimeType="vnd.android.cursor.dir/playlist"/>
             </intent-filter>
         </activity>
+        <activity android:name="nu.staldal.djdplayer.QueryBrowserActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.MEDIA_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+            />
+        </activity>
         <activity-alias android:name="nu.staldal.djdplayer.PlaylistShortcutActivity"
             android:targetActivity="nu.staldal.djdplayer.PlaylistBrowserActivity"
             android:label="@string/musicshortcutlabel"
-            android:icon="@drawable/ic_launcher_shortcut_music_playlist"
-            android:exported="true" >
+            android:icon="@drawable/ic_launcher_shortcut_music_playlist" >
 
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -177,7 +174,7 @@
 
         </activity-alias>
         <activity android:name="nu.staldal.djdplayer.MusicPicker"
-                android:label="@string/music_picker_title" android:exported="true" >
+                android:label="@string/music_picker_title" >
             <!-- First way to invoke us: someone asks to get content of
                  any of the audio types we support. -->
             <intent-filter>
@@ -197,7 +194,7 @@
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.CreatePlaylist"
-            android:theme="@style/Theme.Dialog" android:exported="false" />
+            android:theme="@style/Theme.Dialog" />
 
         <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
             <intent-filter>
@@ -207,14 +204,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.SettingsActivity" android:exported="false" />
+        <activity android:name="nu.staldal.djdplayer.SettingsActivity" />
 
-        <activity android:name="nu.staldal.djdplayer.RescanActivity" android:exported="false" />
+        <activity android:name="nu.staldal.djdplayer.RescanActivity" />
 
         <activity android:name="nu.staldal.djdplayer.PickMusicFolderActivity"
-            android:theme="@style/Theme.Dialog" android:exported="false" />
+            android:theme="@style/Theme.Dialog" />
 
-        <service android:name="nu.staldal.djdplayer.MediaPlaybackService" android:exported="false" />
+        <service android:name="nu.staldal.djdplayer.MediaPlaybackService" />
 
         <receiver android:name="nu.staldal.djdplayer.MediaAppWidgetProvider">
             <intent-filter>
