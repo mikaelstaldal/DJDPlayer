@@ -51,7 +51,6 @@ public abstract class BrowserActivity extends ListActivity
         if (getIntent().getBooleanExtra("withtabs", false)) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.media_picker_activity);
     }

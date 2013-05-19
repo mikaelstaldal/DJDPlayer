@@ -16,72 +16,79 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <View 
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#ffffffff" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff5a5a5a"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView android:id="@+id/currenttime"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:shadowColor="#ff000000"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="3"
-            android:layout_gravity="bottom"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:paddingLeft="5dip"
-            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#ffffffff" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="bottom"
-            android:layout_marginTop="1dip"
-            android:layout_marginBottom="2dip"
-            android:gravity="center">
+            android:background="#ff5a5a5a"
+            android:orientation="horizontal">
 
-            <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/prev" style="@android:style/MediaButton.Previous" />
+            <TextView android:id="@+id/currenttime"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:shadowColor="#ff000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:paddingLeft="5dip"
+                android:layout_height="wrap_content" />
 
-            <ImageButton android:id="@+id/pause" style="@android:style/MediaButton.Play" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="1dip"
+                android:layout_marginBottom="2dip"
+                android:gravity="center">
 
-            <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/next" style="@android:style/MediaButton.Next" />
+                <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/prev" style="@android:style/MediaButton.Previous" />
+
+                <ImageButton android:id="@+id/pause" style="@android:style/MediaButton.Play" />
+
+                <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/next" style="@android:style/MediaButton.Next" />
+
+            </LinearLayout>
+
+            <TextView android:id="@+id/totaltime"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:shadowColor="#ff000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3"
+                android:gravity="right"
+                android:paddingRight="5dip"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
-        <TextView android:id="@+id/totaltime"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:shadowColor="#ff000000"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="3"
-            android:gravity="right"
-            android:paddingRight="5dip"
-            android:layout_gravity="bottom"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content" />
+        <SeekBar android:id="@android:id/progress"
+            android:background="#ff5a5a5a"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dip"
+            android:paddingRight="8dip"
+            android:paddingBottom="2dip" />
 
     </LinearLayout>
-
-    <SeekBar android:id="@android:id/progress"
-        android:background="#ff5a5a5a"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="8dip"
-        android:paddingRight="8dip"
-        android:paddingBottom="2dip" />
 
 </merge>

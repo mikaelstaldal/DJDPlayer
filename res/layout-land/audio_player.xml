@@ -22,41 +22,40 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="10dip">
+        android:gravity="center">
 
-        <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+       <ImageButton android:id="@+id/curplaylist"
+            android:src="@drawable/ic_mp_current_playlist_btn"
+            android:layout_width="82dip"
+            android:layout_height="45dip"
+            android:layout_marginRight="8dip"
+            android:nextFocusLeft="@id/curplaylist" />
 
-           <ImageButton android:id="@+id/curplaylist"
-                android:src="@drawable/ic_mp_current_playlist_btn"
-                android:layout_width="82dip"
-                android:layout_height="45dip"
-                android:layout_marginRight="8dip"
-                android:nextFocusLeft="@id/curplaylist" />
+       <ImageButton android:id="@+id/shuffle"
+            android:src="@drawable/ic_mp_shuffle_off_btn"
+            android:layout_width="82dip"
+            android:layout_height="45dip"
+            android:layout_marginRight="8dip" />
 
-           <ImageButton android:id="@+id/shuffle"
-                android:src="@drawable/ic_mp_shuffle_off_btn"
-                android:layout_width="82dip"
-                android:layout_height="45dip"
-                android:layout_marginRight="8dip" />
+       <ImageButton android:id="@+id/repeat"
+            android:layout_width="82dip"
+            android:layout_height="45dip"
+            android:layout_marginRight="8dip" />
 
-           <ImageButton android:id="@+id/repeat"
-                android:layout_width="82dip"
-                android:layout_height="45dip" />
+       <ImageButton android:id="@+id/library"
+            android:src="@drawable/ic_menu_music_library"
+            android:layout_width="82dip"
+            android:layout_height="45dip" />
 
-           <ImageButton android:id="@+id/library"
-                android:src="@drawable/ic_menu_music_library"
-                android:layout_width="82dip"
-                android:layout_height="45dip"
-                android:layout_marginRight="8dip" />
+    </LinearLayout>
 
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dip"
@@ -69,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:baselineAligned="false"
-                android:paddingBottom="10dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -93,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:baselineAligned="false"
-                android:paddingBottom="10dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -117,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:baselineAligned="false"
-                android:paddingBottom="10dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -150,8 +149,7 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false"
                 android:paddingLeft="11dip"
-                android:paddingTop="4dip"
-                android:paddingBottom="4dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -175,8 +173,7 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false"
                 android:paddingLeft="11dip"
-                android:paddingTop="4dip"
-                android:paddingBottom="4dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -200,8 +197,7 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false"
                 android:paddingLeft="11dip"
-                android:paddingTop="4dip"
-                android:paddingBottom="4dip">
+                android:paddingBottom="8dip">
 
                 <ImageView
                     android:layout_width="wrap_content"

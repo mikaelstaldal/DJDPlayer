@@ -344,8 +344,6 @@ public class MusicPicker extends ListActivity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        
         int sortMode = TRACK_MENU;
         if (icicle == null) {
             mSelectedUri = getIntent().getParcelableExtra(

@@ -64,7 +64,6 @@ public class MediaPlaybackActivity extends Activity
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.audio_player);
 
         mCurrentTime = (TextView) findViewById(R.id.currenttime);
@@ -475,13 +474,6 @@ public class MediaPlaybackActivity extends Activity
         setPauseButtonImage();
     }
     
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        //System.out.println("***************** playback activity onDestroy\n");
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
