@@ -131,7 +131,7 @@
     <!-- Playlists screen title -->
     <string name="playlists_title">Playlists</string>
     <!-- Category label on Library screen -->
-    <string name="browse_menu">Artists</string>
+    <string name="artists_menu">Artists</string>
     <!-- Menu item -->
     <string name="info">Info</string>
     <!-- Library screen, menu item -->

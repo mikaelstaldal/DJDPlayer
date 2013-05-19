@@ -27,7 +27,7 @@
         android:focusable="true"
         android:background="@drawable/buttonbarbackground"
         android:drawableTop="@drawable/ic_tab_artists"
-        android:text="@string/browse_menu"
+        android:text="@string/artists_menu"
         android:singleLine="true"
         android:ellipsize="none"
         android:textAppearance="?android:attr/textAppearanceSmall"
