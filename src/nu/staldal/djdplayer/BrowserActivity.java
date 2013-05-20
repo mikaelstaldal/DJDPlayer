@@ -122,7 +122,10 @@ public abstract class BrowserActivity extends ListActivity
 
     protected void processTabClick(Activity a, View v, int current) {
         int id = v.getId();
-        if (id == current) {
+        if (id == R.id.menubutton) {
+            openOptionsMenu();
+            return;
+        } else if (id == current) {
             return;
         }
 
