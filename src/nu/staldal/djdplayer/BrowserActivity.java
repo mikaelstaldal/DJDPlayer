@@ -19,14 +19,12 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.content.*;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
+import android.view.*;
 import android.widget.ImageButton;
 import android.widget.TabWidget;
 import android.widget.TextView;
@@ -53,6 +51,19 @@ public abstract class BrowserActivity extends ListActivity
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.media_picker_activity);
+        if (!hasMenuKey()) {
+            findViewById(R.id.menubutton).setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean hasMenuKey() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return ViewConfiguration.get(this).hasPermanentMenuKey();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     protected boolean updateButtonBar(int tabId) {
