@@ -692,22 +692,22 @@ public class MusicUtils {
         Intent intent = new Intent(Intent.ACTION_PICK);
         switch (id) {
             case R.id.artisttab:
-                intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Artists.CONTENT_TYPE);
+                intent.setClass(a, ArtistBrowserActivity.class);
                 break;
             case R.id.albumtab:
-                intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
+                intent.setClass(a, AlbumBrowserActivity.class);
                 break;
             case R.id.genretab:
-                intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Genres.CONTENT_TYPE);
+                intent.setClass(a, GenreBrowserActivity.class);
                 break;
             case R.id.foldertab:
-                intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.folder");
+                intent.setClass(a, FolderBrowserActivity.class);
                 break;
             case R.id.songtab:
-                intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+                intent.setClass(a, TrackBrowserActivity.class);
                 break;
             case R.id.playlisttab:
-                intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
+                intent.setClass(a, PlaylistBrowserActivity.class);
                 break;
             default:
                 return;
