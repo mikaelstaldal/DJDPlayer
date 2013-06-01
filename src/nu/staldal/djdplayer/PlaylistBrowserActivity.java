@@ -113,8 +113,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         super.onServiceConnected(classname, obj);
 
         final Intent intent = getIntent();
-        final String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             long id = Long.parseLong(intent.getExtras().getString("playlist"));
             MusicUtils.playAll(this, fetchSongList(id));
             finish();
@@ -292,7 +291,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         if (mCreateShortcut) {
             final Intent shortcut = new Intent();
             shortcut.setAction(Intent.ACTION_VIEW);
-            shortcut.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
+            shortcut.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.playlist");
             shortcut.putExtra(CATEGORY_ID, String.valueOf(id));
 
             final Intent intent = new Intent();
@@ -306,18 +305,18 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
             return;
         }
         if (id == RECENTLY_ADDED_PLAYLIST) {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra(CATEGORY_ID, "recentlyadded");
             startActivity(intent);
         } else if (id == PODCASTS_PLAYLIST) {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra(CATEGORY_ID, "podcasts");
             startActivity(intent);
         } else {
             Intent intent = new Intent(Intent.ACTION_EDIT);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra(CATEGORY_ID, Long.valueOf(id).toString());
             startActivity(intent);
         }

@@ -103,48 +103,49 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity" >
+        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/artists"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity" >
+        <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/albums"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity" >
+        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/genre"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.FolderBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.FolderBrowserActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/djd.folder"/>
+                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.folder"/>
             </intent-filter>
         </activity>
-        <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity" android:exported="false" >
+        <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
-                <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/djd.track"/>
+                <data android:mimeType="vnd.android.cursor.dir/audio"/>
+                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
             </intent-filter>
         </activity>
         <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/playlist"/>
+                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.playlist"/>
             </intent-filter>
         </activity>
 
@@ -159,6 +160,7 @@
                 android:resource="@xml/searchable"
             />
         </activity>
+
         <activity-alias android:name="nu.staldal.djdplayer.PlaylistShortcutActivity"
             android:targetActivity="nu.staldal.djdplayer.PlaylistBrowserActivity"
             android:label="@string/musicshortcutlabel"
@@ -168,10 +170,10 @@
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity-alias>
+
         <activity android:name="nu.staldal.djdplayer.MusicPicker"
-                android:label="@string/music_picker_title" >
+                  android:label="@string/music_picker_title" >
             <!-- First way to invoke us: someone asks to get content of
                  any of the audio types we support. -->
             <intent-filter>
@@ -197,7 +199,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.item/djd.track"/>
+                <data android:mimeType="vnd.android.cursor.item/audio"/>
+                <data android:mimeType="vnd.android.cursor.item/vnd.djdplayer.audio"/>
             </intent-filter>
         </activity>
 

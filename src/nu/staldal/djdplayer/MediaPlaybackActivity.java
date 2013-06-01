@@ -146,7 +146,7 @@ public class MediaPlaybackActivity extends Activity
             public void onClick(View v) {
                 startActivity(
                         new Intent(Intent.ACTION_EDIT)
-                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track")
+                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio")
                         .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE)
                 );
             }
@@ -359,8 +359,8 @@ public class MediaPlaybackActivity extends Activity
     }
 
     private void browseCategory(String categoryId, long id) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
         intent.putExtra(categoryId, String.valueOf(id));
         startActivity(intent);
     }
@@ -533,7 +533,7 @@ public class MediaPlaybackActivity extends Activity
                 intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()),
-                    "vnd.android.cursor.item/djd.track");
+                    "vnd.android.cursor.item/vnd.djdplayer.audio");
                 startActivity(intent);
                 return true;
 

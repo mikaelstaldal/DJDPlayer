@@ -30,8 +30,8 @@ public final class FolderContract {
     public static class Folder implements BaseColumns, FolderColumns {
         private Folder() {}
 
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/djd.folder";
-        // public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/djd.folder";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.folder";
+        // public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.djdplayer.folder";
 
         public static final String FOLDER_PATH = "djd.folder";
 

@@ -153,8 +153,8 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
         mCursor.moveToPosition(position);
         String path = mCursor.getString(mCursor.getColumnIndexOrThrow(FolderContract.Folder.PATH));
         intent.putExtra(CATEGORY_ID, path);

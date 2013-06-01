@@ -177,8 +177,8 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
         intent.putExtra(getCategoryId(), String.valueOf(id));
         startActivity(intent);
     }

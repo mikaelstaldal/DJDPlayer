@@ -76,16 +76,16 @@ public class QueryBrowserActivity extends ListActivity
                 return;
             } else if (path.startsWith("content://media/external/audio/albums/")) {
                 // This is an album, show the songs on it
-                Intent i = new Intent(Intent.ACTION_PICK);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
                 i.putExtra("album", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
                 return;
             } else if (path.startsWith("content://media/external/audio/artists/")) {
                 // This is an artist, show the songs for that artist
-                Intent i = new Intent(Intent.ACTION_PICK);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
                 i.putExtra("artist", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -307,7 +307,7 @@ public class QueryBrowserActivity extends ListActivity
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
-                    "vnd.android.cursor.item/djd.track");
+                    "vnd.android.cursor.item/vnd.djdplayer.audio");
                 startActivity(intent);
                 return true;
         }
@@ -326,15 +326,15 @@ public class QueryBrowserActivity extends ListActivity
                 MediaStore.Audio.Media.MIME_TYPE));
 
         if ("artist".equals(selectedType)) {
-            Intent intent = new Intent(Intent.ACTION_PICK);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
             intent.putExtra("artist", Long.valueOf(id).toString());
             startActivity(intent);
         } else if ("album".equals(selectedType)) {
-            Intent intent = new Intent(Intent.ACTION_PICK);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/djd.track");
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0) {

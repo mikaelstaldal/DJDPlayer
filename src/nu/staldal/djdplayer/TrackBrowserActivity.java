@@ -688,7 +688,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
-                    "vnd.android.cursor.item/djd.track");
+                    "vnd.android.cursor.item/vnd.djdplayer.audio");
                 startActivity(intent);
                 return true;
 
