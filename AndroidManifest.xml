@@ -142,15 +142,12 @@
         <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity">
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/playlist"/>
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/playlist"/>
             </intent-filter>
         </activity>
+
         <activity android:name="nu.staldal.djdplayer.QueryBrowserActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

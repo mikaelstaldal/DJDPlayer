@@ -689,7 +689,7 @@ public class MusicUtils {
     }
 
     static void activateTab(Activity a, int id) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
+        Intent intent = new Intent();
         switch (id) {
             case R.id.artisttab:
                 intent.setClass(a, ArtistBrowserActivity.class);

@@ -113,7 +113,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             mPlaylist = getIntent().getStringExtra(PlaylistBrowserActivity.CATEGORY_ID);
             mGenreId = parseLong(getIntent().getStringExtra("genre"));
             mFolder = getIntent().getStringExtra(FolderBrowserActivity.CATEGORY_ID);
-            mEditMode = getIntent().getAction().equals(Intent.ACTION_EDIT);
+            mEditMode = Intent.ACTION_EDIT.equals(getIntent().getAction());
         }
 
         updateButtonBar(R.id.songtab);
