@@ -292,7 +292,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         if (mCreateShortcut) {
             final Intent shortcut = new Intent();
             shortcut.setAction(Intent.ACTION_VIEW);
-            shortcut.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/playlist");
+            shortcut.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
             shortcut.putExtra(CATEGORY_ID, String.valueOf(id));
 
             final Intent intent = new Intent();
