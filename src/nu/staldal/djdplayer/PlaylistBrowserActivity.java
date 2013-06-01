@@ -86,7 +86,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                     new String[] { MediaStore.Audio.Playlists.NAME},
                     new int[] { android.R.id.text1 });
             setListAdapter(mAdapter);
-            setTitle(R.string.working_playlists);
+            if (!withTabs) setTitle(R.string.working_playlists);
             getCursor(mAdapter.getQueryHandler(), null);
         } else {
             mAdapter.setActivity(this);
@@ -101,7 +101,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
             if (mCursor != null) {
                 init(mCursor);
             } else {
-                setTitle(R.string.working_playlists);
+                if (!withTabs) setTitle(R.string.working_playlists);
                 getCursor(mAdapter.getQueryHandler(), null);
             }
         }

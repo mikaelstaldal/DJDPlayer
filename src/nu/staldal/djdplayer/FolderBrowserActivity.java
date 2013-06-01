@@ -85,7 +85,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
                     new int[] {},
                     this);
             setListAdapter(mAdapter);
-            setTitle(R.string.working_folders);
+            if (!withTabs) setTitle(R.string.working_folders);
             getCursor(mAdapter.getQueryHandler());
         } else {
             mAdapter.setActivity(this);

@@ -92,7 +92,6 @@ public class TrackBrowserActivity extends BrowserActivity {
     private long mSelectedId;
     private static int mLastListPosCourse = -1;
     private static int mLastListPosFine = -1;
-    private boolean mUseLastListPos = false;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -117,7 +116,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             mEditMode = getIntent().getAction().equals(Intent.ACTION_EDIT);
         }
 
-        mUseLastListPos = updateButtonBar(R.id.songtab);
+        updateButtonBar(R.id.songtab);
         mTrackList = getListView();
         mTrackList.setOnCreateContextMenuListener(this);
         mTrackList.setCacheColorHint(0);
@@ -166,7 +165,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                     mPlaylist != null &&
                     !(mPlaylist.equals("podcasts") || mPlaylist.equals("recentlyadded")));
             setListAdapter(mAdapter);
-            setTitle(R.string.working_songs);
+            if (!withTabs) setTitle(R.string.working_songs);
             getTrackCursor(mAdapter.getQueryHandler(), null, true);
         } else {
             mTrackCursor = mAdapter.getCursor();
@@ -179,7 +178,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             if (mTrackCursor != null) {
                 init(mTrackCursor, false);
             } else {
-                setTitle(R.string.working_songs);
+                if (!withTabs) setTitle(R.string.working_songs);
                 getTrackCursor(mAdapter.getQueryHandler(), null, true);
             }
         }
@@ -196,7 +195,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     public void onDestroy() {
         ListView lv = getListView();
         if (lv != null) {
-            if (mUseLastListPos) {
+            if (withTabs) {
                 mLastListPosCourse = lv.getFirstVisiblePosition();
                 View cv = lv.getChildAt(0);
                 if (cv != null) {
@@ -303,7 +302,6 @@ public class TrackBrowserActivity extends BrowserActivity {
     }
     
     public void init(Cursor newCursor, boolean isLimited) {
-
         if (mAdapter == null) {
             return;
         }
@@ -317,11 +315,11 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
 
         MusicUtils.hideDatabaseError(this);
-        mUseLastListPos = updateButtonBar(R.id.songtab);
-        setTitle();
+        updateButtonBar(R.id.songtab);
+        if (!withTabs) setTitle();
 
         // Restore previous position
-        if (mLastListPosCourse >= 0 && mUseLastListPos) {
+        if (mLastListPosCourse >= 0 && withTabs) {
             ListView lv = getListView();
             // this hack is needed because otherwise the position doesn't change
             // for the 2nd (non-limited) cursor
@@ -1085,13 +1083,12 @@ public class TrackBrowserActivity extends BrowserActivity {
         // asynchronously using AsyncQueryHandler, so we do some extra initialization here.
         if (ret != null && async) {
             init(ret, false);
-            setTitle();
+            if (!withTabs) setTitle();
         }
         return ret;
     }
 
     private class PlayQueueCursor extends AbstractCursor {
-
         public PlayQueueCursor(MediaPlaybackService service, String[] cols) {
             mCols = cols;
             mService  = service;
@@ -1542,4 +1539,3 @@ public class TrackBrowserActivity extends BrowserActivity {
         }        
     }
 }
-

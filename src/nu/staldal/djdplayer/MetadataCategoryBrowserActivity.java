@@ -98,7 +98,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
                     new int[] {},
                     this);
             setListAdapter(mAdapter);
-            setTitle(getWorkingCategoryStringId());
+            if (!withTabs) setTitle(getWorkingCategoryStringId());
             getCursor(mAdapter.getQueryHandler(), null);
         } else {
             mAdapter.setActivity(this);

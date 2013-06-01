@@ -79,7 +79,7 @@ public abstract class CategoryBrowserActivity<A extends CursorAdapter> extends B
 
         MusicUtils.hideDatabaseError(this);
         updateButtonBar(getTabId());
-        setTitle();
+        if (!withTabs) setTitle();
     }
 
     @Override

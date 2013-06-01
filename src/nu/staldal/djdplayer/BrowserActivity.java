@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ public abstract class BrowserActivity extends ListActivity
 
     protected MusicUtils.ServiceToken mToken;
 
+    protected boolean withTabs;
+
     private View nowPlayingView;
     private TextView titleView;
     private TextView artistView;
@@ -46,14 +48,12 @@ public abstract class BrowserActivity extends ListActivity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        if (getIntent().getBooleanExtra("withtabs", false)) {
+        withTabs = getIntent().getBooleanExtra("withtabs", false);
+        if (withTabs && hasMenuKey()) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.media_picker_activity);
-        if (!hasMenuKey()) {
-            findViewById(R.id.menubutton).setVisibility(View.VISIBLE);
-        }
     }
 
     private boolean hasMenuKey() {
@@ -66,17 +66,12 @@ public abstract class BrowserActivity extends ListActivity
         }
     }
 
-    protected boolean updateButtonBar(int tabId) {
+    protected void updateButtonBar(int tabId) {
         final TabWidget ll = (TabWidget) findViewById(R.id.buttonbar);
-        boolean withtabs = false;
-        Intent intent = getIntent();
-        if (intent != null) {
-            withtabs = intent.getBooleanExtra("withtabs", false);
-        }
 
-        if (!withtabs) {
+        if (!withTabs) {
             ll.setVisibility(View.GONE);
-            return withtabs;
+            return;
         } else {
             ll.setVisibility(View.VISIBLE);
         }
@@ -128,15 +123,11 @@ public abstract class BrowserActivity extends ListActivity
                     processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
                 }});
         }
-        return withtabs;
     }
 
     protected void processTabClick(Activity a, View v, int current) {
         int id = v.getId();
-        if (id == R.id.menubutton) {
-            openOptionsMenu();
-            return;
-        } else if (id == current) {
+        if (id == current) {
             return;
         }
 

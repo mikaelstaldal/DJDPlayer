@@ -124,18 +124,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ImageView
-        android:id="@+id/menubutton"
-        android:focusable="true"
-        android:background="@drawable/buttonbarbackground"
-        android:src="@drawable/ic_tab_menu"
-        android:scaleType="center"
-        android:paddingTop="5dip"
-        android:paddingBottom="2dip"
-        android:gravity="center"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
-
 </TabWidget>
