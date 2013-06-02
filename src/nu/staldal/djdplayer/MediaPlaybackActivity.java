@@ -184,7 +184,7 @@ public class MediaPlaybackActivity extends Activity
 
         mTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
     }
-    
+
     int mInitialX = -1;
     int mLastX = -1;
     int mTextWidth = 0;
@@ -477,41 +477,33 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        // Don't show the menu items if we got launched by path/filedescriptor, or
-        // if we're in one shot mode. In most cases, these menu items are not
-        // useful in those modes, so for consistency we never show them in these
-        // modes, instead of tailoring them to the specific file being played.
-        if (MusicUtils.getCurrentAudioId() >= 0) {
-            menu.add(1, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
-            menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
-            SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
-                    R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
-            // these next two are in a separate group, so they can be shown/hidden as needed
-            // based on the keyguard state
-            menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
-                    .setIcon(R.drawable.ic_menu_set_as_ringtone);
-            menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
-                    .setIcon(R.drawable.ic_menu_delete);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
-                Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                if (getPackageManager().resolveActivity(i, 0) != null) {
-                    menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
-                }
+        menu.add(1, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+        menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
+
+        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
+                .setIcon(R.drawable.ic_menu_set_as_ringtone);
+        menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
+                .setIcon(R.drawable.ic_menu_delete);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
+            Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+            if (getPackageManager().resolveActivity(i, 0) != null) {
+                menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
             }
-
-            return true;
         }
-        return false;
+
+        return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mService == null) return false;
-
-        MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
-        if (item != null) {
-            SubMenu sub = item.getSubMenu();
+        if (mService != null) {
+            MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
+            SubMenu sub = (item != null)
+                ? item.getSubMenu()
+                : menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
+                        R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             MusicUtils.makePlaylistMenu(this, sub);
         }
 
@@ -975,6 +967,9 @@ public class MediaPlaybackActivity extends Activity
     private ServiceConnection osc = new ServiceConnection() {
             public void onServiceConnected(ComponentName classname, IBinder service) {
                 mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    invalidateOptionsMenu();
+                }
                 startPlayback();
                 // Assume something is playing when the service says it is,
                 // but also if the audio ID is valid but the service is paused.
