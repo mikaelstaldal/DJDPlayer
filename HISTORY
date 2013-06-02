@@ -45,3 +45,5 @@
 1.8
 ---
 * Basic tablet support
+* Properly styled icon for playlist shortcuts
+* Avoid interference with other music players when switching tabs
