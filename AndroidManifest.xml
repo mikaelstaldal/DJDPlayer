@@ -38,6 +38,7 @@
 
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
+                 android:theme="@style/Theme.Default"
                  android:allowTaskReparenting="true">
         <meta-data
             android:name="android.app.default_searchable"
@@ -71,7 +72,6 @@
              recents since this is accessible through a notification when
              appropriate. -->
         <activity android:name="nu.staldal.djdplayer.MediaPlaybackActivity"
-                android:theme="@style/Theme.Default"
                 android:taskAffinity=""
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
