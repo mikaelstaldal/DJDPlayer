@@ -72,6 +72,7 @@
         android:layout_weight="1"
         android:layout_height="match_parent"
         android:src="@drawable/ic_appwidget_music_play"
+        android:contentDescription="@string/play_pause"
         android:background="@drawable/appwidget_button_center"
         android:scaleType="center"
         />
@@ -88,6 +89,7 @@
         android:layout_weight="1"
         android:layout_height="match_parent"
         android:src="@drawable/ic_appwidget_music_next"
+        android:contentDescription="@string/next"
         android:background="@drawable/appwidget_button_right"
         android:scaleType="center"
         />

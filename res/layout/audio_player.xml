@@ -32,6 +32,7 @@
             android:orientation="vertical">
          <ImageButton android:id="@+id/curplaylist"
              android:src="@drawable/ic_mp_current_playlist_btn"
+             android:contentDescription="@string/play_queue_title"
              android:layout_width="match_parent"
              android:layout_height="50dip" />
          <TextView android:text="@string/play_queue_title"
@@ -47,6 +48,7 @@
               android:orientation="vertical">
          <ImageButton android:id="@+id/shuffle"
             android:src="@drawable/ic_mp_shuffle_off_btn"
+            android:contentDescription="@string/shuffle"
             android:layout_width="match_parent"
             android:layout_height="50dip" />
          <TextView android:text="@string/shuffle"
@@ -61,6 +63,7 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
          <ImageButton android:id="@+id/repeat"
+            android:contentDescription="@string/repeat"
             android:layout_width="match_parent"
             android:layout_height="50dip" />
          <TextView android:text="@string/repeat"
@@ -76,6 +79,7 @@
                android:orientation="vertical">
          <ImageButton android:id="@+id/library"
              android:src="@drawable/ic_menu_music_library"
+             android:contentDescription="@string/goto_start"
              android:layout_width="match_parent"
              android:layout_height="50dip" />
          <TextView android:text="@string/goto_start"

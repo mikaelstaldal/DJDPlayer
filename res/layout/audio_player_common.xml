@@ -55,11 +55,20 @@
                 android:layout_marginBottom="2dip"
                 android:gravity="center">
 
-                <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/prev" style="@android:style/MediaButton.Previous" />
+                <nu.staldal.djdplayer.RepeatingImageButton
+                        android:id="@+id/prev"
+                        style="@android:style/MediaButton.Previous"
+                        android:contentDescription="@string/prev"/>
 
-                <ImageButton android:id="@+id/pause" style="@android:style/MediaButton.Play" />
+                <ImageButton
+                        android:id="@+id/pause"
+                        style="@android:style/MediaButton.Play"
+                        android:contentDescription="@string/play_pause"/>
 
-                <nu.staldal.djdplayer.RepeatingImageButton android:id="@+id/next" style="@android:style/MediaButton.Next" />
+                <nu.staldal.djdplayer.RepeatingImageButton
+                        android:id="@+id/next"
+                        style="@android:style/MediaButton.Next"
+                        android:contentDescription="@string/next"/>
 
             </LinearLayout>
 

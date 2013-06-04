@@ -70,6 +70,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:src="@android:drawable/ic_media_previous"
+                android:contentDescription="@string/prev"
                 android:background="@drawable/appwidget_button_center"
                 />
             <ImageButton
@@ -79,6 +80,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:src="@android:drawable/ic_media_play"
+                android:contentDescription="@string/play_pause"
                 android:background="@drawable/appwidget_button_center"
                 />
             <ImageButton
@@ -88,6 +90,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:src="@android:drawable/ic_media_next"
+                android:contentDescription="@string/next"
                 android:background="@drawable/appwidget_button_center"
                 />
         </LinearLayout>
