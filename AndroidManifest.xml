@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="33"
-          android:versionName="1.8"
+          android:versionCode="34"
+          android:versionName="1.9beta"
           android:installLocation="auto">
 
     <!-- Require 2.2 (Froyo), target 4.0.3 (Ice Cream Sandwich) -->
@@ -39,7 +39,8 @@
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
                  android:theme="@style/Theme.Default"
-                 android:allowTaskReparenting="true">
+                 android:allowTaskReparenting="true"
+                 android:allowBackup="true">
         <meta-data
             android:name="android.app.default_searchable"
             android:value="nu.staldal.djdplayer.QueryBrowserActivity"
@@ -194,7 +195,7 @@
         <activity android:name="nu.staldal.djdplayer.CreatePlaylist"
             android:theme="@style/Theme.Dialog" />
 
-        <activity android:name="nu.staldal.djdplayer.TrackInfoActivity" android:exported="false">
+        <activity android:name="nu.staldal.djdplayer.TrackInfoActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
