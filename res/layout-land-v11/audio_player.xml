@@ -61,9 +61,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dip"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="0dip"
@@ -71,77 +72,41 @@
             android:layout_weight="3"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView android:id="@+id/trackname"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:paddingBottom="6dip">
+                android:drawableLeft="@drawable/ic_mp_song_playback"
+                android:drawablePadding="4dip"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_song_playback" />
-
-                <TextView android:id="@+id/trackname"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView android:id="@+id/artistname"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:paddingBottom="6dip">
+                android:drawableLeft="@drawable/ic_mp_artist_playback"
+                android:drawablePadding="4dip"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_artist_playback" />
-
-                <TextView android:id="@+id/artistname"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView android:id="@+id/genrename"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:paddingBottom="6dip">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_genre_playback" />
-
-                <TextView android:id="@+id/genrename"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
+                android:drawableLeft="@drawable/ic_mp_genre_playback"
+                android:drawablePadding="4dip"/>
 
         </LinearLayout>
 
@@ -151,77 +116,42 @@
             android:layout_weight="2"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView android:id="@+id/nexttrackname"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingLeft="11dip"
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
+                android:drawableLeft="@drawable/ic_mp_song_playback"
+                android:drawablePadding="4dip"/>
+
+            <TextView android:id="@+id/nextartistname"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:paddingLeft="11dip"
-                android:paddingBottom="6dip">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_song_playback" />
-
-                <TextView android:id="@+id/nexttrackname"
-                    android:textSize="14sp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
+                android:drawableLeft="@drawable/ic_mp_artist_playback"
+                android:drawablePadding="4dip"/>
+
+            <TextView android:id="@+id/nextgenrename"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:paddingLeft="11dip"
-                android:paddingBottom="6dip">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_artist_playback" />
-
-                <TextView android:id="@+id/nextartistname"
-                    android:textSize="12sp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
+                android:paddingBottom="6dip"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:paddingLeft="11dip"
-                android:paddingBottom="6dip">
+                android:drawableLeft="@drawable/ic_mp_genre_playback"
+                android:drawablePadding="4dip"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dip"
-                    android:src="@drawable/ic_mp_genre_playback" />
-
-                <TextView android:id="@+id/nextgenrename"
-                    android:textSize="12sp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:layout_gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

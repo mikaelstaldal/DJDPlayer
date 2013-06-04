@@ -61,7 +61,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:layout_gravity="right"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
                 >
             <ImageButton
                 android:id="@+id/control_play"

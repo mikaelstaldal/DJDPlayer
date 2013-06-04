@@ -76,29 +76,23 @@ public class MediaPlaybackActivity extends Activity
         mNextArtistName = (TextView) findViewById(R.id.nextartistname);
         mNextGenreName = (TextView) findViewById(R.id.nextgenrename);
 
-        View v = (View)mArtistName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mArtistName.setOnTouchListener(this);
+        mArtistName.setOnLongClickListener(this);
 
-        v = (View)mGenreName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mGenreName.setOnTouchListener(this);
+        mGenreName.setOnLongClickListener(this);
 
-        v = (View)mTrackName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mTrackName.setOnTouchListener(this);
+        mTrackName.setOnLongClickListener(this);
 
-        v = (View)mNextTrackName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mNextTrackName.setOnTouchListener(this);
+        mNextTrackName.setOnLongClickListener(this);
 
-        v = (View)mNextArtistName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mNextArtistName.setOnTouchListener(this);
+        mNextArtistName.setOnLongClickListener(this);
 
-        v = (View)mNextGenreName.getParent();
-        v.setOnTouchListener(this);
-        v.setOnLongClickListener(this);
+        mNextGenreName.setOnTouchListener(this);
+        mNextGenreName.setOnLongClickListener(this);
 
         mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
         mPrevButton.setOnClickListener(new View.OnClickListener() {
@@ -337,21 +331,21 @@ public class MediaPlaybackActivity extends Activity
             return false;
         }
 
-        if (view.equals(mArtistName.getParent())) {
+        if (view.equals(mArtistName)) {
             browseCategory("artist", artistId);
             return true;
-        } else if (view.equals(mGenreName.getParent())) {
+        } else if (view.equals(mGenreName)) {
             browseCategory("genre", genreId);
             return true;
-        } else if (view.equals(mNextArtistName.getParent())) {
+        } else if (view.equals(mNextArtistName)) {
             browseCategory("artist", nextArtistId);
             return true;
-        } else if (view.equals(mNextGenreName.getParent())) {
+        } else if (view.equals(mNextGenreName)) {
             browseCategory("genre", nextGenreId);
             return true;
-        } else if (view.equals(mTrackName.getParent())) {
+        } else if (view.equals(mTrackName)) {
             return searchSong(artist, album, song);
-        } else if (view.equals(mNextTrackName.getParent())) {
+        } else if (view.equals(mNextTrackName)) {
             return searchSong(nextArtist, nextAlbum, nextSong);
         } else {
             throw new RuntimeException("shouldn't be here");
@@ -1142,18 +1136,18 @@ public class MediaPlaybackActivity extends Activity
         if (songid < 0 && path.toLowerCase().startsWith("http://")) {
             // Once we can get meta data from MediaPlayer,
             // we can show that info again when streaming.
-            ((View) mArtistName.getParent()).setVisibility(View.INVISIBLE);
-            ((View) mGenreName.getParent()).setVisibility(View.INVISIBLE);
+            mArtistName.setVisibility(View.INVISIBLE);
+            mGenreName.setVisibility(View.INVISIBLE);
             mTrackName.setText(path);
-            ((View) mNextTrackName.getParent()).setVisibility(View.INVISIBLE);
-            ((View) mNextArtistName.getParent()).setVisibility(View.INVISIBLE);
-            ((View) mNextGenreName.getParent()).setVisibility(View.INVISIBLE);
+            mNextTrackName.setVisibility(View.INVISIBLE);
+            mNextArtistName.setVisibility(View.INVISIBLE);
+            mNextGenreName.setVisibility(View.INVISIBLE);
         } else {
-            ((View) mArtistName.getParent()).setVisibility(View.VISIBLE);
-            ((View) mGenreName.getParent()).setVisibility(View.VISIBLE);
-            ((View) mNextTrackName.getParent()).setVisibility(View.VISIBLE);
-            ((View) mNextArtistName.getParent()).setVisibility(View.VISIBLE);
-            ((View) mNextGenreName.getParent()).setVisibility(View.VISIBLE);
+            mArtistName.setVisibility(View.VISIBLE);
+            mGenreName.setVisibility(View.VISIBLE);
+            mNextTrackName.setVisibility(View.VISIBLE);
+            mNextArtistName.setVisibility(View.VISIBLE);
+            mNextGenreName.setVisibility(View.VISIBLE);
             String artistName = mService.getArtistName();
             if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
                 artistName = getString(R.string.unknown_artist_name);
