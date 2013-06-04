@@ -341,7 +341,7 @@ public class MediaPlaybackService extends Service {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
         }
         // release all MediaPlayer resources, including the native player and wakelocks
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             Intent i = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
             i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
             i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
@@ -1733,7 +1733,7 @@ public class MediaPlaybackService extends Service {
             }
             mMediaPlayer.setOnCompletionListener(listener);
             mMediaPlayer.setOnErrorListener(errorListener);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
                 Intent i = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
                 i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
                 i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());

@@ -76,7 +76,7 @@ public class MediaPlaybackActivity extends Activity
         mNextArtistName = (TextView) findViewById(R.id.nextartistname);
         mNextGenreName = (TextView) findViewById(R.id.nextgenrename);
 
-        View v = (View)mArtistName.getParent(); 
+        View v = (View)mArtistName.getParent();
         v.setOnTouchListener(this);
         v.setOnLongClickListener(this);
 
@@ -486,7 +486,7 @@ public class MediaPlaybackActivity extends Activity
         menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                 .setIcon(R.drawable.ic_menu_delete);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
             if (getPackageManager().resolveActivity(i, 0) != null) {
                 menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
