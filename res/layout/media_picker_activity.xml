@@ -27,7 +27,7 @@
     <nu.staldal.djdplayer.TouchInterceptor
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dip"
         android:layout_weight="1"
         android:textSize="18sp"
         android:drawSelectorOnTop="false"

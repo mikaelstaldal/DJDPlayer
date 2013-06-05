@@ -27,11 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/artist"
-            android:textStyle="bold"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:textStyle="bold"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -44,11 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/composer"
-            android:textStyle="bold"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:textStyle="bold"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/composer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -61,11 +55,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/album"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/album"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/album"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -78,11 +69,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/genre"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/genre"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/genre"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -95,11 +83,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/year"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/year"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/year"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -112,11 +97,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/duration"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/duration"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -129,11 +111,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/folder"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/folder"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/folder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -146,11 +125,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/filename"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/filename"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/filename"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -163,11 +139,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/filesize"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/filesize"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/filesize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -180,11 +153,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/mimetype"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/mimetype"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/mimetype"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -197,11 +167,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/date_added"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/date_added"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/date_added"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -214,11 +181,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/id"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" "/>
+            android:text="@string/id"
+            android:paddingRight="4dip"/>
         <TextView android:id="@+id/id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

@@ -377,11 +377,13 @@
     <string name="id">ID</string>
     <string name="date_added">Added</string>
 
-    <string name="exporting_playlist">Exporting playlist...</string>
-    <string name="playlist_exported">...playlist exported</string>
+    <string name="exporting_playlist">Exporting playlist…</string>
+    <string name="playlist_exported">…playlist exported</string>
 
     <string name="play_pause">Play/Pause</string>
     <string name="next">Next</string>
     <string name="prev">Previous</string>
+
+    <string name="playing">playing</string>
 
 </resources>

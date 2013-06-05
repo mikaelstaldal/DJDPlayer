@@ -74,6 +74,7 @@
         android:layout_alignBottom="@id/line2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="6dip" />
-        
+        android:layout_marginRight="6dip"
+        android:contentDescription="@string/playing"/>
+
 </nu.staldal.djdplayer.CheckableRelativeLayout>
