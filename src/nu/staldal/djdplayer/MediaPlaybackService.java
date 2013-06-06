@@ -1108,7 +1108,6 @@ public class MediaPlaybackService extends Service {
             mMediaplayerHandler.sendEmptyMessage(FADEUP);
 
             RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
-            views.setImageViewResource(R.id.icon, R.drawable.stat_notify_musicplayer);
             if (getAudioId() < 0) {
                 // streaming
                 views.setTextViewText(R.id.trackname, getPath());
