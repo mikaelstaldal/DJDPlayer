@@ -100,7 +100,7 @@ public class MediaPlaybackService extends Service {
     private MultiPlayer mPlayer;
     private String mFileToPlay;
     private int mRepeatMode = REPEAT_NONE;
-    private long [] mPlayList = null;
+    private long [] mPlayList = new long[0];
     private int mPlayListLen = 0;
     private Cursor mCursor;
     private long mGenreId = -1;
@@ -717,15 +717,12 @@ public class MediaPlaybackService extends Service {
     }
 
     private void ensurePlayListCapacity(int size) {
-        if (mPlayList == null || size > mPlayList.length) {
+        if (size > mPlayList.length) {
             // reallocate at 2x requested size so we don't
             // need to grow and copy the array for every
             // insert
             long [] newlist = new long[size * 2];
-            int len = mPlayList != null ? mPlayList.length : mPlayListLen;
-            for (int i = 0; i < len; i++) {
-                newlist[i] = mPlayList[i];
-            }
+            System.arraycopy(mPlayList, 0, newlist, 0, mPlayList.length);
             mPlayList = newlist;
         }
         // FIXME: shrink the array when the needed size is much smaller
@@ -750,14 +747,10 @@ public class MediaPlaybackService extends Service {
 
         // move part of list after insertion point
         int tailsize = mPlayListLen - position;
-        for (int i = tailsize ; i > 0 ; i--) {
-            mPlayList[position + i] = mPlayList[position + i - list.length];
-        }
+        System.arraycopy(mPlayList, position + 1 - list.length, mPlayList, position + 1, tailsize);
 
         // copy list into playlist
-        for (int i = 0; i < list.length; i++) {
-            mPlayList[position + i] = list[i];
-        }
+        System.arraycopy(list, 0, mPlayList, position, list.length);
         mPlayListLen += list.length;
     }
 
@@ -889,9 +882,7 @@ public class MediaPlaybackService extends Service {
             }
             if (index1 < index2) {
                 long tmp = mPlayList[index1];
-                for (int i = index1; i < index2; i++) {
-                    mPlayList[i] = mPlayList[i+1];
-                }
+                System.arraycopy(mPlayList, index1 + 1, mPlayList, index1, index2 - index1);
                 mPlayList[index2] = tmp;
                 if (mPlayPos == index1) {
                     mPlayPos = index2;
@@ -900,9 +891,7 @@ public class MediaPlaybackService extends Service {
                 }
             } else if (index2 < index1) {
                 long tmp = mPlayList[index1];
-                for (int i = index1; i > index2; i--) {
-                    mPlayList[i] = mPlayList[i-1];
-                }
+                System.arraycopy(mPlayList, index2, mPlayList, index2 + 1, index1 - index2);
                 mPlayList[index2] = tmp;
                 if (mPlayPos == index1) {
                     mPlayPos = index2;
@@ -923,9 +912,7 @@ public class MediaPlaybackService extends Service {
         synchronized (this) {
             int len = mPlayListLen;
             long [] list = new long[len];
-            for (int i = 0; i < len; i++) {
-                list[i] = mPlayList[i];
-            }
+            System.arraycopy(mPlayList, 0, list, 0, len);
             return list;
         }
     }
