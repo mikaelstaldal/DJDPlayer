@@ -16,24 +16,14 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="66dip"
-    android:gravity="bottom"
-    android:orientation="vertical"
-    android:baselineAligned="false">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="66dip"
+                android:gravity="center_vertical"
+                android:ignoreGravity="@+id/icon"
+                android:background="@drawable/playlist_tile"
+                android:paddingLeft="47dip">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="66dip"
-        android:gravity="center_vertical"
-        android:ignoreGravity="@+id/icon"
-        android:background="@drawable/playlist_tile"
-        android:paddingLeft="47dip"
-        >
+    <include layout="@layout/track_list_item_common"/>
 
-        <include layout="@layout/track_list_item_common" />
-
-    </RelativeLayout>
-
-</LinearLayout>
+</RelativeLayout>

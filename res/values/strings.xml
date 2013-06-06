@@ -25,11 +25,6 @@
         <item quantity="other"><xliff:g id="count">%d</xliff:g> songs</item>
     </plurals>
 
-    <!-- shows how many songs on the album are by the selected artist, out of how many total, if those two numbers are different -->
-    <plurals name="Nsongscomp">
-        <item quantity="other"><xliff:g id="count_for_artist">%2$d</xliff:g> of <xliff:g id="total_count">%1$d</xliff:g> songs</item>
-    </plurals>
-
     <!-- Used in artists list view, indicates how many albums exist for a given artist. -->
     <plurals name="Nalbums">
         <!-- number of albums is one -->
@@ -189,10 +184,6 @@
     <string name="unknown_genre_name">Unknown genre</string>
     <!-- Default name of album that doesn't have a name in the metadata -->
     <string name="unknown_album_name">Unknown album</string>
-    <!-- Toast after turning shuffle on -->
-    <string name="shuffle_on_notif">Shuffle is on</string>
-    <!-- Toast after turning shuffle off -->
-    <string name="shuffle_off_notif">Shuffle is off</string>
     <!-- Toast after turning repeat off -->
     <string name="repeat_off_notif">Repeat is off</string>
     <!-- Toast after turning single repeat on -->
@@ -241,8 +232,6 @@
     <string name="emptyplaylist">Selected playlist is empty</string>
     <!-- Button name when saving a playlist -->
     <string name="create_playlist_create_text">Save</string>
-    <!-- Button name when saving a playlist and the new playlist will overwrite an existing one -->
-    <string name="create_playlist_overwrite_text">Overwrite</string>
     <!-- Dialog box title -->
     <string name="service_start_error_title">Playback problem</string>
     <!-- Dialog box message -->
@@ -268,8 +257,6 @@
     <!-- Title of time span picker -->
     <string name="weekpicker_title">Set time</string>
 
-    <!-- menu item to save the current list as a new playlist -->
-    <string name="save_as_playlist">Save as playlist</string>
     <!-- menu item to clear the queue -->
     <string name="clear_queue">Clear queue</string>
 
@@ -287,12 +274,6 @@
 
     <!-- context menu item to remove the selected item from the playlist -->
     <string name="remove_from_playlist">Remove from playlist</string>
-
-    <!-- context menu item -->
-    <string name="remove">Remove</string>
-
-    <!-- shown when connecting to a music stream, before it starts playing -->
-    <string name="streamloadingtext">Connecting to <xliff:g id="host">%s</xliff:g></string>
 
     <!-- title of contextual music search menu -->
     <string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
@@ -314,18 +295,10 @@
     <string name="loading">Loading</string>
     <!-- Menu in music picker to sort the list by track/song name. -->
     <string name="sort_by_track">Tracks</string>
-    <!-- Menu in music picker to sort the list by album name. -->
-    <string name="sort_by_album">Albums</string>
     <!-- Menu in music picker to sort the list by artist name. -->
     <string name="sort_by_artist">Artists</string>
     <!--  Title of the music picker activity. -->
     <string name="music_picker_title">Select music track</string>
-
-    <!-- Title for track number in music gadget -->
-    <string name="gadget_track">Track <xliff:g id="track_number">%d</xliff:g></string>
-
-    <!-- Toast after streamStarter activity receives PLAYBACK_COMPLETE in case of an error -->
-    <string name="fail_to_start_stream">Failed to play the requested stream.</string>
 
     <!-- The string used to describe Music as a searchable item within system search settings. -->
     <string name="search_settings_description">Artists, albums, and tracks</string>

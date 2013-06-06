@@ -47,7 +47,7 @@ public class TrackBrowserActivity extends BrowserActivity {
     private static final int NEW_PLAYLIST_ALL = CHILD_MENU_BASE + 2;
     private static final int NEW_PLAYLIST_SINGLE = CHILD_MENU_BASE + 3;
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE + 4;
-    private static final int REMOVE = CHILD_MENU_BASE + 5;
+    private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 5;
     private static final int TRACK_INFO = CHILD_MENU_BASE + 6;
     private static final int SEARCH_FOR = CHILD_MENU_BASE + 7;
 
@@ -582,7 +582,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub);
         if (mEditMode) {
-            menu.add(0, REMOVE, 0, R.string.remove);
+            menu.add(0, REMOVE_FROM_PLAYLIST, 0, R.string.remove_from_playlist);
         }
         menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
@@ -680,7 +680,7 @@ public class TrackBrowserActivity extends BrowserActivity {
                 return true;
             }
             
-            case REMOVE:
+            case REMOVE_FROM_PLAYLIST:
                 removePlaylistItem(mSelectedPosition);
                 return true;
 
