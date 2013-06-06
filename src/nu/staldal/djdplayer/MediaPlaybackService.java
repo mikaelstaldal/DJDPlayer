@@ -1750,9 +1750,8 @@ public class MediaPlaybackService extends Service {
             return mMediaPlayer.getCurrentPosition();
         }
 
-        public long seek(long whereto) {
+        public void seek(long whereto) {
             mMediaPlayer.seekTo((int) whereto);
-            return whereto;
         }
 
         public void setVolume(float vol) {
