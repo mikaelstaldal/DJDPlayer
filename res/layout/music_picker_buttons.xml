@@ -3,8 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/listPreferredItemHeight"
-        android:layout_marginTop="1dip"
-        android:background="@android:drawable/bottom_bar">
+        android:layout_marginTop="1dip">
 
     <Button android:id="@+id/okayButton"
             android:layout_width="wrap_content"
