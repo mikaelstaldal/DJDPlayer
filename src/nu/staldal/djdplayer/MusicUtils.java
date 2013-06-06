@@ -28,7 +28,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
@@ -36,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -746,52 +744,6 @@ public class MusicUtils {
             }
         } else {
             return null;
-        }
-    }
-
-    static class LogEntry {
-        final Object item;
-        final long time;
-
-        LogEntry(Object o) {
-            item = o;
-            time = System.currentTimeMillis();
-        }
-
-        void dump(PrintWriter out) {
-            sTime.set(time);
-            out.print(sTime.toString() + " : ");
-            if (item instanceof Exception) {
-                ((Exception)item).printStackTrace(out);
-            } else {
-                out.println(item);
-            }
-        }
-    }
-
-    private static final LogEntry[] sMusicLog = new LogEntry[100];
-    private static int sLogPtr = 0;
-    private static final Time sTime = new Time();
-
-    static void debugLog(Object o) {
-
-        sMusicLog[sLogPtr] = new LogEntry(o);
-        sLogPtr++;
-        if (sLogPtr >= sMusicLog.length) {
-            sLogPtr = 0;
-        }
-    }
-
-    static void debugDump(PrintWriter out) {
-        for (int i = 0; i < sMusicLog.length; i++) {
-            int idx = (sLogPtr + i);
-            if (idx >= sMusicLog.length) {
-                idx -= sMusicLog.length;
-            }
-            LogEntry entry = sMusicLog[idx];
-            if (entry != null) {
-                entry.dump(out);
-            }
         }
     }
 }

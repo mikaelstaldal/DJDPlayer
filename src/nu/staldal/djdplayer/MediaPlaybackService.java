@@ -37,9 +37,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -156,7 +154,7 @@ public class MediaPlaybackService extends Service {
         float mCurrentVolume = 1.0f;
         @Override
         public void handleMessage(Message msg) {
-            MusicUtils.debugLog("mMediaplayerHandler.handleMessage " + msg.what);
+            Log.d(TAG, "handleMessage " + msg.what);
             switch (msg.what) {
                 case FADEDOWN:
                     mCurrentVolume -= .05f;
@@ -258,7 +256,7 @@ public class MediaPlaybackService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
-            MusicUtils.debugLog("mIntentReceiver.onReceive " + action + " / " + cmd);
+            Log.d(TAG, "mIntentReceiver.onReceive " + action + " / " + cmd);
             if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
                 next(true);
             } else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
@@ -554,7 +552,7 @@ public class MediaPlaybackService extends Service {
         if (intent != null) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
-            MusicUtils.debugLog("onStartCommand " + action + " / " + cmd);
+            Log.d(TAG, "onStartCommand " + action + " / " + cmd);
 
             if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
                 next(true);
@@ -1685,7 +1683,7 @@ public class MediaPlaybackService extends Service {
         }
 
         public void start() {
-            MusicUtils.debugLog(new Exception("MultiPlayer.start called"));
+            Log.d(TAG, "MultiPlayer.start called");
             mMediaPlayer.start();
         }
 
@@ -1768,18 +1766,5 @@ public class MediaPlaybackService extends Service {
         public int getAudioSessionId() {
             return mMediaPlayer.getAudioSessionId();
         }
-    }
-
-    @Override
-    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        writer.println("" + mPlayListLen + " items in queue, currently at index " + mPlayPos);
-        writer.println("Currently loaded:");
-        writer.println(getArtistName());
-        writer.println(getAlbumName());
-        writer.println(getTrackName());
-        writer.println(getPath());
-        writer.println("playing: " + mIsSupposedToBePlaying);
-        writer.println("actual: " + mPlayer.mMediaPlayer.isPlaying());
-        MusicUtils.debugDump(writer);
     }
 }
