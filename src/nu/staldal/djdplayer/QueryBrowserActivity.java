@@ -62,9 +62,12 @@ public class QueryBrowserActivity extends ListActivity
         registerReceiver(mScanListener, f);
 
         Intent intent = getIntent();
-        String action = intent != null ? intent.getAction() : null;
+        if (intent == null) {
+            finish();
+            return;
+        }
 
-        if (Intent.ACTION_VIEW.equals(action)) {
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             // this is something we got from the search bar
             Uri uri = intent.getData();
             String path = uri.toString();
@@ -94,7 +97,7 @@ public class QueryBrowserActivity extends ListActivity
         }
 
         String mFilterString = intent.getStringExtra(SearchManager.QUERY);
-        if (MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(action)) {
+        if (MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
             String focus = intent.getStringExtra(MediaStore.EXTRA_MEDIA_FOCUS);
             String artist = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ARTIST);
             String album = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ALBUM);
