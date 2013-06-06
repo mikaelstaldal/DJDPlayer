@@ -274,7 +274,7 @@ public class MediaPlaybackActivity extends Activity
         return false; 
     }
 
-    Handler mLabelScroller = new Handler() {
+    final Handler mLabelScroller = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             TextView tv = (TextView) msg.obj;
@@ -400,7 +400,7 @@ public class MediaPlaybackActivity extends Activity
         return true;
     }
 
-    private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
+    private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
         public void onStartTrackingTouch(SeekBar bar) {
             mLastSeekEventTime = 0;
             mFromTouch = true;
@@ -734,18 +734,15 @@ public class MediaPlaybackActivity extends Activity
     }
 
     private boolean useDpadMusicControl() {
-        if (mDeviceHasDpad && (mPrevButton.isFocused() ||
-                mNextButton.isFocused() ||
-                mPauseButton.isFocused())) {
-            return true;
-        }
-        return false;
+        return mDeviceHasDpad &&
+                (mPrevButton.isFocused() ||
+                 mNextButton.isFocused() ||
+                 mPauseButton.isFocused());
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        int direction = -1;
         int repcnt = event.getRepeatCount();
 
         if((seekmethod==0)?seekMethod1(keyCode):seekMethod2(keyCode))
@@ -932,13 +929,12 @@ public class MediaPlaybackActivity extends Activity
         if (mService == null)
             return;
         Intent intent = getIntent();
-        String filename = "";
         Uri uri = intent.getData();
         if (uri != null && uri.toString().length() > 0) {
             // If this is a file:// URI, just use the path directly instead
             // of going through the open-from-filedescriptor codepath.
-            String scheme = uri.getScheme();
-            if ("file".equals(scheme)) {
+            String filename;
+            if ("file".equals(uri.getScheme())) {
                 filename = uri.getPath();
             } else {
                 filename = uri.toString();
@@ -958,7 +954,7 @@ public class MediaPlaybackActivity extends Activity
         queueNextRefresh(next);
     }
 
-    private ServiceConnection osc = new ServiceConnection() {
+    private final ServiceConnection osc = new ServiceConnection() {
             public void onServiceConnected(ComponentName classname, IBinder service) {
                 mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -1104,7 +1100,7 @@ public class MediaPlaybackActivity extends Activity
         }
     };
 
-    private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mStatusListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();

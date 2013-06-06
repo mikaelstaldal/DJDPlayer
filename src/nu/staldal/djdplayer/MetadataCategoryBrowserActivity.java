@@ -38,7 +38,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     protected String mCurrentName;
     protected boolean mIsUnknown;
 
-    BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
+    final BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();

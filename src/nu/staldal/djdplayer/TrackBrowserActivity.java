@@ -87,7 +87,6 @@ public class TrackBrowserActivity extends BrowserActivity {
     private String mPlaylist;
     private long mGenreId;
     private String mFolder;
-    private String mSortOrder;
     private int mSelectedPosition;
     private long mSelectedId;
     private static int mLastListPosCourse = -1;
@@ -268,14 +267,14 @@ public class TrackBrowserActivity extends BrowserActivity {
      * This listener gets called when the media scanner starts up or finishes, and
      * when the sd card is unmounted.
      */
-    private BroadcastReceiver mScanListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mReScanHandler.sendEmptyMessage(0);
         }
     };
     
-    private Handler mReScanHandler = new Handler() {
+    private final Handler mReScanHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (mAdapter != null) {
@@ -452,7 +451,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     }
     
-    private TouchInterceptor.DropListener mDropListener = new TouchInterceptor.DropListener() {
+    private final TouchInterceptor.DropListener mDropListener = new TouchInterceptor.DropListener() {
         public void drop(int from, int to) {
             if (mTrackCursor instanceof PlayQueueCursor) {
                 // update the currently playing list
@@ -469,7 +468,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
     };
     
-    private TouchInterceptor.RemoveListener mRemoveListener = new TouchInterceptor.RemoveListener() {
+    private final TouchInterceptor.RemoveListener mRemoveListener = new TouchInterceptor.RemoveListener() {
         public void remove(int which) {
             removePlaylistItem(which);
         }
@@ -505,14 +504,14 @@ public class TrackBrowserActivity extends BrowserActivity {
         return ret;
     }
     
-    private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
         }
     };
 
-    private BroadcastReceiver mNowPlayingListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mNowPlayingListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
@@ -717,14 +716,11 @@ public class TrackBrowserActivity extends BrowserActivity {
     }
 
     void doSearch() {
-        CharSequence title = null;
-        String query = null;
-        
         Intent i = new Intent();
         i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
-        title = mCurrentTrackName;
+        String query;
         if (MediaStore.UNKNOWN_STRING.equals(mCurrentArtistNameForAlbum)) {
             query = mCurrentTrackName;
         } else {
@@ -735,10 +731,9 @@ public class TrackBrowserActivity extends BrowserActivity {
             i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, mCurrentAlbumName);
         }
         i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
-        title = getString(R.string.mediasearch, title);
         i.putExtra(SearchManager.QUERY, query);
 
-        startActivity(Intent.createChooser(i, title));
+        startActivity(Intent.createChooser(i, getString(R.string.mediasearch, mCurrentTrackName)));
     }
 
     // In order to use alt-up/down as a shortcut for moving the selected item
@@ -1000,7 +995,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
 
         Cursor ret = null;
-        mSortOrder = MediaStore.Audio.Media.TITLE_KEY;
+        String mSortOrder = MediaStore.Audio.Media.TITLE_KEY;
         StringBuilder where = new StringBuilder();
         where.append(MediaStore.Audio.Media.TITLE + " != ''");
 
@@ -1019,8 +1014,6 @@ public class TrackBrowserActivity extends BrowserActivity {
                     if (ret.getCount() == 0) {
                         finish();
                     }
-                } else {
-                    // Nothing is playing.
                 }
             } else if (mPlaylist.equals("podcasts")) {
                 where.append(" AND " + MediaStore.Audio.Media.IS_PODCAST + "=1");
@@ -1089,9 +1082,18 @@ public class TrackBrowserActivity extends BrowserActivity {
     }
 
     private class PlayQueueCursor extends AbstractCursor {
+        private final String [] mCols;
+        private final MediaPlaybackService mService;
+
+        private Cursor mCurrentPlaylistCursor;     // updated in onMove
+        private int mSize;          // size of the queue
+        private long[] mNowPlaying;
+        private long[] mCursorIdxs;
+        private int mCurPos;
+
         public PlayQueueCursor(MediaPlaybackService service, String[] cols) {
             mCols = cols;
-            mService  = service;
+            mService = service;
             makeNowPlayingCursor();
         }
 
@@ -1151,7 +1153,6 @@ public class TrackBrowserActivity extends BrowserActivity {
                 mSize = mNowPlaying.length;
                 if (mSize == 0) {
                     mCursorIdxs = null;
-                    return;
                 }
             }
         }
@@ -1189,13 +1190,13 @@ public class TrackBrowserActivity extends BrowserActivity {
             if (mService.removeTracks(which, which) == 0) {
                 return false; // delete failed
             }
-            int i = (int) which;
+            int i = which;
             mSize--;
             while (i < mSize) {
                 mNowPlaying[i] = mNowPlaying[i+1];
                 i++;
             }
-            onMove(-1, (int) mCurPos);
+            onMove(-1, mCurPos);
             return true;
         }
         
@@ -1281,19 +1282,11 @@ public class TrackBrowserActivity extends BrowserActivity {
             makeNowPlayingCursor();
             return true;
         }
-
-        private String [] mCols;
-        private Cursor mCurrentPlaylistCursor;     // updated in onMove
-        private int mSize;          // size of the queue
-        private long[] mNowPlaying;
-        private long[] mCursorIdxs;
-        private int mCurPos;
-        private MediaPlaybackService mService;
     }
     
     static class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
-        boolean mIsNowPlaying;
-        boolean mDisableNowPlayingIndicator;
+        final boolean mIsNowPlaying;
+        final boolean mDisableNowPlayingIndicator;
 
         int mTitleIdx;
         int mArtistIdx;
@@ -1302,12 +1295,11 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         private final StringBuilder mBuilder = new StringBuilder();
         private final String mUnknownArtist;
-        private final String mUnknownAlbum;
-        
+
         private AlphabetIndexer mIndexer;
         
         private TrackBrowserActivity mActivity = null;
-        private TrackQueryHandler mQueryHandler;
+        private final TrackQueryHandler mQueryHandler;
         private String mConstraint = null;
         private boolean mConstraintIsValid = false;
         
@@ -1376,8 +1368,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             mIsNowPlaying = isnowplaying;
             mDisableNowPlayingIndicator = disablenowplayingindicator;
             mUnknownArtist = context.getString(R.string.unknown_artist_name);
-            mUnknownAlbum = context.getString(R.string.unknown_album_name);
-            
+
             mQueryHandler = new TrackQueryHandler(context.getContentResolver());
         }
         

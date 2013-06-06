@@ -52,6 +52,8 @@ import java.io.IOException;
 public class MusicPicker extends ListActivity
         implements View.OnClickListener, MediaPlayer.OnCompletionListener,
         MusicUtils.Defs {
+    private static final String TAG = "MusicPicker";
+
     /** Holds the previous state of the list, to restore after the async
      * query has completed. */
     static final String LIST_STATE_KEY = "liststate";
@@ -131,10 +133,7 @@ public class MusicPicker extends ListActivity
      * our cursor data to our list item structure, and takes care of other
      * advanced features such as indexing and filtering.
      */
-    class TrackListAdapter extends SimpleCursorAdapter
-            implements SectionIndexer {
-        final ListView mListView;
-        
+    class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
         private final String mUnknownArtist;
 
         private int mIdIdx;
@@ -154,10 +153,8 @@ public class MusicPicker extends ListActivity
             ImageView play_indicator;
         }
         
-        TrackListAdapter(Context context, ListView listView, int layout,
-                String[] from, int[] to) {
+        TrackListAdapter(Context context, int layout, String[] from, int[] to) {
             super(context, layout, null, from, to);
-            mListView = listView;
             mUnknownArtist = context.getString(R.string.unknown_artist_name);
         }
 
@@ -349,8 +346,7 @@ public class MusicPicker extends ListActivity
             mSelectedUri = getIntent().getParcelableExtra(
                     RingtoneManager.EXTRA_RINGTONE_EXISTING_URI);
         } else {
-            mSelectedUri = (Uri)icicle.getParcelable(
-                    RingtoneManager.EXTRA_RINGTONE_EXISTING_URI);
+            mSelectedUri = icicle.getParcelable(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI);
             // Retrieve list state. This will be applied after the
             // QueryHandler has run
             mListState = icicle.getParcelable(LIST_STATE_KEY);
@@ -376,7 +372,7 @@ public class MusicPicker extends ListActivity
 
         listView.setItemsCanFocus(false);
         
-        mAdapter = new TrackListAdapter(this, listView,
+        mAdapter = new TrackListAdapter(this,
                 R.layout.music_picker_item, new String[] {},
                 new int[] {});
 
@@ -533,6 +529,7 @@ public class MusicPicker extends ListActivity
                 return getContentResolver().query(uri, CURSOR_COLS,
                         where.toString(), null, mSortOrder);
             } catch (UnsupportedOperationException ex) {
+                Log.w(TAG, "Error", ex);
             }
         } else {
             mAdapter.setLoading(true);
@@ -569,7 +566,7 @@ public class MusicPicker extends ListActivity
             } catch (IOException e) {
                 Log.w("MusicPicker", "Unable to play track", e);
             }
-        } else if (mMediaPlayer != null) {
+        } else {
             stopMediaPlayer();
             getListView().invalidateViews();
         }

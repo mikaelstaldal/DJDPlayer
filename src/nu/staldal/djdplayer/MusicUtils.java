@@ -88,23 +88,23 @@ public class MusicUtils {
             if (! isUnknown) {
                 String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
                 sFormatBuilder.setLength(0);
-                sFormatter.format(f, Integer.valueOf(numalbums));
+                sFormatter.format(f, numalbums);
                 songs_albums.append(sFormatBuilder);
                 songs_albums.append(context.getString(R.string.albumsongseparator));
             }
             String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
             sFormatBuilder.setLength(0);
-            sFormatter.format(f, Integer.valueOf(numsongs));
+            sFormatter.format(f, numsongs);
             songs_albums.append(sFormatBuilder);
         }
         return songs_albums.toString();
     }
     
     public static MediaPlaybackService sService = null;
-    private static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<Context, ServiceBinder>();
+    private final static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<Context, ServiceBinder>();
 
     public static class ServiceToken {
-        ContextWrapper mWrappedContext;
+        final ContextWrapper mWrappedContext;
         ServiceToken(ContextWrapper context) {
             mWrappedContext = context;
         }
@@ -146,7 +146,7 @@ public class MusicUtils {
     }
 
     private static class ServiceBinder implements ServiceConnection {
-        ServiceConnection mCallback;
+        final ServiceConnection mCallback;
         ServiceBinder(ServiceConnection callback) {
             mCallback = callback;
         }
@@ -252,7 +252,7 @@ public class MusicUtils {
         }
         long [] list = new long[len];
         cursor.moveToFirst();
-        int colidx = -1;
+        int colidx;
         try {
             colidx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
         } catch (IllegalArgumentException ex) {
@@ -310,12 +310,6 @@ public class MusicUtils {
         }
     }
 
-    public static void clearPlaylist(Context context, int plid) {
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", plid);
-        context.getContentResolver().delete(uri, null, null);
-        return;
-    }
-    
     public static void deleteTracks(Context context, long [] list) {
         String [] cols = new String [] { MediaStore.Audio.Media._ID, 
                 MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID };
@@ -365,7 +359,7 @@ public class MusicUtils {
         }
 
         String message = context.getResources().getQuantityString(
-                R.plurals.NNNtracksdeleted, list.length, Integer.valueOf(list.length));
+                R.plurals.NNNtracksdeleted, list.length, list.length);
         
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         // We deleted a number of tracks, which could affect any number of things
@@ -568,8 +562,8 @@ public class MusicUtils {
      *  formatDuration().
      *  This Formatter/StringBuilder are also used by makeAlbumSongsLabel()
      */
-    private static StringBuilder sFormatBuilder = new StringBuilder();
-    private static Formatter sFormatter = new Formatter(sFormatBuilder, Locale.getDefault());
+    private static final StringBuilder sFormatBuilder = new StringBuilder();
+    private static final Formatter sFormatter = new Formatter(sFormatBuilder, Locale.getDefault());
     private static final Object[] sTimeArgs = new Object[5];
 
     public static String formatDuration(Context context, long millis) {
@@ -756,8 +750,8 @@ public class MusicUtils {
     }
 
     static class LogEntry {
-        Object item;
-        long time;
+        final Object item;
+        final long time;
 
         LogEntry(Object o) {
             item = o;
@@ -775,9 +769,9 @@ public class MusicUtils {
         }
     }
 
-    private static LogEntry[] sMusicLog = new LogEntry[100];
+    private static final LogEntry[] sMusicLog = new LogEntry[100];
     private static int sLogPtr = 0;
-    private static Time sTime = new Time();
+    private static final Time sTime = new Time();
 
     static void debugLog(Object o) {
 

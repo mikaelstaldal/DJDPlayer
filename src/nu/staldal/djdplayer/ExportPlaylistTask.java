@@ -29,7 +29,7 @@ import java.io.*;
 public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
     private static final String TAG = "ExportPlaylistTask";
 
-    private Context context;
+    private final Context context;
 
     public ExportPlaylistTask(Context context) {
         this.context = context;

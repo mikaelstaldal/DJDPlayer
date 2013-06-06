@@ -122,14 +122,14 @@ public abstract class CategoryBrowserActivity<A extends CursorAdapter> extends B
         super.onDestroy();
     }
 
-    private BroadcastReceiver mScanListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mReScanHandler.sendEmptyMessage(0);
         }
     };
 
-    protected Handler mReScanHandler = new Handler() {
+    protected final Handler mReScanHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             reloadData();

@@ -15,7 +15,7 @@ package nu.staldal.djdplayer;/*
  */
 
 public class ID3Utils {
-    private static String[] GENRE_NAMES = new String[256];
+    private static final String[] GENRE_NAMES = new String[256];
 
     static {
         GENRE_NAMES[0] = "Blues";

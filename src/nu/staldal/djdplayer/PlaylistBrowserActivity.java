@@ -370,7 +370,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         }
     }
 
-    String[] mCols = new String[] {
+    final String[] mCols = new String[] {
             MediaStore.Audio.Playlists._ID,
             MediaStore.Audio.Playlists.NAME
     };
@@ -457,7 +457,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
         int mIdIdx;
         private String mConstraint = null;
         private boolean mConstraintIsValid = false;
-        private AsyncQueryHandler mQueryHandler;
+        private final AsyncQueryHandler mQueryHandler;
         private PlaylistBrowserActivity mActivity = null;
 
         public void setActivity(PlaylistBrowserActivity activity) {

@@ -109,7 +109,7 @@ public class RepeatingImageButton extends ImageButton {
         return super.onKeyUp(keyCode, event);
     }
     
-    private Runnable mRepeater = new Runnable() {
+    private final Runnable mRepeater = new Runnable() {
         public void run() {
             doRepeat(false);
             if (isPressed()) {

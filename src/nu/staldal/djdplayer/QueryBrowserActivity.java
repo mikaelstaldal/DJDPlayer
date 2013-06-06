@@ -182,14 +182,14 @@ public class QueryBrowserActivity extends ListActivity
     * This listener gets called when the media scanner starts up, and when the
     * sd card is unmounted.
     */
-    private BroadcastReceiver mScanListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mReScanHandler.sendEmptyMessage(0);
         }
     };
 
-    private Handler mReScanHandler = new Handler() {
+    private final Handler mReScanHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (mAdapter != null) {
@@ -371,8 +371,8 @@ public class QueryBrowserActivity extends ListActivity
     }
 
     static class QueryListAdapter extends SimpleCursorAdapter {
+        private final AsyncQueryHandler mQueryHandler;
         private QueryBrowserActivity mActivity = null;
-        private AsyncQueryHandler mQueryHandler;
         private String mConstraint = null;
         private boolean mConstraintIsValid = false;
 

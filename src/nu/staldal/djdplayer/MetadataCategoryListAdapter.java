@@ -31,10 +31,11 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
     protected final Drawable mNowPlayingOverlay;
     protected final Resources mResources;
     protected final String mUnknown;
+    protected final AsyncQueryHandler mQueryHandler;
+
     protected AlphabetIndexer mIndexer;
     protected String mConstraint = null;
     protected boolean mConstraintIsValid = false;
-    protected AsyncQueryHandler mQueryHandler;
     protected MetadataCategoryBrowserActivity mActivity = null;
 
     public void setActivity(MetadataCategoryBrowserActivity activity) {

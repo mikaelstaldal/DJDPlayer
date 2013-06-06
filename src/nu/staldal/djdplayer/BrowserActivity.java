@@ -226,7 +226,7 @@ public abstract class BrowserActivity extends ListActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mStatusListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {

@@ -17,7 +17,6 @@
 package nu.staldal.djdplayer;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -50,21 +49,19 @@ public class TouchInterceptor extends ListView {
     private int mUpperBound;
     private int mLowerBound;
     private int mHeight;
-    private GestureDetector mGestureDetector;
-    private Rect mTempRect = new Rect();
+    private final Rect mTempRect = new Rect();
     private Bitmap mDragBitmap;
     private final int mTouchSlop;
-    private int mItemHeightNormal;
-    private int mItemHeightExpanded;
-    private int mItemHeightHalf;
+    private final int mItemHeightNormal;
+    private final int mItemHeightExpanded;
+    private final int mItemHeightHalf;
 
     public TouchInterceptor(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        Resources res = getResources();
-        mItemHeightNormal = res.getDimensionPixelSize(R.dimen.normal_height);
+        mItemHeightNormal = getResources().getDimensionPixelSize(R.dimen.normal_height);
         mItemHeightHalf = mItemHeightNormal / 2;
-        mItemHeightExpanded = res.getDimensionPixelSize(R.dimen.expanded_height);
+        mItemHeightExpanded = getResources().getDimensionPixelSize(R.dimen.expanded_height);
     }
     
     @Override
@@ -252,9 +249,6 @@ public class TouchInterceptor extends ListView {
     
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mGestureDetector != null) {
-            mGestureDetector.onTouchEvent(ev);
-        }
         if ((mDragListener != null || mDropListener != null) && mDragView != null) {
             int action = ev.getAction(); 
             switch (action) {
@@ -383,7 +377,7 @@ public class TouchInterceptor extends ListView {
     public void setDragListener(DragListener l) {
         mDragListener = l;
     }
-    
+
     public void setDropListener(DropListener l) {
         mDropListener = l;
     }

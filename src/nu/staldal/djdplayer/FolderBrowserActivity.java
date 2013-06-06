@@ -36,7 +36,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
 
     private String mCurrentFolder;
 
-    private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
@@ -268,10 +268,23 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
     static class FolderListAdapter extends SimpleCursorAdapter {
         protected final Drawable mNowPlayingOverlay;
         protected final Resources mResources;
+        protected final AsyncQueryHandler mQueryHandler;
+
         protected String mConstraint = null;
         protected boolean mConstraintIsValid = false;
-        protected AsyncQueryHandler mQueryHandler;
         protected FolderBrowserActivity mActivity = null;
+
+        public FolderListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
+                                 FolderBrowserActivity currentActivity) {
+            super(context, layout, cursor, from, to);
+            this.mActivity = currentActivity;
+
+            mNowPlayingOverlay = context.getResources().getDrawable(R.drawable.indicator_ic_mp_playing_list);
+
+            mResources = context.getResources();
+
+            mQueryHandler = new QueryHandler(context.getContentResolver());
+        }
 
         public void setActivity(FolderBrowserActivity activity) {
             mActivity = activity;
@@ -297,19 +310,6 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             TextView line1;
             TextView line2;
             ImageView play_indicator;
-        }
-
-        public FolderListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
-                                           FolderBrowserActivity currentActivity) {
-            super(context, layout, cursor, from, to);
-            this.mActivity = currentActivity;
-
-            Resources r = context.getResources();
-            mNowPlayingOverlay = r.getDrawable(R.drawable.indicator_ic_mp_playing_list);
-
-            mResources = context.getResources();
-
-            mQueryHandler = new QueryHandler(context.getContentResolver());
         }
 
         @Override
