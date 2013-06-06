@@ -1,5 +1,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.Default" parent="@android:style/Theme.Holo"></style>
-    <style name="Theme.NoTitleBar" parent="@android:style/Theme.Holo.NoActionBar"></style>
-    <style name="Theme.Dialog" parent="@android:style/Theme.Holo.Dialog"></style>
+    <style name="Theme.Default" parent="@android:style/Theme.Holo"/>
+    <style name="Theme.NoTitleBar" parent="@android:style/Theme.Holo.NoActionBar"/>
+    <style name="Theme.Dialog" parent="@android:style/Theme.Holo.Dialog"/>
 </resources>
