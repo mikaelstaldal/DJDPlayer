@@ -544,6 +544,7 @@ public class MusicPicker extends ListActivity
     protected void onListItemClick(ListView l, View v, int position, long id) {
         mCursor.moveToPosition(position);
         setSelected(mCursor);
+        mOkayButton.setEnabled(true);
     }
     
     void setSelected(Cursor c) {
