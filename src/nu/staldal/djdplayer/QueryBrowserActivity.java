@@ -331,7 +331,7 @@ public class QueryBrowserActivity extends ListActivity
         if ("artist".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Albums.CONTENT_TYPE);
+            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra("artist", Long.valueOf(id).toString());
             startActivity(intent);
         } else if ("album".equals(selectedType)) {
