@@ -127,4 +127,9 @@ public class GenreBrowserActivity extends MetadataCategoryBrowserActivity {
         }
         return MusicUtils.sEmptyList;
     }
+
+    @Override
+    protected boolean shuffleSongs() {
+        return true;
+    }
 }

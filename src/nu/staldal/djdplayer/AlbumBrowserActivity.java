@@ -124,7 +124,7 @@ public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
         String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " +
                 MediaStore.Audio.Media.IS_MUSIC + "=1";
         Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                ccols, where, null, MediaStore.Audio.Media.TRACK);
+                ccols, where, null, MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
@@ -132,5 +132,10 @@ public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
             return list;
         }
         return MusicUtils.sEmptyList;
+    }
+
+    @Override
+    protected boolean shuffleSongs() {
+        return false;
     }
 }

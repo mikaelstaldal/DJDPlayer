@@ -995,7 +995,6 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
 
         Cursor ret = null;
-        String mSortOrder = MediaStore.Audio.Media.TITLE_KEY;
         StringBuilder where = new StringBuilder();
         where.append(MediaStore.Audio.Media.TITLE + " != ''");
 
@@ -1004,9 +1003,8 @@ public class TrackBrowserActivity extends BrowserActivity {
             if (!TextUtils.isEmpty(filter)) {
                 uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
             }
-            mSortOrder = MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER;
             ret = queryhandler.doQuery(uri,
-                    CURSOR_COLS, where.toString(), null, mSortOrder, async);
+                    CURSOR_COLS, where.toString(), null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER, async);
         } else if (mPlaylist != null) {
             if (mPlaylist.equals(PLAYQUEUE)) {
                 if (MusicUtils.sService != null) {
@@ -1042,26 +1040,28 @@ public class TrackBrowserActivity extends BrowserActivity {
                 if (!TextUtils.isEmpty(filter)) {
                     uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
                 }
-                mSortOrder = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
                 ret = queryhandler.doQuery(uri, PLAYLIST_MEMBER_COLS,
-                        where.toString(), null, mSortOrder, async);
+                        where.toString(), null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER, async);
             }
         } else if (mFolder != null) {
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
             if (!TextUtils.isEmpty(filter)) {
                 uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
             }
-            mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
             where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE ?");
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), new String[] { mFolder + "%" }, mSortOrder, async);
+            ret = queryhandler.doQuery(uri, CURSOR_COLS, where.toString(), new String[] { mFolder + "%" },
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER, async);
         } else {
+            String mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+
             if (mAlbumId != -1) {
                 where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);
-                mSortOrder = MediaStore.Audio.Media.TRACK + ", " + mSortOrder;
+                mSortOrder = MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY;
             }
             if (mArtistId != -1) {
                 where.append(" AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + mArtistId);
+                mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
             }
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;

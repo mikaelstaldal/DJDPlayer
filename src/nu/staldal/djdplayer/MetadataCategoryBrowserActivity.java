@@ -73,6 +73,8 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
 
     protected abstract String getEntryContentType();
 
+    protected abstract boolean shuffleSongs();
+
     /**
      * Do nothing by default, can be overridden by subclasses.
      * @param i  intent
@@ -220,14 +222,14 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
         switch (item.getItemId()) {
             case PLAY_ALL: {
                 long[] songs = fetchSongList(mCurrentId);
-                MusicUtils.shuffleArray(songs);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.playAll(this, songs);
                 return true;
             }
 
             case QUEUE_ALL: {
                 long[] songs = fetchSongList(mCurrentId);
-                MusicUtils.shuffleArray(songs);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.queue(this, songs);
                 return true;
             }
@@ -242,7 +244,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
             case PLAYLIST_SELECTED: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 long[] songs = fetchSongList(mCurrentId);
-                MusicUtils.shuffleArray(songs);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.addToPlaylist(this, songs, playlist);
                 return true;
             }
@@ -278,7 +280,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
                     long[] songs = fetchSongList(mCurrentId);
-                    MusicUtils.shuffleArray(songs);
+                    if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                     MusicUtils.interleave(this, songs, currentCount, newCount);
                     return true;
                 }
@@ -294,7 +296,7 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
                     Uri uri = intent.getData();
                     if (uri != null) {
                         long [] songs = fetchSongList(mCurrentId);
-                        MusicUtils.shuffleArray(songs);
+                        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                         MusicUtils.addToPlaylist(this, songs, Long.parseLong(uri.getLastPathSegment()));
                     }
                 }
