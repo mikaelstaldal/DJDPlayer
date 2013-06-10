@@ -141,7 +141,7 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
         Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID},
                 MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE ?",
-                new String[] { folder + "%" }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                new String[] { folder + "%" }, MediaStore.Audio.Media.DATA);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
@@ -190,14 +190,12 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
         switch (item.getItemId()) {
             case PLAY_ALL: {
                 long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.shuffleArray(songs);
                 MusicUtils.playAll(this, songs);
                 return true;
             }
 
             case QUEUE_ALL: {
                 long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.shuffleArray(songs);
                 MusicUtils.queue(this, songs);
                 return true;
             }
@@ -212,7 +210,6 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
             case PLAYLIST_SELECTED: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.shuffleArray(songs);
                 MusicUtils.addToPlaylist(this, songs, playlist);
                 return true;
             }
@@ -245,7 +242,6 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
                     long[] songs = fetchSongList(mCurrentFolder);
-                    MusicUtils.shuffleArray(songs);
                     MusicUtils.interleave(this, songs, currentCount, newCount);
                     return true;
                 }
@@ -262,7 +258,6 @@ public class FolderBrowserActivity extends CategoryBrowserActivity<FolderBrowser
                     Uri uri = intent.getData();
                     if (uri != null) {
                         long[] songs = fetchSongList(mCurrentFolder);
-                        MusicUtils.shuffleArray(songs);
                         MusicUtils.addToPlaylist(this, songs, Long.parseLong(uri.getLastPathSegment()));
                     }
                 }
