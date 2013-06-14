@@ -47,3 +47,9 @@
 * Basic tablet support
 * Properly styled icon for playlist shortcuts
 * Avoid interference with other music players when switching tabs
+
+1.9
+---
+* Bug fixes
+* Layout improvements
+* Performance improvements
