@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.content.*;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -49,21 +48,19 @@ public abstract class BrowserActivity extends ListActivity
         super.onCreate(icicle);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         withTabs = getIntent().getBooleanExtra("withtabs", false);
-        if (withTabs && hasMenuKey()) {
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if (withTabs) {
+            if (hasMenuKey()) requestWindowFeature(Window.FEATURE_NO_TITLE);
+            // getActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_HOME);
+        } else {
+            getActionBar().setHomeButtonEnabled(true);
         }
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.media_picker_activity);
     }
 
     private boolean hasMenuKey() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            return ViewConfiguration.get(this).hasPermanentMenuKey();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            return false;
-        } else {
-            return true;
-        }
+        return ViewConfiguration.get(this).hasPermanentMenuKey();
     }
 
     protected void updateButtonBar(int tabId) {
@@ -216,6 +213,12 @@ public abstract class BrowserActivity extends ListActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(this, MusicBrowserActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;

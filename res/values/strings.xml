@@ -48,8 +48,6 @@
     <!-- Do not translate. Duration format for duration >= 1 hour -->
     <string translatable="false" name="durationformatlong"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
 
-    <!-- Menu item that takes the user back to the top level screen of the music player -->
-    <string name="goto_start">Library</string>
     <!-- Menu item that deletes the currently selected song.
          The user will be prompted to confirm before deletion actually takes place -->
     <string name="delete_item">Delete</string>
@@ -195,7 +193,7 @@
     <!-- Individual song context menu item -->
     <string name="ringtone_menu">Use as phone ringtone</string>
     <!-- Menu item -->
-    <string name="ringtone_menu_short">Use as ringtone</string>
+    <string name="set_as">Set as</string>
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone</string>
     <!-- Context menu item -->

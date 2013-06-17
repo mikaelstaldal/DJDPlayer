@@ -5,17 +5,17 @@
         android:layout_height="?android:attr/listPreferredItemHeight"
         android:layout_marginTop="1dip">
 
+    <Button android:id="@+id/cancelButton"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@android:string/cancel" />
+
     <Button android:id="@+id/okayButton"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@android:string/ok"
             android:enabled="false" />
-
-    <Button android:id="@+id/cancelButton"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@android:string/cancel" />
 
 </LinearLayout>

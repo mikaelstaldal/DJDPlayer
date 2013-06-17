@@ -17,12 +17,12 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="35"
-          android:versionName="1.9beta1"
+          android:versionCode="14200"
+          android:versionName="2.0beta1"
           android:installLocation="auto">
 
-    <!-- Require 2.2 (Froyo), target 4.0.3 (Ice Cream Sandwich) -->
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15"/>
+    <!-- Require 4.0, target 4.0.3 (Ice Cream Sandwich) -->
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="15"/>
 
     <!-- To inform activities about music playback status -->
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
@@ -38,7 +38,7 @@
 
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
-                 android:theme="@style/Theme.Default"
+                 android:theme="@style/Theme.Main"
                  android:allowTaskReparenting="true"
                  android:allowBackup="true">
 
@@ -46,8 +46,7 @@
             android:name="android.app.default_searchable"
             android:value="nu.staldal.djdplayer.QueryBrowserActivity" />
 
-        <activity android:name="nu.staldal.djdplayer.MusicBrowserActivity"
-                  android:theme="@style/Theme.NoTitleBar">
+        <activity android:name="nu.staldal.djdplayer.MusicBrowserActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />

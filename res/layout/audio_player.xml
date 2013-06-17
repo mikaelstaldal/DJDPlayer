@@ -22,122 +22,50 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-      <LinearLayout
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-         <ImageButton android:id="@+id/curplaylist"
-             android:src="@drawable/ic_mp_current_playlist_btn"
-             android:contentDescription="@string/play_queue_title"
-             android:layout_width="match_parent"
-             android:layout_height="50dip" />
-         <TextView android:text="@string/play_queue_title"
-             android:textSize="12sp"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:gravity="center_horizontal"/>
-       </LinearLayout>
-
-       <LinearLayout
-              android:layout_width="80dip"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
-         <ImageButton android:id="@+id/shuffle"
-            android:src="@drawable/ic_mp_shuffle_off_btn"
-            android:contentDescription="@string/shuffle"
-            android:layout_width="match_parent"
-            android:layout_height="50dip" />
-         <TextView android:text="@string/shuffle"
-            android:textSize="12sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"/>
-       </LinearLayout>
-
-       <LinearLayout
-              android:layout_width="80dip"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
-         <ImageButton android:id="@+id/repeat"
-            android:contentDescription="@string/repeat"
-            android:layout_width="match_parent"
-            android:layout_height="50dip" />
-         <TextView android:text="@string/repeat"
-            android:textSize="12sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"/>
-       </LinearLayout>
-
-       <LinearLayout
-               android:layout_width="80dip"
-               android:layout_height="wrap_content"
-               android:orientation="vertical">
-         <ImageButton android:id="@+id/library"
-             android:src="@drawable/ic_menu_music_library"
-             android:contentDescription="@string/goto_start"
-             android:layout_width="match_parent"
-             android:layout_height="50dip" />
-         <TextView android:text="@string/goto_start"
-             android:textSize="12sp"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:gravity="center_horizontal"/>
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
+        android:paddingTop="4dip"
+        android:paddingLeft="4dip"
         android:orientation="vertical">
 
         <TextView android:id="@+id/trackname"
-             android:textSize="18sp"
-             android:textStyle="bold"
-             android:singleLine="true"
-             android:ellipsize="end"
-             android:paddingLeft="11dip"
-             android:paddingTop="0dip"
-             android:paddingBottom="8dip"
-             android:gravity="center_vertical"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:drawableLeft="@drawable/ic_mp_song_playback"
-             android:drawablePadding="4dip"/>
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:paddingTop="0dip"
+            android:paddingBottom="8dip"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_song_playback"
+            android:drawablePadding="4dip"/>
 
-         <TextView android:id="@+id/artistname"
-             android:textSize="14sp"
-             android:textStyle="bold"
-             android:singleLine="true"
-             android:ellipsize="end"
-             android:paddingLeft="11dip"
-             android:paddingTop="4dip"
-             android:paddingBottom="8dip"
-             android:gravity="center_vertical"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:drawableLeft="@drawable/ic_mp_artist_playback"
-             android:drawablePadding="4dip" />
+        <TextView android:id="@+id/artistname"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:paddingTop="4dip"
+            android:paddingBottom="8dip"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_artist_playback"
+            android:drawablePadding="4dip" />
 
-         <TextView android:id="@+id/genrename"
-             android:textSize="14sp"
-             android:textStyle="bold"
-             android:singleLine="true"
-             android:ellipsize="end"
-             android:paddingLeft="11dip"
-             android:paddingTop="4dip"
-             android:paddingBottom="8dip"
-             android:gravity="center_vertical"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:drawableLeft="@drawable/ic_mp_genre_playback"
-             android:drawablePadding="4dip" />
+        <TextView android:id="@+id/genrename"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:paddingTop="4dip"
+            android:paddingBottom="8dip"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_genre_playback"
+            android:drawablePadding="4dip" />
 
         <View
             android:layout_width="match_parent"
@@ -148,7 +76,6 @@
             android:textSize="14sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingLeft="11dip"
             android:paddingTop="4dip"
             android:paddingBottom="4dip"
             android:gravity="center_vertical"
@@ -161,7 +88,6 @@
             android:textSize="12sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingLeft="11dip"
             android:paddingTop="4dip"
             android:paddingBottom="4dip"
             android:gravity="center_vertical"
@@ -174,7 +100,6 @@
             android:textSize="12sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingLeft="11dip"
             android:paddingTop="4dip"
             android:paddingBottom="4dip"
             android:gravity="center_vertical"

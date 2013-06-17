@@ -952,7 +952,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             }
 
             default:
-                if (item.getItemId() > INTERLEAVE_ALL) {
+                if (item.getItemId() > INTERLEAVE_ALL && item.getItemId() != android.R.id.home) {
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
                     long[] songs = MusicUtils.getSongListForCursor(mTrackCursor);

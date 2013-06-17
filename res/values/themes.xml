@@ -1,5 +1,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.Default" parent="@android:style/Theme"/>
-    <style name="Theme.NoTitleBar" parent="@android:style/Theme.NoTitleBar"/>
-    <style name="Theme.Dialog" parent="@android:style/Theme.Dialog"/>
+    <style name="Theme.Main" parent="@android:style/Theme.Holo">
+        <item name="android:actionBarStyle">@style/CustomActionBar</item>
+    </style>
+
+    <style name="CustomActionBar" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@drawable/actionbar_background</item>
+    </style>
+
+    <style name="Theme.Dialog" parent="@android:style/Theme.Holo.Dialog"/>
 </resources>

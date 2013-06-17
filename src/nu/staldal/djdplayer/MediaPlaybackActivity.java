@@ -41,6 +41,8 @@ public class MediaPlaybackActivity extends Activity
         implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener {
     private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
     private static final int TRACK_INFO = CHILD_MENU_BASE+1;
+    private static final int PLAY_QUEUE = CHILD_MENU_BASE+2;
+    private static final int REPEAT = CHILD_MENU_BASE+3;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -50,10 +52,6 @@ public class MediaPlaybackActivity extends Activity
     private RepeatingImageButton mPrevButton;
     private ImageButton mPauseButton;
     private RepeatingImageButton mNextButton;
-    private ImageButton mRepeatButton;
-    private ImageButton mShuffleButton;
-    private ImageButton mQueueButton;
-    private ImageButton mLibraryButton;
     private Toast mToast;
     private int mTouchSlop;
     private MusicUtils.ServiceToken mToken;
@@ -63,6 +61,8 @@ public class MediaPlaybackActivity extends Activity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        getActionBar().setHomeButtonEnabled(true);
 
         setContentView(R.layout.audio_player);
 
@@ -134,41 +134,6 @@ public class MediaPlaybackActivity extends Activity
 
         mDeviceHasDpad = (getResources().getConfiguration().navigation ==
             Configuration.NAVIGATION_DPAD);
-        
-        mQueueButton = (ImageButton) findViewById(R.id.curplaylist);
-        mQueueButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startActivity(
-                        new Intent(Intent.ACTION_EDIT)
-                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio")
-                        .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE)
-                );
-            }
-        });
-
-        mShuffleButton = ((ImageButton) findViewById(R.id.shuffle));
-        mShuffleButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                shuffle();
-            }
-        });
-
-        mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
-        mRepeatButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                cycleRepeat();
-            }
-        });
-        mLibraryButton = ((ImageButton) findViewById(R.id.library));
-        mLibraryButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }
-        });
 
         if (mProgress instanceof SeekBar) {
             SeekBar seeker = (SeekBar) mProgress;
@@ -472,19 +437,29 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
+        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_mp_current_playlist_btn)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_mp_shuffle_off_btn)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        menu.add(2, REPEAT, 0, R.string.repeat)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
         menu.add(1, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+
         menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
 
-        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
+        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu)
                 .setIcon(R.drawable.ic_menu_set_as_ringtone);
-        menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
-                .setIcon(R.drawable.ic_menu_delete);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            if (getPackageManager().resolveActivity(i, 0) != null) {
-                menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
-            }
+        menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
+                .setIcon(android.R.drawable.ic_menu_delete);
+
+        Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        if (getPackageManager().resolveActivity(i, 0) != null) {
+            menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq)
+                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         }
 
         return true;
@@ -492,25 +467,80 @@ public class MediaPlaybackActivity extends Activity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        updatePlaylistItem(menu);
+
+        updateRepeatItem(menu);
+
+        applyKeyguard(menu);
+
+        return true;
+    }
+
+    private void updatePlaylistItem(Menu menu) {
         if (mService != null) {
             MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
             SubMenu sub = (item != null)
-                ? item.getSubMenu()
-                : menu.addSubMenu(0, ADD_TO_PLAYLIST, 0,
-                        R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
+                    ? item.getSubMenu()
+                    : menu.addSubMenu(1, ADD_TO_PLAYLIST, 0,
+                    R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             MusicUtils.makePlaylistMenu(this, sub);
         }
+    }
 
+    private void updateRepeatItem(Menu menu) {
+        MenuItem item = menu.findItem(REPEAT);
+
+        if (mService != null) {
+            switch (mService.getRepeatMode()) {
+                case MediaPlaybackService.REPEAT_ALL:
+                    item.setIcon(R.drawable.ic_mp_repeat_all_btn);
+                    break;
+                case MediaPlaybackService.REPEAT_CURRENT:
+                    item.setIcon(R.drawable.ic_mp_repeat_once_btn);
+                    break;
+                case MediaPlaybackService.REPEAT_STOPAFTER:
+                    item.setIcon(R.drawable.ic_mp_repeat_stopafter_btn);
+                    break;
+                default:
+                    item.setIcon(R.drawable.ic_mp_repeat_off_btn);
+                    break;
+            }
+        } else {
+            item.setIcon(R.drawable.ic_mp_repeat_off_btn);
+        }
+    }
+
+    private void applyKeyguard(Menu menu) {
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         menu.setGroupVisible(1, !km.inKeyguardRestrictedInputMode());
-
-        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
+            case android.R.id.home:
+                intent = new Intent(this, MusicBrowserActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+                return true;
+
+            case PLAY_QUEUE:
+                intent = new Intent(Intent.ACTION_EDIT)
+                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio")
+                        .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE);
+                startActivity(intent);
+                return true;
+
+            case SHUFFLE:
+                shuffle();
+                return true;
+
+            case REPEAT:
+                cycleRepeat();
+                return true;
+
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
@@ -914,7 +944,7 @@ public class MediaPlaybackActivity extends Activity
             mService.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
             showToast(R.string.repeat_off_notif);
         }
-        setRepeatButtonImage();
+        invalidateOptionsMenu();
     }
     
     private void showToast(int resid) {
@@ -957,20 +987,13 @@ public class MediaPlaybackActivity extends Activity
     private final ServiceConnection osc = new ServiceConnection() {
             public void onServiceConnected(ComponentName classname, IBinder service) {
                 mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    invalidateOptionsMenu();
-                }
+                invalidateOptionsMenu();
                 startPlayback();
                 // Assume something is playing when the service says it is,
                 // but also if the audio ID is valid but the service is paused.
                 if (mService.getAudioId() >= 0 || mService.isPlaying() ||
                         mService.getPath() != null) {
                     // something is playing now, we're done
-                    mRepeatButton.setVisibility(View.VISIBLE);
-                    mShuffleButton.setVisibility(View.VISIBLE);
-                    mQueueButton.setVisibility(View.VISIBLE);
-                    mLibraryButton.setVisibility(View.VISIBLE);
-                    setRepeatButtonImage();
                     setPauseButtonImage();
                     return;
                 }
@@ -990,24 +1013,6 @@ public class MediaPlaybackActivity extends Activity
             }
     };
 
-    private void setRepeatButtonImage() {
-        if (mService == null) return;
-        switch (mService.getRepeatMode()) {
-            case MediaPlaybackService.REPEAT_ALL:
-                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_all_btn);
-                break;
-            case MediaPlaybackService.REPEAT_CURRENT:
-                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
-                break;
-            case MediaPlaybackService.REPEAT_STOPAFTER:
-                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_stopafter_btn);
-                break;
-            default:
-                mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
-                break;
-        }
-    }
-    
     private void setPauseButtonImage() {
         if (mService != null && mService.isPlaying()) {
             mPauseButton.setImageResource(android.R.drawable.ic_media_pause);

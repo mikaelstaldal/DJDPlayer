@@ -22,43 +22,9 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-       <ImageButton android:id="@+id/curplaylist"
-            android:src="@drawable/ic_mp_current_playlist_btn"
-            android:contentDescription="@string/play_queue_title"
-            android:layout_width="82dip"
-            android:layout_height="45dip"
-            android:layout_marginRight="8dip"
-            android:nextFocusLeft="@id/curplaylist" />
-
-       <ImageButton android:id="@+id/shuffle"
-            android:src="@drawable/ic_mp_shuffle_off_btn"
-            android:contentDescription="@string/shuffle"
-            android:layout_width="82dip"
-            android:layout_height="45dip"
-            android:layout_marginRight="8dip" />
-
-       <ImageButton android:id="@+id/repeat"
-            android:contentDescription="@string/repeat"
-            android:layout_width="82dip"
-            android:layout_height="45dip"
-            android:layout_marginRight="8dip" />
-
-       <ImageButton android:id="@+id/library"
-            android:src="@drawable/ic_menu_music_library"
-            android:contentDescription="@string/goto_start"
-            android:layout_width="82dip"
-            android:layout_height="45dip" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
+        android:paddingTop="4dip"
         android:orientation="horizontal"
         android:baselineAligned="false">
 
@@ -66,6 +32,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="3"
+            android:paddingLeft="2dip"
             android:orientation="vertical">
 
             <TextView android:id="@+id/trackname"
@@ -147,6 +114,7 @@
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_mp_genre_playback"
                 android:drawablePadding="4dip"/>
+
         </LinearLayout>
 
     </LinearLayout>
