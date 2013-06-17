@@ -436,10 +436,10 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_mp_current_playlist_btn)
+        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_action_playqueue)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_mp_shuffle_off_btn)
+        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_action_shuffle)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         menu.add(2, REPEAT, 0, R.string.repeat)
