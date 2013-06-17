@@ -1554,15 +1554,6 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    public String getData() {
-        synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-        }
-    }
-
     public String getMimeType() {
         synchronized (this) {
             if (mCursor == null) {

@@ -39,7 +39,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MediaPlaybackActivity extends Activity
         implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener {
-    private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
     private static final int TRACK_INFO = CHILD_MENU_BASE+1;
     private static final int PLAY_QUEUE = CHILD_MENU_BASE+2;
     private static final int REPEAT = CHILD_MENU_BASE+3;
@@ -453,6 +452,9 @@ public class MediaPlaybackActivity extends Activity
         menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu)
                 .setIcon(R.drawable.ic_menu_set_as_ringtone);
 
+        menu.add(1, SHARE_VIA, 0, R.string.share_via)
+                .setIcon(android.R.drawable.ic_menu_share);
+
         menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                 .setIcon(android.R.drawable.ic_menu_delete);
 
@@ -553,20 +555,26 @@ public class MediaPlaybackActivity extends Activity
                 startActivity(intent);
                 return true;
 
-            case USE_AS_RINGTONE: {
+            case USE_AS_RINGTONE:
                 // Set the system setting to make this the current ringtone
                 if (mService != null) {
                     MusicUtils.setRingtone(this, mService.getAudioId());
                 }
                 return true;
-            }
 
-            case NEW_PLAYLIST: {
+            case SHARE_VIA:
+                intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM,
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+                intent.setType(MusicUtils.getCurrentMimeType());
+                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                return true;
+
+            case NEW_PLAYLIST:
                 intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
                 startActivityForResult(intent, NEW_PLAYLIST);
                 return true;
-            }
 
             case PLAYLIST_SELECTED: {
                 long [] list = new long[1];
@@ -600,12 +608,12 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
-            case EFFECTS_PANEL: {
-                Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                startActivityForResult(i, EFFECTS_PANEL);
+            case EFFECTS_PANEL:
+                intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
+                startActivityForResult(intent, EFFECTS_PANEL);
                 return true;
-            }
+
         }
         return super.onOptionsItemSelected(item);
     }

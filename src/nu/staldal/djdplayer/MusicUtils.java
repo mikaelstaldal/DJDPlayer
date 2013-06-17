@@ -61,7 +61,8 @@ public class MusicUtils {
         public final static int PLAY_NEXT = 16;
         public final static int SETTINGS = 17;
         public final static int SEARCH = 18;
-        public final static int CHILD_MENU_BASE = 19; // this should be the last item
+        public final static int SHARE_VIA = 19;
+        public final static int CHILD_MENU_BASE = 20; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -181,6 +182,13 @@ public class MusicUtils {
     public static File getCurrentFolder() {
         if (sService != null) {
             return sService.getFolder();
+        }
+        return null;
+    }
+
+    public static String getCurrentMimeType() {
+        if (sService != null) {
+            return sService.getMimeType();
         }
         return null;
     }
