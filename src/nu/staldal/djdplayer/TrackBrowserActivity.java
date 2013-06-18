@@ -869,7 +869,7 @@ public class TrackBrowserActivity extends BrowserActivity {
             menu.add(0, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
         }
 
-        menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
+        menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
 
         if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);

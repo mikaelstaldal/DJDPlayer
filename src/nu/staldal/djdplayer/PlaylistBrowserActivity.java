@@ -326,7 +326,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, CREATE_NEW_PLAYLIST, 0, R.string.create_new_playlist).setIcon(android.R.drawable.ic_menu_add);
+        menu.add(0, CREATE_NEW_PLAYLIST, 0, R.string.create_new_playlist).setIcon(R.drawable.ic_menu_add);
 
         return true;
     }

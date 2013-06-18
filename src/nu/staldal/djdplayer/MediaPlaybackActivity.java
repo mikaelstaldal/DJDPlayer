@@ -436,27 +436,27 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_action_playqueue)
+        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_menu_playqueue)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_action_shuffle)
+        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         menu.add(2, REPEAT, 0, R.string.repeat)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(1, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+        menu.add(1, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
 
-        menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(android.R.drawable.ic_menu_info_details);
+        menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(R.drawable.ic_menu_info_details);
 
         menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu)
                 .setIcon(R.drawable.ic_menu_set_as_ringtone);
 
         menu.add(1, SHARE_VIA, 0, R.string.share_via)
-                .setIcon(android.R.drawable.ic_menu_share);
+                .setIcon(R.drawable.ic_menu_share);
 
         menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
-                .setIcon(android.R.drawable.ic_menu_delete);
+                .setIcon(R.drawable.ic_menu_delete);
 
         Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
         if (getPackageManager().resolveActivity(i, 0) != null) {
@@ -484,7 +484,7 @@ public class MediaPlaybackActivity extends Activity
             SubMenu sub = (item != null)
                     ? item.getSubMenu()
                     : menu.addSubMenu(1, ADD_TO_PLAYLIST, 0,
-                    R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
+                    R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
             MusicUtils.makePlaylistMenu(this, sub);
         }
     }
