@@ -16,10 +16,12 @@
 package nu.staldal.djdplayer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.io.File;
@@ -49,6 +51,8 @@ public class TrackInfoActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        getActionBar().setHomeButtonEnabled(true);
 
         setContentView(R.layout.track_info);
     }
@@ -101,5 +105,18 @@ public class TrackInfoActivity extends Activity {
 
     private String formatDate(Date timestamp) {
         return dateFormat.format(timestamp);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(this, MusicBrowserActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
