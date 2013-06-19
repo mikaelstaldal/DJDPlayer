@@ -439,24 +439,23 @@ public class MediaPlaybackActivity extends Activity
         menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_menu_playqueue)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
+        menu.add(2, REPEAT, 0, R.string.repeat)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(2, REPEAT, 0, R.string.repeat)
+        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         menu.add(1, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
 
+        menu.add(0, SEARCH, 0, R.string.search_title).setIcon(R.drawable.ic_menu_search);
+
         menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(R.drawable.ic_menu_info_details);
 
-        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu)
-                .setIcon(R.drawable.ic_menu_set_as_ringtone);
+        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu).setIcon(R.drawable.ic_menu_set_as_ringtone);
 
-        menu.add(1, SHARE_VIA, 0, R.string.share_via)
-                .setIcon(R.drawable.ic_menu_share);
+        menu.add(1, SHARE_VIA, 0, R.string.share_via).setIcon(R.drawable.ic_menu_share);
 
-        menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
-                .setIcon(R.drawable.ic_menu_delete);
+        menu.add(1, DELETE_ITEM, 0, R.string.delete_item).setIcon(R.drawable.ic_menu_delete);
 
         Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
         if (getPackageManager().resolveActivity(i, 0) != null) {
@@ -546,6 +545,9 @@ public class MediaPlaybackActivity extends Activity
             case SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
+
+            case SEARCH:
+                return onSearchRequested();
 
             case TRACK_INFO:
                 intent = new Intent(Intent.ACTION_VIEW);
@@ -1168,6 +1170,8 @@ public class MediaPlaybackActivity extends Activity
             }
             mGenreName.setText(genreName);
             mTrackName.setText(mService.getTrackName());
+
+            setTitle((mService.getQueuePosition() + 1) + "/" + mService.getQueueLength());
 
             String nextTrackName = mService.getNextTrackName();
             if (nextTrackName != null) {

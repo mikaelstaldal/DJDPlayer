@@ -914,6 +914,12 @@ public class MediaPlaybackService extends Service {
         }
     }
 
+    public int getQueueLength() {
+        synchronized (this) {
+            return mPlayListLen;
+        }
+    }
+
     private void openCurrent() {
         synchronized (this) {
             if (mCursor != null) {

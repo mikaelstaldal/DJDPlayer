@@ -598,6 +598,8 @@ public class TrackBrowserActivity extends BrowserActivity {
 
         menu.add(0, TRACK_INFO, 0, R.string.info);
 
+        menu.add(0, SHARE_VIA, 0, R.string.share_via);
+
         // only add the 'search' menu if the selected item is music
         if (isMusic(mTrackCursor)) {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
@@ -689,6 +691,14 @@ public class TrackBrowserActivity extends BrowserActivity {
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
                     "vnd.android.cursor.item/vnd.djdplayer.audio");
                 startActivity(intent);
+                return true;
+
+            case SHARE_VIA:
+                intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM,
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+                intent.setType(MusicUtils.getCurrentMimeType());
+                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
                 return true;
 
             case SEARCH_FOR:
@@ -847,9 +857,10 @@ public class TrackBrowserActivity extends BrowserActivity {
          * - the list of current play queue
          */
         super.onCreateOptionsMenu(menu);
+
         if (!(mTrackCursor instanceof PlayQueueCursor)) {
             if (mEditMode) {
-                menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+                menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
             } else {
                 menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
@@ -865,7 +876,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         }
 
         if (mTrackCursor instanceof PlayQueueCursor) {
-            menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
             menu.add(0, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
         }
 
@@ -874,6 +885,7 @@ public class TrackBrowserActivity extends BrowserActivity {
         if (mTrackCursor instanceof PlayQueueCursor) {
             menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
         }
+
         return true;
     }
 
