@@ -24,8 +24,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:paddingTop="4dip"
+        android:paddingTop="2dip"
         android:paddingLeft="4dip"
+        android:paddingRight="4dip"
         android:orientation="vertical">
 
         <TextView android:id="@+id/trackname"
@@ -33,10 +34,10 @@
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="0dip"
-            android:paddingBottom="8dip"
             android:gravity="center_vertical"
-            android:layout_width="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_mp_song_playback"
             android:drawablePadding="4dip"/>
@@ -46,8 +47,6 @@
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="4dip"
-            android:paddingBottom="8dip"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,8 +58,6 @@
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="4dip"
-            android:paddingBottom="8dip"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -70,14 +67,14 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:background="#ffffffff" />
+            android:background="#ffffffff"
+            android:paddingTop="2dip"
+            android:paddingBottom="2dip" />
 
         <TextView android:id="@+id/nexttrackname"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,11 +82,9 @@
             android:drawablePadding="4dip" />
 
         <TextView android:id="@+id/nextartistname"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -97,11 +92,9 @@
             android:drawablePadding="4dip" />
 
         <TextView android:id="@+id/nextgenrename"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
