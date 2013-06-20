@@ -82,6 +82,7 @@ public class TrackInfoActivity extends Activity {
         Date dateAdded = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED))*1000);
 
         setTitle(title);
+        ((TextView)findViewById(R.id.title)).setText(title);
         ((TextView)findViewById(R.id.artist)).setText(artist);
         ((TextView)findViewById(R.id.composer)).setText(composer);
         ((TextView)findViewById(R.id.album)).setText(album);

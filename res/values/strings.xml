@@ -337,6 +337,7 @@
     <string name="pick_music_folder">Use as music folder</string>
 
     <!-- Info -->
+    <string name="title">Title</string>
     <string name="artist">Artist</string>
     <string name="composer">Composer</string>
     <string name="genre">Genre</string>
