@@ -30,8 +30,6 @@ import android.widget.TextView;
 
 public abstract class BrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
-    private static final String TAG = "BrowserActivity";
-
     private static int sActiveTabIndex = -1;
 
     protected MusicUtils.ServiceToken mToken;

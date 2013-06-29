@@ -27,7 +27,7 @@ import android.widget.Toast;
 import java.io.*;
 
 public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
-    private static final String TAG = "ExportPlaylistTask";
+    private static final String LOGTAG = "ExportPlaylistTask";
 
     private final Context context;
 
@@ -67,12 +67,12 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
                 writer.write('\n');
             }
         } catch (IOException e) {
-            Log.w(TAG, "Unable to export playlist", e);
+            Log.w(LOGTAG, "Unable to export playlist", e);
         } finally {
             try {
                 if (writer != null) writer.close();
             } catch (IOException e) {
-                Log.w(TAG, "Unable to close exported playlist", e);
+                Log.w(LOGTAG, "Unable to close exported playlist", e);
             }
         }
         return null;

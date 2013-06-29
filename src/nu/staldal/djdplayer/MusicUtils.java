@@ -18,6 +18,7 @@
 package nu.staldal.djdplayer;
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -41,7 +42,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public class MusicUtils {
-    private static final String TAG = "MusicUtils";
+    private static final String LOGTAG = "MusicUtils";
 
     public interface Defs {
         public final static int ADD_TO_PLAYLIST = 1;
@@ -62,7 +63,9 @@ public class MusicUtils {
         public final static int SETTINGS = 17;
         public final static int SEARCH = 18;
         public final static int SHARE_VIA = 19;
-        public final static int CHILD_MENU_BASE = 20; // this should be the last item
+        public final static int TRACK_INFO = 20;
+        public final static int SEARCH_FOR = 21;
+        public final static int CHILD_MENU_BASE = 22; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -121,19 +124,19 @@ public class MusicUtils {
             sConnectionMap.put(cw, sb);
             return new ServiceToken(cw);
         }
-        Log.e(TAG, "Failed to bind to service");
+        Log.e(LOGTAG, "Failed to bind to service");
         return null;
     }
 
     public static void unbindFromService(ServiceToken token) {
         if (token == null) {
-            Log.e(TAG, "Trying to unbind with null token");
+            Log.e(LOGTAG, "Trying to unbind with null token");
             return;
         }
         ContextWrapper cw = token.mWrappedContext;
         ServiceBinder sb = sConnectionMap.remove(cw);
         if (sb == null) {
-            Log.e(TAG, "Trying to unbind for unknown Context");
+            Log.e(LOGTAG, "Trying to unbind for unknown Context");
             return;
         }
         cw.unbindService(sb);
@@ -354,7 +357,7 @@ public class MusicUtils {
                     if (!f.delete()) {
                         // I'm not sure if we'd ever get here (deletion would
                         // have to fail, but no exception thrown)
-                        Log.e(TAG, "Failed to delete file " + name);
+                        Log.e(LOGTAG, "Failed to delete file " + name);
                     }
                     c.moveToNext();
                 } catch (SecurityException ex) {
@@ -535,7 +538,7 @@ public class MusicUtils {
             message = R.string.sdcard_scanning_message;
         } else if (!TextUtils.equals(mLastSdStatus, status)) {
             mLastSdStatus = status;
-            Log.d(TAG, "sd card: " + status);
+            Log.d(LOGTAG, "sd card: " + status);
         }
 
         a.setTitle(title);
@@ -594,7 +597,7 @@ public class MusicUtils {
 
     public static void playAll(Context context, long[] list) {
         if (list.length == 0 || sService == null) {
-            Log.d(TAG, "attempt to play empty song list");
+            Log.d(LOGTAG, "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
             String message = context.getString(R.string.emptyplaylist, list.length);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -614,24 +617,6 @@ public class MusicUtils {
             long temp = array[i];
             array[i] = array[randomPosition];
             array[randomPosition] = temp;
-        }
-    }
-
-    public static void clearQueue() {
-        if (sService != null) {
-            sService.removeTracks(0, Integer.MAX_VALUE);
-        }
-    }
-
-    public static void shuffleQueue() {
-        if (sService != null) {
-            sService.doShuffle();
-        }
-    }
-
-    public static void uniqueifyQueue() {
-        if (sService != null) {
-            sService.uniqueify();
         }
     }
 
@@ -660,7 +645,7 @@ public class MusicUtils {
             resolver.update(ringUri, values, null, null);
         } catch (UnsupportedOperationException ex) {
             // most likely the card just got unmounted
-            Log.e(TAG, "couldn't set ringtone flag for id " + id);
+            Log.e(LOGTAG, "couldn't set ringtone flag for id " + id);
             return;
         }
 
@@ -754,4 +739,54 @@ public class MusicUtils {
             return null;
         }
     }
+
+    /**
+     * Cursor should be positioned on the entry to be checked
+     * Returns false if the entry matches the naming pattern used for recordings,
+     * or if it is marked as not music in the database.
+     */
+    static boolean isMusic(Cursor c) {
+        int titleidx = c.getColumnIndex(MediaStore.Audio.Media.TITLE);
+        int albumidx = c.getColumnIndex(MediaStore.Audio.Media.ALBUM);
+        int artistidx = c.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+
+        String title = c.getString(titleidx);
+        String album = c.getString(albumidx);
+        String artist = c.getString(artistidx);
+        if (MediaStore.UNKNOWN_STRING.equals(album) &&
+                MediaStore.UNKNOWN_STRING.equals(artist) &&
+                title != null &&
+                title.startsWith("recording")) {
+            // not music
+            return false;
+        }
+
+        int ismusic_idx = c.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC);
+        boolean ismusic = true;
+        if (ismusic_idx >= 0) {
+            ismusic = c.getInt(ismusic_idx) != 0;
+        }
+        return ismusic;
+    }
+
+    static Intent buildSearchForIntent(String trackName, String artistNameForAlbum, String albumName) {
+        Intent i = new Intent();
+        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        String query;
+        if (MediaStore.UNKNOWN_STRING.equals(artistNameForAlbum)) {
+            query = trackName;
+        } else {
+            query = artistNameForAlbum + " " + trackName;
+            i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artistNameForAlbum);
+        }
+        if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
+            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, albumName);
+        }
+        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
+        i.putExtra(SearchManager.QUERY, query);
+        return i;
+    }
+
 }

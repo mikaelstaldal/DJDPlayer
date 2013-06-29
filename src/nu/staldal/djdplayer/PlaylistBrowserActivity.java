@@ -36,7 +36,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 
 public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBrowserActivity.PlaylistListAdapter> {
-    private static final String TAG = "PlaylistBrowserActivity";
+    private static final String LOGTAG = "PlaylistBrowserActivity";
 
     public static final String CATEGORY_ID = "playlist";
 
@@ -206,7 +206,7 @@ public class PlaylistBrowserActivity extends CategoryBrowserActivity<PlaylistBro
                                 }
                             }).show();
                 } else {
-                    Log.e(TAG, "should not be here");
+                    Log.e(LOGTAG, "should not be here");
                 }
                 return true;
 

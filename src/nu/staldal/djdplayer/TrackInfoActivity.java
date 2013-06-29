@@ -30,8 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TrackInfoActivity extends Activity {
-    private static final String TAG = "TrackInfoActivity";
-
     private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private final static String[] COLUMNS = new String[] {

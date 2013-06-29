@@ -20,10 +20,8 @@ package nu.staldal.djdplayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
-import android.app.SearchManager;
 import android.content.*;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
@@ -38,10 +36,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 
 public class MediaPlaybackActivity extends Activity
-        implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener {
-    private static final int TRACK_INFO = CHILD_MENU_BASE+1;
-    private static final int PLAY_QUEUE = CHILD_MENU_BASE+2;
-    private static final int REPEAT = CHILD_MENU_BASE+3;
+        implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener, ServiceConnection {
+    private static final String LOGTAG = "MediaPlaybackActivity";
+
+    private static final int REPEAT = CHILD_MENU_BASE+2;
+    private static final int CLEAR_QUEUE = CHILD_MENU_BASE+3;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -54,44 +53,36 @@ public class MediaPlaybackActivity extends Activity
     private Toast mToast;
     private int mTouchSlop;
     private MusicUtils.ServiceToken mToken;
+    private PlayQueueFragment playQueueFragment;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Log.i(LOGTAG, "onCreate");
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         getActionBar().setHomeButtonEnabled(true);
 
         setContentView(R.layout.audio_player);
 
+        playQueueFragment = (PlayQueueFragment)getFragmentManager().findFragmentById(R.id.playqueue);
+
         mCurrentTime = (TextView) findViewById(R.id.currenttime);
         mTotalTime = (TextView) findViewById(R.id.totaltime);
         mProgress = (ProgressBar) findViewById(android.R.id.progress);
+        mTrackName = (TextView) findViewById(R.id.trackname);
         mArtistName = (TextView) findViewById(R.id.artistname);
         mGenreName = (TextView) findViewById(R.id.genrename);
-        mTrackName = (TextView) findViewById(R.id.trackname);
-        mNextTrackName = (TextView) findViewById(R.id.nexttrackname);
-        mNextArtistName = (TextView) findViewById(R.id.nextartistname);
-        mNextGenreName = (TextView) findViewById(R.id.nextgenrename);
+
+        mTrackName.setOnTouchListener(this);
+        registerForContextMenu(mTrackName);
 
         mArtistName.setOnTouchListener(this);
         mArtistName.setOnLongClickListener(this);
 
         mGenreName.setOnTouchListener(this);
         mGenreName.setOnLongClickListener(this);
-
-        mTrackName.setOnTouchListener(this);
-        mTrackName.setOnLongClickListener(this);
-
-        mNextTrackName.setOnTouchListener(this);
-        mNextTrackName.setOnLongClickListener(this);
-
-        mNextArtistName.setOnTouchListener(this);
-        mNextArtistName.setOnLongClickListener(this);
-
-        mNextGenreName.setOnTouchListener(this);
-        mNextGenreName.setOnLongClickListener(this);
 
         mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
         mPrevButton.setOnClickListener(new View.OnClickListener() {
@@ -155,12 +146,6 @@ public class MediaPlaybackActivity extends Activity
         vv = v.findViewById(R.id.genrename);
         if (vv != null) return (TextView) vv;
         vv = v.findViewById(R.id.trackname);
-        if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.nexttrackname);
-        if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.nextartistname);
-        if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.nextgenrename);
         if (vv != null) return (TextView) vv;
         return null;
     }
@@ -263,11 +248,6 @@ public class MediaPlaybackActivity extends Activity
         String song = mService.getTrackName();
         String artist = mService.getArtistName();
         String album = mService.getAlbumName();
-        long nextArtistId = mService.getNextArtistId();
-        long nextGenreId = mService.getNextGenreId();
-        String nextSong = mService.getNextTrackName();
-        String nextArtist = mService.getNextArtistName();
-        String nextAlbum = mService.getNextAlbumName();
 
         if (MediaStore.UNKNOWN_STRING.equals(album) &&
                 MediaStore.UNKNOWN_STRING.equals(artist) &&
@@ -281,36 +261,12 @@ public class MediaPlaybackActivity extends Activity
             return false;
         }
 
-        Cursor c = MusicUtils.query(this,
-                ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId),
-                new String[] {MediaStore.Audio.Media.IS_MUSIC}, null, null, null);
-        boolean isMusic = true;
-        if (c != null) {
-            if (c.moveToFirst()) {
-                isMusic = c.getInt(0) != 0;
-            }
-            c.close();
-        }
-        if (!isMusic) {
-            return false;
-        }
-
         if (view.equals(mArtistName)) {
             browseCategory("artist", artistId);
             return true;
         } else if (view.equals(mGenreName)) {
             browseCategory("genre", genreId);
             return true;
-        } else if (view.equals(mNextArtistName)) {
-            browseCategory("artist", nextArtistId);
-            return true;
-        } else if (view.equals(mNextGenreName)) {
-            browseCategory("genre", nextGenreId);
-            return true;
-        } else if (view.equals(mTrackName)) {
-            return searchSong(artist, album, song);
-        } else if (view.equals(mNextTrackName)) {
-            return searchSong(nextArtist, nextAlbum, nextSong);
         } else {
             throw new RuntimeException("shouldn't be here");
         }
@@ -321,47 +277,6 @@ public class MediaPlaybackActivity extends Activity
         intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
         intent.putExtra(categoryId, String.valueOf(id));
         startActivity(intent);
-    }
-
-    private boolean searchSong(String artist, String album, String song) {
-        if ((song == null) || MediaStore.UNKNOWN_STRING.equals(song)) {
-            // A popup of the form "Search for null/'' using ..." is pretty
-            // unhelpful, plus, we won't find any way to buy it anyway.
-            return false;
-        }
-
-        boolean knownArtist =
-            (artist != null) && !MediaStore.UNKNOWN_STRING.equals(artist);
-
-        boolean knownAlbum =
-            (album != null) && !MediaStore.UNKNOWN_STRING.equals(album);
-
-        String query;
-        CharSequence title = song;
-        if (knownArtist) {
-            query = artist + " " + song;
-        } else {
-            query = song;
-        }
-        String mime = "audio/*"; // the specific type doesn't matter, so don't bother retrieving it
-
-        title = getString(R.string.mediasearch, title);
-
-        Intent i = new Intent();
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-        i.putExtra(SearchManager.QUERY, query);
-        if(knownArtist) {
-            i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
-        }
-        if(knownAlbum) {
-            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
-        }
-        i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, song);
-        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, mime);
-
-        startActivity(Intent.createChooser(i, title));
-        return true;
     }
 
     private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
@@ -405,7 +320,7 @@ public class MediaPlaybackActivity extends Activity
         super.onStart();
         paused = false;
 
-        mToken = MusicUtils.bindToService(this, osc);
+        mToken = MusicUtils.bindToService(this, this);
         if (mToken == null) {
             // something went wrong
             mHandler.sendEmptyMessage(QUIT);
@@ -436,26 +351,19 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(2, PLAY_QUEUE, 0, R.string.play_queue_title).setIcon(R.drawable.ic_menu_playqueue)
-                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
         menu.add(2, REPEAT, 0, R.string.repeat)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
+        menu.add(0, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
+
+        menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
+
         menu.add(1, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
 
         menu.add(0, SEARCH, 0, R.string.search_title).setIcon(R.drawable.ic_menu_search);
-
-        menu.add(0, TRACK_INFO, 0, R.string.info).setIcon(R.drawable.ic_menu_info_details);
-
-        menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu).setIcon(R.drawable.ic_menu_set_as_ringtone);
-
-        menu.add(1, SHARE_VIA, 0, R.string.share_via).setIcon(R.drawable.ic_menu_share);
-
-        menu.add(1, DELETE_ITEM, 0, R.string.delete_item).setIcon(R.drawable.ic_menu_delete);
 
         Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
         if (getPackageManager().resolveActivity(i, 0) != null) {
@@ -468,24 +376,11 @@ public class MediaPlaybackActivity extends Activity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        updatePlaylistItem(menu);
-
         updateRepeatItem(menu);
 
         applyKeyguard(menu);
 
         return true;
-    }
-
-    private void updatePlaylistItem(Menu menu) {
-        if (mService != null) {
-            MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
-            SubMenu sub = (item != null)
-                    ? item.getSubMenu()
-                    : menu.addSubMenu(1, ADD_TO_PLAYLIST, 0,
-                    R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
-            MusicUtils.makePlaylistMenu(this, sub);
-        }
     }
 
     private void updateRepeatItem(Menu menu) {
@@ -518,28 +413,28 @@ public class MediaPlaybackActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
         switch (item.getItemId()) {
-            case android.R.id.home:
-                intent = new Intent(this, MusicBrowserActivity.class);
+            case android.R.id.home: {
+                Intent intent = new Intent(this, MusicBrowserActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
                 return true;
-
-            case PLAY_QUEUE:
-                intent = new Intent(Intent.ACTION_EDIT)
-                        .setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio")
-                        .putExtra("playlist", TrackBrowserActivity.PLAYQUEUE);
-                startActivity(intent);
+            }
+            case REPEAT:
+                cycleRepeat();
                 return true;
 
             case SHUFFLE:
-                shuffle();
+                if (mService != null) mService.doShuffle();
                 return true;
 
-            case REPEAT:
-                cycleRepeat();
+            case UNIQUEIFY:
+                if (mService != null) mService.uniqueify();
+                return true;
+
+            case CLEAR_QUEUE:
+                if (mService != null) mService.removeTracks(0, Integer.MAX_VALUE);
                 return true;
 
             case SETTINGS:
@@ -549,34 +444,47 @@ public class MediaPlaybackActivity extends Activity
             case SEARCH:
                 return onSearchRequested();
 
-            case TRACK_INFO:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()),
-                    "vnd.android.cursor.item/vnd.djdplayer.audio");
-                startActivity(intent);
+            case EFFECTS_PANEL: {
+                Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
+                startActivityForResult(intent, EFFECTS_PANEL);
                 return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-            case USE_AS_RINGTONE:
-                // Set the system setting to make this the current ringtone
-                if (mService != null) {
-                    MusicUtils.setRingtone(this, mService.getAudioId());
-                }
-                return true;
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        if (mService == null) return;
 
-            case SHARE_VIA:
-                intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
-                intent.setType(MusicUtils.getCurrentMimeType());
-                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
-                return true;
+        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
+        MusicUtils.makePlaylistMenu(this, sub);
 
-            case NEW_PLAYLIST:
-                intent = new Intent();
+        menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+
+        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+
+        menu.add(0, TRACK_INFO, 0, R.string.info);
+
+        menu.add(0, SHARE_VIA, 0, R.string.share_via);
+
+        menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+
+        menu.setHeaderTitle(mService.getTrackName());
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if (mService == null) return false;
+
+        switch (item.getItemId()) {
+            case NEW_PLAYLIST: {
+                Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
                 startActivityForResult(intent, NEW_PLAYLIST);
                 return true;
+            }
 
             case PLAYLIST_SELECTED: {
                 long [] list = new long[1];
@@ -586,40 +494,60 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
+            case USE_AS_RINGTONE:
+                // Set the system setting to make this the current ringtone
+                MusicUtils.setRingtone(this, mService.getAudioId());
+                return true;
+
             case DELETE_ITEM: {
-                if (mService != null) {
-                    final long [] list = new long[1];
-                    list[0] = MusicUtils.getCurrentAudioId();
-                    String f = getString(R.string.delete_song_desc, mService.getTrackName());
-                    new AlertDialog.Builder(this)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle(R.string.delete_song_title)
-                            .setMessage(f)
-                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            })
-                            .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    MusicUtils.deleteTracks(MediaPlaybackActivity.this, list);
-                                }
-                            }).show();
-                }
+                final long [] list = new long[1];
+                list[0] = MusicUtils.getCurrentAudioId();
+                String f = getString(R.string.delete_song_desc, mService.getTrackName());
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_song_title)
+                        .setMessage(f)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(MediaPlaybackActivity.this, list);
+                            }
+                        }).show();
                 return true;
             }
 
-            case EFFECTS_PANEL:
-                intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                startActivityForResult(intent, EFFECTS_PANEL);
+            case TRACK_INFO: {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()),
+                    "vnd.android.cursor.item/vnd.djdplayer.audio");
+                startActivity(intent);
                 return true;
+            }
 
+            case SHARE_VIA: {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM,
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+                intent.setType(MusicUtils.getCurrentMimeType());
+                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                return true;
+            }
+
+            case SEARCH_FOR:
+                startActivity(Intent.createChooser(
+                        MusicUtils.buildSearchForIntent(mService.getTrackName(), mService.getArtistName(), mService.getAlbumName()),
+                        getString(R.string.mediasearch, mService.getTrackName())));
+                return true;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onContextItemSelected(item);
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode != RESULT_OK) {
@@ -637,6 +565,7 @@ public class MediaPlaybackActivity extends Activity
                 break;
         }
     }
+
     private final int keyboard[][] = {
         {
             KeyEvent.KEYCODE_Q,
@@ -834,7 +763,7 @@ public class MediaPlaybackActivity extends Activity
                 return true;
 
             case KeyEvent.KEYCODE_S:
-                shuffle();
+                if (mService != null) mService.doShuffle();
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -918,7 +847,7 @@ public class MediaPlaybackActivity extends Activity
     }
     
     private void doPauseResume() {
-        if(mService != null) {
+        if (mService != null) {
             if (mService.isPlaying()) {
                 mService.pause();
             } else {
@@ -927,13 +856,6 @@ public class MediaPlaybackActivity extends Activity
             refreshNow();
             setPauseButtonImage();
         }
-    }
-    
-    private void shuffle() {
-        if (mService == null) {
-            return;
-        }
-        mService.doShuffle();
     }
     
     private void cycleRepeat() {
@@ -994,34 +916,37 @@ public class MediaPlaybackActivity extends Activity
         queueNextRefresh(next);
     }
 
-    private final ServiceConnection osc = new ServiceConnection() {
-            public void onServiceConnected(ComponentName classname, IBinder service) {
-                mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
-                invalidateOptionsMenu();
-                startPlayback();
-                // Assume something is playing when the service says it is,
-                // but also if the audio ID is valid but the service is paused.
-                if (mService.getAudioId() >= 0 || mService.isPlaying() ||
-                        mService.getPath() != null) {
-                    // something is playing now, we're done
-                    setPauseButtonImage();
-                    return;
-                }
-                // Service is dead or not playing anything. If we got here as part
-                // of a "play this file" Intent, exit. Otherwise go to the Music
-                // app start screen.
-                if (getIntent().getData() == null) {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
-                    startActivity(intent);
-                }
-                finish();
-            }
-            public void onServiceDisconnected(ComponentName classname) {
-                mService = null;
-            }
-    };
+    public void onServiceConnected(ComponentName classname, IBinder service) {
+        mService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
+
+        playQueueFragment.onServiceConnected(mService);
+
+        invalidateOptionsMenu();
+        startPlayback();
+
+        // Assume something is playing when the service says it is,
+        // but also if the audio ID is valid but the service is paused.
+        if (mService.getAudioId() >= 0 || mService.isPlaying() ||
+                mService.getPath() != null) {
+            // something is playing now, we're done
+            setPauseButtonImage();
+            return;
+        }
+        // Service is dead or not playing anything. If we got here as part
+        // of a "play this file" Intent, exit. Otherwise go to the Music
+        // app start screen.
+        if (getIntent().getData() == null) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
+            startActivity(intent);
+        }
+        finish();
+    }
+
+    public void onServiceDisconnected(ComponentName classname) {
+        mService = null;
+    }
 
     private void setPauseButtonImage() {
         if (mService != null && mService.isPlaying()) {
@@ -1036,9 +961,6 @@ public class MediaPlaybackActivity extends Activity
     private TextView mArtistName;
     private TextView mGenreName;
     private TextView mTrackName;
-    private TextView mNextTrackName;
-    private TextView mNextArtistName;
-    private TextView mNextGenreName;
     private ProgressBar mProgress;
     private long mPosOverride = -1;
     private boolean mFromTouch = false;
@@ -1150,15 +1072,9 @@ public class MediaPlaybackActivity extends Activity
             mArtistName.setVisibility(View.INVISIBLE);
             mGenreName.setVisibility(View.INVISIBLE);
             mTrackName.setText(path);
-            mNextTrackName.setVisibility(View.INVISIBLE);
-            mNextArtistName.setVisibility(View.INVISIBLE);
-            mNextGenreName.setVisibility(View.INVISIBLE);
         } else {
             mArtistName.setVisibility(View.VISIBLE);
             mGenreName.setVisibility(View.VISIBLE);
-            mNextTrackName.setVisibility(View.VISIBLE);
-            mNextArtistName.setVisibility(View.VISIBLE);
-            mNextGenreName.setVisibility(View.VISIBLE);
             String artistName = mService.getArtistName();
             if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
                 artistName = getString(R.string.unknown_artist_name);
@@ -1172,17 +1088,6 @@ public class MediaPlaybackActivity extends Activity
             mTrackName.setText(mService.getTrackName());
 
             setTitle((mService.getQueuePosition() + 1) + "/" + mService.getQueueLength());
-
-            String nextTrackName = mService.getNextTrackName();
-            if (nextTrackName != null) {
-                mNextTrackName.setText(nextTrackName);
-                mNextArtistName.setText(mService.getNextArtistName());
-                mNextGenreName.setText(mService.getNextGenreName());
-            } else {
-                mNextTrackName.setText("");
-                mNextArtistName.setText("");
-                mNextGenreName.setText("");
-            }
         }
         mDuration = mService.duration();
         mTotalTime.setText(MusicUtils.formatDuration(this, mDuration));

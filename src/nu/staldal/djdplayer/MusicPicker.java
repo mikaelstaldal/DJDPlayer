@@ -50,9 +50,8 @@ import java.io.IOException;
  * perform filtering of the data as the user presses keys.
  */
 public class MusicPicker extends ListActivity
-        implements View.OnClickListener, MediaPlayer.OnCompletionListener,
-        MusicUtils.Defs {
-    private static final String TAG = "MusicPicker";
+        implements View.OnClickListener, MediaPlayer.OnCompletionListener, MusicUtils.Defs {
+    private static final String LOGTAG = "MusicPicker";
 
     /** Holds the previous state of the list, to restore after the async
      * query has completed. */
@@ -529,7 +528,7 @@ public class MusicPicker extends ListActivity
                 return getContentResolver().query(uri, CURSOR_COLS,
                         where.toString(), null, mSortOrder);
             } catch (UnsupportedOperationException ex) {
-                Log.w(TAG, "Error", ex);
+                Log.w(LOGTAG, "Error", ex);
             }
         } else {
             mAdapter.setLoading(true);

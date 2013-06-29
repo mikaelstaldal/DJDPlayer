@@ -32,8 +32,6 @@ import android.widget.RemoteViews;
  * with play/pause and next track buttons.  
  */
 public class MediaAppWidgetProvider extends AppWidgetProvider {
-    static final String TAG = "MusicAppWidgetProvider";
-    
     public static final String CMDAPPWIDGETUPDATE = "appwidgetupdate";
 
     private static MediaAppWidgetProvider sInstance;
