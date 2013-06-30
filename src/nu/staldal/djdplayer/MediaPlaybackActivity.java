@@ -357,9 +357,9 @@ public class MediaPlaybackActivity extends Activity
         menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        menu.add(0, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
+        menu.add(3, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
 
-        menu.add(0, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
+        menu.add(3, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
 
         menu.add(1, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
 
@@ -377,6 +377,8 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         updateRepeatItem(menu);
+
+        updatePlayingItems(menu);
 
         applyKeyguard(menu);
 
@@ -404,6 +406,10 @@ public class MediaPlaybackActivity extends Activity
         } else {
             item.setIcon(R.drawable.ic_mp_repeat_off_btn);
         }
+    }
+
+    private void updatePlayingItems(Menu menu) {
+        menu.setGroupVisible(3, mService != null && !mService.isPlaying());
     }
 
     private void applyKeyguard(Menu menu) {

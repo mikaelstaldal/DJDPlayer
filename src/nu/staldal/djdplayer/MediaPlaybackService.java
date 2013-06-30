@@ -1306,16 +1306,18 @@ public class MediaPlaybackService extends Service {
 
     public void uniqueify() {
         synchronized(this) {
-            boolean modified = false;
-            Set<Long> found = new HashSet<Long>();
-            for (int i=0; i < mPlayListLen; i++) {
-                if (!found.add(mPlayList[i]) && i != mPlayPos) {
-                    removeTracksInternal(i, i);
-                    modified = true;
+            if (!isPlaying()) {
+                boolean modified = false;
+                Set<Long> found = new HashSet<Long>();
+                for (int i=mPlayListLen-1; i >= 0; i--) {
+                    if (!found.add(mPlayList[i])) {
+                        removeTracksInternal(i, i);
+                        modified = true;
+                    }
                 }
-            }
-            if (modified) {
-                notifyChange(QUEUE_CHANGED);
+                if (modified) {
+                    notifyChange(QUEUE_CHANGED);
+                }
             }
         }
     }
