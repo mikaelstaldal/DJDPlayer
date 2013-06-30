@@ -53,3 +53,8 @@
 * Bug fixes
 * Layout improvements
 * Performance improvements
+
+2.0
+---
+* Integrate current playing song and play queue view
+* Use Action Bar and other Android 4 UI enhancements
