@@ -16,14 +16,15 @@
 
 package nu.staldal.djdplayer;
 
-import android.content.AsyncQueryHandler;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 
-public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
+public class AlbumFragment extends MetadataCategoryFragment {
     @Override
     protected String getCategoryId() {
         return "album";
@@ -32,16 +33,6 @@ public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
     @Override
     protected String getSelectedCategoryId() {
         return "selectedalbum";
-    }
-
-    @Override
-    protected int getTabId() {
-        return R.id.albumtab;
-    }
-
-    @Override
-    protected int getWorkingCategoryStringId() {
-        return R.string.working_albums;
     }
 
     @Override
@@ -75,27 +66,15 @@ public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
     }
 
     @Override
-    protected Cursor getCursor(AsyncQueryHandler async, String filter) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] cols = new String[] {
                 MediaStore.Audio.Albums._ID,
                 MediaStore.Audio.Albums.ALBUM,
-                MediaStore.Audio.Albums.NUMBER_OF_SONGS
+                MediaStore.Audio.Albums.NUMBER_OF_SONGS,
         };
 
-        Cursor ret = null;
         Uri uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
-        if (!TextUtils.isEmpty(filter)) {
-            uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filter)).build();
-        }
-        if (async != null) {
-            async.startQuery(0, null,
-                    uri,
-                    cols, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-        } else {
-            ret = MusicUtils.query(this, uri,
-                    cols, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-        }
-        return ret;
+        return new CursorLoader(getActivity(), uri, cols, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
     @Override
@@ -123,7 +102,7 @@ public class AlbumBrowserActivity extends MetadataCategoryBrowserActivity {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " +
                 MediaStore.Audio.Media.IS_MUSIC + "=1";
-        Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        Cursor cursor = MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null, MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
 
         if (cursor != null) {

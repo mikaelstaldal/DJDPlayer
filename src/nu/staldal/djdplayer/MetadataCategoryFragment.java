@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.*;
@@ -31,23 +32,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserActivity<MetadataCategoryListAdapter> {
+public abstract class MetadataCategoryFragment extends CategoryFragment {
     protected final static int SEARCH_FOR = CHILD_MENU_BASE;
 
-    protected long mCurrentId;
+    public static final String CURRENT_NAME = "CURRENT_NAME";
+    public static final String IS_UNKNOWN = "IS_UNKNOWN";
+
+    protected long mCurrentId;    
     protected String mCurrentName;
     protected boolean mIsUnknown;
 
-    final BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            getListView().invalidateViews();
-        }
-    };
-
     protected abstract String getCategoryId();
-
-    protected abstract Cursor getCursor(AsyncQueryHandler async, String filter);
 
     protected abstract String getSelectedCategoryId();
 
@@ -60,8 +55,6 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
     protected abstract String fetchCategoryName(Cursor cursor);
 
     protected abstract int fetchNumberOfSongsForCategory(Cursor cursor, long id);
-
-    protected abstract int getWorkingCategoryStringId();
 
     protected abstract int getTitleStringId();
 
@@ -87,32 +80,141 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
 
         if (icicle != null) {
             mCurrentId = icicle.getLong(getSelectedCategoryId());
+            mCurrentName = icicle.getString(CURRENT_NAME);
+            mIsUnknown = icicle.getBoolean(IS_UNKNOWN);
         }
+    }
 
-        mAdapter = (MetadataCategoryListAdapter)getLastNonConfigurationInstance();
-        if (mAdapter == null) {
-            //Log.i("@@@", "starting query");
-            mAdapter = new MetadataCategoryListAdapter(
-                    getApplication(),
-                    R.layout.track_list_item,
-                    mCursor,
-                    new String[] {},
-                    new int[] {},
-                    this);
-            setListAdapter(mAdapter);
-            if (!withTabs) setTitle(getWorkingCategoryStringId());
-            getCursor(mAdapter.getQueryHandler(), null);
-        } else {
-            mAdapter.setActivity(this);
-            setListAdapter(mAdapter);
-            mCursor = mAdapter.getCursor();
-            if (mCursor != null) {
-                init(mCursor);
-            } else {
-                getCursor(mAdapter.getQueryHandler(), null);
+    @Override
+    protected MetadataCategoryListAdapter createListAdapter() {
+        return new MetadataCategoryListAdapter(
+                getActivity(),
+                R.layout.track_list_item,
+                null,
+                new String[] {},
+                new int[] {},
+                this);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outcicle) {
+        // need to store the selected item so we don't lose it in case
+        // of an orientation switch. Otherwise we could lose it while
+        // in the middle of specifying a playlist to add the item to.
+        outcicle.putLong(getSelectedCategoryId(), mCurrentId);
+        outcicle.putString(CURRENT_NAME, mCurrentName);
+        outcicle.putBoolean(IS_UNKNOWN, mIsUnknown);
+        super.onSaveInstanceState(outcicle);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+        intent.putExtra(getCategoryId(), String.valueOf(id));
+        startActivity(intent);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+
+        menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
+        for (int i = 1; i<=5; i++) {
+            for (int j = 1; j<=5; j++) {
+                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
-        mToken = MusicUtils.bindToService(this, this);
+
+        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
+        MusicUtils.makePlaylistMenu(getActivity(), sub);
+
+        menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
+
+        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
+        mAdapter.getCursor().moveToPosition(mi.position);
+        mCurrentId = fetchCategoryId(mAdapter.getCursor());
+        mCurrentName = fetchCategoryName(mAdapter.getCursor());
+        mIsUnknown = mCurrentName == null || mCurrentName.equals(MediaStore.UNKNOWN_STRING);
+        if (mIsUnknown) {
+            menu.setHeaderTitle(getString(getUnknownStringId()));
+        } else {
+            menu.setHeaderTitle(mCurrentName);
+            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case PLAY_ALL: {
+                long[] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                MusicUtils.playAll(getActivity(), songs);
+                return true;
+            }
+
+            case QUEUE_ALL: {
+                long[] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                MusicUtils.queue(getActivity(), songs);
+                return true;
+            }
+
+            case NEW_PLAYLIST: {
+                Intent intent = new Intent();
+                intent.setClass(getActivity(), CreatePlaylist.class);
+                startActivityForResult(intent, NEW_PLAYLIST);
+                return true;
+            }
+
+            case PLAYLIST_SELECTED: {
+                long playlist = item.getIntent().getLongExtra("playlist", 0);
+                long[] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                MusicUtils.addToPlaylist(getActivity(), songs, playlist);
+                return true;
+            }
+
+            case DELETE_ITEM: {
+                final long[] songs = fetchSongList(mCurrentId);
+                String f = getString(getDeleteDescStringId());
+                String desc = String.format(f, mCurrentName);
+                new AlertDialog.Builder(getActivity())
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_songs_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(MetadataCategoryFragment.this.getActivity(), songs);
+                            }
+                        }).show();
+                return true;
+            }
+
+            case SEARCH_FOR:
+                doSearch();
+                return true;
+
+            default:
+                if (item.getItemId() > INTERLEAVE_ALL) {
+                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
+                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
+                    long[] songs = fetchSongList(mCurrentId);
+                    if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                    MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
+                    return true;
+                }
+        }
+        return super.onContextItemSelected(item);
     }
 
     protected void doSearch() {
@@ -135,179 +237,20 @@ public abstract class MetadataCategoryBrowserActivity extends CategoryBrowserAct
 
         startActivity(Intent.createChooser(i, title));
     }
-
+    
     @Override
-    protected void setTitle() {
-        CharSequence fancyName = "";
-        if (mCursor != null && mCursor.getCount() > 0) {
-            mCursor.moveToFirst();
-            fancyName = fetchCategoryName(mCursor);
-            if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING))
-                fancyName = getText(R.string.unknown_artist_name);
-        }
-
-        if (fancyName != null)
-            setTitle(fancyName);
-        else
-            setTitle(getTitleStringId());
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outcicle) {
-        // need to store the selected item so we don't lose it in case
-        // of an orientation switch. Otherwise we could lose it while
-        // in the middle of specifying a playlist to add the item to.
-        outcicle.putLong(getSelectedCategoryId(), mCurrentId);
-        super.onSaveInstanceState(outcicle);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        IntentFilter f = new IntentFilter();
-        f.addAction(MediaPlaybackService.META_CHANGED);
-        f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        registerReceiver(mTrackListListener, f);
-        mTrackListListener.onReceive(null, null);
-    }
-
-    @Override
-    public void onPause() {
-        unregisterReceiver(mTrackListListener);
-        super.onPause();
-    }
-
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
-        intent.putExtra(getCategoryId(), String.valueOf(id));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
-        if (menuInfoIn == null) return;
-
-        menu.add(0, PLAY_ALL, 0, R.string.play_all);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
-        for (int i = 1; i<=5; i++) {
-            for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
-            }
-        }
-
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(this, sub);
-
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
-
-        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        mCursor.moveToPosition(mi.position);
-        mCurrentId = fetchCategoryId(mCursor);
-        mCurrentName = fetchCategoryName(mCursor);
-        mIsUnknown = mCurrentName == null ||
-                mCurrentName.equals(MediaStore.UNKNOWN_STRING);
-        if (mIsUnknown) {
-            menu.setHeaderTitle(getString(getUnknownStringId()));
-        } else {
-            menu.setHeaderTitle(mCurrentName);
-            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case PLAY_ALL: {
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.playAll(this, songs);
-                return true;
-            }
-
-            case QUEUE_ALL: {
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.queue(this, songs);
-                return true;
-            }
-
-            case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(this, CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
-                return true;
-            }
-
-            case PLAYLIST_SELECTED: {
-                long playlist = item.getIntent().getLongExtra("playlist", 0);
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.addToPlaylist(this, songs, playlist);
-                return true;
-            }
-
-            case DELETE_ITEM: {
-                final long[] songs = fetchSongList(mCurrentId);
-                String f = getString(getDeleteDescStringId());
-                String desc = String.format(f, mCurrentName);
-                new AlertDialog.Builder(this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.delete_songs_title)
-                        .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MusicUtils.deleteTracks(MetadataCategoryBrowserActivity.this, songs);
-                            }
-                        }).show();
-                return true;
-            }
-
-            case SEARCH_FOR:
-                doSearch();
-                return true;
-
-            default:
-                if (item.getItemId() > INTERLEAVE_ALL) {
-                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
-                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    long[] songs = fetchSongList(mCurrentId);
-                    if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                    MusicUtils.interleave(this, songs, currentCount, newCount);
-                    return true;
-                }
-        }
-        return super.onContextItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         switch (requestCode) {
             case NEW_PLAYLIST:
-                if (resultCode == RESULT_OK) {
+                if (resultCode == Activity.RESULT_OK) {
                     Uri uri = intent.getData();
                     if (uri != null) {
                         long [] songs = fetchSongList(mCurrentId);
                         if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                        MusicUtils.addToPlaylist(this, songs, Long.parseLong(uri.getLastPathSegment()));
+                        MusicUtils.addToPlaylist(getActivity(), songs, Long.parseLong(uri.getLastPathSegment()));
                     }
                 }
                 break;
-        }
-    }
-
-    @Override
-    protected void reloadData() {
-        if (mAdapter != null) {
-            getCursor(mAdapter.getQueryHandler(), null);
         }
     }
 }

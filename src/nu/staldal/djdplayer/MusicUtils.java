@@ -673,37 +673,6 @@ public class MusicUtils {
         }
     }
 
-    static void activateTab(Activity a, int id) {
-        Intent intent = new Intent();
-        switch (id) {
-            case R.id.artisttab:
-                intent.setClass(a, ArtistBrowserActivity.class);
-                break;
-            case R.id.albumtab:
-                intent.setClass(a, AlbumBrowserActivity.class);
-                break;
-            case R.id.genretab:
-                intent.setClass(a, GenreBrowserActivity.class);
-                break;
-            case R.id.foldertab:
-                intent.setClass(a, FolderBrowserActivity.class);
-                break;
-            case R.id.songtab:
-                intent.setClass(a, TrackBrowserActivity.class);
-                break;
-            case R.id.playlisttab:
-                intent.setClass(a, PlaylistBrowserActivity.class);
-                break;
-            default:
-                return;
-        }
-        intent.putExtra("withtabs", true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        a.startActivity(intent);
-        a.finish();
-        a.overridePendingTransition(0, 0);
-    }
-    
     static int getCardId(Context context) {
         ContentResolver res = context.getContentResolver();
         Cursor c = res.query(Uri.parse("content://media/external/fs_id"), null, null, null, null);
@@ -789,4 +758,7 @@ public class MusicUtils {
         return i;
     }
 
+    static long parseLong(String s) {
+        return (s == null) ? -1 : Long.parseLong(s);
+    }
 }

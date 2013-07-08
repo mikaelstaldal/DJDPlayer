@@ -38,15 +38,16 @@
 
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
-                 android:theme="@style/Theme.Main"
+                 android:theme="@style/Theme.Default"
                  android:allowTaskReparenting="true"
                  android:allowBackup="true">
 
         <meta-data
             android:name="android.app.default_searchable"
-            android:value="nu.staldal.djdplayer.QueryBrowserActivity" />
+            android:value=".QueryBrowserActivity" />
 
-        <activity android:name="nu.staldal.djdplayer.MusicBrowserActivity">
+        <activity android:name=".MusicBrowserActivity"
+                  android:theme="@style/Theme.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -55,49 +56,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.ArtistBrowserActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/artists"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.AlbumBrowserActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/albums"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.GenreBrowserActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/genre"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.FolderBrowserActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.folder"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.TrackBrowserActivity">
+        <activity android:name=".TrackBrowserActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/audio"/>
                 <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="nu.staldal.djdplayer.PlaylistBrowserActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/playlist"/>
-                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.playlist"/>
             </intent-filter>
         </activity>
 
@@ -112,7 +77,7 @@
              to it we want it back in its initial state.  We exclude from
              recents since this is accessible through a notification when
              appropriate. -->
-        <activity android:name="nu.staldal.djdplayer.MediaPlaybackActivity"
+        <activity android:name=".MediaPlaybackActivity"
                 android:taskAffinity=""
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
@@ -142,7 +107,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.QueryBrowserActivity" >
+        <activity android:name=".QueryBrowserActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MEDIA_SEARCH" />
@@ -153,8 +118,9 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <activity-alias android:name="nu.staldal.djdplayer.PlaylistShortcutActivity"
-            android:targetActivity="nu.staldal.djdplayer.PlaylistBrowserActivity"
+        <!--
+        <activity-alias android:name=".PlaylistShortcutActivity"
+            android:targetActivity=".PlaylistFragment"
             android:label="@string/musicshortcutlabel"
             android:icon="@drawable/ic_launcher_shortcut_music_playlist" >
 
@@ -163,8 +129,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity-alias>
+        -->
 
-        <activity android:name="nu.staldal.djdplayer.MusicPicker"
+        <activity android:name=".MusicPicker"
                   android:label="@string/music_picker_title" >
             <!-- First way to invoke us: someone asks to get content of
                  any of the audio types we support. -->
@@ -185,10 +152,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.CreatePlaylist"
+        <activity android:name=".CreatePlaylist"
             android:theme="@style/Theme.Dialog" />
 
-        <activity android:name="nu.staldal.djdplayer.TrackInfoActivity">
+        <activity android:name=".TrackInfoActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -196,23 +163,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nu.staldal.djdplayer.SettingsActivity" />
+        <activity android:name=".SettingsActivity" />
 
-        <activity android:name="nu.staldal.djdplayer.RescanActivity" />
+        <activity android:name=".RescanActivity" />
 
-        <activity android:name="nu.staldal.djdplayer.PickMusicFolderActivity"
+        <activity android:name=".PickMusicFolderActivity"
             android:theme="@style/Theme.Dialog" />
 
-        <service android:name="nu.staldal.djdplayer.MediaPlaybackService" />
+        <service android:name=".MediaPlaybackService" />
 
-        <receiver android:name="nu.staldal.djdplayer.MediaAppWidgetProvider">
+        <receiver android:name=".MediaAppWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
         </receiver>
 
-        <receiver android:name="nu.staldal.djdplayer.MediaButtonIntentReceiver">
+        <receiver android:name=".MediaButtonIntentReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
@@ -221,7 +188,7 @@
 
         <provider android:authorities="nu.staldal.djdplayer"
                   android:exported="false"
-                  android:name="nu.staldal.djdplayer.FolderProvider"/>
+                  android:name=".FolderProvider"/>
 
     </application>
 

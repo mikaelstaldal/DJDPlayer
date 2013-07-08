@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.content.AsyncQueryHandler;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -31,16 +29,9 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
     protected final Drawable mNowPlayingOverlay;
     protected final Resources mResources;
     protected final String mUnknown;
-    protected final AsyncQueryHandler mQueryHandler;
 
     protected AlphabetIndexer mIndexer;
-    protected String mConstraint = null;
-    protected boolean mConstraintIsValid = false;
-    protected MetadataCategoryBrowserActivity mActivity = null;
-
-    public void setActivity(MetadataCategoryBrowserActivity activity) {
-        mActivity = activity;
-    }
+    protected MetadataCategoryFragment mActivity = null;
 
     protected static class ViewHolder {
         TextView line1;
@@ -48,24 +39,11 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         ImageView play_indicator;
     }
 
-    protected class QueryHandler extends AsyncQueryHandler {
-        QueryHandler(ContentResolver res) {
-            super(res);
-        }
-
-        @Override
-        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-            //Log.i("@@@", "query complete");
-            mActivity.init(cursor);
-        }
-    }
-
     public MetadataCategoryListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
-                                       MetadataCategoryBrowserActivity currentActivity) {
-        super(context, layout, cursor, from, to);
+                                       MetadataCategoryFragment currentActivity) {
+        super(context, layout, cursor, from, to, 0);
         this.mActivity = currentActivity;
         this.mUnknown = context.getString(mActivity.getUnknownStringId());
-        mQueryHandler = new QueryHandler(context.getContentResolver());
 
         Resources r = context.getResources();
         mNowPlayingOverlay = r.getDrawable(R.drawable.indicator_ic_mp_playing_list);
@@ -74,8 +52,11 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         mResources = context.getResources();
     }
 
-    public AsyncQueryHandler getQueryHandler() {
-        return mQueryHandler;
+    @Override
+    public Cursor swapCursor(Cursor c) {
+        Cursor res = super.swapCursor(c);
+        getIndexer(c);
+        return res;
     }
 
     @Override
@@ -126,33 +107,6 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
                         mResources.getString(R.string.fast_scroll_alphabet));
             }
         }
-    }
-
-    @Override
-    public void changeCursor(Cursor cursor) {
-        if (mActivity.isFinishing() && cursor != null) {
-            cursor.close();
-            cursor = null;
-        }
-        if (cursor != mActivity.mCursor) {
-            mActivity.mCursor = cursor;
-            getIndexer(cursor);
-            super.changeCursor(cursor);
-        }
-    }
-
-    @Override
-    public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-        String s = constraint.toString();
-        if (mConstraintIsValid && (
-                (s == null && mConstraint == null) ||
-                (s != null && s.equals(mConstraint)))) {
-            return getCursor();
-        }
-        Cursor c = mActivity.getCursor(null, s);
-        mConstraint = s;
-        mConstraintIsValid = true;
-        return c;
     }
 
     public Object[] getSections() {
