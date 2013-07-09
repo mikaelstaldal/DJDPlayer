@@ -495,9 +495,7 @@ public class MediaPlaybackActivity extends Activity
 
         switch (item.getItemId()) {
             case NEW_PLAYLIST2: {
-                Intent intent = new Intent();
-                intent.setClass(this, CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                CreatePlaylist.showMe(this, new long[] { MusicUtils.getCurrentAudioId() });
                 return true;
             }
 
@@ -559,24 +557,6 @@ public class MediaPlaybackActivity extends Activity
                 return true;
         }
         return super.onContextItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode != RESULT_OK) {
-            return;
-        }
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                Uri uri = intent.getData();
-                if (uri != null) {
-                    long [] list = new long[1];
-                    list[0] = MusicUtils.getCurrentAudioId();
-                    int playlist = Integer.parseInt(uri.getLastPathSegment());
-                    MusicUtils.addToPlaylist(this, list, playlist);
-                }
-                break;
-        }
     }
 
     private final int keyboard[][] = {

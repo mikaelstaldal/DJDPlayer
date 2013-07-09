@@ -152,9 +152,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".CreatePlaylist"
-            android:theme="@style/Theme.Dialog" />
-
         <activity android:name=".SettingsActivity" />
 
         <activity android:name=".RescanActivity" />

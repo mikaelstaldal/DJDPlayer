@@ -15,13 +15,11 @@
  */
 package nu.staldal.djdplayer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.content.*;
 import android.database.AbstractCursor;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -253,9 +251,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
@@ -315,24 +311,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 return true;
         }
         return super.onContextItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode != Activity.RESULT_OK) {
-            return;
-        }
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                Uri uri = intent.getData();
-                if (uri != null) {
-                    long [] list = new long[1];
-                    list[0] = mSelectedId;
-                    int playlist = Integer.parseInt(uri.getLastPathSegment());
-                    MusicUtils.addToPlaylist(getActivity(), list, playlist);
-                }
-                break;
-        }
     }
 
     private class PlayQueueCursor extends AbstractCursor {

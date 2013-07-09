@@ -261,14 +261,12 @@ public class QueryBrowserActivity extends ListActivity
             }
 
             case QUEUE: {
-                MusicUtils.queue(this, new long[]{mSelectedId});
+                MusicUtils.queue(this, new long[] { mSelectedId });
                 return true;
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(this, CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                CreatePlaylist.showMe(this, new long[] { mSelectedId });
                 return true;
             }
 

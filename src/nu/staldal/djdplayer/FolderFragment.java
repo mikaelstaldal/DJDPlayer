@@ -16,9 +16,11 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.CursorLoader;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -175,9 +177,7 @@ public class FolderFragment extends CategoryFragment {
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                CreatePlaylist.showMe(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
             }
 
@@ -222,20 +222,5 @@ public class FolderFragment extends CategoryFragment {
 
         }
         return super.onContextItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long[] songs = fetchSongList(mCurrentFolder);
-                        MusicUtils.addToPlaylist(getActivity(), songs, Long.parseLong(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-        }
     }
 }

@@ -17,10 +17,10 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.*;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -164,9 +164,9 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST);
+                long [] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                CreatePlaylist.showMe(getActivity(), songs);
                 return true;
             }
 
@@ -237,20 +237,4 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
         startActivity(Intent.createChooser(i, title));
     }
-    
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        switch (requestCode) {
-            case NEW_PLAYLIST:
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long [] songs = fetchSongList(mCurrentId);
-                        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                        MusicUtils.addToPlaylist(getActivity(), songs, Long.parseLong(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-        }
     }
-}

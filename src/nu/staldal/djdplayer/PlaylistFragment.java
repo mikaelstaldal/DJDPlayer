@@ -326,7 +326,7 @@ public class PlaylistFragment extends CategoryFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case CREATE_NEW_PLAYLIST:
-                startActivity(new Intent(getActivity(), CreatePlaylist.class));
+                CreatePlaylist.showMe(getActivity(), null);
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -17,7 +17,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.*;
@@ -320,9 +319,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST_SINGLE);
+                CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
@@ -469,9 +466,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             }
 
             case NEW_PLAYLIST: {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), CreatePlaylist.class);
-                startActivityForResult(intent, NEW_PLAYLIST_ALL);
+                CreatePlaylist.showMe(getActivity(), MusicUtils.getSongListForCursor(mAdapter.getCursor()));
                 return true;
             }
 
@@ -493,31 +488,6 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
 
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        switch (requestCode) {
-            case NEW_PLAYLIST_SINGLE:
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long [] list = new long[] { mSelectedId };
-                        MusicUtils.addToPlaylist(getActivity(), list, Integer.valueOf(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-
-            case NEW_PLAYLIST_ALL:
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri uri = intent.getData();
-                    if (uri != null) {
-                        long [] list = MusicUtils.getSongListForCursor(mAdapter.getCursor());
-                        MusicUtils.addToPlaylist(getActivity(), list, Integer.parseInt(uri.getLastPathSegment()));
-                    }
-                }
-                break;
-        }
     }
 
     class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
