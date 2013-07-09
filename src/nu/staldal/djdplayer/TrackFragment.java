@@ -412,15 +412,15 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         if (mEditMode) {
             menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
             menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
-        } else {
-            menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
-            menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
-            SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
-                    R.drawable.ic_menu_interleave);
-            for (int i = 1; i<=5; i++) {
-                for (int j = 1; j<=5; j++) {
-                    interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
-                }
+        }
+
+        menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
+                R.drawable.ic_menu_interleave);
+        for (int i = 1; i<=5; i++) {
+            for (int j = 1; j<=5; j++) {
+                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
 
