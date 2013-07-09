@@ -42,6 +42,15 @@ public class MediaPlaybackActivity extends Activity
     private static final int REPEAT = CHILD_MENU_BASE+2;
     private static final int CLEAR_QUEUE = CHILD_MENU_BASE+3;
 
+    private static final int ADD_TO_PLAYLIST2 = CHILD_MENU_BASE+4;
+    private static final int USE_AS_RINGTONE2 = CHILD_MENU_BASE+5;
+    private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
+    private static final int TRACK_INFO2 = CHILD_MENU_BASE+7;
+    private static final int SHARE_VIA2 = CHILD_MENU_BASE+8;
+    private static final int SEARCH_FOR2 = CHILD_MENU_BASE+9;
+    private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+10;
+    private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+11;
+
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
     private long mStartSeekPos = 0;
@@ -464,18 +473,18 @@ public class MediaPlaybackActivity extends Activity
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (mService == null) return;
 
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(this, sub);
+        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST2, 0, R.string.add_to_playlist);
+        MusicUtils.makePlaylistMenu(this, sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
-        menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+        menu.add(0, USE_AS_RINGTONE2, 0, R.string.ringtone_menu);
 
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+        menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);
 
-        menu.add(0, TRACK_INFO, 0, R.string.info);
+        menu.add(0, TRACK_INFO2, 0, R.string.info);
 
-        menu.add(0, SHARE_VIA, 0, R.string.share_via);
+        menu.add(0, SHARE_VIA2, 0, R.string.share_via);
 
-        menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+        menu.add(0, SEARCH_FOR2, 0, R.string.search_for);
 
         menu.setHeaderTitle(mService.getTrackName());
     }
@@ -485,14 +494,14 @@ public class MediaPlaybackActivity extends Activity
         if (mService == null) return false;
 
         switch (item.getItemId()) {
-            case NEW_PLAYLIST: {
+            case NEW_PLAYLIST2: {
                 Intent intent = new Intent();
                 intent.setClass(this, CreatePlaylist.class);
                 startActivityForResult(intent, NEW_PLAYLIST);
                 return true;
             }
 
-            case PLAYLIST_SELECTED: {
+            case PLAYLIST_SELECTED2: {
                 long [] list = new long[1];
                 list[0] = MusicUtils.getCurrentAudioId();
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
@@ -500,12 +509,12 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
-            case USE_AS_RINGTONE:
+            case USE_AS_RINGTONE2:
                 // Set the system setting to make this the current ringtone
                 MusicUtils.setRingtone(this, mService.getAudioId());
                 return true;
 
-            case DELETE_ITEM: {
+            case DELETE_ITEM2: {
                 final long [] list = new long[1];
                 list[0] = MusicUtils.getCurrentAudioId();
                 String f = getString(R.string.delete_song_desc, mService.getTrackName());
@@ -527,16 +536,14 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
-            case TRACK_INFO: {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()),
-                    "vnd.android.cursor.item/vnd.djdplayer.audio");
-                startActivity(intent);
+            case TRACK_INFO2: {
+                TrackInfoFragment.showMe(this,
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+
                 return true;
             }
 
-            case SHARE_VIA: {
+            case SHARE_VIA2: {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.putExtra(Intent.EXTRA_STREAM,
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
@@ -545,7 +552,7 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
-            case SEARCH_FOR:
+            case SEARCH_FOR2:
                 startActivity(Intent.createChooser(
                         MusicUtils.buildSearchForIntent(mService.getTrackName(), mService.getArtistName(), mService.getAlbumName()),
                         getString(R.string.mediasearch, mService.getTrackName())));

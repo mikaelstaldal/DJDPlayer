@@ -366,15 +366,12 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 return true;
 
             case TRACK_INFO:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
-                    "vnd.android.cursor.item/vnd.djdplayer.audio");
-                startActivity(intent);
+                TrackInfoFragment.showMe(getActivity(),
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
                 return true;
 
             case SHARE_VIA:
-                intent = new Intent(Intent.ACTION_SEND);
+                Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.putExtra(Intent.EXTRA_STREAM,
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
                 intent.setType(MusicUtils.getCurrentMimeType());

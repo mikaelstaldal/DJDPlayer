@@ -285,6 +285,11 @@ public class MusicUtils {
      * @param sub The submenu to add the items to.
      */
     public static void makePlaylistMenu(Context context, SubMenu sub) {
+        makePlaylistMenu(context, sub, Defs.NEW_PLAYLIST, Defs.PLAYLIST_SELECTED);
+
+    }
+
+    public static void makePlaylistMenu(Context context, SubMenu sub, int newPlaylist, int playlistSelected) {
         String[] cols = new String[] {
                 MediaStore.Audio.Playlists._ID,
                 MediaStore.Audio.Playlists.NAME
@@ -298,7 +303,7 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
-            sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
+            sub.add(1, newPlaylist, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
                 cur.moveToFirst();
@@ -308,7 +313,7 @@ public class MusicUtils {
 //                    if (cur.getInt(0) == mLastPlaylistSelected) {
 //                        sub.add(0, MusicBaseActivity.PLAYLIST_SELECTED, cur.getString(1)).setIntent(intent);
 //                    } else {
-                        sub.add(1, Defs.PLAYLIST_SELECTED, 0, cur.getString(1)).setIntent(intent);
+                        sub.add(1, playlistSelected, 0, cur.getString(1)).setIntent(intent);
 //                    }
                     cur.moveToNext();
                 }

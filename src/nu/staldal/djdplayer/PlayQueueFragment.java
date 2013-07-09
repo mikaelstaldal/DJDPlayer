@@ -295,17 +295,15 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
             }
 
             case TRACK_INFO:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
-                    "vnd.android.cursor.item/vnd.djdplayer.audio");
-                startActivity(intent);
+                TrackInfoFragment.showMe(getActivity(),
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
+
                 return true;
 
             case SHARE_VIA:
-                intent = new Intent(Intent.ACTION_SEND);
+                Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
                 intent.setType(MusicUtils.getCurrentMimeType());
                 startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
                 return true;

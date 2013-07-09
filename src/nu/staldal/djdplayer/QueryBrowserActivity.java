@@ -37,6 +37,8 @@ import android.widget.*;
 
 public class QueryBrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection {
+    private static final String LOGTAG = "QueryBrowserActivity";
+
     private static final int TRACK_INFO = CHILD_MENU_BASE + 1;
 
     private QueryListAdapter mAdapter;
@@ -307,11 +309,8 @@ public class QueryBrowserActivity extends ListActivity
             }
 
             case TRACK_INFO:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId),
-                    "vnd.android.cursor.item/vnd.djdplayer.audio");
-                startActivity(intent);
+                TrackInfoFragment.showMe(this,
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
                 return true;
         }
         return super.onContextItemSelected(item);
