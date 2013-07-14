@@ -36,11 +36,6 @@ public class AlbumFragment extends MetadataCategoryFragment {
     }
 
     @Override
-    protected int getTitleStringId() {
-        return R.string.albums_title;
-    }
-
-    @Override
     protected int getUnknownStringId() {
         return R.string.unknown_album_name;
     }
@@ -78,11 +73,6 @@ public class AlbumFragment extends MetadataCategoryFragment {
     }
 
     @Override
-    protected long fetchCategoryId(Cursor cursor) {
-        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-    }
-
-    @Override
     protected String fetchCategoryName(Cursor cursor) {
         return cursor.getString(getNameColumnIndex(cursor));
     }
@@ -93,8 +83,8 @@ public class AlbumFragment extends MetadataCategoryFragment {
     }
 
     @Override
-    protected int fetchNumberOfSongsForCategory(Cursor cursor, long id) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS));
+    protected String getNumberOfSongsColumnName() {
+        return MediaStore.Audio.Albums.NUMBER_OF_SONGS;
     }
 
     @Override

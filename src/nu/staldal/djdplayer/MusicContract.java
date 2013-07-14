@@ -60,9 +60,31 @@ public final class MusicContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, PLAYLIST_PATH);
 
         /*
-        public static Uri getPlaylistUri(long playlistId) {
-            return ContentUris.withAppendedId(CONTENT_URI, playlistId);
+        public static Uri getPlaylistUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
         }
         */
     }
+
+    protected interface GenreColumns {
+        public static final String NAME = MediaStore.Audio.Genres.NAME;
+    }
+
+    public static class Genre implements BaseColumns, GenreColumns {
+        private Genre() {}
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.genre";
+        // public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.djdplayer.genre";
+
+        public static final String GENRE_PATH = "genre";
+
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, GENRE_PATH);
+
+        /*
+        public static Uri getGenreUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+        */
+    }
+
 }

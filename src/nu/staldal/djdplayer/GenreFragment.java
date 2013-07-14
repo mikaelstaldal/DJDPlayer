@@ -19,7 +19,6 @@ package nu.staldal.djdplayer;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
@@ -32,10 +31,6 @@ public class GenreFragment extends MetadataCategoryFragment {
     @Override
     protected String getSelectedCategoryId() {
         return "selectedgenre";
-    }
-    @Override
-    protected int getTitleStringId() {
-        return R.string.genres_title;
     }
 
     @Override
@@ -61,17 +56,13 @@ public class GenreFragment extends MetadataCategoryFragment {
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] cols = new String[] {
-                MediaStore.Audio.Genres._ID,
-                MediaStore.Audio.Genres.NAME,
+                MusicContract.Genre._ID,
+                MusicContract.Genre.NAME,
+                MusicContract.Genre._COUNT,
         };
 
-        Uri uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
-        return new CursorLoader(getActivity(), uri, cols, null, null, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
-    }
-
-    @Override
-    protected long fetchCategoryId(Cursor cursor) {
-        return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID));
+        return new CursorLoader(getActivity(), MusicContract.Genre.CONTENT_URI, cols, null, null,
+                MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
     }
 
     @Override
@@ -81,15 +72,12 @@ public class GenreFragment extends MetadataCategoryFragment {
 
     @Override
     protected int getNameColumnIndex(Cursor cursor) {
-        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
+        return cursor.getColumnIndexOrThrow(MusicContract.Genre.NAME);
     }
 
     @Override
-    protected int fetchNumberOfSongsForCategory(Cursor cursor, long id) {
-        if (id > -1)
-            return fetchSongList(id).length; // TODO [mikes] this is quite slow
-        else
-            return 0;
+    protected String getNumberOfSongsColumnName() {
+        return MusicContract.Genre._COUNT;
     }
 
     @Override

@@ -88,14 +88,8 @@ public class PlaylistFragment extends CategoryFragment {
                 switch (view.getId()) {
                     case R.id.line2:
                         int numSongs = cursor.getInt(columnIndex);
-                        String text;
-                        if (numSongs > 0) {
-                            text = PlaylistFragment.this.getActivity().getResources()
-                                    .getQuantityString(R.plurals.Nsongs, numSongs, numSongs);
-                        } else {
-                            text = "";
-                        }
-                        ((TextView) view).setText(text);
+                        ((TextView) view).setText(PlaylistFragment.this.getActivity().getResources()
+                                .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
                         return true;
 
                     case R.id.play_indicator:

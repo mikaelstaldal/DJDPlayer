@@ -37,15 +37,19 @@ public class MusicProvider extends ContentProvider {
 
     private static final int FOLDER = 1;
     private static final int PLAYLIST = 2;
-    // private static final int PLAYLIST_ID = 3;
-    // private static final int FOLDER_ID = 4;
+    private static final int GENRE = 3;
+    // private static final int PLAYLIST_ID = 4;
+    // private static final int GENRE_ID = 5;
+    // private static final int FOLDER_ID = 6;
 
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH, FOLDER);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH, PLAYLIST);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH, GENRE);
         // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/#", PLAYLIST_ID);
+        // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH+"/#", GENRE_ID);
         // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH+"/#", FOLDER_ID);
     }
 
@@ -62,6 +66,9 @@ public class MusicProvider extends ContentProvider {
 
             case PLAYLIST:
                 return fetchPlaylists();
+
+            case GENRE:
+                return fetchGenres();
 
             default:
                 return null;
@@ -144,40 +151,72 @@ public class MusicProvider extends ContentProvider {
         int[] counts = new int[cursor.getCount()];
         int i = 0;
         while (cursor.moveToNext()) {
-            counts[i++] = fetchPlaylistCount(cursor.getLong(idColumn));
+            counts[i++] = getCursorCount(fetchSongListForPlaylists(cursor.getLong(idColumn)));
         }
         cursor.moveToPosition(-1);
 
         return new CursorWithCountColumn(cursor, counts);
     }
 
-
-    private int fetchPlaylistCount(long id) {
-        if (id < 0) return 0;
-        Cursor cursor = fetchSongListCursor(id);
-        if (cursor == null) return 0;
-        int count = cursor.getCount();
-        cursor.close();
-        return count;
-    }
-
-    private Cursor fetchSongListCursor(long playlistId) {
-        if (playlistId == MusicProvider.RECENTLY_ADDED_PLAYLIST) {
+    private Cursor fetchSongListForPlaylists(long id) {
+        if (id == MusicProvider.RECENTLY_ADDED_PLAYLIST) {
             // do a query for all songs added in the last X weeks
             int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
             int X = numweeks * (3600 * 24 * 7);
             String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
             return getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, where, null, null);
-        } else if (playlistId == MusicProvider.ALL_SONGS_PLAYLIST) {
+        } else if (id == MusicProvider.ALL_SONGS_PLAYLIST) {
             return getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
                     null, null);
-        } else {
-            return getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+        } else if (id >= 0) {
+            return getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id),
                     new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID}, null, null, null);
+        } else {
+            return null;
         }
     }
+
+
+    private Cursor fetchGenres() {
+        Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+                new String[] {
+                        MediaStore.Audio.Genres._ID,
+                        MediaStore.Audio.Genres.NAME
+                },
+                null, null,
+                MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+
+        cursor.setNotificationUri(getContext().getContentResolver(), MusicContract.Genre.CONTENT_URI);
+
+        int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID);
+        int[] counts = new int[cursor.getCount()];
+        int i = 0;
+        while (cursor.moveToNext()) {
+            counts[i++] = getCursorCount(fetchSongListForGenres(cursor.getLong(idColumn)));
+        }
+        cursor.moveToPosition(-1);
+
+        return new CursorWithCountColumn(cursor, counts);
+    }
+
+    private Cursor fetchSongListForGenres(long id) {
+        if (id >= 0)
+            return getContext().getContentResolver().query(MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                    new String[] { MediaStore.Audio.Genres.Members.AUDIO_ID }, null, null, null);
+        else
+            return null;
+    }
+
+
+    private int getCursorCount(Cursor cursor) {
+        if (cursor == null) return 0;
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
 
     @Override
     public String getType(Uri uri) {

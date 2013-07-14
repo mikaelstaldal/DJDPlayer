@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -50,13 +51,9 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
     protected abstract long[] fetchSongList(long id);
 
-    protected abstract long fetchCategoryId(Cursor cursor);
-
     protected abstract String fetchCategoryName(Cursor cursor);
 
-    protected abstract int fetchNumberOfSongsForCategory(Cursor cursor, long id);
-
-    protected abstract int getTitleStringId();
+    protected abstract String getNumberOfSongsColumnName();
 
     protected abstract int getUnknownStringId();
 
@@ -135,7 +132,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mAdapter.getCursor().moveToPosition(mi.position);
-        mCurrentId = fetchCategoryId(mAdapter.getCursor());
+        mCurrentId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndexOrThrow(BaseColumns._ID));
         mCurrentName = fetchCategoryName(mAdapter.getCursor());
         mIsUnknown = mCurrentName == null || mCurrentName.equals(MediaStore.UNKNOWN_STRING);
         if (mIsUnknown) {

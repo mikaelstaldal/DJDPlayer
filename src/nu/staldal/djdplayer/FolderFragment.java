@@ -72,10 +72,8 @@ public class FolderFragment extends CategoryFragment {
                 switch (view.getId()) {
                     case R.id.line2:
                         int numSongs = cursor.getInt(columnIndex);
-                        if (numSongs > 0) {
-                            ((TextView) view).setText(FolderFragment.this.getActivity().getResources()
-                                    .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
-                        }
+                        ((TextView) view).setText(FolderFragment.this.getActivity().getResources()
+                                .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
                         return true;
 
                     case R.id.play_indicator:

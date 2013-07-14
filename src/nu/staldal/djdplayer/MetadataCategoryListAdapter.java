@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,12 +83,10 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         }
         vh.line1.setText(displayname);
 
-        long id = mActivity.fetchCategoryId(cursor);
+        long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
 
-        int numSongs = mActivity.fetchNumberOfSongsForCategory(cursor, id);
-        if (numSongs > 0) {
-            vh.line2.setText(mResources.getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
-        }
+        int numSongs = cursor.getInt(cursor.getColumnIndexOrThrow(mActivity.getNumberOfSongsColumnName()));
+        vh.line2.setText(mResources.getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
 
         long currentId = mActivity.fetchCurrentlyPlayingCategoryId();
         ImageView iv = vh.play_indicator;
