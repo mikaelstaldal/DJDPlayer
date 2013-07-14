@@ -177,7 +177,7 @@
 
         <provider android:authorities="nu.staldal.djdplayer"
                   android:exported="false"
-                  android:name=".FolderProvider"/>
+                  android:name=".MusicProvider"/>
 
     </application>
 

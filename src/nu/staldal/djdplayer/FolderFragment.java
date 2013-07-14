@@ -35,10 +35,10 @@ import java.io.File;
 
 public class FolderFragment extends CategoryFragment {
     static final String[] cols = new String[] {
-            FolderContract.Folder.NAME,
-            FolderContract.Folder._COUNT,
-            FolderContract.Folder.PATH,
-            FolderContract.Folder._ID,
+            MusicContract.Folder.NAME,
+            MusicContract.Folder._COUNT,
+            MusicContract.Folder.PATH,
+            MusicContract.Folder._ID,
     };
 
     public static final String CATEGORY_ID = "folder";
@@ -101,7 +101,7 @@ public class FolderFragment extends CategoryFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), FolderContract.Folder.CONTENT_URI, cols, null, null, null);
+        return new CursorLoader(getActivity(), MusicContract.Folder.CONTENT_URI, cols, null, null, null);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class FolderFragment extends CategoryFragment {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
         mAdapter.getCursor().moveToPosition(position);
-        String path = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(FolderContract.Folder.PATH));
+        String path = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
         intent.putExtra(CATEGORY_ID, path);
         startActivity(intent);
     }
@@ -157,8 +157,8 @@ public class FolderFragment extends CategoryFragment {
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mAdapter.getCursor().moveToPosition(mi.position);
-        mCurrentFolder = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(FolderContract.Folder.PATH));
-        menu.setHeaderTitle(mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(FolderContract.Folder.NAME)));
+        mCurrentFolder = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
+        menu.setHeaderTitle(mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME)));
     }
 
     @Override

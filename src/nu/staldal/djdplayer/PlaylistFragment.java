@@ -36,6 +36,12 @@ import java.util.ArrayList;
 public class PlaylistFragment extends CategoryFragment {
     private static final String LOGTAG = "PlaylistFragment";
 
+    static final String[] cols = new String[] {
+            MusicContract.Playlist._ID,
+            MusicContract.Playlist.NAME,
+            MusicContract.Playlist._COUNT
+    };
+
     public static final String CATEGORY_ID = "playlist";
 
     private static final String CURRENT_PLAYLIST = "currentplaylist";
@@ -49,7 +55,6 @@ public class PlaylistFragment extends CategoryFragment {
 
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
-    private static final long PODCASTS_PLAYLIST = -3;
 
     private long mCurrentId;
     private String mPlaylistName;
@@ -72,8 +77,8 @@ public class PlaylistFragment extends CategoryFragment {
                 getActivity(),
                 R.layout.track_list_item,
                 null,
-                new String[] { MediaStore.Audio.Playlists.NAME, MediaStore.Audio.Playlists._ID,
-                               MediaStore.Audio.Playlists._ID, MediaStore.Audio.Playlists._ID },
+                new String[] { MusicContract.Playlist.NAME, MusicContract.Playlist._COUNT,
+                               MusicContract.Playlist._ID, MusicContract.Playlist._ID },
                 new int[] { R.id.line1, R.id.line2, R.id.play_indicator, R.id.icon },
                 0);
 
@@ -82,11 +87,15 @@ public class PlaylistFragment extends CategoryFragment {
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 switch (view.getId()) {
                     case R.id.line2:
-                        int numSongs = fetchNumberOfSongs(cursor, cursor.getLong(columnIndex));
+                        int numSongs = cursor.getInt(columnIndex);
+                        String text;
                         if (numSongs > 0) {
-                            ((TextView) view).setText(PlaylistFragment.this.getActivity().getResources()
-                                    .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+                            text = PlaylistFragment.this.getActivity().getResources()
+                                    .getQuantityString(R.plurals.Nsongs, numSongs, numSongs);
+                        } else {
+                            text = "";
                         }
+                        ((TextView) view).setText(text);
                         return true;
 
                     case R.id.play_indicator:
@@ -115,9 +124,9 @@ public class PlaylistFragment extends CategoryFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mCols,
-                MediaStore.Audio.Playlists.NAME + " != ''", null,
-                MediaStore.Audio.Playlists.NAME);
+        return new CursorLoader(getActivity(), MusicContract.Playlist.CONTENT_URI, cols,
+                MusicContract.Playlist.NAME + " != ''", null,
+                MusicContract.Playlist.NAME);
     }
 
     @Override
@@ -161,7 +170,7 @@ public class PlaylistFragment extends CategoryFragment {
         menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
 
         mAdapter.getCursor().moveToPosition(mi.position);
-        mPlaylistName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+        mPlaylistName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
         menu.setHeaderTitle(mPlaylistName);
     }
 
@@ -302,11 +311,6 @@ public class PlaylistFragment extends CategoryFragment {
             intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
             intent.putExtra(CATEGORY_ID, "recentlyadded");
             startActivity(intent);
-        } else if (id == PODCASTS_PLAYLIST) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
-            intent.putExtra(CATEGORY_ID, "podcasts");
-            startActivity(intent);
         } else {
             Intent intent = new Intent(Intent.ACTION_EDIT);
             intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
@@ -344,12 +348,6 @@ public class PlaylistFragment extends CategoryFragment {
             String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
             return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        } else if (playlistId == PODCASTS_PLAYLIST) {
-            // do a query for all files that are podcasts
-            final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
-            return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    ccols, MediaStore.Audio.Media.IS_PODCAST + "=1",
-                    null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         } else if (playlistId == ALL_SONGS_PLAYLIST) {
             return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
@@ -361,11 +359,6 @@ public class PlaylistFragment extends CategoryFragment {
         }
     }
 
-    final String[] mCols = new String[] {
-            MediaStore.Audio.Playlists._ID,
-            MediaStore.Audio.Playlists.NAME
-    };
-
     private Cursor mergedCursor(Cursor c) {
         if (c == null) {
             return null;
@@ -375,7 +368,7 @@ public class PlaylistFragment extends CategoryFragment {
             Log.d("PlaylistFragment", "Already wrapped");
             return c;
         }
-        MatrixCursor autoplaylistscursor = new MatrixCursor(mCols);
+        MatrixCursor autoplaylistscursor = new MatrixCursor(cols);
         /*
         if (mCreateShortcut) {
             ArrayList<Object> all = new ArrayList<Object>(2);
@@ -388,31 +381,7 @@ public class PlaylistFragment extends CategoryFragment {
         recent.add(RECENTLY_ADDED_PLAYLIST);
         recent.add(getString(R.string.recentlyadded));
         autoplaylistscursor.addRow(recent);
-        
-        // check if there are any podcasts
-        Cursor counter = MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[] {"count(*)"}, "is_podcast=1", null, null);
-        if (counter != null) {
-            counter.moveToFirst();
-            int numpodcasts = counter.getInt(0);
-            counter.close();
-            if (numpodcasts > 0) {
-                ArrayList<Object> podcasts = new ArrayList<Object>(2);
-                podcasts.add(PODCASTS_PLAYLIST);
-                podcasts.add(getString(R.string.podcasts_listitem));
-                autoplaylistscursor.addRow(podcasts);
-            }
-        }
 
         return new MergeCursor(new Cursor [] {autoplaylistscursor, c});
-    }
-
-    private int fetchNumberOfSongs(Cursor playlistCursor, long id) {
-        if (id < 0) return 0;
-        Cursor cursor = fetchSongListCursor(id); // TODO [mikes] this is quite slow
-        if (cursor == null) return 0;
-        int count = cursor.getCount();
-        cursor.close();
-        return count;
     }
 }

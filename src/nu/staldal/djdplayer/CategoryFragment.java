@@ -26,6 +26,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 
 public abstract class CategoryFragment extends BrowserFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String LOGTAG = "CategoryFragment";
+
     protected CursorAdapter mAdapter;
 
     protected abstract CursorAdapter createListAdapter();

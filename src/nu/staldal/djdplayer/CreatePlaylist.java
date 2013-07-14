@@ -31,6 +31,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class CreatePlaylist extends DialogFragment {
+    private static final String LOGTAG = "CreatePlaylist";
+
     private EditText mPlaylist;
 
     public static void showMe(Activity activity, long[] songs) {
@@ -77,6 +79,7 @@ public class CreatePlaylist extends DialogFragment {
                                 }
                             }
                         }
+                        CreatePlaylist.this.getDialog().dismiss();
                     }
                 }).create();
     }
