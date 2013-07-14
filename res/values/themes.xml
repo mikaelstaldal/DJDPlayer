@@ -9,13 +9,12 @@
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle</item>
         <item name="android:actionBarTabBarStyle">@style/ActionBarTabBarStyle</item>
-        <item name="android:actionBarSize">60dip</item>
+        <item name="android:actionBarTabTextStyle">@style/ActionBarTabTextStyle</item>
     </style>
 
     <style name="ActionBarStyle" parent="@android:style/Widget.Holo.ActionBar">
         <item name="android:background">@drawable/actionbar_background</item>
         <item name="android:backgroundStacked">@drawable/actionbar_background</item>
-        <item name="android:backgroundSplit">@drawable/actionbar_background</item>
     </style>
 
     <style name="ActionBarTabStyle" parent="@android:style/Widget.Holo.ActionBar.TabView">
@@ -25,6 +24,10 @@
 
     <style name="ActionBarTabBarStyle" parent="@android:style/Widget.Holo.ActionBar.TabBar">
         <item name="android:dividerPadding">1dip</item>
+    </style>
+
+    <style name="ActionBarTabTextStyle" parent="@android:style/Widget.Holo.ActionBar.TabText">
+        <item name="android:textSize">10sp</item>
     </style>
 
     <style name="Theme.Dialog" parent="@android:style/Theme.Holo.Dialog"/>

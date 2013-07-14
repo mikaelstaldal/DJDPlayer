@@ -31,9 +31,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.TextView;
 
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -89,46 +87,39 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         ActionBar actionBar = getActionBar();
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ARTISTS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_artists, R.string.artists_menu))
+                    .setText(R.string.artists_menu)
                     .setTabListener(new TabListener<ArtistFragment>(this, "artist", ArtistFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, false)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_albums, R.string.albums_menu))
+                    .setText(R.string.albums_menu)
                     .setTabListener(new TabListener<AlbumFragment>(this, "album", AlbumFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_genres, R.string.genres_menu))
+                    .setText(R.string.genres_menu)
                     .setTabListener(new TabListener<GenreFragment>(this, "genre", GenreFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_FOLDERS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_folders, R.string.folders_menu))
+                    .setText(R.string.folders_menu)
                     .setTabListener(new TabListener<FolderFragment>(this, "folder", FolderFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_songs, R.string.tracks_menu))
+                    .setText(R.string.tracks_menu)
                     .setTabListener(new TabListener<TrackFragment>(this, "track", TrackFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
-                    .setCustomView(buildTabView(R.drawable.ic_tab_playlists, R.string.playlists_menu))
+                    .setText(R.string.playlists_menu)
                     .setTabListener(new TabListener<PlaylistFragment>(this, "playlist", PlaylistFragment.class)));
         }
-    }
-
-    private View buildTabView(int icon, int label) {
-        TextView textView = new TextView(this);
-        textView.setCompoundDrawablesWithIntrinsicBounds(0, icon, 0, 0);
-        textView.setText(label);
-        return textView;
     }
 
     private boolean hasMenuKey() {
