@@ -283,7 +283,7 @@ public class MediaPlaybackActivity extends Activity
 
     private void browseCategory(String categoryId, long id) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+        intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
         intent.putExtra(categoryId, String.valueOf(id));
         startActivity(intent);
     }

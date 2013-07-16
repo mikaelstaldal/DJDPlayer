@@ -82,7 +82,7 @@ public class QueryBrowserActivity extends ListActivity
             } else if (path.startsWith("content://media/external/audio/albums/")) {
                 // This is an album, show the songs on it
                 Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+                i.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
                 i.putExtra("album", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -90,7 +90,7 @@ public class QueryBrowserActivity extends ListActivity
             } else if (path.startsWith("content://media/external/audio/artists/")) {
                 // This is an artist, show the songs for that artist
                 Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+                i.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
                 i.putExtra("artist", uri.getLastPathSegment());
                 startActivity(i);
                 finish();
@@ -328,13 +328,13 @@ public class QueryBrowserActivity extends ListActivity
         if ("artist".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
             intent.putExtra("artist", Long.valueOf(id).toString());
             startActivity(intent);
         } else if ("album".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
             intent.putExtra("album", Long.valueOf(id).toString());
             startActivity(intent);
         } else if (position >= 0 && id >= 0) {

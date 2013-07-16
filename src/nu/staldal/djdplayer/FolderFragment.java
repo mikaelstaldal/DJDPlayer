@@ -128,7 +128,7 @@ public class FolderFragment extends CategoryFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+        intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
         mAdapter.getCursor().moveToPosition(position);
         String path = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
         intent.putExtra(CATEGORY_ID, path);

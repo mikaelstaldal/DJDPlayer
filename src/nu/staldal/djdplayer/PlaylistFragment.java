@@ -17,11 +17,10 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -30,8 +29,6 @@ import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.*;
-
-import java.util.ArrayList;
 
 public class PlaylistFragment extends CategoryFragment {
     private static final String LOGTAG = "PlaylistFragment";
@@ -56,17 +53,21 @@ public class PlaylistFragment extends CategoryFragment {
     private static final long RECENTLY_ADDED_PLAYLIST = -1;
     private static final long ALL_SONGS_PLAYLIST = -2;
 
-    private long mCurrentId;
-    private String mPlaylistName;
+    private long currentId;
+    private String playlistName;
+
+    private boolean createShortcut;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
         if (icicle != null) {
-            mCurrentId = icicle.getLong(CURRENT_PLAYLIST);
-            mPlaylistName = icicle.getString(CURRENT_PLAYLIST_NAME);
+            currentId = icicle.getLong(CURRENT_PLAYLIST);
+            playlistName = icicle.getString(CURRENT_PLAYLIST_NAME);
         }
+
+        createShortcut = (getActivity() instanceof PlaylistShortcutActivity);
 
         setHasOptionsMenu(true);
     }
@@ -128,8 +129,8 @@ public class PlaylistFragment extends CategoryFragment {
         // need to store the selected item so we don't lose it in case
         // of an orientation switch. Otherwise we could lose it while
         // in the middle of specifying a playlist to add the item to.
-        outcicle.putLong(CURRENT_PLAYLIST, mCurrentId);
-        outcicle.putString(CURRENT_PLAYLIST_NAME, mPlaylistName);
+        outcicle.putLong(CURRENT_PLAYLIST, currentId);
+        outcicle.putString(CURRENT_PLAYLIST_NAME, playlistName);
         super.onSaveInstanceState(outcicle);
     }
 
@@ -138,7 +139,7 @@ public class PlaylistFragment extends CategoryFragment {
         if (menuInfoIn == null) return;
 
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
-        mCurrentId = mi.id;
+        currentId = mi.id;
 
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
@@ -149,39 +150,39 @@ public class PlaylistFragment extends CategoryFragment {
             }
         }
 
-        if (mCurrentId >= 0) {
+        if (currentId >= 0) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
         }
 
-        if (mCurrentId == RECENTLY_ADDED_PLAYLIST) {
+        if (currentId == RECENTLY_ADDED_PLAYLIST) {
             menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
         }
 
-        if (mCurrentId >= 0) {
+        if (currentId >= 0) {
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
         }
 
         menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
 
         mAdapter.getCursor().moveToPosition(mi.position);
-        mPlaylistName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
-        menu.setHeaderTitle(mPlaylistName);
+        playlistName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
+        menu.setHeaderTitle(playlistName);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_ALL:
-                MusicUtils.playAll(getActivity(), fetchSongList(mCurrentId));
+                MusicUtils.playAll(getActivity(), fetchSongList(currentId));
                 return true;
 
             case QUEUE_ALL:
-                MusicUtils.queue(getActivity(), fetchSongList(mCurrentId));
+                MusicUtils.queue(getActivity(), fetchSongList(currentId));
                 return true;
 
             case DELETE_PLAYLIST:
                 Uri uri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mCurrentId);
+                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
                 getActivity().getContentResolver().delete(uri, null, null);
                 Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
                 if (mAdapter.getCursor().getCount() == 0) {
@@ -190,7 +191,7 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
 
             case EDIT_PLAYLIST:
-                if (mCurrentId == RECENTLY_ADDED_PLAYLIST) {
+                if (currentId == RECENTLY_ADDED_PLAYLIST) {
                     new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.weekpicker_title)
                             .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
@@ -207,15 +208,15 @@ public class PlaylistFragment extends CategoryFragment {
             case RENAME_PLAYLIST: {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.rename_playlist, null);
                 final EditText mPlaylist = (EditText)view.findViewById(R.id.playlist);
-                final long playlistId = mCurrentId;
+                final long playlistId = currentId;
 
-                if (playlistId >= 0 && mPlaylistName != null) {
-                    mPlaylist.setText(mPlaylistName);
-                    mPlaylist.setSelection(mPlaylistName.length());
+                if (playlistId >= 0 && playlistName != null) {
+                    mPlaylist.setText(playlistName);
+                    mPlaylist.setSelection(playlistName.length());
 
                     new AlertDialog.Builder(getActivity())
                             .setTitle(String.format(PlaylistFragment.this.getString(R.string.rename_playlist_prompt),
-                                    mPlaylistName))
+                                    playlistName))
                             .setView(view)
                             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
@@ -232,14 +233,14 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
             }
             case EXPORT_PLAYLIST:
-                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(mPlaylistName, fetchSongList(mCurrentId));
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, fetchSongList(currentId));
                 return true;
 
             default:
                 if (item.getItemId() > INTERLEAVE_ALL) {
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    MusicUtils.interleave(getActivity(), fetchSongList(mCurrentId), currentCount, newCount);
+                    MusicUtils.interleave(getActivity(), fetchSongList(currentId), currentCount, newCount);
                     return true;
                 }
         }
@@ -282,33 +283,30 @@ public class PlaylistFragment extends CategoryFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        /*
-        if (mCreateShortcut) {
-            final Intent shortcut = new Intent();
+        if (createShortcut) {
+            Intent shortcut = new Intent();
             shortcut.setAction(Intent.ACTION_VIEW);
-            shortcut.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.playlist");
+            shortcut.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
             shortcut.putExtra(CATEGORY_ID, String.valueOf(id));
 
-            final Intent intent = new Intent();
+            Intent intent = new Intent();
             intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
-            intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, ((TextView) v.findViewById(R.id.line1)).getText());
+            intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+                    mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME)));
             intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(
                     getActivity(), R.drawable.ic_launcher_shortcut_music_playlist));
 
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
-            return;
-        }
-        */
-        if (id == RECENTLY_ADDED_PLAYLIST) {
+        } else if (id == RECENTLY_ADDED_PLAYLIST) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
+            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
             intent.putExtra(CATEGORY_ID, "recentlyadded");
             startActivity(intent);
         } else {
             Intent intent = new Intent(Intent.ACTION_EDIT);
-            intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/vnd.djdplayer.audio");
-            intent.putExtra(CATEGORY_ID, Long.valueOf(id).toString());
+            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
+            intent.putExtra(CATEGORY_ID, String.valueOf(id));
             startActivity(intent);
         }
     }
@@ -353,6 +351,7 @@ public class PlaylistFragment extends CategoryFragment {
         }
     }
 
+    /*
     private Cursor mergedCursor(Cursor c) {
         if (c == null) {
             return null;
@@ -363,14 +362,12 @@ public class PlaylistFragment extends CategoryFragment {
             return c;
         }
         MatrixCursor autoplaylistscursor = new MatrixCursor(cols);
-        /*
-        if (mCreateShortcut) {
+        if (createShortcut) {
             ArrayList<Object> all = new ArrayList<Object>(2);
             all.add(ALL_SONGS_PLAYLIST);
             all.add(getString(R.string.play_all));
             autoplaylistscursor.addRow(all);
         }
-        */
         ArrayList<Object> recent = new ArrayList<Object>(2);
         recent.add(RECENTLY_ADDED_PLAYLIST);
         recent.add(getString(R.string.recentlyadded));
@@ -378,4 +375,5 @@ public class PlaylistFragment extends CategoryFragment {
 
         return new MergeCursor(new Cursor [] {autoplaylistscursor, c});
     }
+    */
 }

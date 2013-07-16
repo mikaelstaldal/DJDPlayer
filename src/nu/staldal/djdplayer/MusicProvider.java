@@ -226,6 +226,9 @@ public class MusicProvider extends ContentProvider {
 
             case PLAYLIST:
                 return MusicContract.Playlist.CONTENT_TYPE;
+
+            case GENRE:
+                return MusicContract.Genre.CONTENT_TYPE;
             default:
                 return null;
         }
