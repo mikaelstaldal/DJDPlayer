@@ -154,10 +154,6 @@
     <string name="recentlyadded">Recently added</string>
     <!-- The name of the pseudo-playlist that holds all the recently added files, shown in title bar of songs list -->
     <string name="recentlyadded_title">Recently added</string>
-    <!-- The name of the pseudo-playlist that holds all the podcasts, shown in list view -->
-    <string name="podcasts_listitem">Podcasts</string>
-    <!-- The name of the pseudo-playlist that holds all the podcasts, shown in title bar of songs list -->
-    <string name="podcasts_title">Podcasts</string>
 
     <!-- Title of screen when no sd card is present -->
     <string name="sdcard_missing_title">No SD card</string>

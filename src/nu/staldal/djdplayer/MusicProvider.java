@@ -20,20 +20,20 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 
 public class MusicProvider extends ContentProvider {
     private static final String LOGTAG = "MusicProvider";
-
-    private static final long RECENTLY_ADDED_PLAYLIST = -1;
-    private static final long ALL_SONGS_PLAYLIST = -2;
 
     private static final int FOLDER = 1;
     private static final int PLAYLIST = 2;
@@ -145,8 +145,6 @@ public class MusicProvider extends ContentProvider {
                 null, null,
                 MediaStore.Audio.Playlists.NAME);
 
-        cursor.setNotificationUri(getContext().getContentResolver(), MusicContract.Playlist.CONTENT_URI);
-
         int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID);
         int[] counts = new int[cursor.getCount()];
         int i = 0;
@@ -155,27 +153,53 @@ public class MusicProvider extends ContentProvider {
         }
         cursor.moveToPosition(-1);
 
-        return new CursorWithCountColumn(cursor, counts);
+        MergeCursor mergeCursor = new MergeCursor(new Cursor[]{buildAutoPlaylistsCursor(), new CursorWithCountColumn(cursor, counts)});
+        mergeCursor.setNotificationUri(getContext().getContentResolver(), MusicContract.Playlist.CONTENT_URI);
+        return mergeCursor;
     }
 
     private Cursor fetchSongListForPlaylists(long id) {
-        if (id == MusicProvider.RECENTLY_ADDED_PLAYLIST) {
-            // do a query for all songs added in the last X weeks
-            int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
-            int X = numweeks * (3600 * 24 * 7);
-            String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
-            return getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID}, where, null, null);
-        } else if (id == MusicProvider.ALL_SONGS_PLAYLIST) {
-            return getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
-                    null, null);
-        } else if (id >= 0) {
+        if (id >= 0) {
             return getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id),
                     new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID}, null, null, null);
         } else {
             return null;
         }
+    }
+
+    private Cursor buildAutoPlaylistsCursor() {
+        MatrixCursor cursor = new MatrixCursor(new String[] {
+                MediaStore.Audio.Playlists._ID,
+                MediaStore.Audio.Playlists.NAME,
+                BaseColumns._COUNT
+        }, 1);
+
+        /*
+        if (createShortcut) {
+            int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
+                    null, null));
+            ArrayList<Object> all = new ArrayList<Object>(3);
+            all.add(ALL_SONGS_PLAYLIST);
+            all.add(getContext().getString(R.string.play_all));
+            all.add(count);
+            cursor.addRow(all);
+        }
+        */
+
+        // do a query for all songs added in the last X weeks
+        int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
+        int X = numweeks * (3600 * 24 * 7);
+        String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
+        int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Audio.Media._ID}, where, null, null));
+        ArrayList<Object> recent = new ArrayList<Object>(3);
+        recent.add(MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST);
+        recent.add(getContext().getString(R.string.recentlyadded));
+        recent.add(count);
+        cursor.addRow(recent);
+
+        return cursor;
     }
 
 

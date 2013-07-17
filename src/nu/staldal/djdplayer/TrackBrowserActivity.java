@@ -72,7 +72,7 @@ public class TrackBrowserActivity extends Activity implements MusicUtils.Defs, S
     private String calcTitle(Intent intent) {
         long mAlbumId = MusicUtils.parseLong(intent.getStringExtra("album"));
         long mArtistId = MusicUtils.parseLong(intent.getStringExtra("artist"));
-        String mPlaylist = intent.getStringExtra(PlaylistFragment.CATEGORY_ID);
+        long mPlaylist = MusicUtils.parseLong(intent.getStringExtra(PlaylistFragment.CATEGORY_ID));
         long mGenreId = MusicUtils.parseLong(intent.getStringExtra("genre"));
         String mFolder = intent.getStringExtra(FolderFragment.CATEGORY_ID);
 
@@ -108,17 +108,15 @@ public class TrackBrowserActivity extends Activity implements MusicUtils.Defs, S
                 }
                 cursor.close();
             }
-        } else if (mPlaylist != null) {
-            if (mPlaylist.equals("podcasts")){
-                fancyName = getString(R.string.podcasts_title);
-            } else if (mPlaylist.equals("recentlyadded")){
+        } else if (mPlaylist != -1) {
+            if (mPlaylist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                 fancyName = getString(R.string.recentlyadded_title);
             } else {
                 String [] cols = new String [] {
                     MediaStore.Audio.Playlists.NAME
                 };
                 Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, Long.valueOf(mPlaylist)),
+                        ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mPlaylist),
                         cols, null, null, null);
                 if (cursor != null) {
                     if (cursor.getCount() != 0) {

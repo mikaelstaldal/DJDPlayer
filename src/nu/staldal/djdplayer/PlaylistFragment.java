@@ -33,7 +33,7 @@ import android.widget.*;
 public class PlaylistFragment extends CategoryFragment {
     private static final String LOGTAG = "PlaylistFragment";
 
-    static final String[] cols = new String[] {
+    static final String[] cols = new String[]{
             MusicContract.Playlist._ID,
             MusicContract.Playlist.NAME,
             MusicContract.Playlist._COUNT
@@ -49,9 +49,6 @@ public class PlaylistFragment extends CategoryFragment {
     private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
     private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 4;
     private static final int EXPORT_PLAYLIST = CHILD_MENU_BASE + 5;
-
-    private static final long RECENTLY_ADDED_PLAYLIST = -1;
-    private static final long ALL_SONGS_PLAYLIST = -2;
 
     private long currentId;
     private String playlistName;
@@ -78,9 +75,9 @@ public class PlaylistFragment extends CategoryFragment {
                 getActivity(),
                 R.layout.track_list_item,
                 null,
-                new String[] { MusicContract.Playlist.NAME, MusicContract.Playlist._COUNT,
-                               MusicContract.Playlist._ID, MusicContract.Playlist._ID },
-                new int[] { R.id.line1, R.id.line2, R.id.play_indicator, R.id.icon },
+                new String[]{MusicContract.Playlist.NAME, MusicContract.Playlist._COUNT,
+                        MusicContract.Playlist._ID, MusicContract.Playlist._ID},
+                new int[]{R.id.line1, R.id.line2, R.id.play_indicator, R.id.icon},
                 0);
 
         listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
@@ -98,10 +95,10 @@ public class PlaylistFragment extends CategoryFragment {
                         return true;
 
                     case R.id.icon:
-                        if (cursor.getLong(columnIndex) == RECENTLY_ADDED_PLAYLIST) {
-                            ((ImageView)view).setImageResource(R.drawable.ic_mp_playlist_recently_added_list);
+                        if (cursor.getLong(columnIndex) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+                            ((ImageView) view).setImageResource(R.drawable.ic_mp_playlist_recently_added_list);
                         } else {
-                            ((ImageView)view).setImageResource(R.drawable.ic_mp_playlist_list);
+                            ((ImageView) view).setImageResource(R.drawable.ic_mp_playlist_list);
                         }
                         ViewGroup.LayoutParams p = view.getLayoutParams();
                         p.width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -144,22 +141,19 @@ public class PlaylistFragment extends CategoryFragment {
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
-        for (int i = 1; i<=5; i++) {
-            for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+        for (int i = 1; i <= 5; i++) {
+            for (int j = 1; j <= 5; j++) {
+                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0, getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
 
         if (currentId >= 0) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
-        }
-
-        if (currentId == RECENTLY_ADDED_PLAYLIST) {
-            menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
-        }
-
-        if (currentId >= 0) {
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
+        }
+
+        if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+            menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
         }
 
         menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
@@ -191,13 +185,14 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
 
             case EDIT_PLAYLIST:
-                if (currentId == RECENTLY_ADDED_PLAYLIST) {
+                if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                     new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.weekpicker_title)
                             .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                  int numweeks = which + 1;
-                                  MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), "numweeks", numweeks);
+                                    int numweeks = which + 1;
+                                    MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), "numweeks", numweeks);
+                                    getLoaderManager().restartLoader(0, null, PlaylistFragment.this);
                                 }
                             }).show();
                 } else {
@@ -207,7 +202,7 @@ public class PlaylistFragment extends CategoryFragment {
 
             case RENAME_PLAYLIST: {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.rename_playlist, null);
-                final EditText mPlaylist = (EditText)view.findViewById(R.id.playlist);
+                final EditText mPlaylist = (EditText) view.findViewById(R.id.playlist);
                 final long playlistId = currentId;
 
                 if (playlistId >= 0 && playlistName != null) {
@@ -266,9 +261,9 @@ public class PlaylistFragment extends CategoryFragment {
 
     private int idForPlaylist(String name) {
         Cursor c = MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                new String[] { MediaStore.Audio.Playlists._ID },
+                new String[]{MediaStore.Audio.Playlists._ID},
                 MediaStore.Audio.Playlists.NAME + "=?",
-                new String[] { name },
+                new String[]{name},
                 MediaStore.Audio.Playlists.NAME);
         int id = -1;
         if (c != null) {
@@ -298,13 +293,8 @@ public class PlaylistFragment extends CategoryFragment {
 
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
-        } else if (id == RECENTLY_ADDED_PLAYLIST) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-            intent.putExtra(CATEGORY_ID, "recentlyadded");
-            startActivity(intent);
         } else {
-            Intent intent = new Intent(Intent.ACTION_EDIT);
+            Intent intent = new Intent((id < 0) ? Intent.ACTION_VIEW : Intent.ACTION_EDIT);
             intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
             intent.putExtra(CATEGORY_ID, String.valueOf(id));
             startActivity(intent);
@@ -333,47 +323,21 @@ public class PlaylistFragment extends CategoryFragment {
     }
 
     private Cursor fetchSongListCursor(long playlistId) {
-        if (playlistId == RECENTLY_ADDED_PLAYLIST) {
+        if (playlistId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
             // do a query for all songs added in the last X weeks
             int X = MusicUtils.getIntPref(getActivity(), "numweeks", 2) * (3600 * 24 * 7);
-            final String[] ccols = new String[] { MediaStore.Audio.Media._ID};
+            final String[] ccols = new String[]{MediaStore.Audio.Media._ID};
             String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
             return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        } else if (playlistId == ALL_SONGS_PLAYLIST) {
+        } else if (playlistId == MusicContract.Playlist.ALL_SONGS_PLAYLIST) {
             return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
                     null, null);
         } else {
-            final String[] ccols = new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID };
+            final String[] ccols = new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID};
             return MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
                     ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
         }
     }
-
-    /*
-    private Cursor mergedCursor(Cursor c) {
-        if (c == null) {
-            return null;
-        }
-        if (c instanceof MergeCursor) {
-            // this shouldn't happen, but fail gracefully
-            Log.d("PlaylistFragment", "Already wrapped");
-            return c;
-        }
-        MatrixCursor autoplaylistscursor = new MatrixCursor(cols);
-        if (createShortcut) {
-            ArrayList<Object> all = new ArrayList<Object>(2);
-            all.add(ALL_SONGS_PLAYLIST);
-            all.add(getString(R.string.play_all));
-            autoplaylistscursor.addRow(all);
-        }
-        ArrayList<Object> recent = new ArrayList<Object>(2);
-        recent.add(RECENTLY_ADDED_PLAYLIST);
-        recent.add(getString(R.string.recentlyadded));
-        autoplaylistscursor.addRow(recent);
-
-        return new MergeCursor(new Cursor [] {autoplaylistscursor, c});
-    }
-    */
 }

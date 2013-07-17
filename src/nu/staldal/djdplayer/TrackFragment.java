@@ -74,7 +74,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
 
     private long mAlbumId;
     private long mArtistId;
-    private String mPlaylist;
+    private long mPlaylist;
     private long mGenreId;
     private String mFolder;
     private boolean mEditMode;
@@ -88,14 +88,14 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             mSelectedId = savedInstanceState.getLong("selectedtrack");
             mAlbumId = savedInstanceState.getLong("album");
             mArtistId = savedInstanceState.getLong("artist");
-            mPlaylist = savedInstanceState.getString("playlist");
+            mPlaylist = savedInstanceState.getLong("playlist");
             mGenreId = savedInstanceState.getLong("genre");
             mFolder = savedInstanceState.getString("folder");
             mEditMode = savedInstanceState.getBoolean("editmode", false);
         } else {
             mAlbumId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("album"));
             mArtistId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("artist"));
-            mPlaylist = getActivity().getIntent().getStringExtra(PlaylistFragment.CATEGORY_ID);
+            mPlaylist = MusicUtils.parseLong(getActivity().getIntent().getStringExtra(PlaylistFragment.CATEGORY_ID));
             mGenreId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("genre"));
             mFolder = getActivity().getIntent().getStringExtra(FolderFragment.CATEGORY_ID);
             mEditMode = Intent.ACTION_EDIT.equals(getActivity().getIntent().getAction());
@@ -113,7 +113,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             ((TouchInterceptor) listView).setDropListener(new TouchInterceptor.DropListener() {
                     public void drop(int from, int to) {
                         MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                                Long.valueOf(mPlaylist), from, to);
+                                mPlaylist, from, to);
                     }
                 });
             ((TouchInterceptor) listView).setRemoveListener(new TouchInterceptor.RemoveListener() {
@@ -145,8 +145,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 mEditMode ? R.layout.edit_track_list_item : R.layout.track_list_item,
                 null, // cursor
                 new String[] {},
-                new int[] {},
-                mPlaylist != null && !(mPlaylist.equals("podcasts") || mPlaylist.equals("recentlyadded")));
+                new int[] {});
         setListAdapter(mAdapter);
 
         getLoaderManager().initLoader(0, null, this);
@@ -161,13 +160,8 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId);
             return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,
                     MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
-        } else if (mPlaylist != null) {
-            if (mPlaylist.equals("podcasts")) {
-                where.append(" AND " + MediaStore.Audio.Media.IS_PODCAST + "=1");
-                Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-            } else if (mPlaylist.equals("recentlyadded")) {
+        } else if (mPlaylist != -1) {
+            if (mPlaylist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                 // do a query for all songs added in the last X weeks
                 Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 int X = MusicUtils.getIntPref(getActivity(), "numweeks", 2) * (3600 * 24 * 7);
@@ -176,8 +170,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
             } else {
-                Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                        Long.valueOf(mPlaylist));
+                Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
                 return new CursorLoader(getActivity(), uri, PLAYLIST_MEMBER_COLS, where.toString(), null,
                         MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
             }
@@ -232,7 +225,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
 
         outcicle.putLong("artist", mArtistId);
         outcicle.putLong("album", mAlbumId);
-        outcicle.putString("playlist", mPlaylist);
+        outcicle.putLong("playlist", mPlaylist);
         outcicle.putLong("genre", mGenreId);
         outcicle.putString("folder", mFolder);
         outcicle.putBoolean("editmode", mEditMode);
@@ -251,8 +244,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         int colidx = mAdapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
         mAdapter.getCursor().moveToPosition(which);
         long id = mAdapter.getCursor().getLong(colidx);
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                Long.valueOf(mPlaylist));
+        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
         boolean ret = getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri, id), null, null) > 0;
         v.setVisibility(View.VISIBLE);
         getListView().invalidateViews();
@@ -449,7 +441,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 for (int i=0; i < songs.length; i++) {
                     int randomPosition = random.nextInt(songs.length);
                     MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                            Long.valueOf(mPlaylist), i, randomPosition);
+                            mPlaylist, i, randomPosition);
                 }
                 return true;
             }
@@ -491,8 +483,6 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
     }
 
     class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
-        final boolean mDisableNowPlayingIndicator;
-
         int mTitleIdx;
         int mArtistIdx;
         int mDurationIdx;
@@ -513,11 +503,9 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         }
 
         TrackListAdapter(Context context,
-                int layout, Cursor cursor, String[] from, int[] to,
-                boolean disablenowplayingindicator) {
+                int layout, Cursor cursor, String[] from, int[] to) {
             super(context, layout, cursor, from, to, 0);
             getColumnIndices(cursor);
-            mDisableNowPlayingIndicator = disablenowplayingindicator;
             mUnknownArtist = context.getString(R.string.unknown_artist_name);
         }
 
@@ -603,7 +591,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 id = MusicUtils.sService.getAudioId();
             }
 
-            if (!mDisableNowPlayingIndicator && cursor.getLong(mAudioIdIdx) == id) {
+            if (cursor.getLong(mAudioIdIdx) == id) {
                 iv.setImageResource(R.drawable.indicator_ic_mp_playing_list);
                 iv.setVisibility(View.VISIBLE);
             } else {
