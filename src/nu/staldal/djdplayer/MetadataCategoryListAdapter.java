@@ -92,8 +92,9 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         ImageView iv = vh.play_indicator;
         if (currentId == id) {
             iv.setImageDrawable(mNowPlayingOverlay);
+            iv.setVisibility(View.VISIBLE);
         } else {
-            iv.setImageDrawable(null);
+            iv.setVisibility(View.GONE);
         }
     }
 
