@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import nu.staldal.ui.RepeatingImageButton;
 
 
 public class MediaPlaybackActivity extends Activity

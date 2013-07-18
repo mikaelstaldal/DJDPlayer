@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.ui;
 
 import android.content.Context;
 import android.os.SystemClock;

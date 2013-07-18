@@ -34,6 +34,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import nu.staldal.util.SharedPreferencesCompat;
 
 import java.io.File;
 import java.util.Formatter;
@@ -215,30 +216,6 @@ public class MusicUtils {
             return sService.isPlaying();
         }
         return false;
-    }
-
-    public static void play() {
-        if (MusicUtils.sService != null) {
-            sService.play();
-        }
-    }
-
-    public static void pause() {
-        if (MusicUtils.sService != null) {
-            sService.pause();
-        }
-    }
-
-    public static void prev() {
-        if (MusicUtils.sService != null) {
-            sService.prev();
-        }
-    }
-
-    public static void next() {
-        if (MusicUtils.sService != null) {
-            sService.next(true);
-        }
     }
 
     public final static long [] sEmptyList = new long[0];
@@ -495,25 +472,17 @@ public class MusicUtils {
     }
 
     public static Cursor query(Context context, Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder, int limit) {
+            String selection, String[] selectionArgs, String sortOrder) {
         try {
             ContentResolver resolver = context.getContentResolver();
             if (resolver == null) {
                 return null;
-            }
-            if (limit > 0) {
-                uri = uri.buildUpon().appendQueryParameter("limit", "" + limit).build();
             }
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
          } catch (UnsupportedOperationException ex) {
             return null;
         }
 
-    }
-
-    public static Cursor query(Context context, Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder) {
-        return query(context, uri, projection, selection, selectionArgs, sortOrder, 0);
     }
 
     private static String mLastSdStatus;

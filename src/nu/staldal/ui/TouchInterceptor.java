@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,6 +25,7 @@ import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import nu.staldal.djdplayer.R;
 
 public class TouchInterceptor extends ListView {
     private ImageView mDragView;

@@ -36,6 +36,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import nu.staldal.util.SharedPreferencesCompat;
 
 import java.io.File;
 import java.io.IOException;

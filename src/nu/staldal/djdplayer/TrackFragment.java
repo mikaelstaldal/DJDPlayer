@@ -27,6 +27,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
+import nu.staldal.ui.TouchInterceptor;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -480,8 +481,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             char [] buffer2;
         }
 
-        TrackListAdapter(Context context,
-                int layout, Cursor cursor, String[] from, int[] to) {
+        TrackListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to) {
             super(context, layout, cursor, from, to, 0);
             getColumnIndices(cursor);
             mUnknownArtist = context.getString(R.string.unknown_artist_name);

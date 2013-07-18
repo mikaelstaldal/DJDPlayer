@@ -99,22 +99,12 @@
         <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> songs were deleted</item>
     </plurals>
 
-    <!-- title of the play queue screen -->
-    <string name="play_queue_title">Play queue</string>
-    <!-- Artist screen title -->
-    <string name="artists_title">Artists</string>
     <!-- Category label on Library screen -->
     <string name="albums_menu">Albums</string>
     <!-- Category label on Library screen -->
     <string name="genres_menu">Genres</string>
     <!-- Category label on Library screen -->
     <string name="folders_menu">Folders</string>
-    <!-- Albums screen title -->
-    <string name="folders_title">Folders</string>
-    <!-- Genre screen title -->
-    <string name="albums_title">Albums</string>
-    <!-- Genre screen title -->
-    <string name="genres_title">Genres</string>
     <!-- Category label on Library screen -->
     <string name="tracks_menu">Songs</string>
     <!-- Songs screen title -->
@@ -273,19 +263,6 @@
 
     <!-- title of contextual music search menu -->
     <string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
-
-    <!-- Shown in the title bar while the list of artists is being retrieved in the background -->
-    <string name="working_artists">Artists\u2026</string>
-    <!-- Shown in the title bar while the list of albums is being retrieved in the background -->
-    <string name="working_albums">Albums\u2026</string>
-    <!-- Shown in the title bar while the list of genres is being retrieved in the background -->
-    <string name="working_genres">Genres\u2026</string>
-    <!-- Shown in the title bar while the list of folders is being retrieved in the background -->
-    <string name="working_folders">Folders\u2026</string>
-    <!-- Shown in the title bar while the list of songs is being retrieved in the background -->
-    <string name="working_songs">Songs\u2026</string>
-    <!-- Shown in the title bar while the list of playlists is being retrieved in the background -->
-    <string name="working_playlists">Playlists\u2026</string>
 
     <!-- Shown in the music picker while loading the music database. -->
     <string name="loading">Loading</string>

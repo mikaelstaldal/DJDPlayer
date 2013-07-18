@@ -55,7 +55,7 @@
                 android:layout_marginBottom="2dip"
                 android:gravity="center">
 
-                <nu.staldal.djdplayer.RepeatingImageButton
+                <nu.staldal.ui.RepeatingImageButton
                         android:id="@+id/prev"
                         style="@android:style/MediaButton.Previous"
                         android:contentDescription="@string/prev"/>
@@ -65,7 +65,7 @@
                         style="@android:style/MediaButton.Play"
                         android:contentDescription="@string/play_pause"/>
 
-                <nu.staldal.djdplayer.RepeatingImageButton
+                <nu.staldal.ui.RepeatingImageButton
                         android:id="@+id/next"
                         style="@android:style/MediaButton.Next"
                         android:contentDescription="@string/next"/>

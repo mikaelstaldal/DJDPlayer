@@ -26,6 +26,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
+import nu.staldal.ui.TouchInterceptor;
 
 import java.util.Arrays;
 
