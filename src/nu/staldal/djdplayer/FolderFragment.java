@@ -129,8 +129,8 @@ public class FolderFragment extends CategoryFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-        mAdapter.getCursor().moveToPosition(position);
-        String path = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
+        adapter.getCursor().moveToPosition(position);
+        String path = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
         intent.putExtra(CATEGORY_ID, path);
         startActivity(intent);
     }
@@ -154,9 +154,9 @@ public class FolderFragment extends CategoryFragment {
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        mAdapter.getCursor().moveToPosition(mi.position);
-        mCurrentFolder = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        menu.setHeaderTitle(mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME)));
+        adapter.getCursor().moveToPosition(mi.position);
+        mCurrentFolder = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
+        menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME)));
     }
 
     @Override

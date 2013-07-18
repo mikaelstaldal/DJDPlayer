@@ -142,8 +142,8 @@ public class PlaylistFragment extends CategoryFragment {
 
         menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
 
-        mAdapter.getCursor().moveToPosition(mi.position);
-        playlistName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
+        adapter.getCursor().moveToPosition(mi.position);
+        playlistName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
         menu.setHeaderTitle(playlistName);
     }
 
@@ -163,7 +163,7 @@ public class PlaylistFragment extends CategoryFragment {
                         MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
                 getActivity().getContentResolver().delete(uri, null, null);
                 Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
-                if (mAdapter.getCursor().getCount() == 0) {
+                if (adapter.getCursor().getCount() == 0) {
                     getActivity().setTitle(R.string.no_playlists_title);
                 }
                 return true;
@@ -271,7 +271,7 @@ public class PlaylistFragment extends CategoryFragment {
             Intent intent = new Intent();
             intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
             intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-                    mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME)));
+                    adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME)));
             intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(
                     getActivity(), R.drawable.ic_launcher_shortcut_music_playlist));
 

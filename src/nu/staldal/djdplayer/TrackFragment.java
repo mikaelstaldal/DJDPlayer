@@ -18,7 +18,6 @@
 package nu.staldal.djdplayer;
 
 import android.app.AlertDialog;
-import android.app.LoaderManager;
 import android.content.*;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
@@ -33,14 +32,12 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-public class TrackFragment extends BrowserFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     private static final String LOGTAG = "TrackFragment";
 
-    private static final int NEW_PLAYLIST_ALL = CHILD_MENU_BASE + 2;
-    private static final int NEW_PLAYLIST_SINGLE = CHILD_MENU_BASE + 3;
-    private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 4;
-    private static final int TRACK_INFO = CHILD_MENU_BASE + 5;
-    private static final int SEARCH_FOR = CHILD_MENU_BASE + 6;
+    private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 2;
+    private static final int TRACK_INFO = CHILD_MENU_BASE + 3;
+    private static final int SEARCH_FOR = CHILD_MENU_BASE + 4;
 
     private static final String[] CURSOR_COLS = new String[] {
         MediaStore.Audio.Media._ID,
@@ -67,7 +64,6 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
     private String mCurrentTrackName;
     private String mCurrentAlbumName;
     private String mCurrentArtistNameForAlbum;
-    private TrackListAdapter mAdapter;
 
     private int mSelectedPosition;
     private long mSelectedId;
@@ -135,20 +131,15 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
 
         return listView;
     }
-    
+
     @Override
-    public void onActivityCreated(Bundle icicle) {
-        super.onActivityCreated(icicle);
-
-        mAdapter = new TrackListAdapter(
-                getActivity(), // need to use application context to avoid leaks
-                mEditMode ? R.layout.edit_track_list_item : R.layout.track_list_item,
-                null, // cursor
-                new String[] {},
-                new int[] {});
-        setListAdapter(mAdapter);
-
-        getLoaderManager().initLoader(0, null, this);
+    protected CursorAdapter createListAdapter() {
+        return new TrackListAdapter(
+                        getActivity(), // need to use application context to avoid leaks
+                        mEditMode ? R.layout.edit_track_list_item : R.layout.track_list_item,
+                        null, // cursor
+                        new String[] {},
+                        new int[] {});
     }
 
     @Override
@@ -203,19 +194,6 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         }
     }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in. (The framework will take care of closing the old cursor once we return.)
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // above is about to be closed.  We need to make sure we are no longer using it.
-        mAdapter.swapCursor(null);
-    }
-
     public void onSaveInstanceState(Bundle outcicle) {
         // need to store the selected item so we don't lose it in case
         // of an orientation switch. Otherwise we could lose it while
@@ -241,9 +219,9 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         }
         v.setVisibility(View.GONE);
         getListView().invalidateViews();
-        int colidx = mAdapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
-        mAdapter.getCursor().moveToPosition(which);
-        long id = mAdapter.getCursor().getLong(colidx);
+        int colidx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
+        adapter.getCursor().moveToPosition(which);
+        long id = adapter.getCursor().getLong(colidx);
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
         boolean ret = getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri, id), null, null) > 0;
         v.setVisibility(View.VISIBLE);
@@ -267,10 +245,10 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mSelectedPosition = mi.position;
-        mAdapter.getCursor().moveToPosition(mSelectedPosition);
+        adapter.getCursor().moveToPosition(mSelectedPosition);
         try {
-            int id_idx = mAdapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            mSelectedId = mAdapter.getCursor().getLong(id_idx);
+            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+            mSelectedId = adapter.getCursor().getLong(id_idx);
         } catch (IllegalArgumentException ex) {
             mSelectedId = mi.id;
         }
@@ -280,14 +258,14 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
         menu.add(0, SHARE_VIA, 0, R.string.share_via);
 
         // only add the 'search' menu if the selected item is music
-        if (MusicUtils.isMusic(mAdapter.getCursor())) {
+        if (MusicUtils.isMusic(adapter.getCursor())) {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
-        mCurrentAlbumName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(
+        mCurrentAlbumName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                 MediaStore.Audio.Media.ALBUM));
-        mCurrentArtistNameForAlbum = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(
+        mCurrentArtistNameForAlbum = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                 MediaStore.Audio.Media.ARTIST));
-        mCurrentTrackName = mAdapter.getCursor().getString(mAdapter.getCursor().getColumnIndexOrThrow(
+        mCurrentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                 MediaStore.Audio.Media.TITLE));
         menu.setHeaderTitle(mCurrentTrackName);
     }
@@ -379,11 +357,11 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         mSelectedPosition = position;
-        mAdapter.getCursor().moveToPosition(mSelectedPosition);
+        adapter.getCursor().moveToPosition(mSelectedPosition);
         try {
-            int id_idx = mAdapter.getCursor().getColumnIndexOrThrow(
+            int id_idx = adapter.getCursor().getColumnIndexOrThrow(
                     MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            mSelectedId = mAdapter.getCursor().getLong(id_idx);
+            mSelectedId = adapter.getCursor().getLong(id_idx);
         } catch (IllegalArgumentException ex) {
             mSelectedId = id;
         }
@@ -426,18 +404,18 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_ALL: {
-                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(mAdapter.getCursor()));
+                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
             case QUEUE_ALL: {
-                MusicUtils.queue(getActivity(), MusicUtils.getSongListForCursor(mAdapter.getCursor()));
+                MusicUtils.queue(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
             case SHUFFLE_PLAYLIST: {
                 Random random = new Random();
-                long[] songs = MusicUtils.getSongListForCursor(mAdapter.getCursor());
+                long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
                 for (int i=0; i < songs.length; i++) {
                     int randomPosition = random.nextInt(songs.length);
                     MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
@@ -447,7 +425,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             }
 
             case UNIQUEIFY_PLAYLIST: {
-                long[] songs = MusicUtils.getSongListForCursor(mAdapter.getCursor());
+                long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
                 Set<Long> found = new HashSet<Long>();
                 for (int i = 0; i < songs.length; i++) {
                     if (!found.add(songs[i])) {
@@ -458,12 +436,12 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
             }
 
             case NEW_PLAYLIST: {
-                CreatePlaylist.showMe(getActivity(), MusicUtils.getSongListForCursor(mAdapter.getCursor()));
+                CreatePlaylist.showMe(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
             case PLAYLIST_SELECTED: {
-                long [] list = MusicUtils.getSongListForCursor(mAdapter.getCursor());
+                long [] list = MusicUtils.getSongListForCursor(adapter.getCursor());
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), list, playlist);
                 return true;
@@ -473,7 +451,7 @@ public class TrackFragment extends BrowserFragment implements LoaderManager.Load
                 if (item.getItemId() > INTERLEAVE_ALL && item.getItemId() != android.R.id.home) {
                     int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
                     int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    long[] songs = MusicUtils.getSongListForCursor(mAdapter.getCursor());
+                    long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
                     MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
                     return true;
                 }

@@ -53,8 +53,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.i(LOGTAG, "onCreateView");
-
         TouchInterceptor listView = new TouchInterceptor(getActivity(), null);
         listView.setId(android.R.id.list);
         listView.setFastScrollEnabled(true);
@@ -80,8 +78,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     }
 
     public void onServiceConnected(final MediaPlaybackService service) {
-        Log.i(LOGTAG, "onServiceConnected");
-
         this.service = service;
 
         playQueueCursor = new PlayQueueCursor();
@@ -159,7 +155,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     @Override
     public void onStop() {
         super.onStop();
-        Log.i(LOGTAG, "onStop");
         getActivity().unregisterReceiver(mNowPlayingListener);
         this.service = null;
     }
@@ -185,7 +180,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     private final BroadcastReceiver mNowPlayingListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(LOGTAG, "Broadcast: " + intent);
             if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
                 getListView().invalidateViews();
                 getListView().setSelection(service.getQueuePosition() + 1);
@@ -495,7 +489,6 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
 
         @Override
         public boolean requery() {
-            Log.i(LOGTAG, "requery");
             init();
             return true;
         }

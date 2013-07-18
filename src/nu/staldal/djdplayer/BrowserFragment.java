@@ -16,36 +16,61 @@
 package nu.staldal.djdplayer;
 
 import android.app.ListFragment;
+import android.app.LoaderManager;
+import android.content.*;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.widget.CursorAdapter;
 
-public abstract class BrowserFragment extends ListFragment implements MusicUtils.Defs {
+public abstract class BrowserFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /*
+    protected CursorAdapter adapter;
+
+    protected abstract CursorAdapter createListAdapter();
+
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        super.onServiceConnected(name, service);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        IntentFilter f = new IntentFilter();
+        adapter = createListAdapter();
+        setListAdapter(adapter);
 
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
-        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Swap the new cursor in. (The framework will take care of closing the old cursor once we return.)
+        adapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no longer using it.
+        adapter.swapCursor(null);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-
+        getActivity().registerReceiver(statusListener, f);
     }
 
-    private final BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
+    @Override
+    public void onPause() {
+        getActivity().unregisterReceiver(statusListener);
+        super.onPause();
+    }
+
+    private final BroadcastReceiver statusListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            getListView().invalidateViews();
+            getLoaderManager().restartLoader(0, null, BrowserFragment.this);
         }
     };
-
-
-     */
-
 }

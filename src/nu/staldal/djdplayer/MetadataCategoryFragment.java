@@ -131,9 +131,9 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        mAdapter.getCursor().moveToPosition(mi.position);
-        mCurrentId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndexOrThrow(BaseColumns._ID));
-        mCurrentName = fetchCategoryName(mAdapter.getCursor());
+        adapter.getCursor().moveToPosition(mi.position);
+        mCurrentId = adapter.getCursor().getLong(adapter.getCursor().getColumnIndexOrThrow(BaseColumns._ID));
+        mCurrentName = fetchCategoryName(adapter.getCursor());
         mIsUnknown = mCurrentName == null || mCurrentName.equals(MediaStore.UNKNOWN_STRING);
         if (mIsUnknown) {
             menu.setHeaderTitle(getString(getUnknownStringId()));

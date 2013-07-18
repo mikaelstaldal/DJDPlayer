@@ -13,24 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package nu.staldal.djdplayer;
 
-import android.app.LoaderManager;
-import android.content.Loader;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 
-public abstract class CategoryFragment extends BrowserFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public abstract class CategoryFragment extends BrowserFragment implements MusicUtils.Defs {
     private static final String LOGTAG = "CategoryFragment";
-
-    protected CursorAdapter mAdapter;
-
-    protected abstract CursorAdapter createListAdapter();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,33 +31,9 @@ public abstract class CategoryFragment extends BrowserFragment implements Loader
         listView.setId(android.R.id.list);
         listView.setFastScrollEnabled(true);
         listView.setTextFilterEnabled(true);
-        // listView.setDivider(null);
 
         registerForContextMenu(listView);
 
         return listView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        mAdapter = createListAdapter();
-        setListAdapter(mAdapter);
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in. (The framework will take care of closing the old cursor once we return.)
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // above is about to be closed.  We need to make sure we are no longer using it.
-        mAdapter.swapCursor(null);
     }
 }
