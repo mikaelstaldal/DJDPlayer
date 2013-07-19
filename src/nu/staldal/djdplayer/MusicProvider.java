@@ -174,19 +174,6 @@ public class MusicProvider extends ContentProvider {
                 BaseColumns._COUNT
         }, 1);
 
-        /*
-        if (createShortcut) {
-            int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
-                    null, null));
-            ArrayList<Object> all = new ArrayList<Object>(3);
-            all.add(ALL_SONGS_PLAYLIST);
-            all.add(getContext().getString(R.string.play_all));
-            all.add(count);
-            cursor.addRow(all);
-        }
-        */
-
         // do a query for all songs added in the last X weeks
         int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
         int X = numweeks * (3600 * 24 * 7);
