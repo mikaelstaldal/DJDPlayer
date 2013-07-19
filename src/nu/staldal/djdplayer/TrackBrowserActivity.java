@@ -29,7 +29,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -186,7 +185,6 @@ public class TrackBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(LOGTAG, "onOptionsItemSelected: " + item.getItemId());
         switch (item.getItemId()) {
             case android.R.id.home:
                 Intent intent = new Intent(this, MusicBrowserActivity.class);
