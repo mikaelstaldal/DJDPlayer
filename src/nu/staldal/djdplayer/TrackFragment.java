@@ -30,7 +30,6 @@ import android.widget.*;
 import nu.staldal.ui.TouchInterceptor;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
@@ -415,13 +414,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             }
 
             case SHUFFLE_PLAYLIST: {
-                Random random = new Random();
-                long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
-                for (int i=0; i < songs.length; i++) {
-                    int randomPosition = random.nextInt(songs.length);
-                    MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                            mPlaylist, i, randomPosition);
-                }
+                new ShufflePlaylistTask(getActivity().getApplicationContext()).execute(
+                        mPlaylist, MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 

@@ -36,11 +36,6 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
     }
 
     @Override
-    protected void onPreExecute() {
-        Toast.makeText(context, R.string.exporting_playlist, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     protected Void doInBackground(Object... params) {
         String playlistName = (String)params[0];
         long[] songs = (long[])params[1];
