@@ -73,11 +73,13 @@ public class MediaPlaybackService extends Service {
     public static final String CMDNAME = "command";
     public static final String CMDTOGGLEPAUSE = "togglepause";
     public static final String CMDSTOP = "stop";
+    public static final String CMDPLAY = "play";
     public static final String CMDPAUSE = "pause";
     public static final String CMDPREVIOUS = "previous";
     public static final String CMDNEXT = "next";
 
     public static final String TOGGLEPAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.togglepause";
+    public static final String PLAY_ACTION = "nu.staldal.djdplayer.musicservicecommand.play";
     public static final String PAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.pause";
     public static final String PREVIOUS_ACTION = "nu.staldal.djdplayer.musicservicecommand.previous";
     public static final String NEXT_ACTION = "nu.staldal.djdplayer.musicservicecommand.next";
@@ -200,17 +202,20 @@ public class MediaPlaybackService extends Service {
                     break;
 
                 case FOCUSCHANGE:
-                    // This code is here so we can better synchronize it with the code that
-                    // handles fade-in
+                    // This code is here so we can better synchronize it with the code that handles fade-in
                     switch (msg.arg1) {
                         case AudioManager.AUDIOFOCUS_LOSS:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
+                            mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
+                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
+                            mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             if(isPlaying()) {
                                 mPausedByTransientLossOfFocus = false;
                             }
                             pause();
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                             mMediaplayerHandler.removeMessages(FADEUP);
                             mMediaplayerHandler.sendEmptyMessage(FADEDOWN);
                             break;
@@ -223,6 +228,8 @@ public class MediaPlaybackService extends Service {
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
+                            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
+                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
                             if(!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
                                 mCurrentVolume = 0f;
@@ -261,6 +268,8 @@ public class MediaPlaybackService extends Service {
                 } else {
                     play();
                 }
+            } else if (CMDPLAY.equals(cmd) || PLAY_ACTION.equals(action)) {
+                play();
             } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
@@ -289,11 +298,10 @@ public class MediaPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(LOGTAG, "onCreate");
 
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
-        
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
         mPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         mCardId = MusicUtils.getCardId(this);
         
@@ -308,6 +316,7 @@ public class MediaPlaybackService extends Service {
         IntentFilter commandFilter = new IntentFilter();
         commandFilter.addAction(SERVICECMD);
         commandFilter.addAction(TOGGLEPAUSE_ACTION);
+        commandFilter.addAction(PLAY_ACTION);
         commandFilter.addAction(PAUSE_ACTION);
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
@@ -325,10 +334,16 @@ public class MediaPlaybackService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.i(LOGTAG, "onDestroy");
+
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
         }
+
+        mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
+                        MediaButtonIntentReceiver.class.getName()));
+
         // release all MediaPlayer resources, including the native player and wakelocks
         Intent i = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
         i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
@@ -550,6 +565,8 @@ public class MediaPlaybackService extends Service {
                 } else {
                     play();
                 }
+            } else if (CMDPLAY.equals(cmd) || PLAY_ACTION.equals(action)) {
+                play();
             } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
@@ -1016,8 +1033,13 @@ public class MediaPlaybackService extends Service {
      * Starts playback of a previously opened file.
      */
     public void play() {
-        mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
+        int result = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            Log.w(LOGTAG, "Unable to gain audio focus: " + result);
+            return;
+        }
+
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
 
@@ -1068,7 +1090,6 @@ public class MediaPlaybackService extends Service {
                 mIsSupposedToBePlaying = true;
                 notifyChange(PLAYSTATE_CHANGED);
             }
-
         }
     }
     
@@ -1085,11 +1106,9 @@ public class MediaPlaybackService extends Service {
         }
         if (remove_status_icon) {
             gotoIdleState();
+            mIsSupposedToBePlaying = false;
         } else {
             stopForeground(false);
-        }
-        if (remove_status_icon) {
-            mIsSupposedToBePlaying = false;
         }
     }
 
