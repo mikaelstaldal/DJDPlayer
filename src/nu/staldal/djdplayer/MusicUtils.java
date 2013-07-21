@@ -251,14 +251,6 @@ public class MusicUtils {
         return list;
     }
 
-    public static Intent shareVia(long audioId, String mimeType, Resources resources) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_STREAM,
-            ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId));
-        intent.setType(mimeType);
-        return Intent.createChooser(intent, resources.getString(R.string.share_via));
-    }
-
     /**
      * Fills out the given submenu with items for "new playlist" and
      * any existing playlists. When the user selects an item, the
@@ -720,24 +712,33 @@ public class MusicUtils {
         return ismusic;
     }
 
-    static Intent buildSearchForIntent(String trackName, String artistNameForAlbum, String albumName) {
-        Intent i = new Intent();
-        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    static Intent shareVia(long audioId, String mimeType, Resources resources) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM,
+            ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId));
+        intent.setType(mimeType);
+
+        return Intent.createChooser(intent, resources.getString(R.string.share_via));
+    }
+
+    static Intent searchFor(String trackName, String artistNameForAlbum, String albumName, Resources resources) {
+        Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         String query;
         if (MediaStore.UNKNOWN_STRING.equals(artistNameForAlbum)) {
             query = trackName;
         } else {
             query = artistNameForAlbum + " " + trackName;
-            i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artistNameForAlbum);
+            intent.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artistNameForAlbum);
         }
         if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
-            i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, albumName);
+            intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, albumName);
         }
-        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
-        i.putExtra(SearchManager.QUERY, query);
-        return i;
+        intent.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
+        intent.putExtra(SearchManager.QUERY, query);
+
+        return Intent.createChooser(intent, resources.getString(R.string.mediasearch, trackName));
     }
 
     static long parseLong(String s) {

@@ -343,13 +343,13 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.Media.TITLE));
 
-                startActivity(Intent.createChooser(
-                        MusicUtils.buildSearchForIntent(currentTrackName,
-                                adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                                MediaStore.Audio.Media.ARTIST)),
-                                adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                                MediaStore.Audio.Media.ALBUM))),
-                        getString(R.string.mediasearch, currentTrackName)));
+                startActivity(MusicUtils.searchFor(
+                        currentTrackName,
+                        adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.ARTIST)),
+                        adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.ALBUM)),
+                        getResources()));
                 return true;
         }
         return super.onContextItemSelected(item);

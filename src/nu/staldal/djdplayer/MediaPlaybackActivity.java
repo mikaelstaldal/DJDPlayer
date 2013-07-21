@@ -544,16 +544,18 @@ public class MediaPlaybackActivity extends Activity
 
             case SHARE_VIA2: {
                 startActivity(MusicUtils.shareVia(
-                    MusicUtils.getCurrentAudioId(),
-                    MusicUtils.getCurrentMimeType(),
-                    getResources()));
+                        MusicUtils.getCurrentAudioId(),
+                        MusicUtils.getCurrentMimeType(),
+                        getResources()));
                 return true;
             }
 
             case SEARCH_FOR2:
-                startActivity(Intent.createChooser(
-                        MusicUtils.buildSearchForIntent(mService.getTrackName(), mService.getArtistName(), mService.getAlbumName()),
-                        getString(R.string.mediasearch, mService.getTrackName())));
+                startActivity(MusicUtils.searchFor(
+                        mService.getTrackName(),
+                        mService.getArtistName(),
+                        mService.getAlbumName(),
+                        getResources()));
                 return true;
         }
         return super.onContextItemSelected(item);

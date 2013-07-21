@@ -312,15 +312,11 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 return true;
 
             case SEARCH_FOR:
-                String currentTrackName = playQueueCursor.getString(
-                        playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                startActivity(Intent.createChooser(
-                        MusicUtils.buildSearchForIntent(
-                                currentTrackName,
-                                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)),
-                                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM))
-                        ),
-                        getString(R.string.mediasearch, currentTrackName)));
+                startActivity(MusicUtils.searchFor(
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)),
+                        getResources()));
                 return true;
         }
         return super.onContextItemSelected(item);
