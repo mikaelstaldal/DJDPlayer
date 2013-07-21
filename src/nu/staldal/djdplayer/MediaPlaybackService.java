@@ -302,6 +302,9 @@ public class MediaPlaybackService extends Service {
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
+        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
+                MediaButtonIntentReceiver.class.getName()));
+
         mPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         mCardId = MusicUtils.getCardId(this);
         
