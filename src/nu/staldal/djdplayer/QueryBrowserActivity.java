@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -50,7 +51,9 @@ public class QueryBrowserActivity extends ListActivity
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        getActionBar().setHomeButtonEnabled(true);
         mAdapter = (QueryListAdapter) getLastNonConfigurationInstance();
         mToken = MusicUtils.bindToService(this, this);
         // defer the real work until we're bound to the service
@@ -374,6 +377,31 @@ public class QueryBrowserActivity extends ListActivity
             ret = MusicUtils.query(this, search, ccols, null, null, null);
         }
         return ret;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        menu.add(0, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(this, MusicBrowserActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+
+            case SETTINGS:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     static class QueryListAdapter extends SimpleCursorAdapter {
