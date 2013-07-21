@@ -230,8 +230,7 @@ public class QueryBrowserActivity extends ListActivity
         if (mQueryCursor.isBeforeFirst() || mQueryCursor.isAfterLast()) {
             return;
         }
-        String selectedType = mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Media.MIME_TYPE));
+        String selectedType = mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
 
         if (!"artist".equals(selectedType) && !"album".equals(selectedType) && mi.position >= 0 && mi.id >= 0) {
             menu.add(0, PLAY_NOW, 0, R.string.play_now);
@@ -242,6 +241,7 @@ public class QueryBrowserActivity extends ListActivity
             menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
             menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
             menu.add(0, TRACK_INFO, 0, R.string.info);
+            menu.add(0, SHARE_VIA, 0, R.string.share_via);
             mSelectedId = mi.id;
             menu.setHeaderTitle(mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
         }
@@ -310,6 +310,14 @@ public class QueryBrowserActivity extends ListActivity
                 TrackInfoFragment.showMe(this,
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
                 return true;
+
+            case SHARE_VIA:
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM,
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
+                intent.setType(mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)));
+                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                return true;
         }
         return super.onContextItemSelected(item);
     }
@@ -322,8 +330,7 @@ public class QueryBrowserActivity extends ListActivity
         if (mQueryCursor.isBeforeFirst() || mQueryCursor.isAfterLast()) {
             return;
         }
-        String selectedType = mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Media.MIME_TYPE));
+        String selectedType = mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
 
         if ("artist".equals(selectedType)) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -416,8 +423,7 @@ public class QueryBrowserActivity extends ListActivity
             p.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             p.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Media.MIME_TYPE));
+            String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
 
             if (mimetype == null) {
                 mimetype = "audio/";

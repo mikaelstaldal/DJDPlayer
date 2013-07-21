@@ -46,7 +46,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         MediaStore.Audio.Media.ALBUM,
         MediaStore.Audio.Media.ARTIST,
         MediaStore.Audio.Media.ARTIST_ID,
-        MediaStore.Audio.Media.DURATION
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.MIME_TYPE
     };
     private static final String[] PLAYLIST_MEMBER_COLS = new String[] {
         MediaStore.Audio.Playlists.Members._ID,
@@ -56,14 +57,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         MediaStore.Audio.Media.ARTIST,
         MediaStore.Audio.Media.ARTIST_ID,
         MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.MIME_TYPE,
         MediaStore.Audio.Playlists.Members.PLAY_ORDER,
         MediaStore.Audio.Playlists.Members.AUDIO_ID,
         MediaStore.Audio.Media.IS_MUSIC
     };
-
-    private String mCurrentTrackName;
-    private String mCurrentAlbumName;
-    private String mCurrentArtistNameForAlbum;
 
     private int mSelectedPosition;
     private long mSelectedId;
@@ -261,13 +259,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         if (MusicUtils.isMusic(adapter.getCursor())) {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
-        mCurrentAlbumName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                MediaStore.Audio.Media.ALBUM));
-        mCurrentArtistNameForAlbum = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                MediaStore.Audio.Media.ARTIST));
-        mCurrentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                MediaStore.Audio.Media.TITLE));
-        menu.setHeaderTitle(mCurrentTrackName);
+        menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                MediaStore.Audio.Media.TITLE)));
     }
 
     @Override
@@ -308,7 +301,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 final long [] list = new long[1];
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
-                String desc = String.format(f, mCurrentTrackName);
+                String desc = String.format(f, adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.TITLE)));
 
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -340,15 +334,23 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             case SHARE_VIA:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
-                intent.setType(MusicUtils.getCurrentMimeType());
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
+                intent.setType(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.MIME_TYPE)));
                 startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
                 return true;
 
             case SEARCH_FOR:
+                String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.TITLE));
+
                 startActivity(Intent.createChooser(
-                        MusicUtils.buildSearchForIntent(mCurrentTrackName, mCurrentArtistNameForAlbum, mCurrentAlbumName),
-                        getString(R.string.mediasearch, mCurrentTrackName)));
+                        MusicUtils.buildSearchForIntent(currentTrackName,
+                                adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                                MediaStore.Audio.Media.ARTIST)),
+                                adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                                MediaStore.Audio.Media.ALBUM))),
+                        getString(R.string.mediasearch, currentTrackName)));
                 return true;
         }
         return super.onContextItemSelected(item);
