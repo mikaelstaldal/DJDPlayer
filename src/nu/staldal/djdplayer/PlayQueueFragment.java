@@ -38,19 +38,27 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.ALBUM
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.MIME_TYPE
     };
 
     MediaPlaybackService service;
-    SimpleCursorAdapter listAdapter;
     PlayQueueCursor playQueueCursor;
+    SimpleCursorAdapter listAdapter;
     boolean deletedOneRow;
 
-    int mSelectedPosition;
-    long mSelectedId;
-    String mCurrentTrackName;
-    String mCurrentAlbumName;
-    String mCurrentArtistNameForAlbum;
+    int mSelectedPosition = -1;
+    long mSelectedId = -1;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mSelectedPosition = savedInstanceState.getInt("selectedposition", -1);
+            mSelectedId = savedInstanceState.getLong("selectedtrack", -1);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -160,6 +168,16 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         this.service = null;
     }
 
+    public void onSaveInstanceState(Bundle outcicle) {
+        // need to store the selected item so we don't lose it in case
+        // of an orientation switch. Otherwise we could lose it while
+        // in the middle of specifying a playlist to add the item to.
+        outcicle.putInt("selectedposition", mSelectedPosition);
+        outcicle.putLong("selectedtrack", mSelectedId);
+
+        super.onSaveInstanceState(outcicle);
+    }
+
     private boolean removePlaylistItem(int which) {
         View v = getListView().getChildAt(which - getListView().getFirstVisiblePosition());
         if (v == null) {
@@ -227,14 +245,8 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
 
-        mCurrentAlbumName = playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Media.ALBUM));
-        mCurrentArtistNameForAlbum = playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Media.ARTIST));
-        mCurrentTrackName = playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Media.TITLE));
-
-        menu.setHeaderTitle(mCurrentTrackName);
+        menu.setHeaderTitle(
+                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
     }
 
     @Override
@@ -265,7 +277,8 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 final long [] list = new long[1];
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
-                String desc = String.format(f, mCurrentTrackName);
+                String desc = String.format(f,
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
 
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -295,14 +308,21 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.putExtra(Intent.EXTRA_STREAM,
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
-                intent.setType(MusicUtils.getCurrentMimeType());
+                intent.setType(playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(
+                        MediaStore.Audio.Media.MIME_TYPE)));
                 startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
                 return true;
 
             case SEARCH_FOR:
+                String currentTrackName = playQueueCursor.getString(
+                        playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
                 startActivity(Intent.createChooser(
-                        MusicUtils.buildSearchForIntent(mCurrentTrackName, mCurrentArtistNameForAlbum, mCurrentAlbumName),
-                        getString(R.string.mediasearch, mCurrentTrackName)));
+                        MusicUtils.buildSearchForIntent(
+                                currentTrackName,
+                                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)),
+                                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM))
+                        ),
+                        getString(R.string.mediasearch, currentTrackName)));
                 return true;
         }
         return super.onContextItemSelected(item);
