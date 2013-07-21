@@ -332,12 +332,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 return true;
 
             case SHARE_VIA:
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
-                intent.setType(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.MIME_TYPE)));
-                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                startActivity(MusicUtils.shareVia(
+                        mSelectedId,
+                        adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                                MediaStore.Audio.Media.MIME_TYPE)),
+                        getResources()));
                 return true;
 
             case SEARCH_FOR:

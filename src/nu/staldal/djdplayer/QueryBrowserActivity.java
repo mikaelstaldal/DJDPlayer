@@ -312,11 +312,10 @@ public class QueryBrowserActivity extends ListActivity
                 return true;
 
             case SHARE_VIA:
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
-                intent.setType(mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)));
-                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                startActivity(MusicUtils.shareVia(
+                        mSelectedId,
+                        mQueryCursor.getString(mQueryCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)),
+                        getResources()));
                 return true;
         }
         return super.onContextItemSelected(item);

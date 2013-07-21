@@ -305,12 +305,10 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 return true;
 
             case SHARE_VIA:
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
-                intent.setType(playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(
-                        MediaStore.Audio.Media.MIME_TYPE)));
-                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                startActivity(MusicUtils.shareVia(
+                        mSelectedId,
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)),
+                        getResources()));
                 return true;
 
             case SEARCH_FOR:

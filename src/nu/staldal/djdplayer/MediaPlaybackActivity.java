@@ -543,11 +543,10 @@ public class MediaPlaybackActivity extends Activity
             }
 
             case SHARE_VIA2: {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM,
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
-                intent.setType(MusicUtils.getCurrentMimeType());
-                startActivity(Intent.createChooser(intent,getResources().getString(R.string.share_via)));
+                startActivity(MusicUtils.shareVia(
+                    MusicUtils.getCurrentAudioId(),
+                    MusicUtils.getCurrentMimeType(),
+                    getResources()));
                 return true;
             }
 
