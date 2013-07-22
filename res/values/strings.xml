@@ -182,6 +182,8 @@
     <string name="set_as">Set as</string>
     <!-- Menu item -->
     <string name="share_via">Share via</string>
+    <!-- Menu item -->
+    <string name="zoom_queue">Zoom queue</string>
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone</string>
     <!-- Context menu item -->

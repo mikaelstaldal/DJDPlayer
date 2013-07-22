@@ -47,6 +47,8 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     SimpleCursorAdapter listAdapter;
     boolean deletedOneRow;
 
+    private boolean queueZoomed;
+
     int mSelectedPosition = -1;
     long mSelectedId = -1;
 
@@ -146,6 +148,14 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         getActivity().registerReceiver(mNowPlayingListener, new IntentFilter(f));
     }
 
+    public void setQueueZoomed(boolean queueZoomed) {
+        this.queueZoomed = queueZoomed;
+    }
+
+    public boolean isQueueZoomed() {
+        return queueZoomed;
+    }
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if (service != null) {
@@ -201,7 +211,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
                 getListView().invalidateViews();
-                getListView().setSelection(service.getQueuePosition() + 1);
+                if (!queueZoomed) getListView().setSelection(service.getQueuePosition() + 1);
             } else if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
                 if (deletedOneRow) {
                     // This is the notification for a single row that was
@@ -217,7 +227,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 playQueueCursor.requery();
                 listAdapter.notifyDataSetChanged();
                 getListView().invalidateViews();
-                getListView().setSelection(service.getQueuePosition() + 1);
+                if (!queueZoomed) getListView().setSelection(service.getQueuePosition() + 1);
             }
         }
     };

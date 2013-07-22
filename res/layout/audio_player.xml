@@ -21,9 +21,9 @@
               android:orientation="vertical">
 
     <LinearLayout
+            android:id="@+id/playback_header"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:paddingTop="2dip"
             android:paddingLeft="4dip"
             android:paddingRight="4dip"
@@ -72,13 +72,14 @@
                 android:paddingTop="2dip"
                 android:paddingBottom="2dip"/>
 
-        <fragment
-                android:id="@+id/playqueue"
-                android:name="nu.staldal.djdplayer.PlayQueueFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
     </LinearLayout>
+
+    <fragment
+            android:id="@+id/playqueue"
+            android:name="nu.staldal.djdplayer.PlayQueueFragment"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="match_parent"/>
 
     <include layout="@layout/audio_player_common"/>
 

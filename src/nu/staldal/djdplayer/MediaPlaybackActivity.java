@@ -51,6 +51,7 @@ public class MediaPlaybackActivity extends Activity
     private static final int SEARCH_FOR2 = CHILD_MENU_BASE+9;
     private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+10;
     private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+11;
+    private static final int ZOOM_QUEUE = CHILD_MENU_BASE+12;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -75,6 +76,9 @@ public class MediaPlaybackActivity extends Activity
         getActionBar().setHomeButtonEnabled(true);
 
         setContentView(R.layout.audio_player);
+
+        mPlaybackHeader = findViewById(R.id.playback_header);
+        mPlaybackFooter = findViewById(R.id.playback_footer);
 
         playQueueFragment = (PlayQueueFragment)getFragmentManager().findFragmentById(R.id.playqueue);
 
@@ -361,6 +365,9 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
+        menu.add(2, ZOOM_QUEUE, 0, R.string.zoom_queue).setIcon(R.drawable.ic_menu_playqueue)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
         menu.add(2, REPEAT, 0, R.string.repeat)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
@@ -437,6 +444,19 @@ public class MediaPlaybackActivity extends Activity
                 finish();
                 return true;
             }
+
+            case ZOOM_QUEUE:
+                if (playQueueFragment.isQueueZoomed()) {
+                    if (mPlaybackHeader != null) mPlaybackHeader.setVisibility(View.VISIBLE);
+                    if (mPlaybackFooter != null) mPlaybackFooter.setVisibility(View.VISIBLE);
+                    playQueueFragment.setQueueZoomed(false);
+                } else {
+                    if (mPlaybackHeader != null) mPlaybackHeader.setVisibility(View.GONE);
+                    if (mPlaybackFooter != null) mPlaybackFooter.setVisibility(View.GONE);
+                    playQueueFragment.setQueueZoomed(true);
+                }
+                return true;
+
             case REPEAT:
                 cycleRepeat();
                 return true;
@@ -951,6 +971,8 @@ public class MediaPlaybackActivity extends Activity
         }
     }
     
+    private View mPlaybackHeader;
+    private View mPlaybackFooter;
     private TextView mCurrentTime;
     private TextView mTotalTime;
     private TextView mArtistName;
