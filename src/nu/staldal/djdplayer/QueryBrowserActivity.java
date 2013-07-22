@@ -63,6 +63,12 @@ public class QueryBrowserActivity extends ListActivity
     }
 
     public void onServiceConnected(ComponentName name, IBinder service) {
+        IntentFilter f = new IntentFilter();
+        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        f.addDataScheme("file");
+        registerReceiver(mScanListener, f);
+
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -97,12 +103,6 @@ public class QueryBrowserActivity extends ListActivity
                 return;
             }
         }
-
-        IntentFilter f = new IntentFilter();
-        f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
 
         mFilterString = intent.getStringExtra(SearchManager.QUERY);
         if (MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
