@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012-2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -356,7 +357,7 @@ public class TouchInterceptor extends ListView {
         }
         mWindowParams.alpha = alpha;
 
-        mWindowParams.x = 0;
+        mWindowParams.x = mXOffset;
         mWindowParams.y = y - mDragPointY + mYOffset;
         mWindowManager.updateViewLayout(mDragView, mWindowParams);
     }
