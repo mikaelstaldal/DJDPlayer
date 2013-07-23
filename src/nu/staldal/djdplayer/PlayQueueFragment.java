@@ -30,7 +30,7 @@ import nu.staldal.ui.TouchInterceptor;
 
 import java.util.Arrays;
 
-public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
+public class PlayQueueFragment extends ListFragment implements AbsListView.OnScrollListener, MusicUtils.Defs {
     private static final String LOGTAG = "PlayQueueFragment";
 
     final static String[] mCols = new String[] {
@@ -48,6 +48,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     boolean deletedOneRow;
 
     private boolean queueZoomed;
+    private boolean listScrolled;
 
     int mSelectedPosition = -1;
     long mSelectedId = -1;
@@ -84,6 +85,9 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         listView.setSelector(R.drawable.list_selector_background);
 
         registerForContextMenu(listView);
+
+        listScrolled = false;
+        listView.setOnScrollListener(this);
 
         return listView;
     }
@@ -150,6 +154,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
 
     public void setQueueZoomed(boolean queueZoomed) {
         this.queueZoomed = queueZoomed;
+        if (!queueZoomed) listScrolled = false;
     }
 
     public boolean isQueueZoomed() {
@@ -176,6 +181,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         super.onStop();
         getActivity().unregisterReceiver(mNowPlayingListener);
         this.service = null;
+        listScrolled = false;
     }
 
     public void onSaveInstanceState(Bundle outcicle) {
@@ -209,10 +215,7 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
     private final BroadcastReceiver mNowPlayingListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
-                getListView().invalidateViews();
-                if (!queueZoomed) getListView().setSelection(service.getQueuePosition() + 1);
-            } else if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
+            if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
                 if (deletedOneRow) {
                     // This is the notification for a single row that was
                     // deleted previously, which is already reflected in the UI.
@@ -226,9 +229,10 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
                 }
                 playQueueCursor.requery();
                 listAdapter.notifyDataSetChanged();
-                getListView().invalidateViews();
-                if (!queueZoomed) getListView().setSelection(service.getQueuePosition() + 1);
             }
+
+            getListView().invalidateViews();
+            if (!listScrolled && !queueZoomed) getListView().setSelection(service.getQueuePosition() + 1);
         }
     };
 
@@ -331,6 +335,15 @@ public class PlayQueueFragment extends ListFragment implements MusicUtils.Defs {
         }
         return super.onContextItemSelected(item);
     }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_TOUCH_SCROLL || scrollState == SCROLL_STATE_FLING)
+            listScrolled = true;
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) { }
 
     private class PlayQueueCursor extends AbstractCursor {
         private Cursor mCurrentPlaylistCursor;     // updated in onMove
