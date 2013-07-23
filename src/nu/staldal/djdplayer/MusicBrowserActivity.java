@@ -37,6 +37,15 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String LOGTAG = "MusicBrowserActivity";
 
+    public static final String ACTIVE_TAB = "ActiveTab";
+
+    public static final String ARTISTS_TAB = "artists";
+    public static final String ALBUMS_TAB = "albums";
+    public static final String GENRES_TAB = "genres";
+    public static final String FOLDERS_TAB = "folders";
+    public static final String SONGS_TAB = "songs";
+    public static final String PLAYLISTS_TAB = "playlists";
+
     private MusicUtils.ServiceToken mToken;
 
     private NowPlayingFragment nowPlayingFragment;
@@ -57,10 +66,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         if (hasMenuKey()) actionBar.setDisplayShowHomeEnabled(false);
 
         setupTabs();
-
-        if (savedInstanceState != null) {
-            actionBar.setSelectedNavigationItem(savedInstanceState.getInt("NavigationIndex", 0));
-        }
 
         setContentView(R.layout.media_picker_activity);
 
@@ -88,37 +93,43 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ARTISTS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.artists_menu)
-                    .setTabListener(new TabListener<ArtistFragment>(this, "artist", ArtistFragment.class)));
+                    .setTag(ARTISTS_TAB)
+                    .setTabListener(new TabListener<ArtistFragment>(this, ARTISTS_TAB, ArtistFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, false)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.albums_menu)
-                    .setTabListener(new TabListener<AlbumFragment>(this, "album", AlbumFragment.class)));
+                    .setTag(ALBUMS_TAB)
+                    .setTabListener(new TabListener<AlbumFragment>(this, ALBUMS_TAB, AlbumFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.genres_menu)
-                    .setTabListener(new TabListener<GenreFragment>(this, "genre", GenreFragment.class)));
+                    .setTag(GENRES_TAB)
+                    .setTabListener(new TabListener<GenreFragment>(this, GENRES_TAB, GenreFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_FOLDERS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.folders_menu)
-                    .setTabListener(new TabListener<FolderFragment>(this, "folder", FolderFragment.class)));
+                    .setTag(FOLDERS_TAB)
+                    .setTabListener(new TabListener<FolderFragment>(this, FOLDERS_TAB, FolderFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.tracks_menu)
-                    .setTabListener(new TabListener<TrackFragment>(this, "track", TrackFragment.class)));
+                    .setTag(SONGS_TAB)
+                    .setTabListener(new TabListener<TrackFragment>(this, SONGS_TAB, TrackFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.playlists_menu)
-                    .setTabListener(new TabListener<PlaylistFragment>(this, "playlist", PlaylistFragment.class)));
+                    .setTag(PLAYLISTS_TAB)
+                    .setTabListener(new TabListener<PlaylistFragment>(this, PLAYLISTS_TAB, PlaylistFragment.class)));
         }
     }
 
@@ -137,21 +148,32 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     protected void onResume() {
         super.onResume();
+
+        ActionBar actionBar = getActionBar();
+
         if (invalidateTabs) {
-            getActionBar().removeAllTabs();
+            actionBar.removeAllTabs();
             setupTabs();
             invalidateTabs = false;
         }
+
+        String activeTab = MusicUtils.getStringPref(this, ACTIVE_TAB, null);
+        for (int i = 0; i < actionBar.getTabCount(); i++) {
+            if (actionBar.getTabAt(i).getTag().equals(activeTab)) {
+                actionBar.setSelectedNavigationItem(i);
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MusicUtils.setStringPref(this, ACTIVE_TAB, (String) getActionBar().getSelectedTab().getTag());
     }
 
     public void onServiceDisconnected(ComponentName name) {
         finish();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("NavigationIndex", getActionBar().getSelectedNavigationIndex());
     }
 
     @Override
