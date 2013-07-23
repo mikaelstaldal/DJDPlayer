@@ -18,3 +18,4 @@
 <merge>
     <include layout="@layout/audio_player_land"/>
 </merge>
+

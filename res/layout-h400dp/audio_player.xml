@@ -16,5 +16,6 @@
 -->
 
 <merge>
-    <include layout="@layout/audio_player_land"/>
+    <include layout="@layout/audio_player_port"/>
 </merge>
+
