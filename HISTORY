@@ -58,3 +58,7 @@
 ---
 * Integrate current playing song and play queue view
 * Use Action Bar and other Android 4 UI enhancements
+* Improved tablet support
+
+NOTE: This version requires Android 4 (API level 14). If your phone runs Android 2.x, you will have to continue
+use version 1.9.
