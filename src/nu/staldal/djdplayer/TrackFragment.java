@@ -162,7 +162,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
             } else {
                 Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
-                return new CursorLoader(getActivity(), uri, PLAYLIST_MEMBER_COLS, where.toString(), null,
+                return new CursorLoader(getActivity(), uri, PLAYLIST_MEMBER_COLS, null, null,
                         MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
             }
         } else if (mFolder != null) {

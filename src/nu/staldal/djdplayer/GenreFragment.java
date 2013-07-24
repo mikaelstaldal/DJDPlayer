@@ -83,8 +83,12 @@ public class GenreFragment extends MetadataCategoryFragment {
     @Override
     protected long[] fetchSongList(long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        Cursor cursor = MusicUtils.query(getActivity(), MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                ccols, null, null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+        Cursor cursor = MusicUtils.query(getActivity(),
+                MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                ccols,
+                MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                null,
+                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);

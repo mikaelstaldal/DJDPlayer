@@ -163,7 +163,7 @@ public class MusicProvider extends ContentProvider {
             return getContext().getContentResolver().query(
                     MediaStore.Audio.Playlists.Members.getContentUri("external", id),
                     new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID },
-                    MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                    null,
                     null,
                     null);
         } else {

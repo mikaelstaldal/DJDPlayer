@@ -91,7 +91,8 @@ public class AlbumFragment extends MetadataCategoryFragment {
     protected long[] fetchSongList(long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " +
-                MediaStore.Audio.Media.IS_MUSIC + "=1";
+                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " +
+                MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''";
         Cursor cursor = MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null, MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
 

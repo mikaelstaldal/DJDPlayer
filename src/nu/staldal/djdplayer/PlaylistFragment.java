@@ -311,13 +311,18 @@ public class PlaylistFragment extends CategoryFragment {
             // do a query for all songs added in the last X weeks
             int X = MusicUtils.getIntPref(getActivity(), "numweeks", 2) * (3600 * 24 * 7);
             final String[] ccols = new String[]{MediaStore.Audio.Media._ID};
-            String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
+            String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X)
+                + " AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''";
             return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         } else if (playlistId == MusicContract.Playlist.ALL_SONGS_PLAYLIST) {
-            return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.IS_MUSIC + "=1",
-                    null, null);
+            return MusicUtils.query(getActivity(),
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{MediaStore.Audio.Media._ID},
+                    MediaStore.Audio.Media.IS_MUSIC + "=1 AND "
+                            + MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                    null,
+                    null);
         } else {
             final String[] ccols = new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID};
             return MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
