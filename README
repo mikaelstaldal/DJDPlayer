@@ -13,13 +13,11 @@ Enhancements over the standard Music Player:
 
 * Show number of songs for all categories (artist, album, genre), folders and playlists
 
-* Jump directly to list of songs for artist/album/genre from currently playing song view
+* Jump directly to list of songs for artist/genre from currently playing song view
 
-* Show next song/artist/genre in currently playing song view
+* Integrate current playing song and play queue view
 
-* Always show currently playing song footer in lists
-
-* Play/pause and next button in currently playing song footer
+* Always show currently playing song footer in lists, with play/pause and next button
 
 * Improved play queue
 
