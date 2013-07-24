@@ -160,8 +160,12 @@ public class MusicProvider extends ContentProvider {
 
     private Cursor fetchSongListForPlaylists(long id) {
         if (id >= 0) {
-            return getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id),
-                    new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID}, null, null, null);
+            return getContext().getContentResolver().query(
+                    MediaStore.Audio.Playlists.Members.getContentUri("external", id),
+                    new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID },
+                    MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                    null,
+                    null);
         } else {
             return null;
         }
@@ -177,7 +181,8 @@ public class MusicProvider extends ContentProvider {
         // do a query for all songs added in the last X weeks
         int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
         int X = numweeks * (3600 * 24 * 7);
-        String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
+        String where = MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != '' AND "
+                + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
         int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID}, where, null, null));
         ArrayList<Object> recent = new ArrayList<Object>(3);
@@ -214,8 +219,12 @@ public class MusicProvider extends ContentProvider {
 
     private Cursor fetchSongListForGenres(long id) {
         if (id >= 0)
-            return getContext().getContentResolver().query(MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                    new String[] { MediaStore.Audio.Genres.Members.AUDIO_ID }, null, null, null);
+            return getContext().getContentResolver().query(
+                    MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                    new String[] { MediaStore.Audio.Genres.Members.AUDIO_ID },
+                    MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                    null,
+                    null);
         else
             return null;
     }

@@ -144,6 +144,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         StringBuilder where = new StringBuilder();
         where.append(MediaStore.Audio.Media.TITLE + " != ''");
+        where.append(" AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL");
+        where.append(" AND " + MediaStore.Audio.Media.DATA + " != ''");
 
         if (mGenreId != -1) {
             Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId);
