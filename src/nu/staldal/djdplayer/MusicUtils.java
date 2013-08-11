@@ -51,13 +51,10 @@ public class MusicUtils {
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
         public final static int PLAY_ALL = 5;
-        public final static int SHUFFLE = 7;
-        public final static int UNIQUEIFY = 8;
         public final static int SHUFFLE_PLAYLIST = 9;
         public final static int UNIQUEIFY_PLAYLIST = 10;
         public final static int QUEUE_ALL = 11;
         public final static int DELETE_ITEM = 12;
-        public final static int EFFECTS_PANEL = 13;
         public final static int QUEUE = 14;
         public final static int PLAY_NOW = 15;
         public final static int PLAY_NEXT = 16;

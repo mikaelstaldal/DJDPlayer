@@ -40,9 +40,6 @@ public class MediaPlaybackActivity extends Activity
         implements MusicUtils.Defs, View.OnTouchListener, View.OnLongClickListener, ServiceConnection {
     private static final String LOGTAG = "MediaPlaybackActivity";
 
-    private static final int REPEAT = CHILD_MENU_BASE+2;
-    private static final int CLEAR_QUEUE = CHILD_MENU_BASE+3;
-
     private static final int ADD_TO_PLAYLIST2 = CHILD_MENU_BASE+4;
     private static final int USE_AS_RINGTONE2 = CHILD_MENU_BASE+5;
     private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
@@ -51,7 +48,6 @@ public class MediaPlaybackActivity extends Activity
     private static final int SEARCH_FOR2 = CHILD_MENU_BASE+9;
     private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+10;
     private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+11;
-    private static final int ZOOM_QUEUE = CHILD_MENU_BASE+12;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -365,34 +361,16 @@ public class MediaPlaybackActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(2, ZOOM_QUEUE, 0, R.string.zoom_queue).setIcon(R.drawable.ic_menu_playqueue)
-                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        menu.add(2, REPEAT, 0, R.string.repeat)
-                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        menu.add(2, SHUFFLE, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle)
-                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        menu.add(3, UNIQUEIFY, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
-
-        menu.add(3, CLEAR_QUEUE, 0, R.string.clear_queue).setIcon(R.drawable.ic_menu_clear_playlist);
-
-        menu.add(1, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
-
-        menu.add(0, SEARCH, 0, R.string.search_title).setIcon(R.drawable.ic_menu_search);
-
-        Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-        if (getPackageManager().resolveActivity(i, 0) != null) {
-            menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq)
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        }
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.player_menu, menu);
 
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        updateSoundEffectItem(menu);
+
         updateRepeatItem(menu);
 
         updatePlayingItems(menu);
@@ -402,8 +380,14 @@ public class MediaPlaybackActivity extends Activity
         return true;
     }
 
+    private void updateSoundEffectItem(Menu menu) {
+        Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        MenuItem item = menu.findItem(R.id.effect_panel);
+        item.setVisible(getPackageManager().resolveActivity(i, 0) != null);
+    }
+
     private void updateRepeatItem(Menu menu) {
-        MenuItem item = menu.findItem(REPEAT);
+        MenuItem item = menu.findItem(R.id.repeat);
 
         if (mService != null) {
             switch (mService.getRepeatMode()) {
@@ -426,12 +410,12 @@ public class MediaPlaybackActivity extends Activity
     }
 
     private void updatePlayingItems(Menu menu) {
-        menu.setGroupVisible(3, mService != null && !mService.isPlaying());
+        menu.setGroupVisible(R.id.playing_items, mService != null && !mService.isPlaying());
     }
 
     private void applyKeyguard(Menu menu) {
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        menu.setGroupVisible(1, !km.inKeyguardRestrictedInputMode());
+        menu.setGroupVisible(R.id.keyguard_items, !km.inKeyguardRestrictedInputMode());
     }
 
     @Override
@@ -445,7 +429,7 @@ public class MediaPlaybackActivity extends Activity
                 return true;
             }
 
-            case ZOOM_QUEUE:
+            case R.id.zoom_queue:
                 if (playQueueFragment.isQueueZoomed()) {
                     if (mPlaybackHeader != null) mPlaybackHeader.setVisibility(View.VISIBLE);
                     if (mPlaybackFooter != null) mPlaybackFooter.setVisibility(View.VISIBLE);
@@ -457,33 +441,33 @@ public class MediaPlaybackActivity extends Activity
                 }
                 return true;
 
-            case REPEAT:
+            case R.id.repeat:
                 cycleRepeat();
                 return true;
 
-            case SHUFFLE:
+            case R.id.shuffle:
                 if (mService != null) mService.doShuffle();
                 return true;
 
-            case UNIQUEIFY:
+            case R.id.uniqueify:
                 if (mService != null) mService.uniqueify();
                 return true;
 
-            case CLEAR_QUEUE:
+            case R.id.clear_queue:
                 if (mService != null) mService.removeTracks(0, Integer.MAX_VALUE);
                 return true;
 
-            case SETTINGS:
+            case R.id.settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
 
-            case SEARCH:
+            case R.id.search:
                 return onSearchRequested();
 
-            case EFFECTS_PANEL: {
+            case R.id.effect_panel: {
                 Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                startActivityForResult(intent, EFFECTS_PANEL);
+                startActivityForResult(intent, 0);
                 return true;
             }
         }
@@ -639,11 +623,11 @@ public class MediaPlaybackActivity extends Activity
                     else if (y == 2 && lastY == 2 && x > lastX) dir = -1;
                     else if (y == 2 && lastY == 2 && x < lastX) dir = 1;
                     // moving up
-                    else if (y < lastY && x <= 4) dir = 1; 
-                    else if (y < lastY && x >= 5) dir = -1; 
+                    else if (y < lastY && x <= 4) dir = 1;
+                    else if (y < lastY && x >= 5) dir = -1;
                     // moving down
-                    else if (y > lastY && x <= 4) dir = -1; 
-                    else if (y > lastY && x >= 5) dir = 1; 
+                    else if (y > lastY && x <= 4) dir = -1;
+                    else if (y > lastY && x >= 5) dir = 1;
                     lastX = x;
                     lastY = y;
                     mService.seek(mService.position() + dir * 5);
@@ -788,7 +772,7 @@ public class MediaPlaybackActivity extends Activity
         }
         return super.onKeyDown(keyCode, event);
     }
-    
+
     private void scanBackward(int repcnt, long delta) {
         if(mService == null) return;
         if(repcnt == 0) {
@@ -860,7 +844,7 @@ public class MediaPlaybackActivity extends Activity
             refreshNow();
         }
     }
-    
+
     private void doPauseResume() {
         if (mService != null) {
             if (mService.isPlaying()) {
@@ -872,7 +856,7 @@ public class MediaPlaybackActivity extends Activity
             setPauseButtonImage();
         }
     }
-    
+
     private void cycleRepeat() {
         if (mService == null) {
             return;

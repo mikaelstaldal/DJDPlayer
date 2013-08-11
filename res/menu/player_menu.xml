@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/zoom_queue"
+            android:icon="@drawable/ic_menu_playqueue"
+            android:title="@string/zoom_queue"
+            android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/repeat"
+            android:title="@string/repeat"
+            android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/shuffle"
+            android:icon="@drawable/ic_menu_shuffle"
+            android:title="@string/shuffle"
+            android:showAsAction="always"/>
+
+    <group android:id="@+id/playing_items">
+
+        <item
+                android:id="@+id/uniqueify"
+                android:icon="@drawable/ic_menu_uniqueify"
+                android:title="@string/uniqueify"/>
+
+        <item
+                android:id="@+id/clear_queue"
+                android:icon="@drawable/ic_menu_clear_playlist"
+                android:title="@string/clear_queue"/>
+
+    </group>
+
+    <group android:id="@+id/keyguard_items">
+
+        <item
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_menu_preferences"
+                android:title="@string/settings"/>
+
+    </group>
+
+    <item
+            android:id="@+id/search"
+            android:icon="@drawable/ic_menu_search"
+            android:title="@string/search_title"/>
+
+    <item
+            android:id="@+id/effect_panel"
+            android:icon="@drawable/ic_menu_eq"
+            android:title="@string/effectspanel"
+            android:showAsAction="ifRoom"/>
+
+</menu>
