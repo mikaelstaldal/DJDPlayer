@@ -121,13 +121,17 @@ public class PlaylistFragment extends CategoryFragment {
 
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
         currentId = mi.id;
+        adapter.getCursor().moveToPosition(mi.position);
+        playlistName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
+        menu.setHeaderTitle(playlistName);
 
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i <= 5; i++) {
             for (int j = 1; j <= 5; j++) {
-                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0,
+                        getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
 
@@ -141,10 +145,6 @@ public class PlaylistFragment extends CategoryFragment {
         }
 
         menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
-
-        adapter.getCursor().moveToPosition(mi.position);
-        playlistName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
-        menu.setHeaderTitle(playlistName);
     }
 
     @Override

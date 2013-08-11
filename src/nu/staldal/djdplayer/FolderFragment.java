@@ -139,12 +139,19 @@ public class FolderFragment extends CategoryFragment {
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (menuInfoIn == null) return;
 
+        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
+        adapter.getCursor().moveToPosition(mi.position);
+        mCurrentFolder = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
+        String title = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME));
+        menu.setHeaderTitle(title);
+
         menu.add(0, PLAY_ALL, 0, R.string.play_all);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
             for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0,
+                        getResources().getString(R.string.interleaveNNN, i, j));
             }
         }
 
@@ -152,11 +159,6 @@ public class FolderFragment extends CategoryFragment {
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
         menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
-
-        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        adapter.getCursor().moveToPosition(mi.position);
-        mCurrentFolder = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME)));
     }
 
     @Override
