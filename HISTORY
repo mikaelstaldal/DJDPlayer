@@ -59,3 +59,8 @@
 * Integrate current playing song and play queue view
 * Use Action Bar and other Android 4 UI enhancements
 * Improved tablet support
+
+2.1
+---
+* Improve interleave menu
+* Don't zoom play queue in landscape mode
