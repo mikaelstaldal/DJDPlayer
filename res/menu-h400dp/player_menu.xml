@@ -31,14 +31,10 @@
 
     </group>
 
-    <group android:id="@+id/keyguard_items">
-
-        <item
-                android:id="@+id/settings"
-                android:icon="@drawable/ic_menu_preferences"
-                android:title="@string/settings"/>
-
-    </group>
+    <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_menu_preferences"
+            android:title="@string/settings"/>
 
     <item
             android:id="@+id/search"

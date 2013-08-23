@@ -19,7 +19,6 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.media.AudioManager;
@@ -375,8 +374,6 @@ public class MediaPlaybackActivity extends Activity
 
         updatePlayingItems(menu);
 
-        applyKeyguard(menu);
-
         return true;
     }
 
@@ -411,11 +408,6 @@ public class MediaPlaybackActivity extends Activity
 
     private void updatePlayingItems(Menu menu) {
         menu.setGroupVisible(R.id.playing_items, mService != null && !mService.isPlaying());
-    }
-
-    private void applyKeyguard(Menu menu) {
-        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        menu.setGroupVisible(R.id.keyguard_items, !km.inKeyguardRestrictedInputMode());
     }
 
     @Override
