@@ -61,7 +61,7 @@
             >
 
         <ImageButton
-                android:id="@+id/control_play"
+                android:id="@+id/pause"
                 android:layout_width="0dip"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -72,7 +72,7 @@
                 />
 
         <ImageButton
-                android:id="@+id/control_next"
+                android:id="@+id/next"
                 android:layout_width="0dip"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"

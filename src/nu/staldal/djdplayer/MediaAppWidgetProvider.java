@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2013 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
-import android.view.View;
 import android.widget.RemoteViews;
 
 /**
@@ -63,10 +63,10 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
      */
     private void defaultAppWidget(Context context, int[] appWidgetIds) {
         final Resources res = context.getResources();
-        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.album_appwidget);
+        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
         
-        views.setViewVisibility(R.id.title, View.GONE);
-        views.setTextViewText(R.id.artist, res.getText(R.string.widget_initial_text));
+        views.setTextViewText(R.id.title, res.getText(R.string.widget_initial_text));
+        views.setTextViewText(R.id.artist, "");
 
         linkButtons(context, views, false /* not playing */);
         pushUpdate(context, appWidgetIds, views);
@@ -109,7 +109,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
      */
     void performUpdate(MediaPlaybackService service, int[] appWidgetIds) {
         final Resources res = service.getResources();
-        final RemoteViews views = new RemoteViews(service.getPackageName(), R.layout.album_appwidget);
+        final RemoteViews views = new RemoteViews(service.getPackageName(), R.layout.appwidget);
         
         CharSequence titleName = service.getTrackName();
         CharSequence artistName = service.getArtistName();
@@ -128,12 +128,11 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         
         if (errorState != null) {
             // Show error state to user
-            views.setViewVisibility(R.id.title, View.GONE);
-            views.setTextViewText(R.id.artist, errorState);
+            views.setTextViewText(R.id.title, errorState);
+            views.setTextViewText(R.id.artist, "");
             
         } else {
             // No error, so show normal titles
-            views.setViewVisibility(R.id.title, View.VISIBLE);
             views.setTextViewText(R.id.title, titleName);
             views.setTextViewText(R.id.artist, artistName);
         }
@@ -141,9 +140,9 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         // Set correct drawable for pause state
         final boolean playing = service.isPlaying();
         if (playing) {
-            views.setImageViewResource(R.id.control_play, R.drawable.ic_appwidget_music_pause);
+            views.setImageViewResource(R.id.pause, android.R.drawable.ic_media_pause);
         } else {
-            views.setImageViewResource(R.id.control_play, R.drawable.ic_appwidget_music_play);
+            views.setImageViewResource(R.id.pause, android.R.drawable.ic_media_play);
         }
 
         // Link actions buttons to intents
@@ -182,12 +181,18 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         intent.setComponent(serviceName);
         pendingIntent = PendingIntent.getService(context,
                 0 /* no requestCode */, intent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.control_play, pendingIntent);
+        views.setOnClickPendingIntent(R.id.pause, pendingIntent);
         
         intent = new Intent(MediaPlaybackService.NEXT_ACTION);
         intent.setComponent(serviceName);
         pendingIntent = PendingIntent.getService(context,
                 0 /* no requestCode */, intent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.control_next, pendingIntent);
+        views.setOnClickPendingIntent(R.id.next, pendingIntent);
+
+        intent = new Intent(MediaPlaybackService.PREVIOUS_ACTION);
+        intent.setComponent(serviceName);
+        pendingIntent = PendingIntent.getService(context,
+                0 /* no requestCode */, intent, 0 /* no flags */);
+        views.setOnClickPendingIntent(R.id.prev, pendingIntent);
     }
 }

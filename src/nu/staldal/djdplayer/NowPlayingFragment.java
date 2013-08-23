@@ -51,7 +51,7 @@ public class NowPlayingFragment extends Fragment {
             }
         });
 
-        View prevButton = nowPlaying.findViewById(R.id.control_prev);
+        View prevButton = nowPlaying.findViewById(R.id.prev);
         if (prevButton != null) {
             prevButton.setOnClickListener(new View.OnClickListener() {
                  @Override
@@ -60,13 +60,13 @@ public class NowPlayingFragment extends Fragment {
                  }
             });
         }
-        nowPlaying.findViewById(R.id.control_next).setOnClickListener(new View.OnClickListener() {
+        nowPlaying.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (service != null) service.next(true);
             }
         });
-        playPauseButton = (ImageButton) nowPlaying.findViewById(R.id.control_play);
+        playPauseButton = (ImageButton) nowPlaying.findViewById(R.id.pause);
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
