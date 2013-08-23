@@ -169,12 +169,12 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
             intent = new Intent(context, MediaPlaybackActivity.class);
             pendingIntent = PendingIntent.getActivity(context,
                     0 /* no requestCode */, intent, 0 /* no flags */);
-            views.setOnClickPendingIntent(R.id.album_appwidget, pendingIntent);
+            views.setOnClickPendingIntent(R.id.appwidget, pendingIntent);
         } else {
             intent = new Intent(context, MusicBrowserActivity.class);
             pendingIntent = PendingIntent.getActivity(context,
                     0 /* no requestCode */, intent, 0 /* no flags */);
-            views.setOnClickPendingIntent(R.id.album_appwidget, pendingIntent);
+            views.setOnClickPendingIntent(R.id.appwidget, pendingIntent);
         }
         
         intent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);

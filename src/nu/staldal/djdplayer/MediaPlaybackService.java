@@ -27,7 +27,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.*;
@@ -92,6 +94,7 @@ public class MediaPlaybackService extends Service {
     private static final int FADEUP = 6;
 
     private final IBinder mBinder = new MediaPlaybackServiceBinder();
+    private RemoteControlClient mRemoteControlClient;
 
     public class MediaPlaybackServiceBinder extends Binder {
       public MediaPlaybackService getService() {
@@ -208,6 +211,7 @@ public class MediaPlaybackService extends Service {
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
                             mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
+                            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             if(isPlaying()) {
                                 mPausedByTransientLossOfFocus = false;
@@ -230,6 +234,8 @@ public class MediaPlaybackService extends Service {
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
+                            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+
                             if(!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
                                 mCurrentVolume = 0f;
@@ -324,10 +330,20 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
         registerReceiver(mIntentReceiver, commandFilter);
-        
+
         PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
         mWakeLock.setReferenceCounted(false);
+
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setComponent(new ComponentName(this.getPackageName(),
+                MediaButtonIntentReceiver.class.getName()));
+        mRemoteControlClient = new RemoteControlClient(
+                PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0));
+        mRemoteControlClient.setTransportControlFlags(
+                RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE |
+                RemoteControlClient.FLAG_KEY_MEDIA_NEXT |
+                RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
 
         // If the service was idle, but got killed before it stopped itself, the
         // system will relaunch it. Make sure it gets stopped again in that case.
@@ -346,6 +362,7 @@ public class MediaPlaybackService extends Service {
 
         mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                         MediaButtonIntentReceiver.class.getName()));
+        mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
 
         // release all MediaPlayer resources, including the native player and wakelocks
         Intent i = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
@@ -695,7 +712,6 @@ public class MediaPlaybackService extends Service {
      * or that the play-state changed (paused/resumed).
      */
     private void notifyChange(String what) {
-
         Intent i = new Intent(what);
         i.putExtra("id", Long.valueOf(getAudioId()));
         i.putExtra("artist", getArtistName());
@@ -712,6 +728,18 @@ public class MediaPlaybackService extends Service {
         
         // Share this notification directly with our widgets
         mAppWidgetProvider.notifyChange(this, what);
+
+        mRemoteControlClient.setPlaybackState(isPlaying()
+                ? RemoteControlClient.PLAYSTATE_PLAYING
+                : RemoteControlClient.PLAYSTATE_PAUSED);
+
+        RemoteControlClient.MetadataEditor metadataEditor = mRemoteControlClient.editMetadata(true);
+        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName());
+        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName());
+        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getArtistName());
+        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_GENRE, getGenreName());
+        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName());
+        metadataEditor.apply();
     }
 
     private void ensurePlayListCapacity(int size) {
@@ -1045,6 +1073,7 @@ public class MediaPlaybackService extends Service {
 
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
+        mAudioManager.registerRemoteControlClient(mRemoteControlClient);
 
         if (mPlayer.isInitialized()) {
             // if we are at the end of the song, go to the next song first
