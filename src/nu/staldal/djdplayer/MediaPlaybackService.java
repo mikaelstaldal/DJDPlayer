@@ -738,7 +738,6 @@ public class MediaPlaybackService extends Service {
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName());
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getArtistName());
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_GENRE, getGenreName());
-        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName());
         metadataEditor.apply();
     }
 
