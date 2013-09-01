@@ -65,7 +65,7 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        Log.i(LOGTAG, "onCreate");
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         getActionBar().setHomeButtonEnabled(true);

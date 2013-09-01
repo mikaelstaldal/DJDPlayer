@@ -304,7 +304,6 @@ public class MediaPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(LOGTAG, "onCreate");
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -353,8 +352,6 @@ public class MediaPlaybackService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i(LOGTAG, "onDestroy");
-
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
