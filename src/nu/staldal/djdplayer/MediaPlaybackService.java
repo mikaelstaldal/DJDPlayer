@@ -1095,14 +1095,14 @@ public class MediaPlaybackService extends Service {
     }
 
     private Notification buildNotification() {
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
-        if (getAudioId() < 0) {
-            // streaming
-            views.setTextViewText(R.id.trackname, getPath());
-            views.setTextViewText(R.id.artistgenre, null);
+        String trackname;
+        String artistgenre;
+        if (getAudioId() < 0) { // streaming
+            trackname = getPath();
+            artistgenre = null;
         } else {
+            trackname = getTrackName();
             String artist = getArtistName();
-            views.setTextViewText(R.id.trackname, getTrackName());
             if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
                 artist = getString(R.string.unknown_artist_name);
             }
@@ -1110,10 +1110,12 @@ public class MediaPlaybackService extends Service {
             if (genre == null || genre.equals(MediaStore.UNKNOWN_STRING)) {
                 genre = getString(R.string.unknown_genre_name);
             }
-
-            views.setTextViewText(R.id.artistgenre,
-                                  getString(R.string.notification_artist_genre, artist, genre));
+            artistgenre = getString(R.string.notification_artist_genre, artist, genre);
         }
+
+        RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
+        views.setTextViewText(R.id.trackname, trackname);
+        views.setTextViewText(R.id.artistgenre, artistgenre);
 
         Notification status = new Notification();
         status.contentView = views;
