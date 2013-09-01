@@ -266,8 +266,6 @@
     <!-- title of contextual music search menu -->
     <string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
 
-    <!-- Shown in the music picker while loading the music database. -->
-    <string name="loading">Loading</string>
     <!-- Menu in music picker to sort the list by track/song name. -->
     <string name="sort_by_track">Sort by title</string>
     <!-- Menu in music picker to sort the list by artist name. -->
