@@ -1085,42 +1085,47 @@ public class MediaPlaybackService extends Service {
             mMediaplayerHandler.removeMessages(FADEDOWN);
             mMediaplayerHandler.sendEmptyMessage(FADEUP);
 
-            RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
-            if (getAudioId() < 0) {
-                // streaming
-                views.setTextViewText(R.id.trackname, getPath());
-                views.setTextViewText(R.id.artistgenre, null);
-            } else {
-                String artist = getArtistName();
-                views.setTextViewText(R.id.trackname, getTrackName());
-                if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
-                    artist = getString(R.string.unknown_artist_name);
-                }
-                String genre = getGenreName();
-                if (genre == null || genre.equals(MediaStore.UNKNOWN_STRING)) {
-                    genre = getString(R.string.unknown_genre_name);
-                }
-                
-                views.setTextViewText(R.id.artistgenre,
-                        getString(R.string.notification_artist_genre, artist, genre)
-                        );
-            }
-            
-            Notification status = new Notification();
-            status.contentView = views;
-            status.flags |= Notification.FLAG_ONGOING_EVENT;
-            status.icon = R.drawable.stat_notify_musicplayer;
-            status.contentIntent = PendingIntent.getActivity(this, 0,
-                    new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
-            startForeground(PLAYBACKSERVICE_STATUS, status);
+            startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
+
             if (!mIsSupposedToBePlaying) {
                 mIsSupposedToBePlaying = true;
                 notifyChange(PLAYSTATE_CHANGED);
             }
         }
     }
-    
+
+    private Notification buildNotification() {
+        RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
+        if (getAudioId() < 0) {
+            // streaming
+            views.setTextViewText(R.id.trackname, getPath());
+            views.setTextViewText(R.id.artistgenre, null);
+        } else {
+            String artist = getArtistName();
+            views.setTextViewText(R.id.trackname, getTrackName());
+            if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
+                artist = getString(R.string.unknown_artist_name);
+            }
+            String genre = getGenreName();
+            if (genre == null || genre.equals(MediaStore.UNKNOWN_STRING)) {
+                genre = getString(R.string.unknown_genre_name);
+            }
+
+            views.setTextViewText(R.id.artistgenre,
+                                  getString(R.string.notification_artist_genre, artist, genre));
+        }
+
+        Notification status = new Notification();
+        status.contentView = views;
+        status.flags |= Notification.FLAG_ONGOING_EVENT;
+        status.icon = R.drawable.stat_notify_musicplayer;
+        status.contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+
+        return status;
+    }
+
     private void stop(boolean remove_status_icon) {
         if (mPlayer.isInitialized()) {
             mPlayer.stop();
