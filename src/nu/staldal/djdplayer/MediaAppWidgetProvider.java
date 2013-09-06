@@ -134,7 +134,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         } else {
             // No error, so show normal titles
             views.setTextViewText(R.id.title, titleName);
-            views.setTextViewText(R.id.artist, artistName);
+            views.setTextViewText(R.id.artist, " - " + artistName);
         }
         
         // Set correct drawable for pause state
