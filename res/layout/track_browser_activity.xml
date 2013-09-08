@@ -20,8 +20,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/sd_error" />
-
     <fragment class="nu.staldal.djdplayer.TrackFragment"
               android:id="@+id/tracks"
               android:layout_width="match_parent"

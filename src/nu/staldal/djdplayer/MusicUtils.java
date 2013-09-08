@@ -24,15 +24,11 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.SubMenu;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 import nu.staldal.util.SharedPreferencesCompat;
 
@@ -476,63 +472,8 @@ public class MusicUtils {
                 return null;
             }
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-         } catch (UnsupportedOperationException ex) {
+        } catch (UnsupportedOperationException ex) {
             return null;
-        }
-
-    }
-
-    private static String mLastSdStatus;
-
-    public static void displayDatabaseError(Activity a) {
-        if (a.isFinishing()) {
-            // When switching tabs really fast, we can end up with a null
-            // cursor (not sure why), which will bring us here.
-            // Don't bother showing an error message in that case.
-            return;
-        }
-
-        String status = Environment.getExternalStorageState();
-        int title, message;
-
-        title = R.string.sdcard_error_title;
-        message = R.string.sdcard_error_message;
-
-        if (status.equals(Environment.MEDIA_SHARED) || status.equals(Environment.MEDIA_UNMOUNTED)) {
-            title = R.string.sdcard_busy_title;
-            message = R.string.sdcard_busy_message;
-        } else if (status.equals(Environment.MEDIA_REMOVED)) {
-            title = R.string.sdcard_missing_title;
-            message = R.string.sdcard_missing_message;
-        } else if (status.equals(Environment.MEDIA_MOUNTED)){
-            title = R.string.sdcard_scanning_title;
-            message = R.string.sdcard_scanning_message;
-        } else if (!TextUtils.equals(mLastSdStatus, status)) {
-            mLastSdStatus = status;
-            Log.d(LOGTAG, "sd card: " + status);
-        }
-
-        a.setTitle(title);
-        View v = a.findViewById(R.id.sd_message);
-        if (v != null) {
-            v.setVisibility(View.VISIBLE);
-        }
-        v = a.findViewById(android.R.id.list);
-        if (v != null) {
-            v.setVisibility(View.GONE);
-        }
-        TextView tv = (TextView) a.findViewById(R.id.sd_message);
-        tv.setText(message);
-    }
-
-    public static void hideDatabaseError(Activity a) {
-        View v = a.findViewById(R.id.sd_message);
-        if (v != null) {
-            v.setVisibility(View.GONE);
-        }
-        v = a.findViewById(android.R.id.list);
-        if (v != null) {
-            v.setVisibility(View.VISIBLE);
         }
     }
 
