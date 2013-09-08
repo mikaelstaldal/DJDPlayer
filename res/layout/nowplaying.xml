@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-**
 ** Copyright 2008, The Android Open Source Project
+** Copyright (C) 2013 Mikael Ståldal
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -19,18 +19,20 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="64dip"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
               android:focusable="true"
               android:visibility="gone"
-              android:background="@drawable/music_bottom_playback_bg"
-              android:orientation="horizontal"
+              android:background="@drawable/nowplaying_background"
               android:baselineAligned="false">
 
     <LinearLayout
             android:layout_width="0dip"
-            android:layout_weight="3"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:paddingLeft="10dip"
+            android:paddingTop="8dip"
+            android:paddingBottom="8dip"
             android:orientation="vertical">
 
         <TextView
@@ -54,29 +56,23 @@
 
     <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:layout_gravity="right"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
         <ImageButton
                 android:id="@+id/pause"
-                android:layout_width="0dip"
-                android:layout_weight="1"
                 style="@android:style/MediaButton.Pause"
                 android:contentDescription="@string/play_pause"
-                android:background="@drawable/button_background"/>
+                android:background="@drawable/button_background"
+                android:layout_gravity="center_vertical"/>
 
         <ImageButton
                 android:id="@+id/next"
-                android:layout_width="0dip"
-                android:layout_weight="1"
                 style="@android:style/MediaButton.Next"
                 android:contentDescription="@string/next"
-                android:background="@drawable/button_background"/>
+                android:background="@drawable/button_background"
+                android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
 
 </LinearLayout>
-
