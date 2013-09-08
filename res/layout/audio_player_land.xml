@@ -112,17 +112,20 @@
                 <nu.staldal.ui.RepeatingImageButton
                         android:id="@+id/prev"
                         style="@android:style/MediaButton.Previous"
-                        android:contentDescription="@string/prev"/>
+                        android:contentDescription="@string/prev"
+                        android:background="@drawable/button_background"/>
 
                 <ImageButton
                         android:id="@+id/pause"
                         style="@android:style/MediaButton.Play"
-                        android:contentDescription="@string/play_pause"/>
+                        android:contentDescription="@string/play_pause"
+                        android:background="@drawable/button_background"/>
 
                 <nu.staldal.ui.RepeatingImageButton
                         android:id="@+id/next"
                         style="@android:style/MediaButton.Next"
-                        android:contentDescription="@string/next"/>
+                        android:contentDescription="@string/next"
+                        android:background="@drawable/button_background"/>
 
             </LinearLayout>
 

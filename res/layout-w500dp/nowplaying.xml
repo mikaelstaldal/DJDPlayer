@@ -63,35 +63,27 @@
         <ImageButton
                 android:id="@+id/prev"
                 android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_media_previous"
+                style="@android:style/MediaButton.Previous"
                 android:contentDescription="@string/prev"
-                android:background="@drawable/appwidget_button_center"
-                />
+                android:background="@drawable/button_background"/>
 
         <ImageButton
                 android:id="@+id/pause"
                 android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_media_play"
+                style="@android:style/MediaButton.Pause"
                 android:contentDescription="@string/play_pause"
-                android:background="@drawable/appwidget_button_center"
-                />
+                android:background="@drawable/button_background"/>
 
         <ImageButton
                 android:id="@+id/next"
                 android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_media_next"
+                style="@android:style/MediaButton.Next"
                 android:contentDescription="@string/next"
-                android:background="@drawable/appwidget_button_center"
-                />
+                android:background="@drawable/button_background"/>
+
     </LinearLayout>
 
 </LinearLayout>

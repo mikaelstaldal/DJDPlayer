@@ -41,19 +41,19 @@
                 android:id="@+id/prev"
                 style="@android:style/MediaButton.Previous"
                 android:contentDescription="@string/prev"
-                android:background="@drawable/appwidget_button_center"/>
+                android:background="@drawable/button_background"/>
 
         <ImageButton
                 android:id="@+id/pause"
                 style="@android:style/MediaButton.Pause"
                 android:contentDescription="@string/play_pause"
-                android:background="@drawable/appwidget_button_center"/>
+                android:background="@drawable/button_background"/>
 
         <ImageButton
                 android:id="@+id/next"
                 style="@android:style/MediaButton.Next"
                 android:contentDescription="@string/next"
-                android:background="@drawable/appwidget_button_center"/>
+                android:background="@drawable/button_background"/>
 
     </LinearLayout>
 
