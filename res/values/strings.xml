@@ -290,8 +290,6 @@
     
     <string name="create_playlist_create_text_prompt">Playlist name</string>
 
-    <string name="notification_artist_genre"><xliff:g id="ARTIST">%1$s</xliff:g> (<xliff:g id="GENRE">%2$s</xliff:g>)</string>
-
     <string name="rename_playlist_prompt">Rename \"<xliff:g id="PLAYLIST">%s</xliff:g>\" to</string>
 
     <!-- Preferences -->
@@ -327,6 +325,7 @@
     <string name="playlist_exported">Playlist exported</string>
     <string name="playlist_shuffled">Playlist shuffled</string>
 
+    <string name="pause">Pause</string>
     <string name="play_pause">Play/Pause</string>
     <string name="next">Next</string>
     <string name="prev">Previous</string>

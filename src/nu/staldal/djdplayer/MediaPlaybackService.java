@@ -1096,34 +1096,33 @@ public class MediaPlaybackService extends Service {
 
     private Notification buildNotification() {
         String trackname;
-        String artistgenre;
+        String artistname;
         if (getAudioId() < 0) { // streaming
             trackname = getPath();
-            artistgenre = null;
+            artistname = null;
         } else {
             trackname = getTrackName();
-            String artist = getArtistName();
-            if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
-                artist = getString(R.string.unknown_artist_name);
+            artistname = getArtistName();
+            if (artistname == null || artistname.equals(MediaStore.UNKNOWN_STRING)) {
+                artistname = getString(R.string.unknown_artist_name);
             }
-            String genre = getGenreName();
-            if (genre == null || genre.equals(MediaStore.UNKNOWN_STRING)) {
-                genre = getString(R.string.unknown_genre_name);
-            }
-            artistgenre = getString(R.string.notification_artist_genre, artist, genre);
         }
 
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
         views.setTextViewText(R.id.trackname, trackname);
-        views.setTextViewText(R.id.artistgenre, artistgenre);
-
+        views.setTextViewText(R.id.artistname, artistname);
+        views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(this, 0,
+                new Intent(this, MediaPlaybackService.class)
+                        .setAction(MediaPlaybackService.SERVICECMD)
+                        .putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDPAUSE), 0));
         Notification status = new Notification();
         status.contentView = views;
         status.flags |= Notification.FLAG_ONGOING_EVENT;
         status.icon = R.drawable.stat_notify_musicplayer;
         status.contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                0);
 
         return status;
     }
