@@ -7,7 +7,6 @@ Enhancements over the standard Music Player:
 * Genre support:
    - genre browsing tab
    - show genre of currently playing song
-   - show genre instead of album in notification
 
 * Do not pretend that album is a proper subcategory of artist (one album can contain songs from different artists)
 
@@ -46,3 +45,5 @@ Enhancements over the standard Music Player:
 * Remote control in lock screen
 
 * Basic tablet support
+
+* Pause button in system notification
