@@ -28,9 +28,26 @@ public class SettingsActivity extends Activity {
     public static final String SHOW_PLAYLISTS_TAB = "show_playlists_tab";
     public static final String MUSIC_FOLDER = "music_folder";
 
+    public static final String PLAYQUEUE = "queue";
+    public static final String CARDID = "cardid";
+    public static final String CURPOS = "curpos";
+    public static final String SEEKPOS = "seekpos";
+    public static final String REPEATMODE = "repeatmode";
+    public static final String NUMWEEKS = "numweeks";
+    public static final String ACTIVE_TAB = "ActiveTab";
+
+    // CLICK_ON_SONG values
     public static final String PLAY_NEXT = "PLAY_NEXT";
     public static final String PLAY_NOW = "PLAY_NOW";
     public static final String QUEUE = "QUEUE";
+
+    // ACTIVE_TAB values
+    public static final String ARTISTS_TAB = "artists";
+    public static final String ALBUMS_TAB = "albums";
+    public static final String GENRES_TAB = "genres";
+    public static final String FOLDERS_TAB = "folders";
+    public static final String SONGS_TAB = "songs";
+    public static final String PLAYLISTS_TAB = "playlists";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

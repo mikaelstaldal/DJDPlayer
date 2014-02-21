@@ -175,7 +175,8 @@ public class PlaylistFragment extends CategoryFragment {
                             .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     int numweeks = which + 1;
-                                    MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), "numweeks", numweeks);
+                                    MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), SettingsActivity.NUMWEEKS,
+                                            numweeks);
                                     getLoaderManager().restartLoader(0, null, PlaylistFragment.this);
                                 }
                             }).show();
@@ -309,7 +310,7 @@ public class PlaylistFragment extends CategoryFragment {
     private Cursor fetchSongListCursor(long playlistId) {
         if (playlistId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
             // do a query for all songs added in the last X weeks
-            int X = MusicUtils.getIntPref(getActivity(), "numweeks", 2) * (3600 * 24 * 7);
+            int X = MusicUtils.getIntPref(getActivity(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
             final String[] ccols = new String[]{MediaStore.Audio.Media._ID};
             String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X)
                 + " AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''";

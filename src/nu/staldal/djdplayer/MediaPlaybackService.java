@@ -430,14 +430,14 @@ public class MediaPlaybackService extends Service {
                 }
             }
             //Log.i("@@@@ service", "created queue string in " + (System.currentTimeMillis() - start) + " ms");
-            ed.putString("queue", q.toString());
-            ed.putInt("cardid", mCardId);
+            ed.putString(SettingsActivity.PLAYQUEUE, q.toString());
+            ed.putInt(SettingsActivity.CARDID, mCardId);
         }
-        ed.putInt("curpos", mPlayPos);
+        ed.putInt(SettingsActivity.CURPOS, mPlayPos);
         if (mPlayer.isInitialized()) {
-            ed.putLong("seekpos", mPlayer.position());
+            ed.putLong(SettingsActivity.SEEKPOS, mPlayer.position());
         }
-        ed.putInt("repeatmode", mRepeatMode);
+        ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
         SharedPreferencesCompat.apply(ed);
 
         //Log.i("@@@@ service", "saved state in " + (System.currentTimeMillis() - start) + " ms");
@@ -447,13 +447,13 @@ public class MediaPlaybackService extends Service {
         String q = null;
         
         int id = mCardId;
-        if (mPreferences.contains("cardid")) {
-            id = mPreferences.getInt("cardid", ~mCardId);
+        if (mPreferences.contains(SettingsActivity.CARDID)) {
+            id = mPreferences.getInt(SettingsActivity.CARDID, ~mCardId);
         }
         if (id == mCardId) {
             // Only restore the saved playlist if the card is still
             // the same one as when the playlist was saved
-            q = mPreferences.getString("queue", "");
+            q = mPreferences.getString(SettingsActivity.PLAYQUEUE, "");
         }
         int qlen = q != null ? q.length() : 0;
         if (qlen > 1) {
@@ -484,7 +484,7 @@ public class MediaPlaybackService extends Service {
             }
             mPlayListLen = plen;
 
-            int pos = mPreferences.getInt("curpos", 0);
+            int pos = mPreferences.getInt(SettingsActivity.CURPOS, 0);
             if (pos < 0 || pos >= mPlayListLen) {
                 // The saved playlist is bogus, discard it
                 mPlayListLen = 0;
@@ -531,11 +531,11 @@ public class MediaPlaybackService extends Service {
                 return;
             }
             
-            long seekpos = mPreferences.getLong("seekpos", 0);
+            long seekpos = mPreferences.getLong(SettingsActivity.SEEKPOS, 0);
             seek(seekpos >= 0 && seekpos < duration() ? seekpos : 0);
             //Log.d(LOGTAG, "restored queue, currently at position " + position() + "/" + duration() + " (requested " + seekpos + ")");
             
-            int repmode = mPreferences.getInt("repeatmode", REPEAT_NONE);
+            int repmode = mPreferences.getInt(SettingsActivity.REPEATMODE, REPEAT_NONE);
             if (repmode != REPEAT_ALL && repmode != REPEAT_CURRENT) {
                 repmode = REPEAT_NONE;
             }

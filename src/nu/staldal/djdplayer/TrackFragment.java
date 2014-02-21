@@ -155,7 +155,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             if (mPlaylist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                 // do a query for all songs added in the last X weeks
                 Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                int X = MusicUtils.getIntPref(getActivity(), "numweeks", 2) * (3600 * 24 * 7);
+                int X = MusicUtils.getIntPref(getActivity(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
                 where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">");
                 where.append(System.currentTimeMillis() / 1000 - X);
                 return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,

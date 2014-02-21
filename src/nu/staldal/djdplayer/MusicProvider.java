@@ -179,7 +179,7 @@ public class MusicProvider extends ContentProvider {
         }, 1);
 
         // do a query for all songs added in the last X weeks
-        int numweeks = MusicUtils.getIntPref(getContext(), "numweeks", 2);
+        int numweeks = MusicUtils.getIntPref(getContext(), SettingsActivity.NUMWEEKS, 2);
         int X = numweeks * (3600 * 24 * 7);
         String where = MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != '' AND "
                 + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
