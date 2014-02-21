@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="14212"
-          android:versionName="2.2"
+          android:versionCode="14213"
+          android:versionName="2.3beta"
           android:installLocation="auto">
 
     <!-- Require 4.0, target 4.0.3 (Ice Cream Sandwich) -->
