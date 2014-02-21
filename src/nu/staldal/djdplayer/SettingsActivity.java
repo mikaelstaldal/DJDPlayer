@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 package nu.staldal.djdplayer;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends Activity {
     public static final String CLICK_ON_SONG = "clickonsong";
     public static final String SHOW_ARTISTS_TAB = "show_artists_tab";
     public static final String SHOW_ALBUMS_TAB = "show_albums_tab";
@@ -35,7 +35,9 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preferences);
         setTitle(R.string.settings);
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
     }
 }
