@@ -38,7 +38,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
-import nu.staldal.util.SharedPreferencesCompat;
 
 import java.io.File;
 import java.io.IOException;
@@ -438,7 +437,7 @@ public class MediaPlaybackService extends Service {
             ed.putLong(SettingsActivity.SEEKPOS, mPlayer.position());
         }
         ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
-        SharedPreferencesCompat.apply(ed);
+        ed.apply();
 
         //Log.i("@@@@ service", "saved state in " + (System.currentTimeMillis() - start) + " ms");
     }

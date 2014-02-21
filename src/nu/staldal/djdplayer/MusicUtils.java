@@ -30,7 +30,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.SubMenu;
 import android.widget.Toast;
-import nu.staldal.util.SharedPreferencesCompat;
 
 import java.io.File;
 import java.util.Formatter;
@@ -543,7 +542,7 @@ public class MusicUtils {
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
         ed.putInt(name, value);
-        SharedPreferencesCompat.apply(ed);
+        ed.apply();
     }
 
     static String getStringPref(Context context, String name, String def) {
@@ -557,7 +556,7 @@ public class MusicUtils {
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
         ed.putString(name, value);
-        SharedPreferencesCompat.apply(ed);
+        ed.apply();
     }
 
     static void setRingtone(Context context, long id) {
