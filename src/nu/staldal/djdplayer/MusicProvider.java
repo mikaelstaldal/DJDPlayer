@@ -145,6 +145,7 @@ public class MusicProvider extends ContentProvider {
                 null, null,
                 MediaStore.Audio.Playlists.NAME);
 
+        if (cursor == null) return null;
         int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID);
         int[] counts = new int[cursor.getCount()];
         int i = 0;
@@ -204,6 +205,7 @@ public class MusicProvider extends ContentProvider {
                 null, null,
                 MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
 
+        if (cursor == null) return null;
         cursor.setNotificationUri(getContext().getContentResolver(), MusicContract.Genre.CONTENT_URI);
 
         int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID);
