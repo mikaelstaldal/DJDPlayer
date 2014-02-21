@@ -160,7 +160,10 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     protected void onPause() {
         super.onPause();
-        MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, (String) getActionBar().getSelectedTab().getTag());
+        ActionBar.Tab selectedTab = getActionBar().getSelectedTab();
+        if (selectedTab != null) {
+            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, (String) selectedTab.getTag());
+        }
     }
 
     public void onServiceDisconnected(ComponentName name) {
