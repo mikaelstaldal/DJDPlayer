@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,12 +265,11 @@ public class MusicUtils {
         };
         ContentResolver resolver = context.getContentResolver();
         if (resolver == null) {
-            System.out.println("resolver = null");
+            Log.w(LOGTAG, "resolver = null");
         } else {
-            String whereclause = MediaStore.Audio.Playlists.NAME + " != ''";
+            String whereClause = MediaStore.Audio.Playlists.NAME + " != ''";
             Cursor cur = resolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                cols, whereclause, null,
-                MediaStore.Audio.Playlists.NAME);
+                cols, whereClause, null, MediaStore.Audio.Playlists.NAME);
             sub.clear();
             sub.add(1, newPlaylist, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
@@ -282,7 +281,7 @@ public class MusicUtils {
 //                    if (cur.getInt(0) == mLastPlaylistSelected) {
 //                        sub.add(0, MusicBaseActivity.PLAYLIST_SELECTED, cur.getString(1)).setIntent(intent);
 //                    } else {
-                        sub.add(1, playlistSelected, 0, cur.getString(1)).setIntent(intent);
+                    sub.add(1, playlistSelected, 0, cur.getString(1)).setIntent(intent);
 //                    }
                     cur.moveToNext();
                 }
@@ -437,29 +436,29 @@ public class MusicUtils {
         if (ids == null) {
             // this shouldn't happen (the menuitems shouldn't be visible
             // unless the selected item represents something playable
-            Log.e("MusicBase", "ListSelection null");
+            Log.e(LOGTAG, "ListSelection null");
         } else {
             int size = ids.length;
             ContentResolver resolver = context.getContentResolver();
             // need to determine the number of items currently in the playlist,
             // so the play_order field can be maintained.
-            String[] cols = new String[] {
-                    "count(*)"
-            };
             Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistid);
-            Cursor cur = resolver.query(uri, cols, null, null, null);
-            cur.moveToFirst();
-            int base = cur.getInt(0);
-            cur.close();
-            int numinserted = 0;
-            for (int i = 0; i < size; i += 1000) {
-                makeInsertItems(ids, i, 1000, base);
-                numinserted += resolver.bulkInsert(uri, sContentValuesCache);
+            Cursor cur = resolver.query(uri, new String[] { "count(*)" }, null, null, null);
+            if (cur != null) {
+                cur.moveToFirst();
+                int base = cur.getInt(0);
+                cur.close();
+                int numInserted = 0;
+                for (int i = 0; i < size; i += 1000) {
+                    makeInsertItems(ids, i, 1000, base);
+                    numInserted += resolver.bulkInsert(uri, sContentValuesCache);
+                }
+                Toast.makeText(context, context.getResources().getQuantityString(
+                        R.plurals.NNNtrackstoplaylist, numInserted, numInserted), Toast.LENGTH_SHORT).show();
+                //mLastPlaylistSelected = playlistid;
+            } else {
+                Log.w(LOGTAG, "Unable to lookup playlist: " + playlistid);
             }
-            String message = context.getResources().getQuantityString(
-                    R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            //mLastPlaylistSelected = playlistid;
         }
     }
 

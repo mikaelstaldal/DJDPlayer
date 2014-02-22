@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,11 +55,15 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
                         new String[] { MediaStore.Audio.Media.DATA },
                         MediaStore.Audio.Media._ID + "=" + song,
                         null, null);
-                cursor.moveToFirst();
-                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                cursor.close();
-                writer.write(path, prefix, path.length() - prefix);
-                writer.write('\n');
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                    cursor.close();
+                    writer.write(path, prefix, path.length() - prefix);
+                    writer.write('\n');
+                } else {
+                    Log.w(LOGTAG, "Unable to get path for song: " + song);
+                }
             }
         } catch (IOException e) {
             Log.w(LOGTAG, "Unable to export playlist", e);
