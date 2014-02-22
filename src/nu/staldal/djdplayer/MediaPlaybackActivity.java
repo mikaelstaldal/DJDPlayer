@@ -1033,17 +1033,19 @@ public class MediaPlaybackActivity extends Activity
     private final BroadcastReceiver mStatusListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(MediaPlaybackService.META_CHANGED)) {
-                // redraw the artist/title info and
-                // set new max for progress bar
-                updateTrackInfo();
-                setPauseButtonImage();
-                queueNextRefresh(1);
-            } else if (action.equals(MediaPlaybackService.QUEUE_CHANGED)) {
-                updateTrackInfo();
-            } else if (action.equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
-                setPauseButtonImage();
+            switch (intent.getAction()) {
+                case MediaPlaybackService.META_CHANGED:
+                    // redraw the artist/title info and set new max for progress bar
+                    updateTrackInfo();
+                    setPauseButtonImage();
+                    queueNextRefresh(1);
+                    break;
+                case MediaPlaybackService.QUEUE_CHANGED:
+                    updateTrackInfo();
+                    break;
+                case MediaPlaybackService.PLAYSTATE_CHANGED:
+                    setPauseButtonImage();
+                    break;
             }
         }
     };

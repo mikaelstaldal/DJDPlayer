@@ -397,14 +397,8 @@ public class MusicPicker extends ListActivity
     
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        StringBuilder where = new StringBuilder();
-        where.append(MediaStore.Audio.Media.TITLE + " != ''");
-        
-        // We want to show all audio files, even recordings.  Enforcing the
-        // following condition would hide recordings.
-        //where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-
-        return new CursorLoader(this, mBaseUri, CURSOR_COLS, where.toString(), null, mSortOrder);
+        // We want to show all audio files, even recordings
+        return new CursorLoader(this, mBaseUri, CURSOR_COLS, MediaStore.Audio.Media.TITLE + " != ''", null, mSortOrder);
     }
         
     @Override

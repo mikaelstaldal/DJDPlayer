@@ -85,42 +85,42 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.artists_menu)
                     .setTag(SettingsActivity.ARTISTS_TAB)
-                    .setTabListener(new TabListener<ArtistFragment>(this, SettingsActivity.ARTISTS_TAB, ArtistFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.ARTISTS_TAB, ArtistFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, false)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.albums_menu)
                     .setTag(SettingsActivity.ALBUMS_TAB)
-                    .setTabListener(new TabListener<AlbumFragment>(this, SettingsActivity.ALBUMS_TAB, AlbumFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.ALBUMS_TAB, AlbumFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.genres_menu)
                     .setTag(SettingsActivity.GENRES_TAB)
-                    .setTabListener(new TabListener<GenreFragment>(this, SettingsActivity.GENRES_TAB, GenreFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.GENRES_TAB, GenreFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_FOLDERS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.folders_menu)
                     .setTag(SettingsActivity.FOLDERS_TAB)
-                    .setTabListener(new TabListener<FolderFragment>(this, SettingsActivity.FOLDERS_TAB, FolderFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.FOLDERS_TAB, FolderFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.tracks_menu)
                     .setTag(SettingsActivity.SONGS_TAB)
-                    .setTabListener(new TabListener<TrackFragment>(this, SettingsActivity.SONGS_TAB, TrackFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.SONGS_TAB, TrackFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.playlists_menu)
                     .setTag(SettingsActivity.PLAYLISTS_TAB)
-                    .setTabListener(new TabListener<PlaylistFragment>(this, SettingsActivity.PLAYLISTS_TAB, PlaylistFragment.class)));
+                    .setTabListener(new TabListener<>(this, SettingsActivity.PLAYLISTS_TAB, PlaylistFragment.class)));
         }
     }
 

@@ -96,7 +96,7 @@ public class MusicUtils {
     }
     
     public static MediaPlaybackService sService = null;
-    private final static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<Context, ServiceBinder>();
+    private final static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<>();
 
     public static class ServiceToken {
         final ContextWrapper mWrappedContext;
@@ -350,14 +350,17 @@ public class MusicUtils {
     }
 
     public static void playSong(Context context, long id) {
-        String clickOnSong = PreferenceManager.getDefaultSharedPreferences(context).getString(
-                SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT);
-        if (clickOnSong.equals(SettingsActivity.PLAY_NOW)) {
-            MusicUtils.queueAndPlayImmediately(context, id);
-        } else if (clickOnSong.equals(SettingsActivity.QUEUE)) {
-            MusicUtils.queue(context, new long[] { id });
-        } else {
-            MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(context, id);
+        switch (PreferenceManager.getDefaultSharedPreferences(context).getString(
+                SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT)) {
+            case SettingsActivity.PLAY_NOW:
+                MusicUtils.queueAndPlayImmediately(context, id);
+                break;
+            case SettingsActivity.QUEUE:
+                MusicUtils.queue(context, new long[]{id});
+                break;
+            default:
+                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(context, id);
+                break;
         }
     }
 

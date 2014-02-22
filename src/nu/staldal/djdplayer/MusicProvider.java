@@ -186,7 +186,7 @@ public class MusicProvider extends ContentProvider {
                 + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
         int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID}, where, null, null));
-        ArrayList<Object> recent = new ArrayList<Object>(3);
+        ArrayList<Object> recent = new ArrayList<>(3);
         recent.add(MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST);
         recent.add(getContext().getString(R.string.recentlyadded));
         recent.add(count);

@@ -1361,7 +1361,7 @@ public class MediaPlaybackService extends Service {
         synchronized(this) {
             if (!isPlaying()) {
                 boolean modified = false;
-                Set<Long> found = new HashSet<Long>();
+                Set<Long> found = new HashSet<>();
                 for (int i=mPlayListLen-1; i >= 0; i--) {
                     if (!found.add(mPlayList[i])) {
                         removeTracksInternal(i, i);
@@ -1596,11 +1596,7 @@ public class MediaPlaybackService extends Service {
                 }
                 mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mMediaPlayer.prepare();
-            } catch (IOException ex) {
-                // TODO: notify the user why the file couldn't be opened
-                mIsInitialized = false;
-                return;
-            } catch (IllegalArgumentException ex) {
+            } catch (IOException | IllegalArgumentException ex) {
                 // TODO: notify the user why the file couldn't be opened
                 mIsInitialized = false;
                 return;

@@ -424,7 +424,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
             case UNIQUEIFY_PLAYLIST: {
                 long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
-                Set<Long> found = new HashSet<Long>();
+                Set<Long> found = new HashSet<>();
                 for (int i = 0; i < songs.length; i++) {
                     if (!found.add(songs[i])) {
                         removePlaylistItem(i);
