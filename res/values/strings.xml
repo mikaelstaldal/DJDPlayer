@@ -111,8 +111,6 @@
     <string name="tracks_title">Songs</string>
     <!-- Category label on Library screen -->
     <string name="playlists_menu">Playlists</string>
-    <!-- Playlists screen title -->
-    <string name="playlists_title">Playlists</string>
     <!-- Category label on Library screen -->
     <string name="artists_menu">Artists</string>
     <!-- Menu item -->
@@ -147,20 +145,8 @@
 
     <!-- Title of screen when no sd card is present -->
     <string name="sdcard_missing_title">No SD card</string>
-    <!-- label underneath icon used to indicate that no sd card is present -->
-    <string name="sdcard_missing_message">Your phone does not have an SD card inserted</string>
     <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
     <string name="sdcard_busy_title">SD card unavailable</string>
-    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_busy_message">Sorry, your SD card is busy</string>
-    <!-- Title of screen when there was an error accessing the sd card -->
-    <string name="sdcard_error_title">SD card error</string>
-    <!-- label underneath icon used to indicate there was an error accessing the sd card -->
-    <string name="sdcard_error_message">An error was encountered on your SD card</string>
-    <!-- label underneath icon used to indicate that the sd card is present, but currently unavailable -->
-    <string name="sdcard_scanning_title">SD card not ready yet</string>
-    <!-- label underneath icon used to indicate sd card is mounted to your computer via USB -->
-    <string name="sdcard_scanning_message">Sorry, your SD card is not ready yet, please wait for a while</string>
 
     <!-- Default name of artist that doesn't have a name in the metadata -->
     <string name="unknown_artist_name">Unknown artist</string>
@@ -178,8 +164,6 @@
     <string name="repeat_all_notif">Repeating all songs</string>
     <!-- Individual song context menu item -->
     <string name="ringtone_menu">Use as phone ringtone</string>
-    <!-- Menu item -->
-    <string name="set_as">Set as</string>
     <!-- Menu item -->
     <string name="share_via">Share via</string>
     <!-- Menu item -->

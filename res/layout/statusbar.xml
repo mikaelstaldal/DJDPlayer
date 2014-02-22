@@ -27,7 +27,8 @@
             android:layout_gravity="center_vertical"
             android:paddingLeft="16dip"
             android:paddingRight="16dip"
-            android:src="@drawable/stat_notify_musicplayer"/>
+            android:src="@drawable/stat_notify_musicplayer"
+            android:contentDescription="@string/applabel"/>
 
     <LinearLayout
             android:layout_width="0dip"
