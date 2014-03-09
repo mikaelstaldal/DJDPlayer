@@ -269,12 +269,12 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_NOW: {
-                MusicUtils.queueAndPlayImmediately(getActivity(), mSelectedId);
+                MusicUtils.queueAndPlayImmediately(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
             case PLAY_NEXT: {
-                MusicUtils.queueNext(getActivity(), mSelectedId);
+                MusicUtils.queueNext(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
@@ -381,7 +381,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
         }
 
-        menu.add(0, PLAY_ALL, 0, R.string.play_all).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
                 R.drawable.ic_menu_interleave);
@@ -406,8 +407,13 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL: {
+            case PLAY_ALL_NOW: {
                 MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
+                return true;
+            }
+
+            case PLAY_ALL_NEXT: {
+                MusicUtils.queueNext(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 

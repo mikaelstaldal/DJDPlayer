@@ -232,12 +232,12 @@ public class QueryBrowserActivity extends ListActivity
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_NOW: {
-                MusicUtils.queueAndPlayImmediately(this, mSelectedId);
+                MusicUtils.queueAndPlayImmediately(this, new long[] { mSelectedId });
                 return true;
             }
 
             case PLAY_NEXT: {
-                MusicUtils.queueNext(this, mSelectedId);
+                MusicUtils.queueNext(this, new long[] { mSelectedId });
                 return true;
             }
 
@@ -252,9 +252,8 @@ public class QueryBrowserActivity extends ListActivity
             }
 
             case PLAYLIST_SELECTED: {
-                long[] list = new long[]{mSelectedId};
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(this, list, playlist);
+                MusicUtils.addToPlaylist(this, new long[] { mSelectedId }, playlist);
                 return true;
             }
 

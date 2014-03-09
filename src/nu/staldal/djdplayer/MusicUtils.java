@@ -45,7 +45,7 @@ public class MusicUtils {
         public final static int USE_AS_RINGTONE = 2;
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
-        public final static int PLAY_ALL = 5;
+        public final static int PLAY_ALL_NOW = 5;
         public final static int SHUFFLE_PLAYLIST = 9;
         public final static int UNIQUEIFY_PLAYLIST = 10;
         public final static int QUEUE_ALL = 11;
@@ -58,7 +58,8 @@ public class MusicUtils {
         public final static int SHARE_VIA = 19;
         public final static int TRACK_INFO = 20;
         public final static int SEARCH_FOR = 21;
-        public final static int CHILD_MENU_BASE = 22; // this should be the last item
+        public final static int PLAY_ALL_NEXT = 22;
+        public final static int CHILD_MENU_BASE = 23; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -353,22 +354,22 @@ public class MusicUtils {
         switch (PreferenceManager.getDefaultSharedPreferences(context).getString(
                 SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT)) {
             case SettingsActivity.PLAY_NOW:
-                MusicUtils.queueAndPlayImmediately(context, id);
+                MusicUtils.queueAndPlayImmediately(context, new long[] { id });
                 break;
             case SettingsActivity.QUEUE:
-                MusicUtils.queue(context, new long[]{id});
+                MusicUtils.queue(context, new long[] { id });
                 break;
             default:
-                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(context, id);
+                MusicUtils.queueNextAndPlayIfNotAlreadyPlaying(context, new long[] { id });
                 break;
         }
     }
 
-    public static void queueNextAndPlayIfNotAlreadyPlaying(Context context, long id) {
+    public static void queueNextAndPlayIfNotAlreadyPlaying(Context context, long[] songs) {
          if (isPlaying()) {
-             queueNext(context, id);
+             queueNext(context, songs);
          } else {
-             queueAndPlayImmediately(context, id);
+             queueAndPlayImmediately(context, songs);
          }
     }
 
@@ -392,19 +393,19 @@ public class MusicUtils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static void queueNext(Context context, long id) {
+    public static void queueNext(Context context, long[] songs) {
         if (sService == null) {
             return;
         }
-        sService.enqueue(new long[] { id }, MediaPlaybackService.NEXT);
+        sService.enqueue(songs, MediaPlaybackService.NEXT);
         Toast.makeText(context, R.string.will_play_next, Toast.LENGTH_SHORT).show();
     }
 
-    public static void queueAndPlayImmediately(Context context, long id) {
+    public static void queueAndPlayImmediately(Context context, long[] songs) {
         if (sService == null) {
             return;
         }
-        sService.enqueue(new long[] { id }, MediaPlaybackService.NOW);
+        sService.enqueue(songs, MediaPlaybackService.NOW);
     }
 
     private static ContentValues[] sContentValuesCache = null;

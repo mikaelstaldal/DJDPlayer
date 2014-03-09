@@ -145,7 +145,8 @@ public class FolderFragment extends CategoryFragment {
         String title = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME));
         menu.setHeaderTitle(title);
 
-        menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
@@ -164,15 +165,17 @@ public class FolderFragment extends CategoryFragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL: {
-                long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.playAll(getActivity(), songs);
+            case PLAY_ALL_NOW: {
+                MusicUtils.playAll(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
             }
 
+            case PLAY_ALL_NEXT: {
+                MusicUtils.queueNext(getActivity(), fetchSongList(mCurrentFolder));
+                return true;
+            }
             case QUEUE_ALL: {
-                long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.queue(getActivity(), songs);
+                MusicUtils.queue(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
             }
 
@@ -183,8 +186,7 @@ public class FolderFragment extends CategoryFragment {
 
             case PLAYLIST_SELECTED: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                long[] songs = fetchSongList(mCurrentFolder);
-                MusicUtils.addToPlaylist(getActivity(), songs, playlist);
+                MusicUtils.addToPlaylist(getActivity(), fetchSongList(mCurrentFolder), playlist);
                 return true;
             }
 

@@ -124,7 +124,8 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         String title = mIsUnknown ? getString(getUnknownStringId()) : mCurrentName;
         menu.setHeaderTitle(title);
 
-        menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
@@ -147,10 +148,17 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL: {
+            case PLAY_ALL_NOW: {
                 long[] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.playAll(getActivity(), songs);
+                return true;
+            }
+
+            case PLAY_ALL_NEXT: {
+                long[] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                MusicUtils.queueNext(getActivity(), songs);
                 return true;
             }
 

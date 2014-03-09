@@ -125,7 +125,8 @@ public class PlaylistFragment extends CategoryFragment {
         playlistName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
         menu.setHeaderTitle(playlistName);
 
-        menu.add(0, PLAY_ALL, 0, R.string.play_all);
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
         for (int i = 1; i <= 5; i++) {
@@ -150,8 +151,12 @@ public class PlaylistFragment extends CategoryFragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL:
+            case PLAY_ALL_NOW:
                 MusicUtils.playAll(getActivity(), fetchSongList(currentId));
+                return true;
+
+            case PLAY_ALL_NEXT:
+                MusicUtils.queueNext(getActivity(), fetchSongList(currentId));
                 return true;
 
             case QUEUE_ALL:

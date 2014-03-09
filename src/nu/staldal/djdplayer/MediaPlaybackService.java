@@ -768,7 +768,7 @@ public class MediaPlaybackService extends Service {
 
         // move part of list after insertion point
         int tailsize = mPlayListLen - position;
-        if (tailsize > 0) System.arraycopy(mPlayList, position + 1 - list.length, mPlayList, position + 1, tailsize);
+        if (tailsize > 0) System.arraycopy(mPlayList, position, mPlayList, position + list.length, tailsize);
 
         // copy list into playlist
         System.arraycopy(list, 0, mPlayList, position, list.length);
