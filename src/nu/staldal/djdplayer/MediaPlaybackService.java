@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1573,8 +1573,7 @@ public class MediaPlaybackService extends Service {
     }
 
     /**
-     * Provides a unified interface for dealing with midi files and
-     * other media files.
+     * Provides a unified interface for dealing with midi files and other media files.
      */
     private class MultiPlayer {
         private MediaPlayer mMediaPlayer = new MediaPlayer();
@@ -1596,8 +1595,8 @@ public class MediaPlaybackService extends Service {
                 }
                 mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mMediaPlayer.prepare();
-            } catch (IOException | IllegalArgumentException ex) {
-                // TODO: notify the user why the file couldn't be opened
+            } catch (IOException | IllegalArgumentException e) {
+                Log.w(LOGTAG, "Couldn't open audio file: " + path, e);
                 mIsInitialized = false;
                 return;
             }
