@@ -357,7 +357,10 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
         }
 
         private void init() {
-            mCurrentPlaylistCursor = null;
+            if (mCurrentPlaylistCursor != null) {
+                mCurrentPlaylistCursor.close();
+                mCurrentPlaylistCursor = null;
+            }
             playQueue = service.getQueue();
             mSize = playQueue.length;
             if (mSize == 0) {
@@ -529,6 +532,13 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
         public boolean requery() {
             init();
             return true;
+        }
+
+        @Override
+        public void close() {
+            if (mCurrentPlaylistCursor != null)
+                mCurrentPlaylistCursor.close();
+            super.close();
         }
     }
 }
