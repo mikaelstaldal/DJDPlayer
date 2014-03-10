@@ -271,10 +271,10 @@ public class MediaPlaybackActivity extends Activity
         }
 
         if (view.equals(mArtistName)) {
-            browseCategory("artist", artistId);
+            browseCategory(ArtistFragment.CATEGORY_ID, artistId);
             return true;
         } else if (view.equals(mGenreName)) {
-            browseCategory("genre", genreId);
+            browseCategory(GenreFragment.CATEGORY_ID, genreId);
             return true;
         } else {
             throw new RuntimeException("shouldn't be here");

@@ -19,10 +19,8 @@ package nu.staldal.djdplayer;
 import android.app.AlertDialog;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.ContextMenu;
@@ -127,12 +125,9 @@ public class FolderFragment extends CategoryFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
         adapter.getCursor().moveToPosition(position);
         String path = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        intent.putExtra(CATEGORY_ID, path);
-        startActivity(intent);
+        viewCategory(CATEGORY_ID, path, false);
     }
 
     @Override

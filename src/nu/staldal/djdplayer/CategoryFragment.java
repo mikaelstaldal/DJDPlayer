@@ -36,4 +36,8 @@ public abstract class CategoryFragment extends BrowserFragment implements MusicU
 
         return listView;
     }
+
+    protected void viewCategory(String categoryId, String id, boolean editMode) {
+        ((MusicBrowserActivity)getActivity()).showSongsInCategory(categoryId, id, editMode);
+    }
 }

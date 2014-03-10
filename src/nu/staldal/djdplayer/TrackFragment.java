@@ -76,7 +76,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         if (savedInstanceState != null) {
             mSelectedPosition = savedInstanceState.getInt("selectedposition");
             mSelectedId = savedInstanceState.getLong("selectedtrack");
@@ -86,13 +86,20 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             mGenreId = savedInstanceState.getLong("genre");
             mFolder = savedInstanceState.getString("folder");
             mEditMode = savedInstanceState.getBoolean("editmode", false);
+        } else if (getArguments() != null) {
+            mAlbumId = MusicUtils.parseLong(getArguments().getString(AlbumFragment.CATEGORY_ID));
+            mArtistId = MusicUtils.parseLong(getArguments().getString(ArtistFragment.CATEGORY_ID));
+            mPlaylist = MusicUtils.parseLong(getArguments().getString(PlaylistFragment.CATEGORY_ID));
+            mGenreId = MusicUtils.parseLong(getArguments().getString(GenreFragment.CATEGORY_ID));
+            mFolder = getArguments().getString(FolderFragment.CATEGORY_ID);
+            mEditMode = getArguments().getBoolean("editmode");
         } else {
-            mAlbumId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("album"));
-            mArtistId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("artist"));
-            mPlaylist = MusicUtils.parseLong(getActivity().getIntent().getStringExtra(PlaylistFragment.CATEGORY_ID));
-            mGenreId = MusicUtils.parseLong(getActivity().getIntent().getStringExtra("genre"));
-            mFolder = getActivity().getIntent().getStringExtra(FolderFragment.CATEGORY_ID);
-            mEditMode = Intent.ACTION_EDIT.equals(getActivity().getIntent().getAction());
+            mAlbumId = -1;
+            mArtistId = -1;
+            mPlaylist = -1;
+            mGenreId = -1;
+            mFolder = null;
+            mEditMode = false;
         }
 
         setHasOptionsMenu(true);

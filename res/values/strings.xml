@@ -156,6 +156,9 @@
     <string name="unknown_genre_name">Unknown genre</string>
     <!-- Default name of album that doesn't have a name in the metadata -->
     <string name="unknown_album_name">Unknown album</string>
+    <!-- Default name of playlist that doesn't have a name in the metadata -->
+    <string name="unknown_playlist_name">Unknown playlist</string>
+
     <!-- Toast after turning repeat off -->
     <string name="repeat_off_notif">Repeat is off</string>
     <!-- Toast after turning single repeat on -->

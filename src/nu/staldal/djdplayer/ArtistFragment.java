@@ -25,9 +25,12 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 
 public class ArtistFragment extends MetadataCategoryFragment {
+
+    public static final String CATEGORY_ID = "artist";
+
     @Override
     protected String getCategoryId() {
-        return "artist";
+        return CATEGORY_ID;
     }
 
     @Override

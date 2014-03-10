@@ -284,10 +284,7 @@ public class PlaylistFragment extends CategoryFragment {
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         } else {
-            Intent intent = new Intent((id < 0) ? Intent.ACTION_VIEW : Intent.ACTION_EDIT);
-            intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-            intent.putExtra(CATEGORY_ID, String.valueOf(id));
-            startActivity(intent);
+            viewCategory(CATEGORY_ID, String.valueOf(id), (id >= 0));
         }
     }
 

@@ -22,7 +22,6 @@ import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -106,10 +105,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-        intent.putExtra(getCategoryId(), String.valueOf(id));
-        startActivity(intent);
+        viewCategory(getCategoryId(), String.valueOf(id), false);
     }
 
     @Override
@@ -243,4 +239,4 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
         startActivity(Intent.createChooser(i, title));
     }
-    }
+}
