@@ -51,6 +51,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private boolean editMode;
     private String title;
     private boolean canGoBack;
+    private boolean picking;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,22 +67,32 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             editMode = savedInstanceState.getBoolean("editMode");
             title = savedInstanceState.getString("title");
             canGoBack = savedInstanceState.getBoolean("canGoBack");
+            picking = savedInstanceState.getBoolean("picking");
         } else {
-            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-                calcCategoryAndId(getIntent());
-                editMode = false;
-                title = calcTitle(category, id);
-            } else if (Intent.ACTION_EDIT.equals(getIntent().getAction())) {
-                calcCategoryAndId(getIntent());
-                editMode = true;
-                title = calcTitle(category, id);
-            } else {
-                category = null;
-                id = null;
-                editMode = false;
-                title = null;
-            }
             canGoBack = false;
+            picking = false;
+            switch (getIntent().getAction()) {
+                case Intent.ACTION_VIEW:
+                    calcCategoryAndId(getIntent());
+                    editMode = false;
+                    title = calcTitle(category, id);
+                    break;
+
+                case Intent.ACTION_EDIT:
+                    calcCategoryAndId(getIntent());
+                    editMode = true;
+                    title = calcTitle(category, id);
+                    break;
+
+                case Intent.ACTION_GET_CONTENT:
+                    picking = true;
+
+                default:
+                    category = null;
+                    id = null;
+                    editMode = false;
+                    title = null;
+            }
         }
 
         if (title == null) {
@@ -269,6 +280,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         Bundle bundle = new Bundle();
         bundle.putBoolean("editmode", editMode);
+        bundle.putBoolean("picking", picking);
         bundle.putString(category, id);
         Fragment fragment = Fragment.instantiate(this, TrackFragment.class.getName(), bundle);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -397,6 +409,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         outState.putString("category", category);
         outState.putString("id", id);
         outState.putBoolean("canGoBack", canGoBack);
+        outState.putBoolean("picking", picking);
     }
 
     @Override
@@ -441,6 +454,10 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         } else {
             super.onBackPressed();
         }
+    }
+
+    public boolean isPicking() {
+        return picking;
     }
 
     static class TabListener<T extends Fragment> implements ActionBar.TabListener {

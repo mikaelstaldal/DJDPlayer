@@ -268,17 +268,13 @@ public class MusicPicker extends ListActivity
             mListHasFocus = icicle.getBoolean(FOCUS_KEY);
             sortMode = icicle.getInt(SORT_MODE_KEY, sortMode);
         }
-        if (Intent.ACTION_GET_CONTENT.equals(getIntent().getAction())) {
-            mBaseUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        } else {
-            mBaseUri = getIntent().getData();
-            if (mBaseUri == null) {
-                Log.w(LOGTAG, "No data URI given to PICK action");
-                finish();
-                return;
-            }
+        mBaseUri = getIntent().getData();
+        if (mBaseUri == null) {
+            Log.w(LOGTAG, "No data URI given to PICK action");
+            finish();
+            return;
         }
-        
+
         setContentView(R.layout.music_picker);
 
         mSortOrder = MediaStore.Audio.Media.TITLE_KEY;

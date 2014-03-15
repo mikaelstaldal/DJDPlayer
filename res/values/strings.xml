@@ -259,8 +259,6 @@
     <string name="sort_by_track">Sort by title</string>
     <!-- Menu in music picker to sort the list by artist name. -->
     <string name="sort_by_artist">Sort by artist</string>
-    <!--  Title of the music picker activity. -->
-    <string name="music_picker_title">Select music track</string>
 
     <!-- The string used to describe Music as a searchable item within system search settings. -->
     <string name="search_settings_description">Artists, albums, and tracks</string>

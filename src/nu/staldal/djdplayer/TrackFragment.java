@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.database.CharArrayBuffer;
@@ -369,14 +370,19 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         mSelectedPosition = position;
         adapter.getCursor().moveToPosition(mSelectedPosition);
         try {
-            int id_idx = adapter.getCursor().getColumnIndexOrThrow(
-                    MediaStore.Audio.Playlists.Members.AUDIO_ID);
+            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
             mSelectedId = adapter.getCursor().getLong(id_idx);
         } catch (IllegalArgumentException ex) {
             mSelectedId = id;
         }
 
-        MusicUtils.playSong(getActivity(), mSelectedId);
+        if (getActivity() instanceof MusicBrowserActivity && ((MusicBrowserActivity)getActivity()).isPicking()) {
+            getActivity().setResult(Activity.RESULT_OK, new Intent().setData(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId)));
+            getActivity().finish();
+        } else {
+            MusicUtils.playSong(getActivity(), mSelectedId);
+        }
     }
 
     @Override
