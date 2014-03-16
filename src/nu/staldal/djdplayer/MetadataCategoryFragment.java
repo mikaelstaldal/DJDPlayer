@@ -105,7 +105,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        viewCategory(getCategoryId(), String.valueOf(id), false);
+        viewCategory(getCategoryId(), String.valueOf(id));
     }
 
     @Override

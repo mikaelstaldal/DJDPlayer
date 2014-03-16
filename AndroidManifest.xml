@@ -62,8 +62,6 @@
                 <data android:mimeType="vnd.android.cursor.dir/audio"/>
                 <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
             </intent-filter>
-
-            <!-- Music picking: someone asks to get content of any of the audio types we support -->
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -71,6 +69,13 @@
                 <data android:mimeType="audio/*"/>
                 <data android:mimeType="application/ogg"/>
                 <data android:mimeType="application/x-ogg"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="vnd.android.cursor.dir/audio"/>
+                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
             </intent-filter>
         </activity>
 
@@ -131,15 +136,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".MusicPicker">
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <data android:mimeType="vnd.android.cursor.dir/audio"/>
             </intent-filter>
         </activity>
 

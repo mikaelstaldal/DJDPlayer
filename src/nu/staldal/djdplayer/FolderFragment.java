@@ -127,7 +127,7 @@ public class FolderFragment extends CategoryFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         adapter.getCursor().moveToPosition(position);
         String path = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        viewCategory(CATEGORY_ID, path, false);
+        viewCategory(CATEGORY_ID, path);
     }
 
     @Override

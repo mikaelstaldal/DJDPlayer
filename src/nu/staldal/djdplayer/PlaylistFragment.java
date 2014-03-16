@@ -284,7 +284,7 @@ public class PlaylistFragment extends CategoryFragment {
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         } else {
-            viewCategory(CATEGORY_ID, String.valueOf(id), (id >= 0));
+            viewCategory(CATEGORY_ID, String.valueOf(id));
         }
     }
 

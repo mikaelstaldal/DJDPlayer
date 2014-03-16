@@ -72,7 +72,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     private long mPlaylist;
     private long mGenreId;
     private String mFolder;
-    private boolean mEditMode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,21 +85,18 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             mPlaylist = savedInstanceState.getLong("playlist");
             mGenreId = savedInstanceState.getLong("genre");
             mFolder = savedInstanceState.getString("folder");
-            mEditMode = savedInstanceState.getBoolean("editmode", false);
         } else if (getArguments() != null) {
             mAlbumId = MusicUtils.parseLong(getArguments().getString(AlbumFragment.CATEGORY_ID));
             mArtistId = MusicUtils.parseLong(getArguments().getString(ArtistFragment.CATEGORY_ID));
             mPlaylist = MusicUtils.parseLong(getArguments().getString(PlaylistFragment.CATEGORY_ID));
             mGenreId = MusicUtils.parseLong(getArguments().getString(GenreFragment.CATEGORY_ID));
             mFolder = getArguments().getString(FolderFragment.CATEGORY_ID);
-            mEditMode = getArguments().getBoolean("editmode");
         } else {
             mAlbumId = -1;
             mArtistId = -1;
             mPlaylist = -1;
             mGenreId = -1;
             mFolder = null;
-            mEditMode = false;
         }
 
         setHasOptionsMenu(true);
@@ -110,7 +106,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ListView listView;
 
-        if (mEditMode) {
+        if (isEditMode()) {
             listView = new TouchInterceptor(getActivity(), null);
             ((TouchInterceptor) listView).setDropListener(new TouchInterceptor.DropListener() {
                     public void drop(int from, int to) {
@@ -142,7 +138,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     protected CursorAdapter createListAdapter() {
         return new TrackListAdapter(
                         getActivity(), // need to use application context to avoid leaks
-                        mEditMode ? R.layout.edit_track_list_item : R.layout.track_list_item,
+                        isEditMode() ? R.layout.edit_track_list_item : R.layout.track_list_item,
                         null, // cursor
                         new String[] {},
                         new int[] {});
@@ -156,49 +152,53 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         where.append(" AND " + MediaStore.Audio.Media.DATA + " != ''");
 
         if (mGenreId != -1) {
-            Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId);
-            return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,
+            return new CursorLoader(getActivity(), MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId),
+                    CURSOR_COLS, where.toString(), null,
                     MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
         } else if (mPlaylist != -1) {
             if (mPlaylist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                 // do a query for all songs added in the last X weeks
-                Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 int X = MusicUtils.getIntPref(getActivity(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
                 where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">");
                 where.append(System.currentTimeMillis() / 1000 - X);
-                return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null,
+                return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
+                        where.toString(), null,
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
             } else {
-                Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
-                return new CursorLoader(getActivity(), uri, PLAYLIST_MEMBER_COLS, null, null,
+                return new CursorLoader(getActivity(), MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist),
+                        PLAYLIST_MEMBER_COLS,
+                        null, null,
                         MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
             }
         } else if (mFolder != null) {
-            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
             where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE ?");
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), new String[] { mFolder + "%" },
-                                MediaStore.Audio.Media.DATA);
+            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
+                    where.toString(), new String[] { mFolder + "%" },
+                    MediaStore.Audio.Media.DATA);
         } else if (mAlbumId != -1) {
             where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);
-            String mSortOrder = MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY;
-
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null, mSortOrder);
+            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
+                    where.toString(), null,
+                    MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
         } else if (mArtistId != -1) {
             where.append(" AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + mArtistId);
-            String mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
-            
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null, mSortOrder);
-        } else { // all songs
-            String mSortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
+                    where.toString(), null,
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        } else if (getActivity().getIntent() != null && getActivity().getIntent().getData() != null) {
+            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
+            return new CursorLoader(getActivity(), getActivity().getIntent().getData(), CURSOR_COLS,
+                    where.toString(), null,
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
+        } else { // all songs
             where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            return new CursorLoader(getActivity(), uri, CURSOR_COLS, where.toString(), null, mSortOrder);
+            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
+                    where.toString(), null,
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         }
     }
 
@@ -214,7 +214,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         outcicle.putLong("playlist", mPlaylist);
         outcicle.putLong("genre", mGenreId);
         outcicle.putString("folder", mFolder);
-        outcicle.putBoolean("editmode", mEditMode);
 
         super.onSaveInstanceState(outcicle);
     }
@@ -246,7 +245,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         menu.add(0, QUEUE, 0, R.string.queue);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
-        if (mEditMode) {
+        if (isEditMode()) {
             menu.add(0, REMOVE_FROM_PLAYLIST, 0, R.string.remove_from_playlist);
         }
         menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
@@ -376,7 +375,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             mSelectedId = id;
         }
 
-        if (getActivity() instanceof MusicBrowserActivity && ((MusicBrowserActivity)getActivity()).isPicking()) {
+        if (isPicking()) {
             getActivity().setResult(Activity.RESULT_OK, new Intent().setData(
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId)));
             getActivity().finish();
@@ -389,7 +388,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        if (mEditMode) {
+        if (isEditMode()) {
             menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
             menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
         }
@@ -477,6 +476,15 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         return super.onOptionsItemSelected(item);
     }
 
+    public boolean isEditMode() {
+        return Intent.ACTION_EDIT.equals(getActivity().getIntent().getAction()) || mPlaylist >= 0;
+    }
+
+    public boolean isPicking() {
+        return Intent.ACTION_PICK.equals(getActivity().getIntent().getAction())
+                || Intent.ACTION_GET_CONTENT.equals(getActivity().getIntent().getAction());
+    }
+
     class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
         int mTitleIdx;
         int mArtistIdx;
@@ -524,7 +532,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
-                } else if (!TrackFragment.this.mEditMode && TrackFragment.this.mAlbumId == -1) {
+                } else if (!TrackFragment.this.isEditMode() && TrackFragment.this.mAlbumId == -1) {
                     String alpha = TrackFragment.this.getString(R.string.fast_scroll_alphabet);
 
                     mIndexer = new MusicAlphabetIndexer(cursor, mTitleIdx, alpha);
