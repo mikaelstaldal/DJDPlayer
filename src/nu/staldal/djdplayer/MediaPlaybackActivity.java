@@ -20,6 +20,7 @@ package nu.staldal.djdplayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
@@ -473,7 +474,9 @@ public class MediaPlaybackActivity extends Activity
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST2, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(this, sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
-        menu.add(0, USE_AS_RINGTONE2, 0, R.string.ringtone_menu);
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            menu.add(0, USE_AS_RINGTONE2, 0, R.string.ringtone_menu);
+        }
 
         menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);
 

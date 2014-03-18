@@ -18,6 +18,7 @@ package nu.staldal.djdplayer;
 import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -247,7 +248,9 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
-        menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+        if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+        }
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
 
         menu.add(0, TRACK_INFO, 0, R.string.info);
