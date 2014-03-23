@@ -240,6 +240,9 @@
     <!-- Application label. This might show up in the activity-picker -->
     <string name="applabel">DJD Player</string>
 
+    <!-- Application description -->
+    <string name="appdescription">Music player and organizer app, adapted for the needs of DJs playing music at parties and dancing events.</string>
+
     <!-- Activity label. This might show up in the activity-picker -->
     <string name="musicshortcutlabel">Music playlist</string>
 

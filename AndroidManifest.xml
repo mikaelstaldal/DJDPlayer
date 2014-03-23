@@ -36,8 +36,12 @@
     <!-- To delete music files, and manipulate play lists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+    <uses-feature android:name="android.software.app_widgets"
+                  android:required="false"/>
+
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
+                 android:description="@string/appdescription"
                  android:theme="@style/Theme.Default"
                  android:allowTaskReparenting="true"
                  android:allowBackup="true">
@@ -146,7 +150,8 @@
         <activity android:name=".PickMusicFolderActivity"
             android:theme="@style/Theme.Dialog" />
 
-        <service android:name=".MediaPlaybackService" />
+        <service android:name=".MediaPlaybackService"
+                 android:exported="false"/>
 
         <receiver android:name=".MediaAppWidgetProvider">
             <intent-filter>
