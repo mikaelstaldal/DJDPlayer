@@ -480,7 +480,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     }
 
     public boolean isEditMode() {
-        return Intent.ACTION_EDIT.equals(getActivity().getIntent().getAction()) || mPlaylist >= 0;
+        return mPlaylist >= 0;
     }
 
     public boolean isPicking() {

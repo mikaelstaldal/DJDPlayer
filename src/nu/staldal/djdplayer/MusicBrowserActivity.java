@@ -66,7 +66,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             canGoBack = savedInstanceState.getBoolean("canGoBack");
         } else {
             String action = getIntent().getAction();
-            if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_EDIT.equals(action) || Intent.ACTION_PICK.equals(action)) {
+            if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) {
                 calcCategoryAndId(getIntent());
                 title = calcTitle(category, id);
             } else {
