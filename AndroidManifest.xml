@@ -48,10 +48,11 @@
 
         <meta-data
             android:name="android.app.default_searchable"
-            android:value=".QueryBrowserActivity" />
+            android:value=".MusicBrowserActivity" />
 
         <activity android:name=".MusicBrowserActivity"
-                  android:theme="@style/Theme.Main">
+                  android:theme="@style/Theme.Main"
+                  android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -80,6 +81,15 @@
                 <data android:mimeType="vnd.android.cursor.dir/audio"/>
                 <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.MEDIA_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
 
         <!-- This is the "current music playing" panel, which has special
@@ -119,17 +129,6 @@
                 <action android:name="nu.staldal.djdplayer.PLAYBACK_VIEWER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <activity android:name=".QueryBrowserActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.MEDIA_SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
         </activity>
 
         <activity android:name=".PlaylistShortcutActivity"

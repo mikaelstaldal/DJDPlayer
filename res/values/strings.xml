@@ -322,4 +322,6 @@
 
     <string name="playing">playing</string>
 
+    <string name="search_results">Search results: \"<xliff:g id="SEARCH">%s</xliff:g>\"</string>
+
 </resources>

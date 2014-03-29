@@ -15,13 +15,13 @@
 -->
 
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
-    android:label="@string/search_title"
+    android:label="@string/applabel"
     android:hint="@string/search_hint"
     android:includeInGlobalSearch="true"
 
     android:searchSuggestAuthority="media"
     android:searchSuggestPath="external/audio/search"
-    android:searchSuggestThreshold="3"
+    android:searchSuggestThreshold="1"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
     android:searchSettingsDescription="@string/search_settings_description"
 />

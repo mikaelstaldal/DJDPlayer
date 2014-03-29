@@ -698,4 +698,15 @@ public class MusicUtils {
     static long parseLong(String s) {
         return (s == null) ? -1 : Long.parseLong(s);
     }
+
+    static boolean isLong(String s) {
+        if (s == null) return false;
+        try {
+            Long.parseLong(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
+

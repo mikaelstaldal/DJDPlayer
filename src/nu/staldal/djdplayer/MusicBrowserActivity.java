@@ -17,10 +17,7 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.app.*;
 import android.content.*;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -29,6 +26,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewConfiguration;
@@ -40,56 +38,102 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     public static final String TRACKS_FRAGMENT = "tracksFragment";
 
-    private MusicUtils.ServiceToken mToken;
-
     private NowPlayingFragment nowPlayingFragment;
+    private MusicUtils.ServiceToken mToken = null;
 
     private boolean invalidateTabs = false;
 
     private String category;
     private String id;
     private String title;
+    private boolean searchResult;
     private boolean canGoBack;
+
+    private Bundle savedInstanceState;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        Log.i("MusicBrowserActivity", "onCreate - " + getIntent());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+
+        this.savedInstanceState = savedInstanceState;
+
+        mToken = MusicUtils.bindToService(this, this);
+    }
+
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        MediaPlaybackService service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
 
         if (savedInstanceState != null) {
             category = savedInstanceState.getString("category");
             id = savedInstanceState.getString("id");
             title = savedInstanceState.getString("title");
+            searchResult = savedInstanceState.getBoolean("searchResult");
             canGoBack = savedInstanceState.getBoolean("canGoBack");
         } else {
-            String action = getIntent().getAction();
-            if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) {
-                calcCategoryAndId(getIntent());
-                title = calcTitle(category, id);
-            } else {
-                category = null;
-                id = null;
-                title = null;
+            boolean shouldContinue = parseIntent(getIntent());
+            if (!shouldContinue) {
+                finish();
+                return;
             }
             canGoBack = false;
         }
 
-        if (title == null) {
-            enterCategoryMode();
-        } else {
-            enterSongsMode();
-        }
-
-        setContentView(R.layout.media_picker_activity);
-
+        setContentView(R.layout.music_browser_activity);
         nowPlayingFragment = (NowPlayingFragment) getFragmentManager().findFragmentById(R.id.nowplaying);
 
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+        setupUI();
+        nowPlayingFragment.onServiceConnected(service);
+        invalidateOptionsMenu();
+    }
 
-        mToken = MusicUtils.bindToService(this, this);
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.i("MusicBrowserActivity", "onNewIntent - " + intent);
+        boolean shouldContinue = parseIntent(intent);
+        if (shouldContinue) {
+            setIntent(intent);
+            setupUI();
+        }
+    }
+
+    /**
+     * @return {@code true} if we should continue and reconfigure UI, {@code false} if we should do nothing more
+     */
+    private boolean parseIntent(Intent intent) {
+        String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)
+                && intent.getData() != null
+                && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
+                && MusicUtils.isLong(intent.getData().getLastPathSegment())) {
+            long id = Long.valueOf(intent.getData().getLastPathSegment());
+            MusicUtils.playSong(this, id);
+            return false;
+        } else if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) {
+            calcCategoryAndId(intent);
+            title = calcTitle(category, id);
+            searchResult = false;
+            canGoBack = true;
+        } else if (Intent.ACTION_SEARCH.equals(intent.getAction())
+                            || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
+            calcCategoryAndId(intent);
+            title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY));
+            searchResult = true;
+            canGoBack = true;
+        } else {
+            category = null;
+            id = null;
+            title = null;
+            searchResult = false;
+            canGoBack = false;
+        }
+        return true;
     }
 
     private void calcCategoryAndId(Intent intent) {
@@ -99,6 +143,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         long genreId = MusicUtils.parseLong(intent.getStringExtra(GenreFragment.CATEGORY_ID));
         String folder = intent.getStringExtra(FolderFragment.CATEGORY_ID);
 
+        category = null;
+        id = null;
         if (albumId != -1) {
             category = AlbumFragment.CATEGORY_ID;
             id = String.valueOf(albumId);
@@ -114,9 +160,20 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         } else if (folder != null) {
             category = FolderFragment.CATEGORY_ID;
             id = folder;
-        } else {
-            category = null;
-            id = null;
+        } else if (intent.getData() != null) {
+            String lastPathSegment = intent.getData().getLastPathSegment();
+            if (MusicUtils.isLong(lastPathSegment)) {
+                if (intent.getData().toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
+                    category = AlbumFragment.CATEGORY_ID;
+                    id = lastPathSegment;
+                } else if (intent.getData().toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
+                    category = ArtistFragment.CATEGORY_ID;
+                    id = lastPathSegment;
+                } else if (intent.getData().toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString())) {
+                    category = GenreFragment.CATEGORY_ID;
+                    id = lastPathSegment;
+                }
+            }
         }
     }
 
@@ -210,10 +267,20 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         }
     }
 
+
+    private void setupUI() {
+        if (title == null) {
+            enterCategoryMode();
+        } else {
+            enterSongsMode();
+        }
+    }
+
     void showSongsInCategory(String category, String id) {
         this.category = category;
         this.id = id;
         this.title = calcTitle(category, id);
+        this.searchResult = false;
         this.canGoBack = true;
         enterSongsMode();
     }
@@ -248,9 +315,14 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         actionBar.setHomeButtonEnabled(true);
         setTitle(title);
 
-        Bundle bundle = new Bundle();
-        bundle.putString(category, id);
-        Fragment fragment = Fragment.instantiate(this, TrackFragment.class.getName(), bundle);
+        Fragment fragment;
+        if (searchResult) {
+            fragment = Fragment.instantiate(this, QueryFragment.class.getName());
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString(category, id);
+            fragment = Fragment.instantiate(this, TrackFragment.class.getName(), bundle);
+        }
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.main, fragment, TRACKS_FRAGMENT);
         ft.commit();
@@ -318,14 +390,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         return ViewConfiguration.get(this).hasPermanentMenuKey();
     }
 
-    public void onServiceConnected(ComponentName name, IBinder binder) {
-        MediaPlaybackService service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
-
-        nowPlayingFragment.onServiceConnected(service);
-
-        invalidateOptionsMenu();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -375,13 +439,16 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         outState.putString("category", category);
         outState.putString("id", id);
         outState.putString("title", title);
+        outState.putBoolean("searchResult", searchResult);
         outState.putBoolean("canGoBack", canGoBack);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MusicUtils.unbindFromService(mToken);
+        if (mToken != null) {
+            MusicUtils.unbindFromService(mToken);
+        }
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
