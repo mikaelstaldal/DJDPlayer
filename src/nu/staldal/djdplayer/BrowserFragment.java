@@ -19,6 +19,7 @@ import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.CursorAdapter;
 
@@ -73,4 +74,15 @@ public abstract class BrowserFragment extends ListFragment implements LoaderMana
             getLoaderManager().restartLoader(0, null, BrowserFragment.this);
         }
     };
+
+    public boolean isPicking() {
+        return Intent.ACTION_PICK.equals(getActivity().getIntent().getAction())
+                || Intent.ACTION_GET_CONTENT.equals(getActivity().getIntent().getAction());
+    }
+
+    protected void viewCategory(Uri uri) {
+        ((MusicBrowserActivity)getActivity()).onNewIntent(new Intent(
+                isPicking() ? Intent.ACTION_PICK : Intent.ACTION_VIEW,
+                uri));
+    }
 }

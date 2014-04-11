@@ -20,18 +20,12 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
+import android.widget.ListView;
 
 public class ArtistFragment extends MetadataCategoryFragment {
-
-    public static final String CATEGORY_ID = "artist";
-
-    @Override
-    protected String getCategoryId() {
-        return CATEGORY_ID;
-    }
 
     @Override
     protected String getSelectedCategoryId() {
@@ -66,13 +60,12 @@ public class ArtistFragment extends MetadataCategoryFragment {
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] cols = new String[] {
-                MediaStore.Audio.Artists._ID,
-                MediaStore.Audio.Artists.ARTIST,
-                MediaStore.Audio.Artists.NUMBER_OF_TRACKS,
+                MusicContract.Artist._ID,
+                MusicContract.Artist.NAME,
+                MusicContract.Artist.COUNT,
         };
 
-        Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
-        return new CursorLoader(getActivity(), uri, cols, null, null, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
+        return new CursorLoader(getActivity(), MusicContract.Artist.CONTENT_URI, cols, null, null, null);
     }
 
     @Override
@@ -82,22 +75,22 @@ public class ArtistFragment extends MetadataCategoryFragment {
 
     @Override
     protected int getNameColumnIndex(Cursor cursor) {
-        return cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST);
+        return cursor.getColumnIndexOrThrow(MusicContract.Artist.NAME);
     }
 
     @Override
     protected String getNumberOfSongsColumnName() {
-        return MediaStore.Audio.Artists.NUMBER_OF_TRACKS;
+        return MusicContract.Artist.COUNT;
     }
 
     @Override
     protected long[] fetchSongList(long id) {
-        final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " +
-                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " +
-                MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''";
-        Cursor cursor = MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        Cursor cursor = MusicUtils.query(getActivity(),
+                MusicContract.Artist.getArtistUri(id),
+                new String[] { MediaStore.Audio.Media._ID },
+                null,
+                null,
+                null);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
@@ -110,5 +103,10 @@ public class ArtistFragment extends MetadataCategoryFragment {
     @Override
     protected boolean shuffleSongs() {
         return true;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        viewCategory(MusicContract.Artist.getArtistUri(id));
     }
 }

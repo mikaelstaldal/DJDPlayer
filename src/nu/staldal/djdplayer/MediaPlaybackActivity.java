@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,8 @@ public class MediaPlaybackActivity extends Activity
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        Log.i(LOGTAG, "onCreate - " + getIntent());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -272,21 +274,24 @@ public class MediaPlaybackActivity extends Activity
         }
 
         if (view.equals(mArtistName)) {
-            browseCategory(ArtistFragment.CATEGORY_ID, artistId);
+            Intent intent = new Intent(this, MusicBrowserActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setData(MusicContract.Artist.getArtistUri(artistId));
+            startActivity(intent);
+            finish();
             return true;
         } else if (view.equals(mGenreName)) {
-            browseCategory(GenreFragment.CATEGORY_ID, genreId);
+            Intent intent = new Intent(this, MusicBrowserActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setData(MusicContract.Genre.getGenreUri(genreId));
+            startActivity(intent);
+            finish();
             return true;
         } else {
             throw new RuntimeException("shouldn't be here");
         }
-    }
-
-    private void browseCategory(String categoryId, long id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-        intent.putExtra(categoryId, String.valueOf(id));
-        startActivity(intent);
     }
 
     private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
@@ -347,6 +352,7 @@ public class MediaPlaybackActivity extends Activity
     
     @Override
     public void onNewIntent(Intent intent) {
+        Log.i(LOGTAG, "onNewIntent - " + getIntent());
         setIntent(intent);
     }
     
@@ -930,9 +936,8 @@ public class MediaPlaybackActivity extends Activity
         // of a "play this file" Intent, exit. Otherwise go to the Music
         // app start screen.
         if (getIntent().getData() == null) {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
+            Intent intent = new Intent(MediaPlaybackActivity.this, MusicBrowserActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
         finish();

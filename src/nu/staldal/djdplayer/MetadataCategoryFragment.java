@@ -30,7 +30,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
     protected final static int SEARCH_FOR = CHILD_MENU_BASE;
@@ -41,8 +40,6 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
     protected long mCurrentId;    
     protected String mCurrentName;
     protected boolean mIsUnknown;
-
-    protected abstract String getCategoryId();
 
     protected abstract String getSelectedCategoryId();
 
@@ -101,11 +98,6 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         outcicle.putString(CURRENT_NAME, mCurrentName);
         outcicle.putBoolean(IS_UNKNOWN, mIsUnknown);
         super.onSaveInstanceState(outcicle);
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        viewCategory(getCategoryId(), String.valueOf(id));
     }
 
     @Override

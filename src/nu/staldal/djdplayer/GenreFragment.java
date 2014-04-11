@@ -21,15 +21,10 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
+import android.widget.ListView;
 
 public class GenreFragment extends MetadataCategoryFragment {
-
-    public static final String CATEGORY_ID = "genre";
-
-    @Override
-    protected String getCategoryId() {
-        return CATEGORY_ID;
-    }
 
     @Override
     protected String getSelectedCategoryId() {
@@ -64,8 +59,7 @@ public class GenreFragment extends MetadataCategoryFragment {
                 MusicContract.Genre._COUNT,
         };
 
-        return new CursorLoader(getActivity(), MusicContract.Genre.CONTENT_URI, cols, null, null,
-                MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+        return new CursorLoader(getActivity(), MusicContract.Genre.CONTENT_URI, cols, null, null, null);
     }
 
     @Override
@@ -85,13 +79,12 @@ public class GenreFragment extends MetadataCategoryFragment {
 
     @Override
     protected long[] fetchSongList(long id) {
-        final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
         Cursor cursor = MusicUtils.query(getActivity(),
-                MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                ccols,
-                MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                MusicContract.Genre.getGenreUri(id),
+                new String[] { MediaStore.Audio.Media._ID },
                 null,
-                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+                null,
+                null);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
@@ -104,5 +97,10 @@ public class GenreFragment extends MetadataCategoryFragment {
     @Override
     protected boolean shuffleSongs() {
         return true;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        viewCategory(MusicContract.Genre.getGenreUri(id));
     }
 }

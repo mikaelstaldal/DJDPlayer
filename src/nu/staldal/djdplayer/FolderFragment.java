@@ -39,8 +39,6 @@ public class FolderFragment extends CategoryFragment {
             MusicContract.Folder._ID,
     };
 
-    public static final String CATEGORY_ID = "folder";
-
     private static final String CURRENT_FOLDER = "currentfolder";
 
     private String mCurrentFolder;
@@ -110,10 +108,12 @@ public class FolderFragment extends CategoryFragment {
     }
 
     private long[] fetchSongList(String folder) {
-        Cursor cursor = MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Media._ID},
-                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE ?",
-                new String[] { folder + "%" }, MediaStore.Audio.Media.DATA);
+        Cursor cursor = MusicUtils.query(getActivity(),
+                MusicContract.Folder.getFolderUri(folder),
+                new String[] { MediaStore.Audio.Media._ID },
+                null,
+                null,
+                null);
 
         if (cursor != null) {
             long [] list = MusicUtils.getSongListForCursor(cursor);
@@ -127,7 +127,7 @@ public class FolderFragment extends CategoryFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         adapter.getCursor().moveToPosition(position);
         String path = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        viewCategory(CATEGORY_ID, path);
+        viewCategory(MusicContract.Folder.getFolderUri(path));
     }
 
     @Override

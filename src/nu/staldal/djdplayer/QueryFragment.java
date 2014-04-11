@@ -18,25 +18,46 @@
 package nu.staldal.djdplayer;
 
 import android.app.SearchManager;
-import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Intent;
-import android.content.Loader;
+import android.content.*;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.view.ContextMenu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
-import android.widget.ImageView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
+import android.widget.*;
 
 public class QueryFragment extends TrackFragment {
     private static final String LOGTAG = "QueryFragment";
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
+        if (menuInfoIn == null) return;
+        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
+        selectedPosition = mi.position;
+        adapter.getCursor().moveToPosition(selectedPosition);
+        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        if (isSong(mimeType)) {
+            super.onCreateContextMenu(menu, view, menuInfoIn);
+        }
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        selectedPosition = position;
+        adapter.getCursor().moveToPosition(selectedPosition);
+        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        if ("artist".equals(mimeType)) {
+            viewCategory(MusicContract.Artist.getArtistUri(id));
+        } else if ("album".equals(mimeType)) {
+            viewCategory(MusicContract.Album.getAlbumUri(id));
+        } else if (isSong(mimeType)) {
+            super.onListItemClick(l, v, position, id);
+        }
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -111,12 +132,8 @@ public class QueryFragment extends TrackFragment {
             p.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             p.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-
-            if (mimetype == null) {
-                mimetype = "audio/";
-            }
-            if (mimetype.equals("artist")) {
+            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+            if ("artist".equals(mimeType)) {
                 iv.setImageResource(R.drawable.ic_mp_artist_list);
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(
                         MediaStore.Audio.Artists.ARTIST));
@@ -135,8 +152,7 @@ public class QueryFragment extends TrackFragment {
                         numalbums, numsongs, isunknown);
 
                 tv2.setText(songs_albums);
-
-            } else if (mimetype.equals("album")) {
+            } else if ("album".equals(mimeType)) {
                 iv.setImageResource(R.drawable.albumart_mp_unknown_list);
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(
                         MediaStore.Audio.Albums.ALBUM));
@@ -153,10 +169,7 @@ public class QueryFragment extends TrackFragment {
                     displayname = context.getString(R.string.unknown_artist_name);
                 }
                 tv2.setText(displayname);
-
-            } else if (mimetype.startsWith("audio/") ||
-                    mimetype.equals("application/ogg") ||
-                    mimetype.equals("application/x-ogg")) {
+            } else if (isSong(mimeType)) {
                 iv.setImageResource(R.drawable.ic_mp_song_list);
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(
                         MediaStore.Audio.Media.TITLE));
@@ -175,5 +188,12 @@ public class QueryFragment extends TrackFragment {
                 tv2.setText(displayname + " - " + name);
             }
         }
+    }
+
+    private static boolean isSong(String mimeType) {
+        return mimeType == null ||
+                mimeType.startsWith("audio/") ||
+                mimeType.equals("application/ogg") ||
+                mimeType.equals("application/x-ogg");
     }
 }

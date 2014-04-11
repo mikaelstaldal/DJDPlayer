@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package nu.staldal.djdplayer;
 
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.UriMatcher;
+import android.content.*;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
@@ -35,22 +33,59 @@ import java.util.ArrayList;
 public class MusicProvider extends ContentProvider {
     private static final String LOGTAG = "MusicProvider";
 
-    private static final int FOLDER = 1;
-    private static final int PLAYLIST = 2;
-    private static final int GENRE = 3;
-    // private static final int PLAYLIST_ID = 4;
-    // private static final int GENRE_ID = 5;
-    // private static final int FOLDER_ID = 6;
+    private static final String[] MEDIA_STORE_MEMBER_CURSOR_COLS = new String[] {
+        MediaStore.Audio.Media._ID,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.ALBUM,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ARTIST_ID,
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.MIME_TYPE
+    };
 
-    private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final String[] MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS = new String[] {
+        MediaStore.Audio.Playlists.Members._ID,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.ALBUM,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ARTIST_ID,
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.MIME_TYPE,
+        MediaStore.Audio.Playlists.Members.PLAY_ORDER,
+        MediaStore.Audio.Playlists.Members.AUDIO_ID,
+        MediaStore.Audio.Media.IS_MUSIC
+    };
+
+    static final int FOLDER = 1;
+    static final int PLAYLIST = 2;
+    static final int GENRE = 3;
+    static final int ARTIST = 4;
+    static final int ALBUM = 5;
+    static final int FOLDER_MEMBERS = 6;
+    static final int PLAYLIST_MEMBERS = 7;
+    static final int GENRE_MEMBERS = 8;
+    static final int ARTIST_MEMBERS = 9;
+    static final int ALBUM_MEMBERS = 10;
+    static final int MUSIC_MEMBERS = 11;
+
+    static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH, FOLDER);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH, PLAYLIST);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH, GENRE);
-        // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/#", PLAYLIST_ID);
-        // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH+"/#", GENRE_ID);
-        // sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH+"/#", FOLDER_ID);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH, FOLDER);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Artist.ARTIST_PATH, ARTIST);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Album.ALBUM_PATH, ALBUM);
+
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/#", PLAYLIST_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH+"/#", GENRE_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH+"/*", FOLDER_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Artist.ARTIST_PATH+"/#", ARTIST_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Album.ALBUM_PATH+"/#", ALBUM_MEMBERS);
+
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.MUSIC_PATH, MUSIC_MEMBERS);
     }
 
     @Override
@@ -70,11 +105,34 @@ public class MusicProvider extends ContentProvider {
             case GENRE:
                 return fetchGenres();
 
+            case ARTIST:
+                return fetchArtists();
+
+            case ALBUM:
+                return fetchAlbums();
+
+            case FOLDER_MEMBERS:
+                return fetchFolder(uri.getLastPathSegment());
+
+            case PLAYLIST_MEMBERS:
+                return fetchPlaylist(ContentUris.parseId(uri));
+
+            case GENRE_MEMBERS:
+                return fetchGenre(ContentUris.parseId(uri));
+
+            case ARTIST_MEMBERS:
+                return fetchArtist(ContentUris.parseId(uri));
+
+            case ALBUM_MEMBERS:
+                return fetchAlbum(ContentUris.parseId(uri));
+
+            case MUSIC_MEMBERS:
+                return fetchMusic();
+
             default:
                 return null;
         }
     }
-
 
     private Cursor fetchFolders() {
         File root = fetchRoot();
@@ -87,6 +145,82 @@ public class MusicProvider extends ContentProvider {
         int[] counter = new int[1];
         processFolder(cursor, counter, root, root);
         return cursor;
+    }
+
+    private Cursor fetchFolder(String folder) {
+        return getContext().getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MEDIA_STORE_MEMBER_CURSOR_COLS,
+                MediaStore.Audio.Media.TITLE + " != ''"
+                        + " AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.Media.DATA + " LIKE ?"
+                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                new String[] { folder + "%" },
+                MediaStore.Audio.Media.DATA);
+    }
+
+    private Cursor fetchPlaylist(long id) {
+        if (id == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+            // do a query for all songs added in the last X weeks
+            int X = MusicUtils.getIntPref(getContext(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
+            return getContext().getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    MEDIA_STORE_MEMBER_CURSOR_COLS,
+                    MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                            + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND "
+                            + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X),
+                    null,
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        } else {
+            return getContext().getContentResolver().query(
+                    MediaStore.Audio.Playlists.Members.getContentUri("external", id),
+                    MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS,
+                    null,
+                    null,
+                    MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+        }
+    }
+
+    private Cursor fetchGenre(long id) {
+        return getContext().getContentResolver().query(
+                MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                MEDIA_STORE_MEMBER_CURSOR_COLS,
+                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.Media.DATA + " != ''",
+                null,
+                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+    }
+
+    private Cursor fetchArtist(long id) {
+        return getContext().getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MEDIA_STORE_MEMBER_CURSOR_COLS,
+                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + id
+                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+    }
+
+    private Cursor fetchAlbum(long id) {
+        return getContext().getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MEDIA_STORE_MEMBER_CURSOR_COLS,
+                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + id
+                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                null,
+                MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
+    }
+
+    private Cursor fetchMusic() {
+        return getContext().getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MEDIA_STORE_MEMBER_CURSOR_COLS,
+                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
 
     private File fetchRoot() {
@@ -195,7 +329,6 @@ public class MusicProvider extends ContentProvider {
         return cursor;
     }
 
-
     private Cursor fetchGenres() {
         Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
                 new String[] {
@@ -217,6 +350,28 @@ public class MusicProvider extends ContentProvider {
         cursor.moveToPosition(-1);
 
         return new CursorWithCountColumn(cursor, counts);
+    }
+
+    private Cursor fetchArtists() {
+        return getContext().getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                new String[] {
+                        MediaStore.Audio.Artists._ID,
+                        MediaStore.Audio.Artists.ARTIST,
+                        MediaStore.Audio.Artists.NUMBER_OF_TRACKS
+                },
+                null, null,
+                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
+    }
+
+    private Cursor fetchAlbums() {
+        return getContext().getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                new String[] {
+                        MediaStore.Audio.Albums._ID,
+                        MediaStore.Audio.Albums.ALBUM,
+                        MediaStore.Audio.Albums.NUMBER_OF_SONGS,
+                },
+                null, null,
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
     private Cursor fetchSongListForGenres(long id) {
@@ -251,6 +406,21 @@ public class MusicProvider extends ContentProvider {
 
             case GENRE:
                 return MusicContract.Genre.CONTENT_TYPE;
+
+            case ARTIST:
+                return MusicContract.Artist.CONTENT_TYPE;
+
+            case ALBUM:
+                return MusicContract.Album.CONTENT_TYPE;
+
+            case FOLDER_MEMBERS:
+            case PLAYLIST_MEMBERS:
+            case GENRE_MEMBERS:
+            case ARTIST_MEMBERS:
+            case ALBUM_MEMBERS:
+            case MUSIC_MEMBERS:
+                return MusicContract.CONTENT_TYPE;
+
             default:
                 return null;
         }

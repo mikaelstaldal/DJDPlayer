@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,63 +41,33 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     private static final int TRACK_INFO = CHILD_MENU_BASE + 3;
     private static final int SEARCH_FOR = CHILD_MENU_BASE + 4;
 
-    private static final String[] CURSOR_COLS = new String[] {
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.ARTIST_ID,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.MIME_TYPE
-    };
-    private static final String[] PLAYLIST_MEMBER_COLS = new String[] {
-        MediaStore.Audio.Playlists.Members._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.ARTIST_ID,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.MIME_TYPE,
-        MediaStore.Audio.Playlists.Members.PLAY_ORDER,
-        MediaStore.Audio.Playlists.Members.AUDIO_ID,
-        MediaStore.Audio.Media.IS_MUSIC
-    };
+    public static final String URI = "uri";
 
-    private int mSelectedPosition;
-    private long mSelectedId;
+    int selectedPosition;
+    long selectedId;
 
-    private long mAlbumId;
-    private long mArtistId;
-    private long mPlaylist;
-    private long mGenreId;
-    private String mFolder;
+    private Uri uri;
+    private long playlist;
+    private long album;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            mSelectedPosition = savedInstanceState.getInt("selectedposition");
-            mSelectedId = savedInstanceState.getLong("selectedtrack");
-            mAlbumId = savedInstanceState.getLong("album");
-            mArtistId = savedInstanceState.getLong("artist");
-            mPlaylist = savedInstanceState.getLong("playlist");
-            mGenreId = savedInstanceState.getLong("genre");
-            mFolder = savedInstanceState.getString("folder");
-        } else if (getArguments() != null) {
-            mAlbumId = MusicUtils.parseLong(getArguments().getString(AlbumFragment.CATEGORY_ID));
-            mArtistId = MusicUtils.parseLong(getArguments().getString(ArtistFragment.CATEGORY_ID));
-            mPlaylist = MusicUtils.parseLong(getArguments().getString(PlaylistFragment.CATEGORY_ID));
-            mGenreId = MusicUtils.parseLong(getArguments().getString(GenreFragment.CATEGORY_ID));
-            mFolder = getArguments().getString(FolderFragment.CATEGORY_ID);
+            selectedPosition = savedInstanceState.getInt("selectedposition");
+            selectedId = savedInstanceState.getLong("selectedtrack");
+        }
+
+        String uriString = getArguments() != null ? getArguments().getString(URI) : null;
+        if (uriString != null) {
+            uri = Uri.parse(uriString);
+            playlist = uriString.startsWith(MusicContract.Playlist.CONTENT_URI.toString()) ? ContentUris.parseId(uri) : -1;
+            album = uriString.startsWith(MusicContract.Album.CONTENT_URI.toString()) ? ContentUris.parseId(uri) : -1;
         } else {
-            mAlbumId = -1;
-            mArtistId = -1;
-            mPlaylist = -1;
-            mGenreId = -1;
-            mFolder = null;
+            uri = MusicContract.CONTENT_URI;
+            playlist = -1;
+            album = -1;
         }
 
         setHasOptionsMenu(true);
@@ -112,7 +82,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             ((TouchInterceptor) listView).setDropListener(new TouchInterceptor.DropListener() {
                     public void drop(int from, int to) {
                         MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                                mPlaylist, from, to);
+                                playlist, from, to);
                     }
                 });
             ((TouchInterceptor) listView).setRemoveListener(new TouchInterceptor.RemoveListener() {
@@ -147,74 +117,15 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        StringBuilder where = new StringBuilder();
-        where.append(MediaStore.Audio.Media.TITLE + " != ''");
-        where.append(" AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL");
-        where.append(" AND " + MediaStore.Audio.Media.DATA + " != ''");
-
-        if (mGenreId != -1) {
-            return new CursorLoader(getActivity(), MediaStore.Audio.Genres.Members.getContentUri("external", mGenreId),
-                    CURSOR_COLS, where.toString(), null,
-                    MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
-        } else if (mPlaylist != -1) {
-            if (mPlaylist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-                // do a query for all songs added in the last X weeks
-                int X = MusicUtils.getIntPref(getActivity(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
-                where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">");
-                where.append(System.currentTimeMillis() / 1000 - X);
-                return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
-                        where.toString(), null,
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-            } else {
-                return new CursorLoader(getActivity(), MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist),
-                        PLAYLIST_MEMBER_COLS,
-                        null, null,
-                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-            }
-        } else if (mFolder != null) {
-            where.append(" AND " + MediaStore.Audio.Media.DATA + " LIKE ?");
-            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
-                    where.toString(), new String[] { mFolder + "%" },
-                    MediaStore.Audio.Media.DATA);
-        } else if (mAlbumId != -1) {
-            where.append(" AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + mAlbumId);
-            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
-                    where.toString(), null,
-                    MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
-        } else if (mArtistId != -1) {
-            where.append(" AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + mArtistId);
-            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
-                    where.toString(), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        } else if (getActivity().getIntent() != null && getActivity().getIntent().getData() != null) {
-            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), getActivity().getIntent().getData(), CURSOR_COLS,
-                    where.toString(), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
-        } else { // all songs
-            where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
-            return new CursorLoader(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, CURSOR_COLS,
-                    where.toString(), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        }
+        return new CursorLoader(getActivity(), uri, null, null, null, null);
     }
 
     public void onSaveInstanceState(Bundle outcicle) {
         // need to store the selected item so we don't lose it in case
         // of an orientation switch. Otherwise we could lose it while
         // in the middle of specifying a playlist to add the item to.
-        outcicle.putInt("selectedposition", mSelectedPosition);
-        outcicle.putLong("selectedtrack", mSelectedId);
-
-        outcicle.putLong("artist", mArtistId);
-        outcicle.putLong("album", mAlbumId);
-        outcicle.putLong("playlist", mPlaylist);
-        outcicle.putLong("genre", mGenreId);
-        outcicle.putString("folder", mFolder);
+        outcicle.putInt("selectedposition", selectedPosition);
+        outcicle.putLong("selectedtrack", selectedId);
 
         super.onSaveInstanceState(outcicle);
     }
@@ -230,7 +141,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         int colidx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
         adapter.getCursor().moveToPosition(which);
         long id = adapter.getCursor().getLong(colidx);
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist);
+        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist);
         boolean ret = getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri, id), null, null) > 0;
         v.setVisibility(View.VISIBLE);
         getListView().invalidateViews();
@@ -254,13 +165,13 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         }
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        mSelectedPosition = mi.position;
-        adapter.getCursor().moveToPosition(mSelectedPosition);
+        selectedPosition = mi.position;
+        adapter.getCursor().moveToPosition(selectedPosition);
         try {
             int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            mSelectedId = adapter.getCursor().getLong(id_idx);
+            selectedId = adapter.getCursor().getLong(id_idx);
         } catch (IllegalArgumentException ex) {
-            mSelectedId = mi.id;
+            selectedId = mi.id;
         }
 
         menu.add(0, TRACK_INFO, 0, R.string.info);
@@ -279,39 +190,39 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_NOW: {
-                MusicUtils.queueAndPlayImmediately(getActivity(), new long[] { mSelectedId });
+                MusicUtils.queueAndPlayImmediately(getActivity(), new long[] {selectedId});
                 return true;
             }
 
             case PLAY_NEXT: {
-                MusicUtils.queueNext(getActivity(), new long[] { mSelectedId });
+                MusicUtils.queueNext(getActivity(), new long[] {selectedId});
                 return true;
             }
 
             case QUEUE: {
-                MusicUtils.queue(getActivity(), new long[] { mSelectedId });
+                MusicUtils.queue(getActivity(), new long[] {selectedId});
                 return true;
             }
 
             case NEW_PLAYLIST: {
-                CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
+                CreatePlaylist.showMe(getActivity(), new long[] {selectedId});
                 return true;
             }
 
             case PLAYLIST_SELECTED: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(getActivity(), new long[] { mSelectedId }, playlist);
+                MusicUtils.addToPlaylist(getActivity(), new long[] {selectedId}, playlist);
                 return true;
             }
 
             case USE_AS_RINGTONE:
                 // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(getActivity(), mSelectedId);
+                MusicUtils.setRingtone(getActivity(), selectedId);
                 return true;
 
             case DELETE_ITEM: {
                 final long [] list = new long[1];
-                list[0] = (int) mSelectedId;
+                list[0] = (int) selectedId;
                 String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f, adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.Media.TITLE)));
@@ -335,17 +246,17 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             }
 
             case REMOVE_FROM_PLAYLIST:
-                removePlaylistItem(mSelectedPosition);
+                removePlaylistItem(selectedPosition);
                 return true;
 
             case TRACK_INFO:
                 TrackInfoFragment.showMe(getActivity(),
-                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selectedId));
                 return true;
 
             case SHARE_VIA:
                 startActivity(MusicUtils.shareVia(
-                        mSelectedId,
+                        selectedId,
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.Media.MIME_TYPE)),
                         getResources()));
@@ -369,21 +280,21 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        mSelectedPosition = position;
-        adapter.getCursor().moveToPosition(mSelectedPosition);
+        selectedPosition = position;
+        adapter.getCursor().moveToPosition(selectedPosition);
         try {
             int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            mSelectedId = adapter.getCursor().getLong(id_idx);
+            selectedId = adapter.getCursor().getLong(id_idx);
         } catch (IllegalArgumentException ex) {
-            mSelectedId = id;
+            selectedId = id;
         }
 
         if (isPicking()) {
             getActivity().setResult(Activity.RESULT_OK, new Intent().setData(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId)));
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selectedId)));
             getActivity().finish();
         } else {
-            MusicUtils.playSong(getActivity(), mSelectedId);
+            MusicUtils.playSong(getActivity(), selectedId);
         }
     }
 
@@ -439,7 +350,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
             case SHUFFLE_PLAYLIST: {
                 new ShufflePlaylistTask(getActivity().getApplicationContext()).execute(
-                        mPlaylist, MusicUtils.getSongListForCursor(adapter.getCursor()));
+                        playlist, MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
@@ -480,12 +391,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     }
 
     public boolean isEditMode() {
-        return mPlaylist >= 0;
-    }
-
-    public boolean isPicking() {
-        return Intent.ACTION_PICK.equals(getActivity().getIntent().getAction())
-                || Intent.ACTION_GET_CONTENT.equals(getActivity().getIntent().getAction());
+        return playlist >= 0;
     }
 
     class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
@@ -535,7 +441,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
-                } else if (!TrackFragment.this.isEditMode() && TrackFragment.this.mAlbumId == -1) {
+                } else if (!TrackFragment.this.isEditMode() && TrackFragment.this.album == -1) {
                     String alpha = TrackFragment.this.getString(R.string.fast_scroll_alphabet);
 
                     mIndexer = new MusicAlphabetIndexer(cursor, mTitleIdx, alpha);

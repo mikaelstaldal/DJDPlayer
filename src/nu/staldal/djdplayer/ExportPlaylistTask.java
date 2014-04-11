@@ -38,7 +38,7 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
     @Override
     protected Void doInBackground(Object... params) {
         String playlistName = (String)params[0];
-        long[] songs = (long[])params[1];
+        long playlistId = (Long)params[1];
 
         String dir = PreferenceManager.getDefaultSharedPreferences(context).getString(
                 SettingsActivity.MUSIC_FOLDER,
@@ -46,24 +46,24 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
         int prefix = dir.length()+1;
         File file = new File(dir, playlistName+".txt");
         Writer writer = null;
+        Cursor cursor = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-            for (long song : songs) {
-                if (isCancelled()) break;
-                Cursor cursor = context.getContentResolver().query(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        new String[] { MediaStore.Audio.Media.DATA },
-                        MediaStore.Audio.Media._ID + "=" + song,
-                        null, null);
-                if (cursor != null) {
-                    cursor.moveToFirst();
+            cursor = context.getContentResolver().query(
+                    MusicContract.Playlist.getPlaylistUri(playlistId),
+                    new String[]{MediaStore.Audio.Media.DATA},
+                    null,
+                    null,
+                    null);
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    if (isCancelled()) break;
                     String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                    cursor.close();
                     writer.write(path, prefix, path.length() - prefix);
                     writer.write('\n');
-                } else {
-                    Log.w(LOGTAG, "Unable to get path for song: " + song);
                 }
+            } else {
+                Log.w(LOGTAG, "Unable to get song list");
             }
         } catch (IOException e) {
             Log.w(LOGTAG, "Unable to export playlist", e);
@@ -73,6 +73,7 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
             } catch (IOException e) {
                 Log.w(LOGTAG, "Unable to close exported playlist", e);
             }
+            if (cursor != null) cursor.close();
         }
         return null;
     }

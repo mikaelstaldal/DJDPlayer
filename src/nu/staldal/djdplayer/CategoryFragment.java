@@ -23,8 +23,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 public abstract class CategoryFragment extends BrowserFragment implements MusicUtils.Defs {
-    private static final String LOGTAG = "CategoryFragment";
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ListView listView = new ListView(getActivity());
@@ -35,9 +33,5 @@ public abstract class CategoryFragment extends BrowserFragment implements MusicU
         registerForContextMenu(listView);
 
         return listView;
-    }
-
-    protected void viewCategory(String categoryId, String id) {
-        ((MusicBrowserActivity)getActivity()).showSongsInCategory(categoryId, id);
     }
 }

@@ -21,6 +21,7 @@ import android.app.*;
 import android.content.*;
 import android.database.Cursor;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -32,22 +33,21 @@ import android.view.MenuItem;
 import android.view.ViewConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TRACKS_FRAGMENT = "tracksFragment";
 
-    private NowPlayingFragment nowPlayingFragment;
     private MusicUtils.ServiceToken mToken = null;
 
     private boolean invalidateTabs = false;
 
-    private String category;
-    private String id;
+    private ArrayList<Intent> backStack;
+    private Uri uri;
     private String title;
     private boolean searchResult;
-    private boolean canGoBack;
 
     private Bundle savedInstanceState;
 
@@ -70,22 +70,22 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         MediaPlaybackService service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
 
         if (savedInstanceState != null) {
-            category = savedInstanceState.getString("category");
-            id = savedInstanceState.getString("id");
+            backStack = savedInstanceState.getParcelableArrayList("backStack");
+            String uriString = savedInstanceState.getString("uri");
+            uri = uriString != null ? Uri.parse(uriString) : null;
             title = savedInstanceState.getString("title");
             searchResult = savedInstanceState.getBoolean("searchResult");
-            canGoBack = savedInstanceState.getBoolean("canGoBack");
         } else {
+            backStack = new ArrayList<>(4);
             boolean shouldContinue = parseIntent(getIntent());
             if (!shouldContinue) {
                 finish();
                 return;
             }
-            canGoBack = false;
         }
 
         setContentView(R.layout.music_browser_activity);
-        nowPlayingFragment = (NowPlayingFragment) getFragmentManager().findFragmentById(R.id.nowplaying);
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) getFragmentManager().findFragmentById(R.id.nowplaying);
 
         setupUI();
         nowPlayingFragment.onServiceConnected(service);
@@ -98,6 +98,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         Log.i("MusicBrowserActivity", "onNewIntent - " + intent);
         boolean shouldContinue = parseIntent(intent);
         if (shouldContinue) {
+            backStack.add(getIntent());
             setIntent(intent);
             setupUI();
         }
@@ -112,122 +113,100 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 && intent.getData() != null
                 && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
                 && MusicUtils.isLong(intent.getData().getLastPathSegment())) {
-            long id = Long.valueOf(intent.getData().getLastPathSegment());
+            long id = ContentUris.parseId(intent.getData());
             MusicUtils.playSong(this, id);
             return false;
-        } else if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) {
-            calcCategoryAndId(intent);
-            title = calcTitle(category, id);
+        } else if ((Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) && intent.getData() != null) {
+            uri = fixUri(intent.getData());
+            title = calcTitle(uri);
             searchResult = false;
-            canGoBack = true;
         } else if (Intent.ACTION_SEARCH.equals(intent.getAction())
                             || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
-            calcCategoryAndId(intent);
+            uri = null;
             title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY));
             searchResult = true;
-            canGoBack = true;
         } else {
-            category = null;
-            id = null;
+            uri = null;
             title = null;
             searchResult = false;
-            canGoBack = false;
         }
         return true;
     }
 
-    private void calcCategoryAndId(Intent intent) {
-        long albumId = MusicUtils.parseLong(intent.getStringExtra(AlbumFragment.CATEGORY_ID));
-        long artistId = MusicUtils.parseLong(intent.getStringExtra(ArtistFragment.CATEGORY_ID));
-        long playlist = MusicUtils.parseLong(intent.getStringExtra(PlaylistFragment.CATEGORY_ID));
-        long genreId = MusicUtils.parseLong(intent.getStringExtra(GenreFragment.CATEGORY_ID));
-        String folder = intent.getStringExtra(FolderFragment.CATEGORY_ID);
-
-        category = null;
-        id = null;
-        if (albumId != -1) {
-            category = AlbumFragment.CATEGORY_ID;
-            id = String.valueOf(albumId);
-        } else if (artistId != -1) {
-            category = ArtistFragment.CATEGORY_ID;
-            id = String.valueOf(artistId);
-        } else if (playlist != -1) {
-            category = PlaylistFragment.CATEGORY_ID;
-            id = String.valueOf(playlist);
-        } else if (genreId != -1) {
-            category = GenreFragment.CATEGORY_ID;
-            id = String.valueOf(genreId);
-        } else if (folder != null) {
-            category = FolderFragment.CATEGORY_ID;
-            id = folder;
-        } else if (intent.getData() != null) {
-            String lastPathSegment = intent.getData().getLastPathSegment();
-            if (MusicUtils.isLong(lastPathSegment)) {
-                if (intent.getData().toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
-                    category = AlbumFragment.CATEGORY_ID;
-                    id = lastPathSegment;
-                } else if (intent.getData().toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
-                    category = ArtistFragment.CATEGORY_ID;
-                    id = lastPathSegment;
-                } else if (intent.getData().toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString())) {
-                    category = GenreFragment.CATEGORY_ID;
-                    id = lastPathSegment;
-                }
+    private Uri fixUri(Uri uri) {
+        String lastPathSegment = uri.getLastPathSegment();
+        if (MusicUtils.isLong(lastPathSegment)) {
+            long id = Long.parseLong(lastPathSegment);
+            if (uri.toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
+                return MusicContract.Album.getAlbumUri(id);
+            } else if (uri.toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
+                return MusicContract.Artist.getArtistUri(id);
+            } else if (uri.toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString())) {
+                return MusicContract.Genre.getGenreUri(id);
+            } else if (uri.toString().startsWith(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI.toString())) {
+                return MusicContract.Playlist.getPlaylistUri(id);
+            } else {
+                return uri;
             }
+        } else {
+            return uri;
         }
     }
 
-    private String calcTitle(String category, String id) {
-        if (AlbumFragment.CATEGORY_ID.equals(category)) {
-            String fancyName = null;
-            String[] cols = new String[]{
-                    MediaStore.Audio.Albums.ALBUM
-            };
-            Cursor cursor = MusicUtils.query(this,
-                    ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, Long.parseLong(id)),
-                    cols, null, null, null);
-            if (cursor != null) {
-                try {
-                    if (cursor.getCount() != 0) {
-                        cursor.moveToFirst();
-                        fancyName = cursor.getString(0);
+    private String calcTitle(Uri uri) {
+        switch (MusicProvider.sURIMatcher.match(uri)) {
+            case MusicProvider.FOLDER_MEMBERS:
+                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+                return uri.getLastPathSegment().substring(root.getAbsolutePath().length() + 1);
+
+            case MusicProvider.PLAYLIST_MEMBERS: {
+                if (ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+                    return getString(R.string.recentlyadded_title);
+                } else {
+                    String[] cols = new String[]{
+                            MediaStore.Audio.Playlists.NAME
+                    };
+                    Cursor cursor = MusicUtils.query(this,
+                            ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                            cols, null, null, null);
+                    if (cursor != null) {
+                        try {
+                            if (cursor.getCount() != 0) {
+                                cursor.moveToFirst();
+                                return cursor.getString(0);
+                            }
+                        } finally {
+                            cursor.close();
+                        }
                     }
-                } finally {
-                    cursor.close();
                 }
+                return getString(R.string.unknown_playlist_name);
             }
-            if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
-                return getString(R.string.unknown_album_name);
-            } else {
-                return fancyName;
-            }
-        } else if (ArtistFragment.CATEGORY_ID.equals(category)) {
-            String[] cols = new String[]{
-                    MediaStore.Audio.Artists.ARTIST
-            };
-            Cursor cursor = MusicUtils.query(this,
-                    ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, Long.parseLong(id)),
-                    cols, null, null, null);
-            if (cursor != null) {
-                try {
-                    if (cursor.getCount() != 0) {
-                        cursor.moveToFirst();
-                        return cursor.getString(0);
-                    }
-                } finally {
-                    cursor.close();
-                }
-            }
-            return getString(R.string.unknown_artist_name);
-        } else if (PlaylistFragment.CATEGORY_ID.equals(category)) {
-            if (Long.parseLong(id) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-                return getString(R.string.recentlyadded_title);
-            } else {
+            case MusicProvider.GENRE_MEMBERS: {
                 String[] cols = new String[]{
-                        MediaStore.Audio.Playlists.NAME
+                        MediaStore.Audio.Genres.NAME
                 };
                 Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, Long.parseLong(id)),
+                        ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                        cols, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() != 0) {
+                            cursor.moveToFirst();
+                            return ID3Utils.decodeGenre(cursor.getString(0));
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+                return getString(R.string.unknown_genre_name);
+            }
+            case MusicProvider.ARTIST_MEMBERS: {
+                String[] cols = new String[]{
+                        MediaStore.Audio.Artists.ARTIST
+                };
+                Cursor cursor = MusicUtils.query(this,
+                        ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
                         cols, null, null, null);
                 if (cursor != null) {
                     try {
@@ -239,34 +218,40 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                         cursor.close();
                     }
                 }
+                return getString(R.string.unknown_artist_name);
             }
-            return getString(R.string.unknown_playlist_name);
-        } else if (GenreFragment.CATEGORY_ID.equals(category)) {
-            String[] cols = new String[]{
-                    MediaStore.Audio.Genres.NAME
-            };
-            Cursor cursor = MusicUtils.query(this,
-                    ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, Long.parseLong(id)),
-                    cols, null, null, null);
-            if (cursor != null) {
-                try {
-                    if (cursor.getCount() != 0) {
-                        cursor.moveToFirst();
-                        return ID3Utils.decodeGenre(cursor.getString(0));
+            case MusicProvider.ALBUM_MEMBERS: {
+                String fancyName = null;
+                String[] cols = new String[]{
+                        MediaStore.Audio.Albums.ALBUM
+                };
+                Cursor cursor = MusicUtils.query(this,
+                        ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                        cols, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() != 0) {
+                            cursor.moveToFirst();
+                            fancyName = cursor.getString(0);
+                        }
+                    } finally {
+                        cursor.close();
                     }
-                } finally {
-                    cursor.close();
+                }
+                if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
+                    return getString(R.string.unknown_album_name);
+                } else {
+                    return fancyName;
                 }
             }
-            return getString(R.string.unknown_genre_name);
-        } else if (FolderFragment.CATEGORY_ID.equals(category)) {
-            File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-            return id.substring(root.getAbsolutePath().length() + 1);
-        } else {
-            return getString(R.string.tracks_title);
+
+            case MusicProvider.MUSIC_MEMBERS:
+                return getString(R.string.tracks_title);
+
+            default:
+                return getString(R.string.tracks_title);
         }
     }
-
 
     private void setupUI() {
         if (title == null) {
@@ -276,16 +261,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         }
     }
 
-    void showSongsInCategory(String category, String id) {
-        this.category = category;
-        this.id = id;
-        this.title = calcTitle(category, id);
-        this.searchResult = false;
-        this.canGoBack = true;
-        enterSongsMode();
-    }
-
     private void enterCategoryMode() {
+        uri = null;
         title = null;
 
         ActionBar actionBar = getActionBar();
@@ -320,7 +297,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             fragment = Fragment.instantiate(this, QueryFragment.class.getName());
         } else {
             Bundle bundle = new Bundle();
-            bundle.putString(category, id);
+            bundle.putString(TrackFragment.URI, uri.toString());
             fragment = Fragment.instantiate(this, TrackFragment.class.getName(), bundle);
         }
         FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -436,11 +413,10 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("category", category);
-        outState.putString("id", id);
+        outState.putParcelableArrayList("backStack", backStack);
+        outState.putString("uri", uri != null ? uri.toString() : null);
         outState.putString("title", title);
         outState.putBoolean("searchResult", searchResult);
-        outState.putBoolean("canGoBack", canGoBack);
     }
 
     @Override
@@ -481,9 +457,13 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     @Override
     public void onBackPressed() {
-        if (canGoBack) {
-            canGoBack = false;
-            enterCategoryMode();
+        if (!backStack.isEmpty()) {
+            Intent intent = backStack.remove(backStack.size() - 1);
+            boolean shouldContinue = parseIntent(intent);
+            if (shouldContinue) {
+                setIntent(intent);
+                setupUI();
+            }
         } else {
             super.onBackPressed();
         }

@@ -39,8 +39,6 @@ public class PlaylistFragment extends CategoryFragment {
             MusicContract.Playlist._COUNT
     };
 
-    public static final String CATEGORY_ID = "playlist";
-
     private static final String CURRENT_PLAYLIST = "currentplaylist";
     private static final String CURRENT_PLAYLIST_NAME = "currentplaylistname";
 
@@ -218,7 +216,7 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
             }
             case EXPORT_PLAYLIST:
-                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, fetchSongList(currentId));
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId);
                 return true;
 
             default:
@@ -271,8 +269,7 @@ public class PlaylistFragment extends CategoryFragment {
         if (createShortcut) {
             Intent shortcut = new Intent();
             shortcut.setAction(Intent.ACTION_VIEW);
-            shortcut.setDataAndType(Uri.EMPTY, MimeTypes.DIR_DJDPLAYER_AUDIO);
-            shortcut.putExtra(CATEGORY_ID, String.valueOf(id));
+            shortcut.setData(MusicContract.Playlist.getPlaylistUri(id));
 
             Intent intent = new Intent();
             intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
@@ -284,7 +281,7 @@ public class PlaylistFragment extends CategoryFragment {
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         } else {
-            viewCategory(CATEGORY_ID, String.valueOf(id));
+            viewCategory(MusicContract.Playlist.getPlaylistUri(id));
         }
     }
 
@@ -306,30 +303,12 @@ public class PlaylistFragment extends CategoryFragment {
     }
 
     private long[] fetchSongList(long playlistId) {
-        return MusicUtils.getSongListForCursorAndClose(fetchSongListCursor(playlistId));
+        return MusicUtils.getSongListForCursorAndClose(MusicUtils.query(getActivity(),
+                MusicContract.Playlist.getPlaylistUri(playlistId),
+                null,
+                null,
+                null,
+                null));
     }
 
-    private Cursor fetchSongListCursor(long playlistId) {
-        if (playlistId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-            // do a query for all songs added in the last X weeks
-            int X = MusicUtils.getIntPref(getActivity(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
-            final String[] ccols = new String[]{MediaStore.Audio.Media._ID};
-            String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X)
-                + " AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''";
-            return MusicUtils.query(getActivity(), MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    ccols, where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        } else if (playlistId == MusicContract.Playlist.ALL_SONGS_PLAYLIST) {
-            return MusicUtils.query(getActivity(),
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID},
-                    MediaStore.Audio.Media.IS_MUSIC + "=1 AND "
-                            + MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
-                    null,
-                    null);
-        } else {
-            final String[] ccols = new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID};
-            return MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
-                    ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-        }
-    }
 }
