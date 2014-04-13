@@ -38,36 +38,32 @@ import java.util.ArrayList;
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String LOGTAG = "MusicBrowserActivity";
+
     public static final String TRACKS_FRAGMENT = "tracksFragment";
 
-    private MusicUtils.ServiceToken mToken = null;
+    private MusicUtils.ServiceToken token = null;
+    private MediaPlaybackService service = null;
 
     private boolean invalidateTabs = false;
+    private long songToPlay = -1;
 
     private ArrayList<Intent> backStack;
     private Uri uri;
     private String title;
     private boolean searchResult;
 
-    private Bundle savedInstanceState;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.i("MusicBrowserActivity", "onCreate - " + getIntent());
+        Log.i(LOGTAG, "onCreate - " + getIntent());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
 
-        this.savedInstanceState = savedInstanceState;
-
-        mToken = MusicUtils.bindToService(this, this);
-    }
-
-    public void onServiceConnected(ComponentName name, IBinder binder) {
-        MediaPlaybackService service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
+        setContentView(R.layout.music_browser_activity);
 
         if (savedInstanceState != null) {
             backStack = savedInstanceState.getParcelableArrayList("backStack");
@@ -76,61 +72,74 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             title = savedInstanceState.getString("title");
             searchResult = savedInstanceState.getBoolean("searchResult");
         } else {
-            backStack = new ArrayList<>(4);
-            boolean shouldContinue = parseIntent(getIntent());
-            if (!shouldContinue) {
-                finish();
-                return;
-            }
+            backStack = new ArrayList<>(8);
+            parseIntent(getIntent(), true);
         }
 
-        setContentView(R.layout.music_browser_activity);
-        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) getFragmentManager().findFragmentById(R.id.nowplaying);
+        token = MusicUtils.bindToService(this, this);
+    }
 
-        setupUI();
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
+
+        if (songToPlay > -1) {
+            MusicUtils.playSong(this, songToPlay);
+        }
+
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) getFragmentManager().findFragmentById(R.id.nowplaying);
         nowPlayingFragment.onServiceConnected(service);
+
         invalidateOptionsMenu();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Log.i("MusicBrowserActivity", "onNewIntent - " + intent);
-        boolean shouldContinue = parseIntent(intent);
-        if (shouldContinue) {
+        Log.i(LOGTAG, "onNewIntent - " + intent);
+        parseIntent(intent, false);
+        if (songToPlay > -1) {
+            if (service != null) {
+                MusicUtils.playSong(this, songToPlay);
+            }
+        } else {
             backStack.add(getIntent());
             setIntent(intent);
-            setupUI();
         }
     }
 
-    /**
-     * @return {@code true} if we should continue and reconfigure UI, {@code false} if we should do nothing more
-     */
-    private boolean parseIntent(Intent intent) {
-        String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)
+    private void parseIntent(Intent intent, boolean onCreate) {
+        if (Intent.ACTION_VIEW.equals(intent.getAction())
                 && intent.getData() != null
                 && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
                 && MusicUtils.isLong(intent.getData().getLastPathSegment())) {
-            long id = ContentUris.parseId(intent.getData());
-            MusicUtils.playSong(this, id);
-            return false;
-        } else if ((Intent.ACTION_VIEW.equals(action) || Intent.ACTION_PICK.equals(action)) && intent.getData() != null) {
+            songToPlay = ContentUris.parseId(intent.getData());
+            if (!onCreate) return;
+            uri = null;
+            title = null;
+            searchResult = false;
+        } else if ((Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_PICK.equals(intent.getAction())) && intent.getData() != null) {
+            songToPlay = -1;
             uri = fixUri(intent.getData());
             title = calcTitle(uri);
             searchResult = false;
         } else if (Intent.ACTION_SEARCH.equals(intent.getAction())
                             || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
+            songToPlay = -1;
             uri = null;
             title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY));
             searchResult = true;
         } else {
+            songToPlay = -1;
             uri = null;
             title = null;
             searchResult = false;
         }
-        return true;
+
+        if (title == null) {
+            enterCategoryMode();
+        } else {
+            enterSongsMode();
+        }
     }
 
     private Uri fixUri(Uri uri) {
@@ -250,14 +259,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
             default:
                 return getString(R.string.tracks_title);
-        }
-    }
-
-    private void setupUI() {
-        if (title == null) {
-            enterCategoryMode();
-        } else {
-            enterSongsMode();
         }
     }
 
@@ -386,6 +387,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     protected void onPause() {
         super.onPause();
+
         saveActiveTab(getActionBar());
     }
 
@@ -407,6 +409,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     }
 
     public void onServiceDisconnected(ComponentName name) {
+        service = null;
         finish();
     }
 
@@ -422,8 +425,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mToken != null) {
-            MusicUtils.unbindFromService(mToken);
+        if (token != null) {
+            MusicUtils.unbindFromService(token);
         }
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
@@ -442,7 +445,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                enterCategoryMode();
+                backStack.clear();
+                parseIntent(new Intent(Intent.ACTION_MAIN), false);
                 return true;
 
             case SETTINGS:
@@ -459,11 +463,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     public void onBackPressed() {
         if (!backStack.isEmpty()) {
             Intent intent = backStack.remove(backStack.size() - 1);
-            boolean shouldContinue = parseIntent(intent);
-            if (shouldContinue) {
-                setIntent(intent);
-                setupUI();
-            }
+            parseIntent(intent, false);
+            setIntent(intent);
         } else {
             super.onBackPressed();
         }
