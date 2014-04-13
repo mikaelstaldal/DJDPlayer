@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ListView;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 public class AlbumFragment extends MetadataCategoryFragment {
 
@@ -86,7 +87,7 @@ public class AlbumFragment extends MetadataCategoryFragment {
     @Override
     protected long[] fetchSongList(long id) {
         Cursor cursor = MusicUtils.query(getActivity(),
-                MusicContract.Album.getAlbumUri(id),
+                MusicContract.Album.getMembersUri(id),
                 new String[] { MediaStore.Audio.Media._ID },
                 null,
                 null,
@@ -107,6 +108,6 @@ public class AlbumFragment extends MetadataCategoryFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        viewCategory(MusicContract.Album.getAlbumUri(id));
+        viewCategory(MusicContract.Album.getMembersUri(id));
     }
 }

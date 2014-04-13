@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.*;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.io.File;
 
@@ -109,7 +110,7 @@ public class FolderFragment extends CategoryFragment {
 
     private long[] fetchSongList(String folder) {
         Cursor cursor = MusicUtils.query(getActivity(),
-                MusicContract.Folder.getFolderUri(folder),
+                MusicContract.Folder.getMembersUri(folder),
                 new String[] { MediaStore.Audio.Media._ID },
                 null,
                 null,
@@ -127,7 +128,7 @@ public class FolderFragment extends CategoryFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         adapter.getCursor().moveToPosition(position);
         String path = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.PATH));
-        viewCategory(MusicContract.Folder.getFolderUri(path));
+        viewCategory(MusicContract.Folder.getMembersUri(path));
     }
 
     @Override

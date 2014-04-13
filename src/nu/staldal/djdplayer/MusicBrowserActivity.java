@@ -19,11 +19,9 @@ package nu.staldal.djdplayer;
 
 import android.app.*;
 import android.content.*;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -31,8 +29,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewConfiguration;
+import nu.staldal.djdplayer.provider.MusicContract;
+import nu.staldal.djdplayer.provider.MusicProvider;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
@@ -120,7 +119,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         } else if ((Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_PICK.equals(intent.getAction())) && intent.getData() != null) {
             songToPlay = -1;
             uri = fixUri(intent.getData());
-            title = calcTitle(uri);
+            title = MusicProvider.calcTitle(this, uri);
             searchResult = false;
         } else if (Intent.ACTION_SEARCH.equals(intent.getAction())
                             || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
@@ -147,118 +146,18 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         if (MusicUtils.isLong(lastPathSegment)) {
             long id = Long.parseLong(lastPathSegment);
             if (uri.toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Album.getAlbumUri(id);
+                return MusicContract.Album.getMembersUri(id);
             } else if (uri.toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Artist.getArtistUri(id);
+                return MusicContract.Artist.getMembersUri(id);
             } else if (uri.toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Genre.getGenreUri(id);
+                return MusicContract.Genre.getMembersUri(id);
             } else if (uri.toString().startsWith(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Playlist.getPlaylistUri(id);
+                return MusicContract.Playlist.getMembersUri(id);
             } else {
                 return uri;
             }
         } else {
             return uri;
-        }
-    }
-
-    private String calcTitle(Uri uri) {
-        switch (MusicProvider.sURIMatcher.match(uri)) {
-            case MusicProvider.FOLDER_MEMBERS:
-                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-                return uri.getLastPathSegment().substring(root.getAbsolutePath().length() + 1);
-
-            case MusicProvider.PLAYLIST_MEMBERS: {
-                if (ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-                    return getString(R.string.recentlyadded_title);
-                } else {
-                    String[] cols = new String[]{
-                            MediaStore.Audio.Playlists.NAME
-                    };
-                    Cursor cursor = MusicUtils.query(this,
-                            ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
-                            cols, null, null, null);
-                    if (cursor != null) {
-                        try {
-                            if (cursor.getCount() != 0) {
-                                cursor.moveToFirst();
-                                return cursor.getString(0);
-                            }
-                        } finally {
-                            cursor.close();
-                        }
-                    }
-                }
-                return getString(R.string.unknown_playlist_name);
-            }
-            case MusicProvider.GENRE_MEMBERS: {
-                String[] cols = new String[]{
-                        MediaStore.Audio.Genres.NAME
-                };
-                Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
-                        cols, null, null, null);
-                if (cursor != null) {
-                    try {
-                        if (cursor.getCount() != 0) {
-                            cursor.moveToFirst();
-                            return ID3Utils.decodeGenre(cursor.getString(0));
-                        }
-                    } finally {
-                        cursor.close();
-                    }
-                }
-                return getString(R.string.unknown_genre_name);
-            }
-            case MusicProvider.ARTIST_MEMBERS: {
-                String[] cols = new String[]{
-                        MediaStore.Audio.Artists.ARTIST
-                };
-                Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
-                        cols, null, null, null);
-                if (cursor != null) {
-                    try {
-                        if (cursor.getCount() != 0) {
-                            cursor.moveToFirst();
-                            return cursor.getString(0);
-                        }
-                    } finally {
-                        cursor.close();
-                    }
-                }
-                return getString(R.string.unknown_artist_name);
-            }
-            case MusicProvider.ALBUM_MEMBERS: {
-                String fancyName = null;
-                String[] cols = new String[]{
-                        MediaStore.Audio.Albums.ALBUM
-                };
-                Cursor cursor = MusicUtils.query(this,
-                        ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
-                        cols, null, null, null);
-                if (cursor != null) {
-                    try {
-                        if (cursor.getCount() != 0) {
-                            cursor.moveToFirst();
-                            fancyName = cursor.getString(0);
-                        }
-                    } finally {
-                        cursor.close();
-                    }
-                }
-                if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
-                    return getString(R.string.unknown_album_name);
-                } else {
-                    return fancyName;
-                }
-            }
-
-            case MusicProvider.MUSIC_MEMBERS:
-                return getString(R.string.tracks_title);
-
-            default:
-                return getString(R.string.tracks_title);
         }
     }
 
@@ -392,7 +291,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     }
 
     private void restoreActiveTab(ActionBar actionBar) {
-        String activeTab = MusicUtils.getStringPref(this, SettingsActivity.ACTIVE_TAB, null);
+        String activeTab = getSharedPreferences(getPackageName(), MODE_PRIVATE).getString(SettingsActivity.ACTIVE_TAB, null);
         for (int i = 0; i < actionBar.getTabCount(); i++) {
             if (actionBar.getTabAt(i).getTag().equals(activeTab)) {
                 actionBar.setSelectedNavigationItem(i);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.provider;
 
 import android.content.*;
 import android.database.Cursor;
@@ -25,6 +25,8 @@ import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.Log;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -81,7 +83,7 @@ public class MusicProvider extends ContentProvider {
 
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/#", PLAYLIST_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH+"/#", GENRE_MEMBERS);
-        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH+"/*", FOLDER_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH +"/*", FOLDER_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Artist.ARTIST_PATH+"/#", ARTIST_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Album.ALBUM_PATH+"/#", ALBUM_MEMBERS);
 
@@ -162,13 +164,15 @@ public class MusicProvider extends ContentProvider {
     private Cursor fetchPlaylist(long id) {
         if (id == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
             // do a query for all songs added in the last X weeks
-            int X = MusicUtils.getIntPref(getContext(), SettingsActivity.NUMWEEKS, 2) * (3600 * 24 * 7);
+            Context context = getContext();
+            int weeks = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).getInt(SettingsActivity.NUMWEEKS, 2);
+            int seconds = weeks * (3600 * 24 * 7);
             return getContext().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     MEDIA_STORE_MEMBER_CURSOR_COLS,
                     MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
                             + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND "
-                            + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X),
+                            + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds),
                     null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         } else {
@@ -314,10 +318,11 @@ public class MusicProvider extends ContentProvider {
         }, 1);
 
         // do a query for all songs added in the last X weeks
-        int numweeks = MusicUtils.getIntPref(getContext(), SettingsActivity.NUMWEEKS, 2);
-        int X = numweeks * (3600 * 24 * 7);
+        Context context = getContext();
+        int weeks = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).getInt(SettingsActivity.NUMWEEKS, 2);
+        int seconds = weeks * (3600 * 24 * 7);
         String where = MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != '' AND "
-                + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - X);
+                + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds);
         int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Media._ID}, where, null, null));
         ArrayList<Object> recent = new ArrayList<>(3);
@@ -440,4 +445,106 @@ public class MusicProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
     }
+
+    public static String calcTitle(Context context, Uri uri) {
+        switch (MusicProvider.sURIMatcher.match(uri)) {
+            case MusicProvider.FOLDER_MEMBERS:
+                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+                return uri.getLastPathSegment().substring(root.getAbsolutePath().length() + 1);
+
+            case MusicProvider.PLAYLIST_MEMBERS: {
+                if (ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+                    return context.getString(R.string.recentlyadded_title);
+                } else {
+                    String[] cols = new String[]{
+                            MediaStore.Audio.Playlists.NAME
+                    };
+                    Cursor cursor = context.getContentResolver().query(
+                            ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                            cols, null, null, null);
+                    if (cursor != null) {
+                        try {
+                            if (cursor.getCount() != 0) {
+                                cursor.moveToFirst();
+                                return cursor.getString(0);
+                            }
+                        } finally {
+                            cursor.close();
+                        }
+                    }
+                }
+                return context.getString(R.string.unknown_playlist_name);
+            }
+            case MusicProvider.GENRE_MEMBERS: {
+                String[] cols = new String[]{
+                        MediaStore.Audio.Genres.NAME
+                };
+                Cursor cursor = context.getContentResolver().query(
+                        ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                        cols, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() != 0) {
+                            cursor.moveToFirst();
+                            return ID3Utils.decodeGenre(cursor.getString(0));
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+                return context.getString(R.string.unknown_genre_name);
+            }
+            case MusicProvider.ARTIST_MEMBERS: {
+                String[] cols = new String[]{
+                        MediaStore.Audio.Artists.ARTIST
+                };
+                Cursor cursor = context.getContentResolver().query(
+                        ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                        cols, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() != 0) {
+                            cursor.moveToFirst();
+                            return cursor.getString(0);
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+                return context.getString(R.string.unknown_artist_name);
+            }
+            case MusicProvider.ALBUM_MEMBERS: {
+                String fancyName = null;
+                String[] cols = new String[]{
+                        MediaStore.Audio.Albums.ALBUM
+                };
+                Cursor cursor = context.getContentResolver().query(
+                        ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                        cols, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() != 0) {
+                            cursor.moveToFirst();
+                            fancyName = cursor.getString(0);
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+                if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
+                    return context.getString(R.string.unknown_album_name);
+                } else {
+                    return fancyName;
+                }
+            }
+
+            case MusicProvider.MUSIC_MEMBERS:
+                return context.getString(R.string.tracks_title);
+
+            default:
+                return context.getString(R.string.tracks_title);
+        }
+    }
+
+
 }

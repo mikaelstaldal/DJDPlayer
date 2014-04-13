@@ -23,6 +23,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.io.*;
 
@@ -50,7 +51,7 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
             cursor = context.getContentResolver().query(
-                    MusicContract.Playlist.getPlaylistUri(playlistId),
+                    MusicContract.Playlist.getMembersUri(playlistId),
                     new String[]{MediaStore.Audio.Media.DATA},
                     null,
                     null,

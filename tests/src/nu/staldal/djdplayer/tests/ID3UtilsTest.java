@@ -16,7 +16,7 @@
 package nu.staldal.djdplayer.tests;
 
 import android.test.InstrumentationTestCase;
-import nu.staldal.djdplayer.ID3Utils;
+import nu.staldal.djdplayer.provider.ID3Utils;
 
 public class ID3UtilsTest extends InstrumentationTestCase {
 

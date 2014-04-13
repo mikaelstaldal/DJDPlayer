@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.provider;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;

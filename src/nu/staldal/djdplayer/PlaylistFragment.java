@@ -29,6 +29,7 @@ import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.*;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 public class PlaylistFragment extends CategoryFragment {
     private static final String LOGTAG = "PlaylistFragment";
@@ -269,7 +270,7 @@ public class PlaylistFragment extends CategoryFragment {
         if (createShortcut) {
             Intent shortcut = new Intent();
             shortcut.setAction(Intent.ACTION_VIEW);
-            shortcut.setData(MusicContract.Playlist.getPlaylistUri(id));
+            shortcut.setData(MusicContract.Playlist.getMembersUri(id));
 
             Intent intent = new Intent();
             intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
@@ -281,7 +282,7 @@ public class PlaylistFragment extends CategoryFragment {
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         } else {
-            viewCategory(MusicContract.Playlist.getPlaylistUri(id));
+            viewCategory(MusicContract.Playlist.getMembersUri(id));
         }
     }
 
@@ -304,7 +305,7 @@ public class PlaylistFragment extends CategoryFragment {
 
     private long[] fetchSongList(long playlistId) {
         return MusicUtils.getSongListForCursorAndClose(MusicUtils.query(getActivity(),
-                MusicContract.Playlist.getPlaylistUri(playlistId),
+                MusicContract.Playlist.getMembersUri(playlistId),
                 null,
                 null,
                 null,

@@ -1,4 +1,4 @@
-package nu.staldal.djdplayer;/*
+/*
  * Copyright (C) 2012 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@ package nu.staldal.djdplayer;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nu.staldal.djdplayer.provider;
 
 public class ID3Utils {
     private static final String[] GENRE_NAMES = new String[256];

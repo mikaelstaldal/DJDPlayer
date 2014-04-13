@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.ui.RepeatingImageButton;
 
 
@@ -277,7 +278,7 @@ public class MediaPlaybackActivity extends Activity
             Intent intent = new Intent(this, MusicBrowserActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setAction(Intent.ACTION_VIEW);
-            intent.setData(MusicContract.Artist.getArtistUri(artistId));
+            intent.setData(MusicContract.Artist.getMembersUri(artistId));
             startActivity(intent);
             finish();
             return true;
@@ -285,7 +286,7 @@ public class MediaPlaybackActivity extends Activity
             Intent intent = new Intent(this, MusicBrowserActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setAction(Intent.ACTION_VIEW);
-            intent.setData(MusicContract.Genre.getGenreUri(genreId));
+            intent.setData(MusicContract.Genre.getMembersUri(genreId));
             startActivity(intent);
             finish();
             return true;

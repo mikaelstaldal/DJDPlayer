@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.SubMenu;
 import android.widget.Toast;
+import nu.staldal.djdplayer.provider.ID3Utils;
 
 import java.io.File;
 import java.util.Formatter;
@@ -534,24 +535,12 @@ public class MusicUtils {
         }
     }
 
-    static int getIntPref(Context context, String name, int def) {
-        SharedPreferences prefs =
-            context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-        return prefs.getInt(name, def);
-    }
-
     static void setIntPref(Context context, String name, int value) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
         ed.putInt(name, value);
         ed.apply();
-    }
-
-    static String getStringPref(Context context, String name, String def) {
-        SharedPreferences prefs =
-            context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-        return prefs.getString(name, def);
     }
 
     static void setStringPref(Context context, String name, String value) {

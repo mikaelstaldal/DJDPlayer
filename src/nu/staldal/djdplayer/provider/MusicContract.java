@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.provider;
 
 import android.content.ContentUris;
 import android.net.Uri;
@@ -26,7 +26,7 @@ public final class MusicContract {
 
     public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.audio";
 
-    public static final String MUSIC_PATH = "music";
+    static final String MUSIC_PATH = "music";
 
     public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, MUSIC_PATH);
 
@@ -40,11 +40,11 @@ public final class MusicContract {
 
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.folder";
 
-        public static final String FOLDER_PATH = "folder";
+        static final String FOLDER_PATH = "folder";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, FOLDER_PATH);
 
-        public static Uri getFolderUri(String folder) {
+        public static Uri getMembersUri(String folder) {
             return CONTENT_URI.buildUpon().appendPath(folder).build();
         }
     }
@@ -58,11 +58,11 @@ public final class MusicContract {
 
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.playlist";
 
-        public static final String PLAYLIST_PATH = "playlist";
+        static final String PLAYLIST_PATH = "playlist";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, PLAYLIST_PATH);
 
-        public static Uri getPlaylistUri(long id) {
+        public static Uri getMembersUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
@@ -78,11 +78,11 @@ public final class MusicContract {
 
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.genre";
 
-        public static final String GENRE_PATH = "genre";
+        static final String GENRE_PATH = "genre";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, GENRE_PATH);
 
-        public static Uri getGenreUri(long id) {
+        public static Uri getMembersUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
@@ -97,11 +97,11 @@ public final class MusicContract {
 
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.artist";
 
-        public static final String ARTIST_PATH = "artist";
+        static final String ARTIST_PATH = "artist";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, ARTIST_PATH);
 
-        public static Uri getArtistUri(long id) {
+        public static Uri getMembersUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
@@ -116,11 +116,11 @@ public final class MusicContract {
 
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.djdplayer.album";
 
-        public static final String ALBUM_PATH = "album";
+        static final String ALBUM_PATH = "album";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, ALBUM_PATH);
 
-        public static Uri getAlbumUri(long id) {
+        public static Uri getMembersUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }

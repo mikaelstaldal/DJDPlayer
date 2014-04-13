@@ -29,6 +29,7 @@ import android.view.ContextMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 public class QueryFragment extends TrackFragment {
     private static final String LOGTAG = "QueryFragment";
@@ -51,9 +52,9 @@ public class QueryFragment extends TrackFragment {
         adapter.getCursor().moveToPosition(selectedPosition);
         String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
         if ("artist".equals(mimeType)) {
-            viewCategory(MusicContract.Artist.getArtistUri(id));
+            viewCategory(MusicContract.Artist.getMembersUri(id));
         } else if ("album".equals(mimeType)) {
-            viewCategory(MusicContract.Album.getAlbumUri(id));
+            viewCategory(MusicContract.Album.getMembersUri(id));
         } else if (isSong(mimeType)) {
             super.onListItemClick(l, v, position, id);
         }
