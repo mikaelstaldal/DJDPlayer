@@ -77,3 +77,7 @@
 * Bug fixes
 * Play all next for categories
 * Improved music picking
+
+2.4
+---
+* Hide rescan music on Android 4.4, since it does not work there
