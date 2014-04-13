@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/behaviour">
+        <ListPreference
+            android:key="clickonsong"
+            android:title="@string/clickonsong"
+            android:entries="@array/pref_clickonsong_entries"
+            android:entryValues="@array/pref_clickonsong_values"
+            android:defaultValue="PLAY_NEXT" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/tabs">
+        <CheckBoxPreference
+            android:key="show_artists_tab"
+            android:title="@string/show_artists_tab"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="show_albums_tab"
+            android:title="@string/show_albums_tab"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="show_genres_tab"
+            android:title="@string/show_genres_tab"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="show_folders_tab"
+            android:title="@string/show_folders_tab"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="show_songs_tab"
+            android:title="@string/show_songs_tab"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="show_playlists_tab"
+            android:title="@string/show_playlists_tab"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/music_folder">
+        <Preference android:title="@string/select_music_folder">
+            <intent
+                android:targetPackage="nu.staldal.djdplayer"
+                android:targetClass="nu.staldal.djdplayer.PickMusicFolderActivity" />
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>

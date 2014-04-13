@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,22 @@ package nu.staldal.djdplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
 public class RescanActivity extends Activity {
+    private static final String LOGTAG = "RescanActivity";
+
     @Override
     protected void onStart() {
         super.onStart();
-        Log.i("RescanActivity", "Rescanning music");
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
+        if (Build.VERSION.SDK_INT >= 19) {
+            Log.w(LOGTAG, "Cannot rescan music on Android 4.4 or later");
+        } else {
+            Log.i(LOGTAG, "Rescanning music");
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
+        }
         finish();
     }
 }
