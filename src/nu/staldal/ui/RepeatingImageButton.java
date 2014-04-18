@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +30,14 @@ import android.widget.ImageButton;
  * as long as the button is pressed.
  */
 public class RepeatingImageButton extends ImageButton {
+    private static final String XMLNS = "http://staldal.nu/android";
+    private static final String KEY_CODE = "keyCode";
 
     private long mStartTime;
     private int mRepeatCount;
     private RepeatListener mListener;
     private long mInterval = 500;
+    private final int myKeyCode;
     
     public RepeatingImageButton(Context context) {
         this(context, null);
@@ -45,6 +49,11 @@ public class RepeatingImageButton extends ImageButton {
 
     public RepeatingImageButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        if (attrs != null) {
+            myKeyCode = attrs.getAttributeIntValue(XMLNS, KEY_CODE, -1);
+        } else {
+            myKeyCode = -1;
+        }
         setFocusable(true);
         setLongClickable(true);
     }
@@ -82,33 +91,13 @@ public class RepeatingImageButton extends ImageButton {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-            case KeyEvent.KEYCODE_ENTER:
-                // need to call super to make long press work, but return
-                // true so that the application doesn't get the down event.
-                super.onKeyDown(keyCode, event);
-                return true;
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == myKeyCode) {
+            return performClick();
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER:
-            // remove the repeater, but call the hook one more time
-            removeCallbacks(mRepeater);
-            if (mStartTime != 0) {
-                doRepeat(true);
-                mStartTime = 0;
-            }
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-    
     private final Runnable mRepeater = new Runnable() {
         public void run() {
             doRepeat(false);
@@ -118,7 +107,7 @@ public class RepeatingImageButton extends ImageButton {
         }
     };
 
-    private  void doRepeat(boolean last) {
+    private void doRepeat(boolean last) {
         long now = SystemClock.elapsedRealtime();
         if (mListener != null) {
             mListener.onRepeat(this, now - mStartTime, last ? -1 : mRepeatCount++);

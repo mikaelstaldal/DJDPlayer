@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2007 The Android Open Source Project
-     Copyright (C) 2012-2014 Mikael Ståldal
+     Copyright (C) 2014 Mikael Ståldal
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -18,36 +18,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical">
+              android:orientation="horizontal">
+
+    <FrameLayout
+            android:id="@+id/main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+    <View
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:background="#ffffffff"
+            android:paddingLeft="2dip"
+            android:paddingRight="2dip"/>
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:orientation="vertical">
 
         <fragment
                 android:id="@+id/player_header"
                 android:name="nu.staldal.djdplayer.PlayerHeaderFragment"
-                android:layout_gravity="top"
-                android:layout_weight="3"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="#ffffffff"
+                android:paddingTop="2dip"
+                android:paddingBottom="2dip"/>
 
         <fragment
                 android:id="@+id/playqueue"
                 android:name="nu.staldal.djdplayer.PlayQueueFragment"
-                android:layout_weight="2"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        <fragment
+                android:id="@+id/player_footer"
+                android:name="nu.staldal.djdplayer.PlayerFooterFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
     </LinearLayout>
-
-    <fragment
-            android:id="@+id/player_footer"
-            android:name="nu.staldal.djdplayer.PlayerFooterFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
 </LinearLayout>

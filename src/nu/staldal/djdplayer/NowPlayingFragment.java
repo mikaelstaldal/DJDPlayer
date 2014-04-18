@@ -28,10 +28,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class NowPlayingFragment extends Fragment {
+public class NowPlayingFragment extends Fragment implements FragmentServiceConnection {
+    @SuppressWarnings("UnusedDeclaration")
     private static final String LOGTAG = "NowPlayingFragment";
 
-    protected MediaPlaybackService service;
+    private MediaPlaybackService service;
 
     private View nowPlaying;
     private TextView titleView;
@@ -83,9 +84,9 @@ public class NowPlayingFragment extends Fragment {
         return nowPlaying;
     }
 
-    public void onServiceConnected(MediaPlaybackService service) {
-        this.service = service;
-
+    @Override
+    public void onServiceConnected(MediaPlaybackService s) {
+        service = s;
         updateNowPlaying();
     }
 
@@ -104,6 +105,11 @@ public class NowPlayingFragment extends Fragment {
     public void onPause() {
         getActivity().unregisterReceiver(mStatusListener);
         super.onPause();
+    }
+
+    @Override
+    public void onServiceDisconnected() {
+        service = null;
     }
 
     private final BroadcastReceiver mStatusListener = new BroadcastReceiver() {

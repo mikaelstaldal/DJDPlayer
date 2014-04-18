@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/player_header"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingTop="2dip"
+              android:paddingLeft="4dip"
+              android:paddingRight="4dip"
+              android:orientation="vertical">
+
+    <TextView
+            android:id="@+id/trackname"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_song_playback"
+            android:drawablePadding="4dip"/>
+
+    <TextView
+            android:id="@+id/artistname"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_artist_playback"
+            android:drawablePadding="4dip"/>
+
+    <TextView
+            android:id="@+id/genrename"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_mp_genre_playback"
+            android:drawablePadding="4dip"/>
+
+</LinearLayout>

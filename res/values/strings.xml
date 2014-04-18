@@ -209,12 +209,6 @@
     <string name="emptyplaylist">Selected playlist is empty</string>
     <!-- Button name when saving a playlist -->
     <string name="create_playlist_create_text">Save</string>
-    <!-- Dialog box title -->
-    <string name="service_start_error_title">Playback problem</string>
-    <!-- Dialog box message -->
-    <string name="service_start_error_msg">Sorry, the song could not be played.</string>
-    <!-- Dialog box button -->
-    <string name="service_start_error_button">OK</string>
     <!-- Time span edit options that appear when editing system playlist "Recently added" -->
     <!-- Used to indicate the number of weeks the "recently added" playlist covers in a selector widget -->
     <string-array name="weeklist">

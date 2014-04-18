@@ -31,7 +31,8 @@ import nu.staldal.ui.TouchInterceptor;
 
 import java.util.Arrays;
 
-public class PlayQueueFragment extends ListFragment implements AbsListView.OnScrollListener, MusicUtils.Defs {
+public class PlayQueueFragment extends ListFragment
+        implements FragmentServiceConnection, AbsListView.OnScrollListener, MusicUtils.Defs {
     private static final String LOGTAG = "PlayQueueFragment";
 
     final static String[] mCols = new String[] {
@@ -43,7 +44,8 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
             MediaStore.Audio.Media.MIME_TYPE
     };
 
-    MediaPlaybackService service;
+    private MediaPlaybackService service;
+
     PlayQueueCursor playQueueCursor;
     SimpleCursorAdapter listAdapter;
     boolean deletedOneRow;
@@ -93,9 +95,19 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
         return listView;
     }
 
-    public void onServiceConnected(final MediaPlaybackService service) {
-        this.service = service;
+    @Override
+    public void onStart() {
+        super.onStart();
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MediaPlaybackService.META_CHANGED);
+        filter.addAction(MediaPlaybackService.QUEUE_CHANGED);
+        getActivity().registerReceiver(mNowPlayingListener, filter);
+    }
+
+    @Override
+    public void onServiceConnected(MediaPlaybackService s) {
+        service = s;
         playQueueCursor = new PlayQueueCursor();
         listAdapter = new SimpleCursorAdapter(
                 getActivity(),
@@ -146,11 +158,6 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
             }
         });
         setListAdapter(listAdapter);
-
-        IntentFilter f = new IntentFilter();
-        f.addAction(MediaPlaybackService.META_CHANGED);
-        f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        getActivity().registerReceiver(mNowPlayingListener, new IntentFilter(f));
     }
 
     public void setQueueZoomed(boolean queueZoomed) {
@@ -216,16 +223,17 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
     private final BroadcastReceiver mNowPlayingListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // The service could disappear while the broadcast was in flight,
+            // so check to see if it's still valid
+            if (service == null) {
+                return;
+            }
+
             if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
                 if (deletedOneRow) {
                     // This is the notification for a single row that was
                     // deleted previously, which is already reflected in the UI.
                     deletedOneRow = false;
-                    return;
-                }
-                // The service could disappear while the broadcast was in flight,
-                // so check to see if it's still valid
-                if (service == null) {
                     return;
                 }
                 playQueueCursor.requery();
@@ -347,6 +355,11 @@ public class PlayQueueFragment extends ListFragment implements AbsListView.OnScr
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) { }
+
+    @Override
+    public void onServiceDisconnected() {
+        service = null;
+    }
 
     private class PlayQueueCursor extends AbstractCursor {
         private Cursor mCurrentPlaylistCursor;     // updated in onMove

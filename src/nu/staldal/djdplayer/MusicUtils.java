@@ -520,9 +520,6 @@ public class MusicUtils {
         }
         sService.open(list, 0);
         sService.play();
-        Intent intent = new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
-            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        context.startActivity(intent);
     }
 
     public static void shuffleArray(long[] array) {
