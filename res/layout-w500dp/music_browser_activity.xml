@@ -29,9 +29,7 @@
     <View
             android:layout_width="1dip"
             android:layout_height="match_parent"
-            android:background="#ffffffff"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"/>
+            android:background="#ffffffff"/>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -48,15 +46,13 @@
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dip"
-                android:background="#ffffffff"
-                android:paddingTop="2dip"
-                android:paddingBottom="2dip"/>
+                android:background="#ffffffff"/>
 
         <fragment
                 android:id="@+id/player_footer"
                 android:name="nu.staldal.djdplayer.NarrowPlayerFooterFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
     </LinearLayout>
 </LinearLayout>

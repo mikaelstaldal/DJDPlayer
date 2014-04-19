@@ -19,7 +19,7 @@
         xmlns:djdplayer="http://staldal.nu/android"
         android:id="@+id/player_footer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#ff5a5a5a">
 
