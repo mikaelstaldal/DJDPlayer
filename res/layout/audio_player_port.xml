@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"/>
 
     <View
-            android:id="@+id/playqueue_divider"
+            android:id="@+id/player_header_divider"
             android:layout_width="match_parent"
             android:layout_height="1dip"
             android:background="#ffffffff"
@@ -40,6 +40,14 @@
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"/>
+
+    <View
+            android:id="@+id/player_footer_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="#ffffffff"
+            android:paddingTop="2dip"
+            android:paddingBottom="2dip"/>
 
     <fragment
             android:id="@+id/player_footer"

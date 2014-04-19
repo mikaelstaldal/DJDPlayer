@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Mikael Ståldal
+ * Copyright (C) 2013-2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,9 @@ public class PlayQueueFragment extends ListFragment
                         return true;
 
                     case R.id.play_indicator:
-                        if (cursor.getPosition() == service.getQueuePosition()) {
+                        int cursorPosition = cursor.getPosition();
+                        int serviceQueuePosition = service.getQueuePosition();
+                        if (cursorPosition == serviceQueuePosition) {
                             ((ImageView) view).setImageResource(R.drawable.indicator_ic_mp_playing_list);
                             view.setVisibility(View.VISIBLE);
                         } else {
@@ -188,7 +190,6 @@ public class PlayQueueFragment extends ListFragment
     public void onStop() {
         super.onStop();
         getActivity().unregisterReceiver(mNowPlayingListener);
-        this.service = null;
         listScrolled = false;
     }
 

@@ -41,7 +41,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
     private PlayerHeaderFragment playerHeaderFragment;
     private PlayQueueFragment playQueueFragment;
     private PlayerFooterFragment playerFooterFragment;
-    private View playQueueDivider;
+    private View playerHeaderDivider;
+    private View playerFooterDivider;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
         playerHeaderFragment = (PlayerHeaderFragment)getFragmentManager().findFragmentById(R.id.player_header);
         playQueueFragment = (PlayQueueFragment)getFragmentManager().findFragmentById(R.id.playqueue);
         playerFooterFragment = (PlayerFooterFragment)getFragmentManager().findFragmentById(R.id.player_footer);
-        playQueueDivider = findViewById(R.id.playqueue_divider);
+        playerHeaderDivider = findViewById(R.id.player_header_divider);
+        playerFooterDivider = findViewById(R.id.player_footer_divider);
 
         token = MusicUtils.bindToService(this, this);
     }
@@ -182,12 +184,14 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
                 if (playQueueFragment.isQueueZoomed()) {
                     playerHeaderFragment.show();
                     playerFooterFragment.show();
-                    if (playQueueDivider != null) playQueueDivider.setVisibility(View.VISIBLE);
+                    if (playerHeaderDivider != null) playerHeaderDivider.setVisibility(View.VISIBLE);
+                    if (playerFooterDivider != null) playerFooterDivider.setVisibility(View.VISIBLE);
                     playQueueFragment.setQueueZoomed(false);
                 } else {
                     playerHeaderFragment.hide();
                     playerFooterFragment.hide();
-                    if (playQueueDivider != null) playQueueDivider.setVisibility(View.GONE);
+                    if (playerHeaderDivider != null) playerHeaderDivider.setVisibility(View.GONE);
+                    if (playerFooterDivider != null) playerFooterDivider.setVisibility(View.GONE);
                     playQueueFragment.setQueueZoomed(true);
                 }
                 return true;
@@ -279,6 +283,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
         playerHeaderFragment.onServiceDisconnected();
         playQueueFragment.onServiceDisconnected();
         playerFooterFragment.onServiceDisconnected();
+
+        finish();
     }
 
     @Override

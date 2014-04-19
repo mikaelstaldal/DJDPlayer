@@ -44,6 +44,14 @@
 
     </LinearLayout>
 
+    <View
+            android:id="@+id/player_footer_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="#ffffffff"
+            android:paddingTop="2dip"
+            android:paddingBottom="2dip"/>
+
     <fragment
             android:id="@+id/player_footer"
             android:name="nu.staldal.djdplayer.PlayerFooterFragment"

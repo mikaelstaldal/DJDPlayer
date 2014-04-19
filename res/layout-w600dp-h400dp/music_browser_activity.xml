@@ -53,10 +53,22 @@
                 android:paddingBottom="2dip"/>
 
         <fragment
+                android:id="@+id/playqueue"
+                android:name="nu.staldal.djdplayer.PlayQueueFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="#ffffffff"/>
+
+        <fragment
                 android:id="@+id/player_footer"
                 android:name="nu.staldal.djdplayer.NarrowPlayerFooterFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
     </LinearLayout>
 </LinearLayout>

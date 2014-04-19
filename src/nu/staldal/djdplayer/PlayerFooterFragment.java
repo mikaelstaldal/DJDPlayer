@@ -34,6 +34,10 @@ import android.widget.TextView;
 import nu.staldal.ui.RepeatingImageButton;
 
 public class PlayerFooterFragment extends Fragment implements FragmentServiceConnection {
+
+    @SuppressWarnings("unused")
+    private static final String LOGTAG = "PlayerFooterFragment";
+
     private MediaPlaybackService service;
 
     private View mainView;
@@ -50,7 +54,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.player_footer, container, false);
+        View view = inflater.inflate(getLayoutId(), container, false);
 
         mainView = view.findViewById(R.id.player_footer);
 
@@ -101,6 +105,10 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
         }, 260);
 
         return view;
+    }
+
+    protected int getLayoutId() {
+        return R.layout.player_footer;
     }
 
     @Override
