@@ -41,16 +41,16 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
     private MediaPlaybackService service;
 
     private View mainView;
-    private ImageButton mPauseButton;
-    private TextView mCurrentTime;
-    private TextView mTotalTime;
-    private ProgressBar mProgress;
-    private long mPosOverride = -1;
-    private boolean paused;
-    private long mStartSeekPos = 0;
-    private long mLastSeekEventTime;
-    private boolean mFromTouch = false;
-    private long mDuration;
+    private TextView currentTime;
+    private TextView totalTime;
+    private ProgressBar progressBar;
+    private ImageButton pauseButton;
+
+    private long posOverride = -1;
+    private boolean paused = true;
+    private long startSeekPos = 0;
+    private long lastSeekEventTime = 0;
+    private boolean fromTouch = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,17 +58,18 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
         mainView = view.findViewById(R.id.player_footer);
 
-        mCurrentTime = (TextView) view.findViewById(R.id.currenttime);
-        mTotalTime = (TextView) view.findViewById(R.id.totaltime);
-        mProgress = (ProgressBar) view.findViewById(android.R.id.progress);
-        if (mProgress instanceof SeekBar) {
-            SeekBar seeker = (SeekBar) mProgress;
+        currentTime = (TextView) view.findViewById(R.id.currenttime);
+        totalTime = (TextView) view.findViewById(R.id.totaltime);
+
+        progressBar = (ProgressBar) view.findViewById(android.R.id.progress);
+        if (progressBar instanceof SeekBar) {
+            SeekBar seeker = (SeekBar) progressBar;
             seeker.setOnSeekBarChangeListener(mSeekListener);
         }
-        mProgress.setMax(1000);
+        progressBar.setMax(1000);
 
-        RepeatingImageButton mPrevButton = (RepeatingImageButton) view.findViewById(R.id.prev);
-        mPrevButton.setOnClickListener(new View.OnClickListener() {
+        RepeatingImageButton prevButton = (RepeatingImageButton) view.findViewById(R.id.prev);
+        prevButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (service == null) return;
                 if (service.position() < 2000) {
@@ -79,26 +80,26 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
                 }
             }
         });
-        mPrevButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
+        prevButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
             public void onRepeat(View v, long howlong, int repcnt) {
                 scanBackward(repcnt, howlong);
             }
         }, 260);
-        mPauseButton = (ImageButton) view.findViewById(R.id.pause);
-        mPauseButton.requestFocus();
-        mPauseButton.setOnClickListener(new View.OnClickListener() {
+        pauseButton = (ImageButton) view.findViewById(R.id.pause);
+        pauseButton.requestFocus();
+        pauseButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 doPauseResume();
             }
         });
-        RepeatingImageButton mNextButton = (RepeatingImageButton) view.findViewById(R.id.next);
-        mNextButton.setOnClickListener(new View.OnClickListener() {
+        RepeatingImageButton nextButton = (RepeatingImageButton) view.findViewById(R.id.next);
+        nextButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (service == null) return;
                 service.next(true);
             }
         });
-        mNextButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
+        nextButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
             public void onRepeat(View v, long howlong, int repcnt) {
                 scanForward(repcnt, howlong);
             }
@@ -150,7 +151,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
     @Override
     public void onStop() {
         paused = true;
-        mHandler.removeMessages(REFRESH);
+        handler.removeMessages(REFRESH);
 
         super.onStop();
     }    
@@ -166,8 +167,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
             if (service == null) return;
             switch (intent.getAction()) {
                 case MediaPlaybackService.META_CHANGED:
-                    mDuration = service.duration();
-                    mTotalTime.setText(MusicUtils.formatDuration(getActivity(), mDuration));
+                    totalTime.setText(MusicUtils.formatDuration(getActivity(), service.duration()));
                     setPauseButtonImage();
                     queueNextRefresh(1);
                     break;
@@ -180,35 +180,35 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
     private final SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
         public void onStartTrackingTouch(SeekBar bar) {
-            mLastSeekEventTime = 0;
-            mFromTouch = true;
+            lastSeekEventTime = 0;
+            fromTouch = true;
         }
         public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
             if (!fromuser || (service == null)) return;
             long now = SystemClock.elapsedRealtime();
-            if ((now - mLastSeekEventTime) > 250) {
-                mLastSeekEventTime = now;
-                mPosOverride = mDuration * progress / 1000;
-                service.seek(mPosOverride);
+            if ((now - lastSeekEventTime) > 250) {
+                lastSeekEventTime = now;
+                posOverride = service.duration() * progress / 1000;
+                service.seek(posOverride);
 
                 // trackball event, allow progress updates
-                if (!mFromTouch) {
+                if (!fromTouch) {
                     refreshNow();
-                    mPosOverride = -1;
+                    posOverride = -1;
                 }
             }
         }
         public void onStopTrackingTouch(SeekBar bar) {
-            mPosOverride = -1;
-            mFromTouch = false;
+            posOverride = -1;
+            fromTouch = false;
         }
     };
 
     private void scanBackward(int repcnt, long delta) {
         if(service == null) return;
         if(repcnt == 0) {
-            mStartSeekPos = service.position();
-            mLastSeekEventTime = 0;
+            startSeekPos = service.position();
+            lastSeekEventTime = 0;
         } else {
             if (delta < 5000) {
                 // seek at 10x speed for the first 5 seconds
@@ -217,22 +217,22 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
                 // seek at 40x after that
                 delta = 50000 + (delta - 5000) * 40;
             }
-            long newpos = mStartSeekPos - delta;
+            long newpos = startSeekPos - delta;
             if (newpos < 0) {
                 // move to previous track
                 service.prev();
                 long duration = service.duration();
-                mStartSeekPos += duration;
+                startSeekPos += duration;
                 newpos += duration;
             }
-            if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
+            if (((delta - lastSeekEventTime) > 250) || repcnt < 0){
                 service.seek(newpos);
-                mLastSeekEventTime = delta;
+                lastSeekEventTime = delta;
             }
             if (repcnt >= 0) {
-                mPosOverride = newpos;
+                posOverride = newpos;
             } else {
-                mPosOverride = -1;
+                posOverride = -1;
             }
             refreshNow();
         }
@@ -241,8 +241,8 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
     private void scanForward(int repcnt, long delta) {
         if(service == null) return;
         if(repcnt == 0) {
-            mStartSeekPos = service.position();
-            mLastSeekEventTime = 0;
+            startSeekPos = service.position();
+            lastSeekEventTime = 0;
         } else {
             if (delta < 5000) {
                 // seek at 10x speed for the first 5 seconds
@@ -251,22 +251,22 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
                 // seek at 40x after that
                 delta = 50000 + (delta - 5000) * 40;
             }
-            long newpos = mStartSeekPos + delta;
+            long newpos = startSeekPos + delta;
             long duration = service.duration();
             if (newpos >= duration) {
                 // move to next track
                 service.next(true);
-                mStartSeekPos -= duration; // is OK to go negative
+                startSeekPos -= duration; // is OK to go negative
                 newpos -= duration;
             }
-            if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
+            if (((delta - lastSeekEventTime) > 250) || repcnt < 0){
                 service.seek(newpos);
-                mLastSeekEventTime = delta;
+                lastSeekEventTime = delta;
             }
             if (repcnt >= 0) {
-                mPosOverride = newpos;
+                posOverride = newpos;
             } else {
-                mPosOverride = -1;
+                posOverride = -1;
             }
             refreshNow();
         }
@@ -286,9 +286,9 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
     private void setPauseButtonImage() {
         if (service != null && service.isPlaying()) {
-            mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+            pauseButton.setImageResource(android.R.drawable.ic_media_pause);
         } else {
-            mPauseButton.setImageResource(android.R.drawable.ic_media_play);
+            pauseButton.setImageResource(android.R.drawable.ic_media_play);
         }
     }
 
@@ -296,40 +296,41 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
     private void queueNextRefresh(long delay) {
         if (!paused) {
-            Message msg = mHandler.obtainMessage(REFRESH);
-            mHandler.removeMessages(REFRESH);
-            mHandler.sendMessageDelayed(msg, delay);
+            Message msg = handler.obtainMessage(REFRESH);
+            handler.removeMessages(REFRESH);
+            handler.sendMessageDelayed(msg, delay);
         }
     }
     
     private long refreshNow() {
-        if(service == null)
-            return 500;
-        long pos = mPosOverride < 0 ? service.position() : mPosOverride;
+        if (service == null) return 500;
+
+        long pos = posOverride < 0 ? service.position() : posOverride;
         long remaining = 1000 - (pos % 1000);
-        if ((pos >= 0) && (mDuration > 0)) {
-            mCurrentTime.setText(MusicUtils.formatDuration(getActivity(), pos));
+        long duration = service.duration();
+        if ((pos >= 0) && (duration > 0)) {
+            currentTime.setText(MusicUtils.formatDuration(getActivity(), pos));
 
             if (service.isPlaying()) {
-                mCurrentTime.setVisibility(View.VISIBLE);
+                currentTime.setVisibility(View.VISIBLE);
             } else {
                 // blink the counter
-                int vis = mCurrentTime.getVisibility();
-                mCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE);
+                int vis = currentTime.getVisibility();
+                currentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE);
                 remaining = 500;
             }
 
-            mProgress.setProgress((int) (1000 * pos / mDuration));
+            progressBar.setProgress((int) (1000 * pos / duration));
         } else {
-            mCurrentTime.setText("--:--");
-            mProgress.setProgress(1000);
+            currentTime.setText("--:--");
+            progressBar.setProgress(1000);
         }
         // return the number of milliseconds until the next full second, so
         // the counter can be updated at just the right time
         return remaining;
     }
     
-    private final Handler mHandler = new Handler() {
+    private final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
