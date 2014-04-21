@@ -261,8 +261,11 @@ public class MediaPlaybackService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
-            Log.d(LOGTAG, "mIntentReceiver.onReceive " + action + " / " + cmd);
-            if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
+            Log.i(LOGTAG, "mIntentReceiver.onReceive " + action + " / " + cmd);
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+                pause();
+                mPausedByTransientLossOfFocus = false;
+            } else if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
                 next(true);
             } else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
                 prev();
@@ -327,6 +330,7 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(PAUSE_ACTION);
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
+        commandFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mIntentReceiver, commandFilter);
 
         PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);

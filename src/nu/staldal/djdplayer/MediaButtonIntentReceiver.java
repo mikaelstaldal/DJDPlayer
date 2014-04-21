@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2014 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +20,6 @@ package nu.staldal.djdplayer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.view.KeyEvent;
 
 /**
@@ -31,13 +31,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String intentAction = intent.getAction();
-        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intentAction)) {
-            Intent i = new Intent(context, MediaPlaybackService.class);
-            i.setAction(MediaPlaybackService.SERVICECMD);
-            i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDPAUSE);
-            context.startService(i);
-        } else if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
+        if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
             KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             
             if (event == null) {
