@@ -228,6 +228,8 @@
     <!-- Title of time span picker -->
     <string name="weekpicker_title">Set time</string>
 
+    <string name="playqueue">View play queue</string>
+
     <!-- menu item to clear the queue -->
     <string name="clear_queue">Clear queue</string>
 

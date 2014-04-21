@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="pressed_button">#6633b5e5</color>
+    <color name="standard_background">#ff5a5a5a</color>
 </resources>

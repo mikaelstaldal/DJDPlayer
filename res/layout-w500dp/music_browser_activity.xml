@@ -29,7 +29,7 @@
     <View
             android:layout_width="1dip"
             android:layout_height="match_parent"
-            android:background="#ffffffff"/>
+            android:background="@android:color/white"/>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -46,7 +46,20 @@
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dip"
-                android:background="#ffffffff"/>
+                android:background="@android:color/white"/>
+
+        <Button
+                android:id="@+id/playqueue_button"
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:text="@string/playqueue"
+                android:background="@drawable/nowplaying_background"/>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="@android:color/white"/>
 
         <fragment
                 android:id="@+id/player_footer"

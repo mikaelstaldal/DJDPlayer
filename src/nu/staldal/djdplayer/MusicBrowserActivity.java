@@ -28,7 +28,9 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.Button;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.djdplayer.provider.MusicProvider;
 
@@ -63,6 +65,16 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         setContentView(R.layout.music_browser_activity);
+
+        Button playQueueButton = (Button)findViewById(R.id.playqueue_button);
+        if (playQueueButton != null) {
+            playQueueButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(MusicBrowserActivity.this, MediaPlaybackActivity.class));
+                }
+            });
+        }
 
         if (savedInstanceState != null) {
             backStack = savedInstanceState.getParcelableArrayList("backStack");

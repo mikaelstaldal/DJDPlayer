@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#ff5a5a5a">
+        android:background="@color/standard_background">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:shadowColor="#ff000000"
+                android:shadowColor="@android:color/black"
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="3"
@@ -78,7 +78,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:shadowColor="#ff000000"
+                android:shadowColor="@android:color/black"
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="3"

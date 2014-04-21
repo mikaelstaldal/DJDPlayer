@@ -25,7 +25,7 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ff5a5a5a"
+            android:background="@color/standard_background"
             android:orientation="horizontal">
 
         <TextView
@@ -33,7 +33,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:shadowColor="#ff000000"
+                android:shadowColor="@android:color/black"
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="3"
@@ -81,7 +81,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:shadowColor="#ff000000"
+                android:shadowColor="@android:color/black"
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="3"
@@ -97,7 +97,7 @@
 
     <SeekBar
             android:id="@android:id/progress"
-            android:background="#ff5a5a5a"
+            android:background="@color/standard_background"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
