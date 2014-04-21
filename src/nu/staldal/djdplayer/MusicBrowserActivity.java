@@ -20,17 +20,16 @@ package nu.staldal.djdplayer;
 import android.app.*;
 import android.content.*;
 import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewConfiguration;
+import android.view.*;
 import android.widget.Button;
+import android.widget.Toast;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.djdplayer.provider.MusicProvider;
 
@@ -352,10 +351,57 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, SETTINGS, 0, R.string.settings).setIcon(R.drawable.ic_menu_preferences);
-        menu.add(0, SEARCH, 0, R.string.search_title).setIcon(R.drawable.ic_menu_search);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.browser_menu, menu);
 
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateSoundEffectItem(menu);
+
+        updateRepeatItem(menu);
+
+        updatePlayingItems(menu);
+
+        return true;
+    }
+
+    private void updateSoundEffectItem(Menu menu) {
+        MenuItem item = menu.findItem(R.id.effect_panel);
+        if (item != null) {
+            Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+            item.setVisible(getPackageManager().resolveActivity(intent, 0) != null);
+        }
+    }
+
+    private void updateRepeatItem(Menu menu) {
+        MenuItem item = menu.findItem(R.id.repeat);
+        if (item != null) {
+            if (service != null) {
+                switch (service.getRepeatMode()) {
+                    case MediaPlaybackService.REPEAT_ALL:
+                        item.setIcon(R.drawable.ic_mp_repeat_all_btn);
+                        break;
+                    case MediaPlaybackService.REPEAT_CURRENT:
+                        item.setIcon(R.drawable.ic_mp_repeat_once_btn);
+                        break;
+                    case MediaPlaybackService.REPEAT_STOPAFTER:
+                        item.setIcon(R.drawable.ic_mp_repeat_stopafter_btn);
+                        break;
+                    default:
+                        item.setIcon(R.drawable.ic_mp_repeat_off_btn);
+                        break;
+                }
+            } else {
+                item.setIcon(R.drawable.ic_mp_repeat_off_btn);
+            }
+        }
+    }
+
+    private void updatePlayingItems(Menu menu) {
+        menu.setGroupVisible(R.id.playing_items, service != null && !service.isPlaying());
     }
 
     @Override
@@ -366,14 +412,57 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 parseIntent(new Intent(Intent.ACTION_MAIN), false);
                 return true;
 
-            case SETTINGS:
+            case R.id.repeat:
+                cycleRepeat();
+                return true;
+
+            case R.id.shuffle:
+                if (service != null) service.doShuffle();
+                return true;
+
+            case R.id.uniqueify:
+                if (service != null) service.uniqueify();
+                return true;
+
+            case R.id.clear_queue:
+                if (service != null) service.removeTracks(0, Integer.MAX_VALUE);
+                return true;
+
+            case R.id.settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
 
-            case SEARCH:
+            case R.id.search:
                 return onSearchRequested();
+
+            case R.id.effect_panel:
+                Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, service.getAudioSessionId());
+                startActivityForResult(intent, 0);
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void cycleRepeat() {
+        if (service == null) {
+            return;
+        }
+        int mode = service.getRepeatMode();
+        if (mode == MediaPlaybackService.REPEAT_NONE) {
+            service.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+            Toast.makeText(this, R.string.repeat_all_notif, Toast.LENGTH_SHORT).show();
+        } else if (mode == MediaPlaybackService.REPEAT_ALL) {
+            service.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
+            Toast.makeText(this, R.string.repeat_current_notif, Toast.LENGTH_SHORT).show();
+        } else if (mode == MediaPlaybackService.REPEAT_CURRENT) {
+            service.setRepeatMode(MediaPlaybackService.REPEAT_STOPAFTER);
+            Toast.makeText(this, R.string.repeat_stopafter_notif, Toast.LENGTH_SHORT).show();
+        } else {
+            service.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
+            Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show();
+        }
+        invalidateOptionsMenu();
     }
 
     @Override

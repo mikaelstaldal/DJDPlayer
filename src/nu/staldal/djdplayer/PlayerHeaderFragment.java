@@ -350,7 +350,9 @@ public class PlayerHeaderFragment extends Fragment implements
     };
 
     private void update() {
-        if (service != null && service.getAudioId() != -1) {
+        if (service == null) return;
+
+        if (service.getAudioId() != -1) {
             String trackName = service.getTrackName();
             trackNameView.setText(trackName);
             String artistName = service.getArtistName();
@@ -363,6 +365,10 @@ public class PlayerHeaderFragment extends Fragment implements
                 genreName = getString(R.string.unknown_genre_name);
             }
             genreNameView.setText(genreName);
+        } else {
+            trackNameView.setText("");
+            artistNameView.setText("");
+            genreNameView.setText("");
         }
     }
 

@@ -54,8 +54,6 @@ public class MusicUtils {
         public final static int QUEUE = 14;
         public final static int PLAY_NOW = 15;
         public final static int PLAY_NEXT = 16;
-        public final static int SETTINGS = 17;
-        public final static int SEARCH = 18;
         public final static int SHARE_VIA = 19;
         public final static int TRACK_INFO = 20;
         public final static int SEARCH_FOR = 21;

@@ -304,8 +304,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         super.onCreateOptionsMenu(menu, inflater);
 
         if (isEditMode()) {
-            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffle).setIcon(R.drawable.ic_menu_shuffle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueify).setIcon(R.drawable.ic_menu_uniqueify);
+            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueifyplaylist).setIcon(R.drawable.ic_menu_uniqueify);
         }
 
         menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);

@@ -63,10 +63,14 @@
     <!-- Menu item to play back all the songs in the currently showing list in list order interleaved with the current play queue -->
     <string name="interleave_all">Interleave</string>
     <string name="interleaveNNN">Queue <xliff:g id="queue">%d</xliff:g> - list <xliff:g id="list">%d</xliff:g></string>
-    <!-- Menu item to shuffle all songs in play queue or play list -->
-    <string name="shuffle">Shuffle</string>
-    <!-- Menu item to uniqueify all songs in play queue or play list -->
-    <string name="uniqueify">Remove dups</string>
+    <!-- Menu item to shuffle all songs in play queue -->
+    <string name="shufflequeue">Shuffle queue</string>
+    <!-- Menu item to shuffle all songs in play list -->
+    <string name="shuffleplaylist">Shuffle list</string>
+    <!-- Menu item to uniqueify all songs in play queue -->
+    <string name="uniqueifyqueue">Remove dups from queue</string>
+    <!-- Menu item to uniqueify all songs in play list -->
+    <string name="uniqueifyplaylist">Remove dups from list</string>
 
     <string name="repeat">Repeat</string>
 

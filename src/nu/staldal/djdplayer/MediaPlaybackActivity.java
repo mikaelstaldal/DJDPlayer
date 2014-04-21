@@ -93,14 +93,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
 
         // Assume something is playing when the service says it is,
         // but also if the audio ID is valid but the service is paused.
-        if (this.service.getAudioId() >= 0 || this.service.isPlaying() ||
-                this.service.getPath() != null) {
+        if (this.service.getAudioId() >= 0 || this.service.isPlaying() || this.service.getPath() != null) {
             // something is playing now, we're done
             return;
         }
         // Service is dead or not playing anything. If we got here as part
-        // of a "play this file" Intent, exit. Otherwise go to the Music
-        // app start screen.
+        // of a "play this file" Intent, exit. Otherwise go to the Music app start screen.
         if (getIntent().getData() == null) {
             Intent intent = new Intent(MediaPlaybackActivity.this, MusicBrowserActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -312,12 +310,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
     private void updateTrackInfo() {
         if (service == null) return;
 
-        String path = service.getPath();
-        if (path == null) {
+        if (service.getQueueLength() > 0) {
+            setTitle((service.getQueuePosition() + 1) + "/" + service.getQueueLength());
+        } else {
             finish();
-            return;
         }
-
-        setTitle((service.getQueuePosition() + 1) + "/" + service.getQueueLength());
     }
 }
