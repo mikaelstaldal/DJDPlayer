@@ -15,7 +15,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_mp_song_playback"
             android:drawablePadding="4dip"/>
