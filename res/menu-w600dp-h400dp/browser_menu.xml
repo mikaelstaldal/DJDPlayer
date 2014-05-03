@@ -27,11 +27,6 @@
     </group>
 
     <item
-            android:id="@+id/settings"
-            android:icon="@drawable/ic_menu_preferences"
-            android:title="@string/settings"/>
-
-    <item
             android:id="@+id/search"
             android:icon="@drawable/ic_menu_search"
             android:title="@string/search_title"/>
@@ -40,5 +35,10 @@
             android:id="@+id/effect_panel"
             android:icon="@drawable/ic_menu_eq"
             android:title="@string/effectspanel"/>
+
+    <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_menu_preferences"
+            android:title="@string/settings"/>
 
 </menu>
