@@ -40,8 +40,8 @@
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:layout_width="0dip"
-                android:paddingLeft="5dip"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dip"/>
 
         <LinearLayout
                 android:layout_width="wrap_content"
@@ -85,11 +85,11 @@
                 android:shadowDy="0"
                 android:shadowRadius="3"
                 android:gravity="right"
-                android:paddingRight="5dip"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:paddingRight="5dip"/>
 
     </LinearLayout>
 
