@@ -20,17 +20,17 @@ import android.app.Fragment;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
-import android.text.Layout;
-import android.text.TextUtils;
 import android.view.*;
 import android.widget.TextView;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 public class PlayerHeaderFragment extends Fragment implements
-        FragmentServiceConnection, View.OnTouchListener, View.OnLongClickListener, MusicUtils.Defs {
+        FragmentServiceConnection, View.OnLongClickListener, MusicUtils.Defs {
+
+    @SuppressWarnings("unused")
+    private static final String LOGTAG = "PlayerHeaderFragment";
+
     private static final int ADD_TO_PLAYLIST2 = CHILD_MENU_BASE+4;
     private static final int USE_AS_RINGTONE2 = CHILD_MENU_BASE+5;
     private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
@@ -47,13 +47,6 @@ public class PlayerHeaderFragment extends Fragment implements
     private TextView artistNameView;
     private TextView genreNameView;
 
-    private int mTouchSlop;
-    private int mInitialX = -1;
-    private int mLastX = -1;
-    private int mTextWidth = 0;
-    private int mViewWidth = 0;
-    boolean mDraggingLabel = false;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.player_header, container, false);
@@ -64,17 +57,10 @@ public class PlayerHeaderFragment extends Fragment implements
         artistNameView = (TextView) view.findViewById(R.id.artistname);
         genreNameView = (TextView) view.findViewById(R.id.genrename);
 
-        trackNameView.setOnTouchListener(this);
         registerForContextMenu(trackNameView);
-
-        artistNameView.setOnTouchListener(this);
         artistNameView.setOnLongClickListener(this);
-
-        genreNameView.setOnTouchListener(this);
         genreNameView.setOnLongClickListener(this);
 
-        mTouchSlop = ViewConfiguration.get(getActivity()).getScaledTouchSlop();
-        
         return view;
     }
 
@@ -199,106 +185,6 @@ public class PlayerHeaderFragment extends Fragment implements
         }
         return super.onContextItemSelected(item);
     }
-
-    private TextView textViewForContainer(View v) {
-        View vv = v.findViewById(R.id.artistname);
-        if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.genrename);
-        if (vv != null) return (TextView) vv;
-        vv = v.findViewById(R.id.trackname);
-        if (vv != null) return (TextView) vv;
-        return null;
-    }
-    
-    public boolean onTouch(View v, MotionEvent event) {
-        int action = event.getAction();
-        TextView tv = textViewForContainer(v);
-        if (tv == null) {
-            return false;
-        }
-        if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundColor(0xff606060);
-            mInitialX = mLastX = (int) event.getX();
-            mDraggingLabel = false;
-        } else if (action == MotionEvent.ACTION_UP ||
-                action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundColor(0);
-            if (mDraggingLabel) {
-                Message msg = mLabelScroller.obtainMessage(0, tv);
-                mLabelScroller.sendMessageDelayed(msg, 1000);
-            }
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            if (mDraggingLabel) {
-                int scrollx = tv.getScrollX();
-                int x = (int) event.getX();
-                int delta = mLastX - x;
-                if (delta != 0) {
-                    mLastX = x;
-                    scrollx += delta;
-                    if (scrollx > mTextWidth) {
-                        // scrolled the text completely off the view to the left
-                        scrollx -= mTextWidth;
-                        scrollx -= mViewWidth;
-                    }
-                    if (scrollx < -mViewWidth) {
-                        // scrolled the text completely off the view to the right
-                        scrollx += mViewWidth;
-                        scrollx += mTextWidth;
-                    }
-                    tv.scrollTo(scrollx, 0);
-                }
-                return true;
-            }
-            int delta = mInitialX - (int) event.getX();
-            if (Math.abs(delta) > mTouchSlop) {
-                // start moving
-                mLabelScroller.removeMessages(0, tv);
-                
-                // Only turn ellipsizing off when it's not already off, because it
-                // causes the scroll position to be reset to 0.
-                if (tv.getEllipsize() != null) {
-                    tv.setEllipsize(null);
-                }
-                Layout ll = tv.getLayout();
-                // layout might be null if the text just changed, or ellipsizing
-                // was just turned off
-                if (ll == null) {
-                    return false;
-                }
-                // get the non-ellipsized line width, to determine whether scrolling
-                // should even be allowed
-                mTextWidth = (int) tv.getLayout().getLineWidth(0);
-                mViewWidth = tv.getWidth();
-                if (mViewWidth > mTextWidth) {
-                    tv.setEllipsize(TextUtils.TruncateAt.END);
-                    v.cancelLongPress();
-                    return false;
-                }
-                mDraggingLabel = true;
-                tv.setHorizontalFadingEdgeEnabled(true);
-                v.cancelLongPress();
-                return true;
-            }
-        }
-        return false; 
-    }
-
-    final Handler mLabelScroller = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            TextView tv = (TextView) msg.obj;
-            int x = tv.getScrollX();
-            x = x * 3 / 4;
-            tv.scrollTo(x, 0);
-            if (x == 0) {
-                tv.setEllipsize(TextUtils.TruncateAt.END);
-            } else {
-                Message newmsg = obtainMessage(0, tv);
-                mLabelScroller.sendMessageDelayed(newmsg, 15);
-            }
-        }
-    };
-        
     public boolean onLongClick(View view) {
         if (service == null) return true;
 
