@@ -93,7 +93,7 @@ public class PickMusicFolderActivity extends Activity {
         if (new File(folder).isDirectory()) {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
             editor.putString(SettingsActivity.MUSIC_FOLDER, folder);
-            editor.commit();
+            editor.apply();
 
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
         }
