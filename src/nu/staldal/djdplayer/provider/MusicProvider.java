@@ -81,7 +81,7 @@ public class MusicProvider extends ContentProvider {
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Artist.ARTIST_PATH, ARTIST);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Album.ALBUM_PATH, ALBUM);
 
-        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/#", PLAYLIST_MEMBERS);
+        sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Playlist.PLAYLIST_PATH+"/*", PLAYLIST_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Genre.GENRE_PATH+"/#", GENRE_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Folder.FOLDER_PATH +"/*", FOLDER_MEMBERS);
         sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.Artist.ARTIST_PATH+"/#", ARTIST_MEMBERS);
@@ -167,21 +167,25 @@ public class MusicProvider extends ContentProvider {
             Context context = getContext();
             int weeks = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).getInt(SettingsActivity.NUMWEEKS, 2);
             int seconds = weeks * (3600 * 24 * 7);
-            return getContext().getContentResolver().query(
+            Cursor cursor = getContext().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     MEDIA_STORE_MEMBER_CURSOR_COLS,
                     MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
                             + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''" + " AND "
                             + MediaStore.Audio.AudioColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds),
                     null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER
+            );
+            Log.i(LOGTAG, "count: " + cursor.getColumnCount());
+            return cursor;
         } else {
-            return getContext().getContentResolver().query(
+            Cursor cursor = getContext().getContentResolver().query(
                     MediaStore.Audio.Playlists.Members.getContentUri("external", id),
                     MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS,
                     null,
                     null,
                     MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+            return cursor;
         }
     }
 
