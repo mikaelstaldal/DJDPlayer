@@ -36,28 +36,28 @@ public class MusicProvider extends ContentProvider {
     private static final String LOGTAG = "MusicProvider";
 
     private static final String[] MEDIA_STORE_MEMBER_CURSOR_COLS = new String[] {
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.ARTIST_ID,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.MIME_TYPE
+        MediaStore.Audio.AudioColumns._ID,
+        MediaStore.Audio.AudioColumns.TITLE,
+        MediaStore.Audio.AudioColumns.DATA,
+        MediaStore.Audio.AudioColumns.ALBUM,
+        MediaStore.Audio.AudioColumns.ARTIST,
+        MediaStore.Audio.AudioColumns.ARTIST_ID,
+        MediaStore.Audio.AudioColumns.DURATION,
+        MediaStore.Audio.AudioColumns.MIME_TYPE
     };
 
     private static final String[] MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS = new String[] {
         MediaStore.Audio.Playlists.Members._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.ARTIST_ID,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.MIME_TYPE,
+        MediaStore.Audio.Playlists.Members.TITLE,
+        MediaStore.Audio.Playlists.Members.DATA,
+        MediaStore.Audio.Playlists.Members.ALBUM,
+        MediaStore.Audio.Playlists.Members.ARTIST,
+        MediaStore.Audio.Playlists.Members.ARTIST_ID,
+        MediaStore.Audio.Playlists.Members.DURATION,
+        MediaStore.Audio.Playlists.Members.MIME_TYPE,
         MediaStore.Audio.Playlists.Members.PLAY_ORDER,
         MediaStore.Audio.Playlists.Members.AUDIO_ID,
-        MediaStore.Audio.Media.IS_MUSIC
+        MediaStore.Audio.Playlists.Members.IS_MUSIC
     };
 
     static final int FOLDER = 1;
@@ -153,12 +153,12 @@ public class MusicProvider extends ContentProvider {
         return getContext().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.Media.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.Media.DATA + " LIKE ?"
-                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " LIKE ?"
+                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
                 new String[] { folder + "%" },
-                MediaStore.Audio.Media.DATA);
+                MediaStore.Audio.AudioColumns.DATA);
     }
 
     private Cursor fetchPlaylist(long id) {
@@ -170,9 +170,9 @@ public class MusicProvider extends ContentProvider {
             return getContext().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     MEDIA_STORE_MEMBER_CURSOR_COLS,
-                    MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                            + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND "
-                            + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds),
+                    MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                            + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''" + " AND "
+                            + MediaStore.Audio.AudioColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds),
                     null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         } else {
@@ -189,8 +189,8 @@ public class MusicProvider extends ContentProvider {
         return getContext().getContentResolver().query(
                 MediaStore.Audio.Genres.Members.getContentUri("external", id),
                 MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.Media.DATA + " != ''",
+                MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''",
                 null,
                 MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
     }
@@ -199,9 +199,9 @@ public class MusicProvider extends ContentProvider {
         return getContext().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + id
-                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''" + " AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=" + id
+                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
                 null,
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
@@ -210,19 +210,19 @@ public class MusicProvider extends ContentProvider {
         return getContext().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + id
-                        + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''" + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=" + id
+                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
                 null,
-                MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.TITLE_KEY);
+                MediaStore.Audio.AudioColumns.TRACK + ", " + MediaStore.Audio.AudioColumns.TITLE_KEY);
     }
 
     private Cursor fetchMusic() {
         return getContext().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.Media.TITLE + " != '' AND " + MediaStore.Audio.Media.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.Media.DATA + " != ''" + " AND " + MediaStore.Audio.Media.IS_MUSIC + "=1",
+                MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''" + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
                 null,
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
@@ -252,8 +252,8 @@ public class MusicProvider extends ContentProvider {
 
     private int fetchFolderCount(String path) {
         Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Media._ID},
-                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " LIKE ?",
+                new String[]{MediaStore.Audio.AudioColumns._ID},
+                MediaStore.Audio.AudioColumns.IS_MUSIC + "=1 AND " + MediaStore.Audio.AudioColumns.DATA + " LIKE ?",
                 new String[]{path + "%"}, null);
 
         int count = 0;
@@ -321,10 +321,10 @@ public class MusicProvider extends ContentProvider {
         Context context = getContext();
         int weeks = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).getInt(SettingsActivity.NUMWEEKS, 2);
         int seconds = weeks * (3600 * 24 * 7);
-        String where = MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != '' AND "
-                + MediaStore.MediaColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds);
+        String where = MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL AND " + MediaStore.Audio.AudioColumns.DATA + " != '' AND "
+                + MediaStore.Audio.AudioColumns.DATE_ADDED + ">" + (System.currentTimeMillis() / 1000 - seconds);
         int count = getCursorCount(getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Media._ID}, where, null, null));
+                new String[]{MediaStore.Audio.AudioColumns._ID}, where, null, null));
         ArrayList<Object> recent = new ArrayList<>(3);
         recent.add(MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST);
         recent.add(getContext().getString(R.string.recentlyadded));
@@ -384,7 +384,7 @@ public class MusicProvider extends ContentProvider {
             return getContext().getContentResolver().query(
                     MediaStore.Audio.Genres.Members.getContentUri("external", id),
                     new String[] { MediaStore.Audio.Genres.Members.AUDIO_ID },
-                    MediaStore.Audio.Media.DATA + " IS NOT NULL AND " + MediaStore.Audio.Media.DATA + " != ''",
+                    MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL AND " + MediaStore.Audio.AudioColumns.DATA + " != ''",
                     null,
                     null);
         else

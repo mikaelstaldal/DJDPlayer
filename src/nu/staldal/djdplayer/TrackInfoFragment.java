@@ -48,16 +48,16 @@ public class TrackInfoFragment extends DialogFragment implements LoaderManager.L
     }
 
     private final static String[] COLUMNS = new String[] {
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.COMPOSER,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.YEAR,
-            MediaStore.Audio.Media.DATE_ADDED
+            MediaStore.Audio.AudioColumns._ID,
+            MediaStore.Audio.AudioColumns.DATA,
+            MediaStore.Audio.AudioColumns.MIME_TYPE,
+            MediaStore.Audio.AudioColumns.TITLE,
+            MediaStore.Audio.AudioColumns.ALBUM,
+            MediaStore.Audio.AudioColumns.ARTIST,
+            MediaStore.Audio.AudioColumns.COMPOSER,
+            MediaStore.Audio.AudioColumns.DURATION,
+            MediaStore.Audio.AudioColumns.YEAR,
+            MediaStore.Audio.AudioColumns.DATE_ADDED
     };
 
     @Override
@@ -105,16 +105,16 @@ public class TrackInfoFragment extends DialogFragment implements LoaderManager.L
     }
 
     private void bindView(Cursor cursor) {
-        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-        File file = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
-        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-        String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-        String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-        String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-        String composer = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.COMPOSER));
-        int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-        String year = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR));
-        Date dateAdded = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED))*1000);
+        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
+        File file = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)));
+        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
+        String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+        String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+        String composer = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.COMPOSER));
+        int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
+        String year = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.YEAR));
+        Date dateAdded = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATE_ADDED))*1000);
 
         ((TextView)getView().findViewById(R.id.title)).setText(title);
         ((TextView)getView().findViewById(R.id.artist)).setText(artist);

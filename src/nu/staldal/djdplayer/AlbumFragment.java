@@ -88,7 +88,7 @@ public class AlbumFragment extends MetadataCategoryFragment {
     protected long[] fetchSongList(long id) {
         Cursor cursor = MusicUtils.query(getActivity(),
                 MusicContract.Album.getMembersUri(id),
-                new String[] { MediaStore.Audio.Media._ID },
+                new String[] { MediaStore.Audio.AudioColumns._ID },
                 null,
                 null,
                 null);

@@ -36,12 +36,12 @@ public class PlayQueueFragment extends ListFragment
     private static final String LOGTAG = "PlayQueueFragment";
 
     final static String[] mCols = new String[] {
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.MIME_TYPE
+            MediaStore.Audio.AudioColumns.TITLE,
+            MediaStore.Audio.AudioColumns.ARTIST,
+            MediaStore.Audio.AudioColumns.DURATION,
+            MediaStore.Audio.AudioColumns._ID,
+            MediaStore.Audio.AudioColumns.ALBUM,
+            MediaStore.Audio.AudioColumns.MIME_TYPE
     };
 
     private MediaPlaybackService service;
@@ -252,7 +252,7 @@ public class PlayQueueFragment extends ListFragment
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         mSelectedPosition = mi.position;
         playQueueCursor.moveToPosition(mSelectedPosition);
-        mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+        mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
 
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
@@ -272,7 +272,7 @@ public class PlayQueueFragment extends ListFragment
         }
 
         menu.setHeaderTitle(
-                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+                playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)));
     }
 
     @Override
@@ -304,7 +304,7 @@ public class PlayQueueFragment extends ListFragment
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f,
-                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)));
 
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -333,15 +333,15 @@ public class PlayQueueFragment extends ListFragment
             case SHARE_VIA:
                 startActivity(MusicUtils.shareVia(
                         mSelectedId,
-                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
                         getResources()));
                 return true;
 
             case SEARCH_FOR:
                 startActivity(MusicUtils.searchFor(
-                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)),
-                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)),
-                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
+                        playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
                         getResources()));
                 return true;
         }
@@ -386,7 +386,7 @@ public class PlayQueueFragment extends ListFragment
 
             mCurrentPlaylistCursor = PlayQueueFragment.this.getActivity().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    mCols, buildPlayQueueWhereClause(playQueue), null, MediaStore.Audio.Media._ID);
+                    mCols, buildPlayQueueWhereClause(playQueue), null, MediaStore.Audio.AudioColumns._ID);
 
             if (mCurrentPlaylistCursor == null) {
                 mSize = 0;
@@ -396,7 +396,7 @@ public class PlayQueueFragment extends ListFragment
             int size = mCurrentPlaylistCursor.getCount();
             mCursorIdxs = new long[size];
             mCurrentPlaylistCursor.moveToFirst();
-            int colidx = mCurrentPlaylistCursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            int colidx = mCurrentPlaylistCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
             for (int i = 0; i < size; i++) {
                 mCursorIdxs[i] = mCurrentPlaylistCursor.getLong(colidx);
                 mCurrentPlaylistCursor.moveToNext();
@@ -428,7 +428,7 @@ public class PlayQueueFragment extends ListFragment
 
         private String buildPlayQueueWhereClause(long[] playQueue) {
             StringBuilder where = new StringBuilder();
-            where.append(MediaStore.Audio.Media._ID + " IN (");
+            where.append(MediaStore.Audio.AudioColumns._ID + " IN (");
             for (int i = 0; i < playQueue.length; i++) {
                 where.append(playQueue[i]);
                 if (i < playQueue.length - 1) {

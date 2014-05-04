@@ -111,7 +111,7 @@ public class FolderFragment extends CategoryFragment {
     private long[] fetchSongList(String folder) {
         Cursor cursor = MusicUtils.query(getActivity(),
                 MusicContract.Folder.getMembersUri(folder),
-                new String[] { MediaStore.Audio.Media._ID },
+                new String[] { MediaStore.Audio.AudioColumns._ID },
                 null,
                 null,
                 null);

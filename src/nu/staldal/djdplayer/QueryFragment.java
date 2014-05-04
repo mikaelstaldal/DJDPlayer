@@ -40,7 +40,7 @@ public class QueryFragment extends TrackFragment {
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         selectedPosition = mi.position;
         adapter.getCursor().moveToPosition(selectedPosition);
-        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
         if (isSong(mimeType)) {
             super.onCreateContextMenu(menu, view, menuInfoIn);
         }
@@ -50,7 +50,7 @@ public class QueryFragment extends TrackFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         selectedPosition = position;
         adapter.getCursor().moveToPosition(selectedPosition);
-        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        String mimeType = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
         if ("artist".equals(mimeType)) {
             viewCategory(MusicContract.Artist.getMembersUri(id));
         } else if ("album".equals(mimeType)) {
@@ -91,10 +91,10 @@ public class QueryFragment extends TrackFragment {
 
         String[] ccols = new String[]{
                 BaseColumns._ID,   // this will be the artist, album or track ID
-                MediaStore.Audio.Media.MIME_TYPE, // mimetype of audio file, or "artist" or "album"
+                MediaStore.Audio.AudioColumns.MIME_TYPE, // mimetype of audio file, or "artist" or "album"
                 MediaStore.Audio.Artists.ARTIST,
                 MediaStore.Audio.Albums.ALBUM,
-                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.AudioColumns.TITLE,
                 "data1",
                 "data2"
         };
@@ -133,7 +133,7 @@ public class QueryFragment extends TrackFragment {
             p.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             p.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
             if ("artist".equals(mimeType)) {
                 iv.setImageResource(R.drawable.ic_mp_artist_list);
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(
@@ -173,7 +173,7 @@ public class QueryFragment extends TrackFragment {
             } else if (isSong(mimeType)) {
                 iv.setImageResource(R.drawable.ic_mp_song_list);
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(
-                        MediaStore.Audio.Media.TITLE));
+                        MediaStore.Audio.AudioColumns.TITLE));
                 tv1.setText(name);
 
                 String displayname = cursor.getString(cursor.getColumnIndexOrThrow(

@@ -113,15 +113,15 @@ public class MediaPlaybackService extends Service {
     private int mOpenFailedCounter = 0;
     final String[] mCursorCols = new String[] {
             "audio._id AS _id",             // index must match IDCOLIDX below
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.ARTIST_ID,
-            MediaStore.Audio.Media.IS_PODCAST, // index must match PODCASTCOLIDX below
-            MediaStore.Audio.Media.BOOKMARK    // index must match BOOKMARKCOLIDX below
+            MediaStore.Audio.AudioColumns.ARTIST,
+            MediaStore.Audio.AudioColumns.ALBUM,
+            MediaStore.Audio.AudioColumns.TITLE,
+            MediaStore.Audio.AudioColumns.DATA,
+            MediaStore.Audio.AudioColumns.MIME_TYPE,
+            MediaStore.Audio.AudioColumns.ALBUM_ID,
+            MediaStore.Audio.AudioColumns.ARTIST_ID,
+            MediaStore.Audio.AudioColumns.IS_PODCAST, // index must match PODCASTCOLIDX below
+            MediaStore.Audio.AudioColumns.BOOKMARK    // index must match BOOKMARKCOLIDX below
     };
     private final static int IDCOLIDX = 0;
     private final static int PODCASTCOLIDX = 8;
@@ -1007,7 +1007,7 @@ public class MediaPlaybackService extends Service {
                     selectionArgs = null;
                 } else {
                    uri = MediaStore.Audio.Media.getContentUriForPath(path);
-                   where = MediaStore.Audio.Media.DATA + "=?";
+                   where = MediaStore.Audio.AudioColumns.DATA + "=?";
                    selectionArgs = new String[] { path };
                 }
                 
@@ -1251,7 +1251,7 @@ public class MediaPlaybackService extends Service {
                 
                 // write 'pos' to the bookmark field
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.Audio.Media.BOOKMARK, pos);
+                values.put(MediaStore.Audio.AudioColumns.BOOKMARK, pos);
                 Uri uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mCursor.getLong(IDCOLIDX));
                 getContentResolver().update(uri, values, null, null);
@@ -1439,7 +1439,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
         }
     }
     
@@ -1448,7 +1448,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return -1;
             }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST_ID));
         }
     }
 
@@ -1457,7 +1457,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
         }
     }
 
@@ -1466,7 +1466,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return -1;
             }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
         }
     }
 
@@ -1493,7 +1493,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
         }
     }
 
@@ -1502,7 +1502,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            return new File(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))).getParentFile();
+            return new File(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA))).getParentFile();
         }
     }
 
@@ -1511,7 +1511,7 @@ public class MediaPlaybackService extends Service {
             if (mCursor == null) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
         }
     }
 

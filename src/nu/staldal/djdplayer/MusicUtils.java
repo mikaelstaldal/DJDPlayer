@@ -234,7 +234,7 @@ public class MusicUtils {
         try {
             colidx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
         } catch (IllegalArgumentException ex) {
-            colidx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            colidx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
         }
         for (int i = 0; i < len; i++) {
             list[i] = cursor.getLong(colidx);
@@ -293,10 +293,10 @@ public class MusicUtils {
     }
 
     public static void deleteTracks(Context context, long [] list) {
-        String [] cols = new String [] { MediaStore.Audio.Media._ID, 
-                MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID };
+        String [] cols = new String [] { MediaStore.Audio.AudioColumns._ID,
+                MediaStore.Audio.AudioColumns.DATA, MediaStore.Audio.AudioColumns.ALBUM_ID };
         StringBuilder where = new StringBuilder();
-        where.append(MediaStore.Audio.Media._ID + " IN (");
+        where.append(MediaStore.Audio.AudioColumns._ID + " IN (");
         for (int i = 0; i < list.length; i++) {
             where.append(list[i]);
             if (i < list.length - 1) {
@@ -552,8 +552,8 @@ public class MusicUtils {
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
         try {
             ContentValues values = new ContentValues(2);
-            values.put(MediaStore.Audio.Media.IS_RINGTONE, "1");
-            values.put(MediaStore.Audio.Media.IS_ALARM, "1");
+            values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
+            values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
             resolver.update(ringUri, values, null, null);
         } catch (UnsupportedOperationException ex) {
             // most likely the card just got unmounted
@@ -562,12 +562,12 @@ public class MusicUtils {
         }
 
         String[] cols = new String[] {
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.TITLE
+                MediaStore.Audio.AudioColumns._ID,
+                MediaStore.Audio.AudioColumns.DATA,
+                MediaStore.Audio.AudioColumns.TITLE
         };
 
-        String where = MediaStore.Audio.Media._ID + "=" + id;
+        String where = MediaStore.Audio.AudioColumns._ID + "=" + id;
         Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 cols, where , null, null);
         try {
@@ -627,9 +627,9 @@ public class MusicUtils {
      * or if it is marked as not music in the database.
      */
     static boolean isMusic(Cursor c) {
-        int titleidx = c.getColumnIndex(MediaStore.Audio.Media.TITLE);
-        int albumidx = c.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-        int artistidx = c.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+        int titleidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.TITLE);
+        int albumidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM);
+        int artistidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST);
 
         String title = c.getString(titleidx);
         String album = c.getString(albumidx);
@@ -642,7 +642,7 @@ public class MusicUtils {
             return false;
         }
 
-        int ismusic_idx = c.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC);
+        int ismusic_idx = c.getColumnIndex(MediaStore.Audio.AudioColumns.IS_MUSIC);
         boolean ismusic = true;
         if (ismusic_idx >= 0) {
             ismusic = c.getInt(ismusic_idx) != 0;

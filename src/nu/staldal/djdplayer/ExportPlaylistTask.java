@@ -52,14 +52,14 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
             cursor = context.getContentResolver().query(
                     MusicContract.Playlist.getMembersUri(playlistId),
-                    new String[]{MediaStore.Audio.Media.DATA},
+                    new String[]{MediaStore.Audio.AudioColumns.DATA},
                     null,
                     null,
                     null);
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     if (isCancelled()) break;
-                    String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                    String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA));
                     writer.write(path, prefix, path.length() - prefix);
                     writer.write('\n');
                 }

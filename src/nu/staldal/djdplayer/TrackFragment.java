@@ -184,7 +184,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
         menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                MediaStore.Audio.Media.TITLE)));
+                MediaStore.Audio.AudioColumns.TITLE)));
     }
 
     @Override
@@ -226,7 +226,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 list[0] = (int) selectedId;
                 String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f, adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.TITLE)));
+                                MediaStore.Audio.AudioColumns.TITLE)));
 
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -259,20 +259,20 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 startActivity(MusicUtils.shareVia(
                         selectedId,
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.MIME_TYPE)),
+                                MediaStore.Audio.AudioColumns.MIME_TYPE)),
                         getResources()));
                 return true;
 
             case SEARCH_FOR:
                 String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.TITLE));
+                                MediaStore.Audio.AudioColumns.TITLE));
 
                 startActivity(MusicUtils.searchFor(
                         currentTrackName,
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.ARTIST)),
+                                MediaStore.Audio.AudioColumns.ARTIST)),
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.Media.ALBUM)),
+                                MediaStore.Audio.AudioColumns.ALBUM)),
                         getResources()));
                 return true;
         }
@@ -430,14 +430,14 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
         private void getColumnIndices(Cursor cursor) {
             if (cursor != null) {
-                mTitleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-                mArtistIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
-                mDurationIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+                mTitleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE);
+                mArtistIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST);
+                mDurationIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION);
                 try {
                     mAudioIdIdx = cursor.getColumnIndexOrThrow(
                             MediaStore.Audio.Playlists.Members.AUDIO_ID);
                 } catch (IllegalArgumentException ex) {
-                    mAudioIdIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+                    mAudioIdIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
                 }
 
                 if (mIndexer != null) {
