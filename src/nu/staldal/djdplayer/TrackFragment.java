@@ -32,6 +32,7 @@ import android.widget.*;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.ui.TouchInterceptor;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -111,7 +112,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         return new TrackListAdapter(
                         getActivity(), // need to use application context to avoid leaks
                         isEditMode() ? R.layout.edit_track_list_item : R.layout.track_list_item,
-                        null, // cursor
                         new String[] {},
                         new int[] {});
     }
@@ -396,15 +396,15 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     }
 
     class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
-        int mTitleIdx;
-        int mArtistIdx;
-        int mDurationIdx;
-        int mAudioIdIdx;
+        int titleIdx = -1;
+        int artistIdx = -1;
+        int durationIdx = -1;
+        int audioIdIdx = -1;
 
-        private final StringBuilder mBuilder = new StringBuilder();
-        private final String mUnknownArtist;
+        private final StringBuilder stringBuilder = new StringBuilder();
+        private final String unknownArtistLabel;
 
-        private AlphabetIndexer mIndexer;
+        private AlphabetIndexer indexer;
 
         class ViewHolder {
             TextView line1;
@@ -415,38 +415,41 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             char [] buffer2;
         }
 
-        TrackListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to) {
-            super(context, layout, cursor, from, to, 0);
-            getColumnIndices(cursor);
-            mUnknownArtist = context.getString(R.string.unknown_artist_name);
+        TrackListAdapter(Context context, int layout, String[] from, int[] to) {
+            super(context, layout, null, from, to, 0);
+            unknownArtistLabel = context.getString(R.string.unknown_artist_name);
         }
 
         @Override
         public Cursor swapCursor(Cursor c) {
             Cursor res = super.swapCursor(c);
-            getColumnIndices(c);
+            if (c != null) {
+                getColumnIndices(c);
+            }
             return res;
         }
 
         private void getColumnIndices(Cursor cursor) {
-            if (cursor != null) {
-                mTitleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE);
-                mArtistIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST);
-                mDurationIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION);
-                try {
-                    mAudioIdIdx = cursor.getColumnIndexOrThrow(
-                            MediaStore.Audio.Playlists.Members.AUDIO_ID);
-                } catch (IllegalArgumentException ex) {
-                    mAudioIdIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
+            try {
+                titleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE);
+                artistIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST);
+                durationIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION);
+
+                audioIdIdx = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+                if (audioIdIdx < 0) {
+                    audioIdIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
                 }
 
-                if (mIndexer != null) {
-                    mIndexer.setCursor(cursor);
+                if (indexer != null) {
+                    indexer.setCursor(cursor);
                 } else if (!TrackFragment.this.isEditMode() && TrackFragment.this.album == -1) {
                     String alpha = TrackFragment.this.getString(R.string.fast_scroll_alphabet);
 
-                    mIndexer = new MusicAlphabetIndexer(cursor, mTitleIdx, alpha);
+                    indexer = new MusicAlphabetIndexer(cursor, titleIdx, alpha);
                 }
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "Cursor does not contain expected columns, actually contains: "
+                        + Arrays.toString(cursor.getColumnNames()), e);
             }
         }
 
@@ -471,22 +474,22 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         public void bindView(View view, Context context, Cursor cursor) {
             ViewHolder vh = (ViewHolder) view.getTag();
 
-            cursor.copyStringToBuffer(mTitleIdx, vh.buffer1);
+            cursor.copyStringToBuffer(titleIdx, vh.buffer1);
             vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied);
 
-            int secs = cursor.getInt(mDurationIdx);
+            int secs = cursor.getInt(durationIdx);
             if (secs == 0) {
                 vh.duration.setText("");
             } else {
                 vh.duration.setText(MusicUtils.formatDuration(context, secs));
             }
 
-            final StringBuilder builder = mBuilder;
+            final StringBuilder builder = stringBuilder;
             builder.delete(0, builder.length());
 
-            String name = cursor.getString(mArtistIdx);
+            String name = cursor.getString(artistIdx);
             if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-                builder.append(mUnknownArtist);
+                builder.append(unknownArtistLabel);
             } else {
                 builder.append(name);
             }
@@ -503,7 +506,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 id = MusicUtils.sService.getAudioId();
             }
 
-            if (cursor.getLong(mAudioIdIdx) == id) {
+            if (cursor.getLong(audioIdIdx) == id) {
                 iv.setImageResource(R.drawable.indicator_ic_mp_playing_list);
                 iv.setVisibility(View.VISIBLE);
             } else {
@@ -514,16 +517,16 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         // SectionIndexer methods
 
         public Object[] getSections() {
-            if (mIndexer != null) {
-                return mIndexer.getSections();
+            if (indexer != null) {
+                return indexer.getSections();
             } else {
                 return null;
             }
         }
 
         public int getPositionForSection(int section) {
-            if (mIndexer != null) {
-                return mIndexer.getPositionForSection(section);
+            if (indexer != null) {
+                return indexer.getPositionForSection(section);
             } else {
                 return 0;
             }
