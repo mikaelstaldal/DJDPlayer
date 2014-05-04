@@ -143,15 +143,17 @@ public class PlayQueueFragment extends ListFragment
                         return true;
 
                     case R.id.play_indicator:
-                        int cursorPosition = cursor.getPosition();
-                        int serviceQueuePosition = service.getQueuePosition();
-                        if (cursorPosition == serviceQueuePosition) {
-                            ((ImageView) view).setImageResource(R.drawable.indicator_ic_mp_playing_list);
-                            view.setVisibility(View.VISIBLE);
-                        } else {
-                            view.setVisibility(View.GONE);
+                        if (service != null) {
+                            int cursorPosition = cursor.getPosition();
+                            int serviceQueuePosition = service.getQueuePosition();
+                            if (cursorPosition == serviceQueuePosition) {
+                                ((ImageView) view).setImageResource(R.drawable.indicator_ic_mp_playing_list);
+                                view.setVisibility(View.VISIBLE);
+                            } else {
+                                view.setVisibility(View.GONE);
+                            }
+                            return true;
                         }
-                        return true;
 
                     default:
                         return false;
