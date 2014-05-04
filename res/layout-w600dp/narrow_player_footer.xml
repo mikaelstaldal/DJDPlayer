@@ -20,12 +20,12 @@
         android:id="@+id/player_footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/standard_background">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/standard_background"
             android:orientation="horizontal">
 
         <TextView
@@ -95,7 +95,6 @@
 
     <SeekBar
             android:id="@android:id/progress"
-            android:background="@color/standard_background"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
