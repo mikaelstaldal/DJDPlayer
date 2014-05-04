@@ -34,7 +34,8 @@
     <item
             android:id="@+id/search"
             android:icon="@drawable/ic_menu_search"
-            android:title="@string/search_title"/>
+            android:title="@string/search_title"
+            android:showAsAction="ifRoom"/>
 
     <item
             android:id="@+id/effect_panel"
