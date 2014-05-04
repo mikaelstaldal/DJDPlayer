@@ -20,12 +20,13 @@
         android:id="@+id/player_footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/standard_background">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/standard_background"
+            android:layout_marginBottom="2dip"
             android:orientation="horizontal">
 
         <TextView
@@ -37,44 +38,33 @@
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="3"
+                android:gravity="left"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingLeft="5dip"
-                android:paddingTop="1dip"/>
+                android:paddingLeft="5dip"/>
 
-        <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="1dip"
-                android:layout_marginBottom="2dip"
-                android:gravity="center">
+        <nu.staldal.ui.RepeatingImageButton
+                android:id="@+id/prev"
+                style="@android:style/MediaButton.Previous"
+                android:contentDescription="@string/prev"
+                android:background="@drawable/button_background"
+                djdplayer:keyCode="21"/>
 
-            <nu.staldal.ui.RepeatingImageButton
-                    android:id="@+id/prev"
-                    style="@android:style/MediaButton.Previous"
-                    android:contentDescription="@string/prev"
-                    android:background="@drawable/button_background"
-                    djdplayer:keyCode="21"/>
+        <nu.staldal.ui.RepeatingImageButton
+                android:id="@+id/pause"
+                style="@android:style/MediaButton.Play"
+                android:contentDescription="@string/play_pause"
+                android:background="@drawable/button_background"
+                djdplayer:keyCode="23"/>
 
-            <nu.staldal.ui.RepeatingImageButton
-                    android:id="@+id/pause"
-                    style="@android:style/MediaButton.Play"
-                    android:contentDescription="@string/play_pause"
-                    android:background="@drawable/button_background"
-                    djdplayer:keyCode="23"/>
-
-            <nu.staldal.ui.RepeatingImageButton
-                    android:id="@+id/next"
-                    style="@android:style/MediaButton.Next"
-                    android:contentDescription="@string/next"
-                    android:background="@drawable/button_background"
-                    djdplayer:keyCode="22"/>
-
-        </LinearLayout>
+        <nu.staldal.ui.RepeatingImageButton
+                android:id="@+id/next"
+                style="@android:style/MediaButton.Next"
+                android:contentDescription="@string/next"
+                android:background="@drawable/button_background"
+                djdplayer:keyCode="22"/>
 
         <TextView
                 android:id="@+id/totaltime"
@@ -90,14 +80,12 @@
                 android:layout_weight="1"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingRight="5dip"
-                android:paddingTop="1dip"/>
+                android:paddingRight="5dip"/>
 
     </LinearLayout>
 
     <SeekBar
             android:id="@android:id/progress"
-            android:background="@color/standard_background"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

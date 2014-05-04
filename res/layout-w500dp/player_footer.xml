@@ -62,6 +62,7 @@
                     android:shadowDx="0"
                     android:shadowDy="0"
                     android:shadowRadius="3"
+                    android:gravity="left"
                     android:layout_gravity="bottom"
                     android:layout_weight="1"
                     android:layout_width="0dip"
@@ -90,7 +91,6 @@
 
         <SeekBar
                 android:id="@android:id/progress"
-                android:background="@color/standard_background"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
