@@ -167,7 +167,7 @@ public class MusicProvider extends ContentProvider {
             Context context = getContext();
             int weeks = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).getInt(SettingsActivity.NUMWEEKS, 2);
             int seconds = weeks * (3600 * 24 * 7);
-            Cursor cursor = getContext().getContentResolver().query(
+            return getContext().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     MEDIA_STORE_MEMBER_CURSOR_COLS,
                     MediaStore.Audio.AudioColumns.TITLE + " != '' AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
@@ -176,16 +176,13 @@ public class MusicProvider extends ContentProvider {
                     null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER
             );
-            Log.i(LOGTAG, "count: " + cursor.getColumnCount());
-            return cursor;
         } else {
-            Cursor cursor = getContext().getContentResolver().query(
+            return getContext().getContentResolver().query(
                     MediaStore.Audio.Playlists.Members.getContentUri("external", id),
                     MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS,
                     null,
                     null,
                     MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-            return cursor;
         }
     }
 
