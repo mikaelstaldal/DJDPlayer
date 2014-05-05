@@ -155,7 +155,7 @@ public class FolderFragment extends CategoryFragment {
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
+        menu.add(0, DELETE_ALL, 0, R.string.delete_all);
     }
 
     @Override
@@ -186,7 +186,7 @@ public class FolderFragment extends CategoryFragment {
                 return true;
             }
 
-            case DELETE_ITEM: {
+            case DELETE_ALL: {
                 final long [] list = fetchSongList(mCurrentFolder);
                 String f = getString(R.string.delete_folder_desc);
                 String desc = String.format(f, mCurrentFolder);

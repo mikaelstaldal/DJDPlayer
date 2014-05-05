@@ -126,7 +126,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_all);
+        menu.add(0, DELETE_ALL, 0, R.string.delete_all);
 
         if (!mIsUnknown) {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
@@ -172,7 +172,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                 return true;
             }
 
-            case DELETE_ITEM: {
+            case DELETE_ALL: {
                 final long[] songs = fetchSongList(mCurrentId);
                 String f = getString(getDeleteDescStringId());
                 String desc = String.format(f, mCurrentName);
