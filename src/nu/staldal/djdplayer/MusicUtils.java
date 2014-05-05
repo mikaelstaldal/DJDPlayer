@@ -58,7 +58,10 @@ public class MusicUtils {
         public final static int TRACK_INFO = 20;
         public final static int SEARCH_FOR = 21;
         public final static int PLAY_ALL_NEXT = 22;
-        public final static int CHILD_MENU_BASE = 23; // this should be the last item
+        public final static int ADD_ALL_TO_PLAYLIST = 23;
+        public final static int PLAYLIST_SELECTED_ALL = 24;
+        public final static int NEW_PLAYLIST_ALL = 25;
+        public final static int CHILD_MENU_BASE = 26; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }

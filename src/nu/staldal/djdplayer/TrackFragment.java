@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
@@ -36,7 +37,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
+public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, PopupMenu.OnMenuItemClickListener {
     private static final String LOGTAG = "TrackFragment";
 
     private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -45,12 +46,34 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
 
     public static final String URI = "uri";
 
+    private ImageView categoryMenuView;
+
     int selectedPosition;
     long selectedId;
 
     private Uri uri;
     private long playlist;
     private long album;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity.getTitle() != null) { // If not Songs tab
+            categoryMenuView = new ImageView(getActivity());
+            categoryMenuView.setImageResource(R.drawable.ic_context_menu);
+            categoryMenuView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onCreateCategoryMenu();
+                }
+            });
+            activity.getActionBar().setCustomView(categoryMenuView);
+            activity.getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
+        } else {
+            categoryMenuView = null;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,8 +94,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             playlist = -1;
             album = -1;
         }
-
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -82,16 +103,16 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         if (isEditMode()) {
             listView = new TouchInterceptor(getActivity(), null);
             ((TouchInterceptor) listView).setDropListener(new TouchInterceptor.DropListener() {
-                    public void drop(int from, int to) {
-                        MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                                playlist, from, to);
-                    }
-                });
+                public void drop(int from, int to) {
+                    MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
+                            playlist, from, to);
+                }
+            });
             ((TouchInterceptor) listView).setRemoveListener(new TouchInterceptor.RemoveListener() {
-                    public void remove(int which) {
-                        removePlaylistItem(which);
-                    }
-                });
+                public void remove(int which) {
+                    removePlaylistItem(which);
+                }
+            });
             listView.setDivider(null);
             listView.setSelector(R.drawable.list_selector_background);
         } else {
@@ -110,25 +131,15 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     @Override
     protected CursorAdapter createListAdapter() {
         return new TrackListAdapter(
-                        getActivity(), // need to use application context to avoid leaks
-                        isEditMode() ? R.layout.edit_track_list_item : R.layout.track_list_item,
-                        new String[] {},
-                        new int[] {});
+                getActivity(), // need to use application context to avoid leaks
+                isEditMode() ? R.layout.edit_track_list_item : R.layout.track_list_item,
+                new String[]{},
+                new int[]{});
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), uri, null, null, null, null);
-    }
-
-    public void onSaveInstanceState(Bundle outcicle) {
-        // need to store the selected item so we don't lose it in case
-        // of an orientation switch. Otherwise we could lose it while
-        // in the middle of specifying a playlist to add the item to.
-        outcicle.putInt("selectedposition", selectedPosition);
-        outcicle.putLong("selectedtrack", selectedId);
-
-        super.onSaveInstanceState(outcicle);
     }
 
     private boolean removePlaylistItem(int which) {
@@ -152,6 +163,9 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (menuInfoIn == null) return;
+
+        menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
+                MediaStore.Audio.AudioColumns.TITLE)));
 
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
         menu.add(0, PLAY_NEXT, 0, R.string.play_next);
@@ -183,36 +197,61 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
         if (MusicUtils.isMusic(adapter.getCursor())) {
             menu.add(0, SEARCH_FOR, 0, R.string.search_for);
         }
-        menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                MediaStore.Audio.AudioColumns.TITLE)));
+    }
+
+    private void onCreateCategoryMenu() {
+        PopupMenu categoryMenu = new PopupMenu(getActivity(), categoryMenuView);
+        categoryMenu.setOnMenuItemClickListener(this);
+        Menu menu = categoryMenu.getMenu();
+
+        if (isEditMode()) {
+            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueifyplaylist).setIcon(R.drawable.ic_menu_uniqueify);
+        }
+
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
+                R.drawable.ic_menu_interleave);
+        for (int i = 1; i <= 5; i++) {
+            for (int j = 1; j <= 5; j++) {
+                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+            }
+        }
+
+        SubMenu sub = menu.addSubMenu(0, ADD_ALL_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
+
+        categoryMenu.show();
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_NOW: {
-                MusicUtils.queueAndPlayImmediately(getActivity(), new long[] {selectedId});
+                MusicUtils.queueAndPlayImmediately(getActivity(), new long[]{selectedId});
                 return true;
             }
 
             case PLAY_NEXT: {
-                MusicUtils.queueNext(getActivity(), new long[] {selectedId});
+                MusicUtils.queueNext(getActivity(), new long[]{selectedId});
                 return true;
             }
 
             case QUEUE: {
-                MusicUtils.queue(getActivity(), new long[] {selectedId});
+                MusicUtils.queue(getActivity(), new long[]{selectedId});
                 return true;
             }
 
             case NEW_PLAYLIST: {
-                CreatePlaylist.showMe(getActivity(), new long[] {selectedId});
+                CreatePlaylist.showMe(getActivity(), new long[]{selectedId});
                 return true;
             }
 
             case PLAYLIST_SELECTED: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(getActivity(), new long[] {selectedId}, playlist);
+                MusicUtils.addToPlaylist(getActivity(), new long[]{selectedId}, playlist);
                 return true;
             }
 
@@ -222,11 +261,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 return true;
 
             case DELETE_ITEM: {
-                final long [] list = new long[1];
+                final long[] list = new long[1];
                 list[0] = (int) selectedId;
                 String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f, adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.AudioColumns.TITLE)));
+                        MediaStore.Audio.AudioColumns.TITLE)));
 
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -260,12 +299,13 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                         selectedId,
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                        getResources()));
+                        getResources()
+                ));
                 return true;
 
             case SEARCH_FOR:
                 String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
-                                MediaStore.Audio.AudioColumns.TITLE));
+                        MediaStore.Audio.AudioColumns.TITLE));
 
                 startActivity(MusicUtils.searchFor(
                         currentTrackName,
@@ -273,66 +313,15 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                                 MediaStore.Audio.AudioColumns.ARTIST)),
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.AudioColumns.ALBUM)),
-                        getResources()));
+                        getResources()
+                ));
                 return true;
         }
         return super.onContextItemSelected(item);
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        selectedPosition = position;
-        adapter.getCursor().moveToPosition(selectedPosition);
-        try {
-            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            selectedId = adapter.getCursor().getLong(id_idx);
-        } catch (IllegalArgumentException ex) {
-            selectedId = id;
-        }
-
-        if (isPicking()) {
-            getActivity().setResult(Activity.RESULT_OK, new Intent().setData(
-                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selectedId)));
-            getActivity().finish();
-        } else {
-            MusicUtils.playSong(getActivity(), selectedId);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        if (isEditMode()) {
-            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
-            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueifyplaylist).setIcon(R.drawable.ic_menu_uniqueify);
-        }
-
-        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
-        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
-                R.drawable.ic_menu_interleave);
-        for (int i = 1; i<=5; i++) {
-            for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0, getResources().getString(R.string.interleaveNNN, i, j));
-            }
-        }
-
-        menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(ADD_TO_PLAYLIST);
-        if (item != null) {
-            SubMenu sub = item.getSubMenu();
-            MusicUtils.makePlaylistMenu(getActivity(), sub);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case PLAY_ALL_NOW: {
                 MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
@@ -366,13 +355,13 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                 return true;
             }
 
-            case NEW_PLAYLIST: {
+            case NEW_PLAYLIST_ALL: {
                 CreatePlaylist.showMe(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
-            case PLAYLIST_SELECTED: {
-                long [] list = MusicUtils.getSongListForCursor(adapter.getCursor());
+            case PLAYLIST_SELECTED_ALL: {
+                long[] list = MusicUtils.getSongListForCursor(adapter.getCursor());
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), list, playlist);
                 return true;
@@ -386,9 +375,49 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
                     MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
                     return true;
                 }
-
         }
-        return super.onOptionsItemSelected(item);
+        return false;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        selectedPosition = position;
+        adapter.getCursor().moveToPosition(selectedPosition);
+        try {
+            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+            selectedId = adapter.getCursor().getLong(id_idx);
+        } catch (IllegalArgumentException ex) {
+            selectedId = id;
+        }
+
+        if (isPicking()) {
+            getActivity().setResult(Activity.RESULT_OK, new Intent().setData(
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selectedId)));
+            getActivity().finish();
+        } else {
+            MusicUtils.playSong(getActivity(), selectedId);
+        }
+    }
+
+
+    public void onSaveInstanceState(Bundle outcicle) {
+        // need to store the selected item so we don't lose it in case
+        // of an orientation switch. Otherwise we could lose it while
+        // in the middle of specifying a playlist to add the item to.
+        outcicle.putInt("selectedposition", selectedPosition);
+        outcicle.putLong("selectedtrack", selectedId);
+
+        super.onSaveInstanceState(outcicle);
+    }
+
+    @Override
+    public void onDetach() {
+        if (categoryMenuView != null) {
+            getActivity().getActionBar().setCustomView(null);
+            getActivity().getActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
+        }
+
+        super.onDetach();
     }
 
     public boolean isEditMode() {
@@ -412,7 +441,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs {
             TextView duration;
             ImageView play_indicator;
             CharArrayBuffer buffer1;
-            char [] buffer2;
+            char[] buffer2;
         }
 
         TrackListAdapter(Context context, int layout, String[] from, int[] to) {
