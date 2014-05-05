@@ -288,9 +288,9 @@ public class PlaylistFragment extends CategoryFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
         menu.add(0, CREATE_NEW_PLAYLIST, 0, R.string.create_new_playlist).setIcon(R.drawable.ic_menu_add);
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
