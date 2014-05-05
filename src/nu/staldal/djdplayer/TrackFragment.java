@@ -512,7 +512,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 }
             } catch (IllegalArgumentException e) {
                 Log.w(LOGTAG, "Cursor does not contain expected columns, actually contains: "
-                        + Arrays.toString(cursor.getColumnNames()), e);
+                        + Arrays.toString(cursor.getColumnNames()) + " - " + e.toString());
             }
         }
 
