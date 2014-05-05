@@ -199,33 +199,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         }
     }
 
-    private void onCreateCategoryMenu() {
-        PopupMenu categoryMenu = new PopupMenu(getActivity(), categoryMenuView);
-        categoryMenu.setOnMenuItemClickListener(this);
-        Menu menu = categoryMenu.getMenu();
-
-        if (isEditMode()) {
-            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
-            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueifyplaylist).setIcon(R.drawable.ic_menu_uniqueify);
-        }
-
-        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
-        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
-                R.drawable.ic_menu_interleave);
-        for (int i = 1; i <= 5; i++) {
-            for (int j = 1; j <= 5; j++) {
-                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0, getResources().getString(R.string.interleaveNNN, i, j));
-            }
-        }
-
-        SubMenu sub = menu.addSubMenu(0, ADD_ALL_TO_PLAYLIST, 0, R.string.add_to_playlist).setIcon(R.drawable.ic_menu_add);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
-
-        categoryMenu.show();
-    }
-
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -320,24 +293,38 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         return super.onContextItemSelected(item);
     }
 
+    private void onCreateCategoryMenu() {
+        PopupMenu categoryMenu = new PopupMenu(getActivity(), categoryMenuView);
+        categoryMenu.setOnMenuItemClickListener(this);
+        Menu menu = categoryMenu.getMenu();
+
+        if (isEditMode()) {
+            menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, UNIQUEIFY_PLAYLIST, 0, R.string.uniqueifyplaylist).setIcon(R.drawable.ic_menu_uniqueify);
+        }
+
+        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
+        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
+                R.drawable.ic_menu_interleave);
+        for (int i = 1; i <= 5; i++) {
+            for (int j = 1; j <= 5; j++) {
+                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0, getResources().getString(R.string.interleaveNNN, i, j));
+            }
+        }
+
+        SubMenu sub = menu.addSubMenu(0, ADD_ALL_TO_PLAYLIST, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
+
+        menu.add(0, DELETE_ALL, 0, R.string.delete_all).setIcon(R.drawable.ic_menu_delete);
+
+        categoryMenu.show();
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL_NOW: {
-                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
-                return true;
-            }
-
-            case PLAY_ALL_NEXT: {
-                MusicUtils.queueNext(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
-                return true;
-            }
-
-            case QUEUE_ALL: {
-                MusicUtils.queue(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
-                return true;
-            }
-
             case SHUFFLE_PLAYLIST: {
                 new ShufflePlaylistTask(getActivity().getApplicationContext()).execute(
                         playlist, MusicUtils.getSongListForCursor(adapter.getCursor()));
@@ -355,15 +342,52 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 return true;
             }
 
+            case PLAY_ALL_NOW: {
+                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
+                return true;
+            }
+
+            case PLAY_ALL_NEXT: {
+                MusicUtils.queueNext(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
+                return true;
+            }
+
+            case QUEUE_ALL: {
+                MusicUtils.queue(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
+                return true;
+            }
+
             case NEW_PLAYLIST_ALL: {
                 CreatePlaylist.showMe(getActivity(), MusicUtils.getSongListForCursor(adapter.getCursor()));
                 return true;
             }
 
             case PLAYLIST_SELECTED_ALL: {
-                long[] list = MusicUtils.getSongListForCursor(adapter.getCursor());
+                long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(getActivity(), list, playlist);
+                MusicUtils.addToPlaylist(getActivity(), songs, playlist);
+                return true;
+            }
+
+            case DELETE_ALL: {
+                final long[] songs = MusicUtils.getSongListForCursor(adapter.getCursor());
+                String f = getString(R.string.delete_category_desc);
+                String desc = String.format(f, getActivity().getTitle());
+                new AlertDialog.Builder(getActivity())
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_songs_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MusicUtils.deleteTracks(TrackFragment.this.getActivity(), songs);
+                            }
+                        }).show();
                 return true;
             }
 

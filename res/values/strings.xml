@@ -92,6 +92,9 @@
     <!-- Delete confirmation dialog when deleting an entire album -->
     <string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted.</string>
 
+    <!-- Delete confirmation dialog when deleting an entire category -->
+    <string name="delete_category_desc">All songs in \"<xliff:g id="category">%s</xliff:g>\" will be permanently deleted.</string>
+
     <!-- Delete confirmation dialog when deleting a single song -->
     <string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted.</string>
 
