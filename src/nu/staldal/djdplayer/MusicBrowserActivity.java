@@ -179,6 +179,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         title = null;
 
         ActionBar actionBar = getActionBar();
+        actionBar.setCustomView(null);
+        actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setHomeButtonEnabled(false);

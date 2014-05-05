@@ -444,16 +444,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         super.onSaveInstanceState(outcicle);
     }
 
-    @Override
-    public void onDetach() {
-        if (categoryMenuView != null) {
-            getActivity().getActionBar().setCustomView(null);
-            getActivity().getActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
-        }
-
-        super.onDetach();
-    }
-
     public boolean isEditMode() {
         return playlist >= 0;
     }
