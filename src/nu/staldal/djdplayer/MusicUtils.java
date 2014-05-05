@@ -62,7 +62,8 @@ public class MusicUtils {
         public final static int PLAYLIST_SELECTED_ALL = 24;
         public final static int NEW_PLAYLIST_ALL = 25;
         public final static int DELETE_ALL = 26;
-        public final static int CHILD_MENU_BASE = 27; // this should be the last item
+        public final static int SEARCH_FOR_CATEGORY = 27;
+        public final static int CHILD_MENU_BASE = 28; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -663,7 +664,7 @@ public class MusicUtils {
         return Intent.createChooser(intent, resources.getString(R.string.share_via));
     }
 
-    static Intent searchFor(String trackName, String artistNameForAlbum, String albumName, Resources resources) {
+    static Intent searchForTrack(String trackName, String artistNameForAlbum, String albumName, Resources resources) {
         Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -681,6 +682,16 @@ public class MusicUtils {
         intent.putExtra(SearchManager.QUERY, query);
 
         return Intent.createChooser(intent, resources.getString(R.string.mediasearch, trackName));
+    }
+
+    static Intent searchForCategory(CharSequence categoryName, String contentType, Resources resources) {
+        Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        intent.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, contentType);
+        intent.putExtra(SearchManager.QUERY, categoryName);
+
+        return Intent.createChooser(intent, resources.getString(R.string.mediasearch, categoryName));
     }
 
     static long parseLong(String s) {

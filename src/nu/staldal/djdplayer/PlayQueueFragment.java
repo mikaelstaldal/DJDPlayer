@@ -340,7 +340,7 @@ public class PlayQueueFragment extends ListFragment
                 return true;
 
             case SEARCH_FOR:
-                startActivity(MusicUtils.searchFor(
+                startActivity(MusicUtils.searchForTrack(
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),

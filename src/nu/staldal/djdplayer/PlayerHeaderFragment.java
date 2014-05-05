@@ -176,7 +176,7 @@ public class PlayerHeaderFragment extends Fragment implements
             }
 
             case SEARCH_FOR2:
-                startActivity(MusicUtils.searchFor(
+                startActivity(MusicUtils.searchForTrack(
                         service.getTrackName(),
                         service.getArtistName(),
                         service.getAlbumName(),

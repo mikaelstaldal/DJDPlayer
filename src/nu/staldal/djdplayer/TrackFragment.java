@@ -280,7 +280,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                         MediaStore.Audio.AudioColumns.TITLE));
 
-                startActivity(MusicUtils.searchFor(
+                startActivity(MusicUtils.searchForTrack(
                         currentTrackName,
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                                 MediaStore.Audio.AudioColumns.ARTIST)),
@@ -318,6 +318,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
 
         menu.add(0, DELETE_ALL, 0, R.string.delete_all).setIcon(R.drawable.ic_menu_delete);
+
+        CharSequence title = getActivity().getTitle();
+        if (title != null && !title.equals(MediaStore.UNKNOWN_STRING)) {
+            menu.add(0, SEARCH_FOR_CATEGORY, 0, R.string.search_for).setIcon(R.drawable.ic_menu_search);
+        }
 
         categoryMenu.show();
     }
@@ -390,6 +395,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                         }).show();
                 return true;
             }
+
+            case SEARCH_FOR_CATEGORY:
+                startActivity(MusicUtils.searchForCategory(getActivity().getTitle(),
+                        MediaStore.Audio.Media.CONTENT_TYPE, getResources()));
+                return true;
 
             default:
                 if (item.getItemId() > INTERLEAVE_ALL && item.getItemId() != android.R.id.home) {

@@ -18,7 +18,6 @@
 package nu.staldal.djdplayer;
 
 import android.app.AlertDialog;
-import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -195,7 +194,9 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
             }
 
             case SEARCH_FOR:
-                doSearch();
+                Intent intent = MusicUtils.searchForCategory(mCurrentName, getEntryContentType(), getResources());
+                addExtraSearchData(intent);
+                startActivity(intent);
                 return true;
 
             default:
@@ -209,26 +210,5 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                 }
         }
         return super.onContextItemSelected(item);
-    }
-
-    protected void doSearch() {
-        Intent i = new Intent();
-        i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        String query = "";
-        CharSequence title = "";
-        if (!mIsUnknown) {
-            query = mCurrentName;
-            addExtraSearchData(i);
-            title = mCurrentName;
-        }
-        // Since we hide the 'search' menu item when category is
-        // unknown, the query and title strings will have at least one of those.
-        i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, getEntryContentType());
-        title = getString(R.string.mediasearch, title);
-        i.putExtra(SearchManager.QUERY, query);
-
-        startActivity(Intent.createChooser(i, title));
     }
 }
