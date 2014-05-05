@@ -409,10 +409,13 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
+            case android.R.id.home: {
                 backStack.clear();
-                parseIntent(new Intent(Intent.ACTION_MAIN), false);
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                parseIntent(intent, false);
+                setIntent(intent);
                 return true;
+            }
 
             case R.id.repeat:
                 cycleRepeat();
