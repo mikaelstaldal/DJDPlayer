@@ -29,9 +29,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.*;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.djdplayer.provider.MusicProvider;
+import nu.staldal.ui.WithSectionMenu;
 
 import java.util.ArrayList;
 
@@ -41,6 +43,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private static final String LOGTAG = "MusicBrowserActivity";
 
     private static final String TRACKS_FRAGMENT = "tracksFragment";
+
+    private ImageView categoryMenuView;
 
     private MusicUtils.ServiceToken token = null;
     private MediaPlaybackService service = null;
@@ -214,6 +218,18 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             Bundle bundle = new Bundle();
             bundle.putString(TrackFragment.URI, uri.toString());
             fragment = Fragment.instantiate(this, TrackFragment.class.getName(), bundle);
+            final WithSectionMenu trackFragment = (WithSectionMenu)fragment;
+
+            categoryMenuView = new ImageView(this);
+            categoryMenuView.setImageResource(R.drawable.ic_section_menu);
+            categoryMenuView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    trackFragment.onCreateSectionMenu(categoryMenuView);
+                }
+            });
+            actionBar.setCustomView(categoryMenuView);
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
         }
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.main, fragment, TRACKS_FRAGMENT);

@@ -17,7 +17,6 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
@@ -32,12 +31,13 @@ import android.view.*;
 import android.widget.*;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.ui.TouchInterceptor;
+import nu.staldal.ui.WithSectionMenu;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, PopupMenu.OnMenuItemClickListener {
+public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, PopupMenu.OnMenuItemClickListener, WithSectionMenu {
     private static final String LOGTAG = "TrackFragment";
 
     private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -46,34 +46,12 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
     public static final String URI = "uri";
 
-    private ImageView categoryMenuView;
-
     int selectedPosition;
     long selectedId;
 
     private Uri uri;
     private long playlist;
     private long album;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity.getTitle() != null) { // If not Songs tab
-            categoryMenuView = new ImageView(getActivity());
-            categoryMenuView.setImageResource(R.drawable.ic_context_menu);
-            categoryMenuView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onCreateCategoryMenu();
-                }
-            });
-            activity.getActionBar().setCustomView(categoryMenuView);
-            activity.getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
-        } else {
-            categoryMenuView = null;
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -293,10 +271,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         return super.onContextItemSelected(item);
     }
 
-    private void onCreateCategoryMenu() {
-        PopupMenu categoryMenu = new PopupMenu(getActivity(), categoryMenuView);
-        categoryMenu.setOnMenuItemClickListener(this);
-        Menu menu = categoryMenu.getMenu();
+    @Override
+    public void onCreateSectionMenu(View view) {
+        PopupMenu sectionMenu = new PopupMenu(getActivity(), view);
+        sectionMenu.setOnMenuItemClickListener(this);
+        Menu menu = sectionMenu.getMenu();
 
         if (isEditMode()) {
             menu.add(0, SHUFFLE_PLAYLIST, 0, R.string.shuffleplaylist).setIcon(R.drawable.ic_menu_shuffle);
@@ -324,7 +303,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             menu.add(0, SEARCH_FOR_CATEGORY, 0, R.string.search_for).setIcon(R.drawable.ic_menu_search);
         }
 
-        categoryMenu.show();
+        sectionMenu.show();
     }
 
     @Override
