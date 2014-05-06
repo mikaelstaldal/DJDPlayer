@@ -183,13 +183,13 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         title = null;
 
         ActionBar actionBar = getActionBar();
-        actionBar.setCustomView(null);
-        actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setHomeButtonEnabled(false);
-        if (hasMenuKey()) actionBar.setDisplayShowHomeEnabled(false);
         setTitle(null);
+        actionBar.setCustomView(null);
+        actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
 
         Fragment oldFragment = getFragmentManager().findFragmentByTag(TRACKS_FRAGMENT);
         if (oldFragment != null) {
@@ -214,6 +214,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         Fragment fragment;
         if (searchResult) {
             fragment = Fragment.instantiate(this, QueryFragment.class.getName());
+            actionBar.setCustomView(null);
+            actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
         } else {
             Bundle bundle = new Bundle();
             bundle.putString(TrackFragment.URI, uri.toString());
