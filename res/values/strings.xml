@@ -147,6 +147,10 @@
     <string name="playlist_deleted_message">Playlist deleted</string>
     <!-- Transient popup message shown after renaming a playlist -->
     <string name="playlist_renamed_message">Playlist renamed</string>
+    <!-- The name of the pseudo-playlist that holds all songs, shown in list view -->
+    <string name="all_songs">All songs</string>
+    <!-- The name of the pseudo-playlist that holds all songs, shown in title bar of songs list -->
+    <string name="all_songs_title">All songs</string>
     <!-- The name of the pseudo-playlist that holds all the recently added files, shown in list view -->
     <string name="recentlyadded">Recently added</string>
     <!-- The name of the pseudo-playlist that holds all the recently added files, shown in title bar of songs list -->

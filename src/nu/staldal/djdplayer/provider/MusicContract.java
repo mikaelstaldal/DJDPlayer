@@ -66,6 +66,7 @@ public final class MusicContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static final long ALL_SONGS = -1;
         public static final long RECENTLY_ADDED_PLAYLIST = -2;
     }
 
