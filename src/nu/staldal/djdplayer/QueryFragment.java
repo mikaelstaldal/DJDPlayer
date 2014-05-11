@@ -32,6 +32,7 @@ import android.widget.*;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 public class QueryFragment extends TrackFragment {
+    @SuppressWarnings("unused")
     private static final String LOGTAG = "QueryFragment";
 
     @Override
