@@ -281,7 +281,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                     .setTabListener(new TabListener<>(this, SettingsActivity.FOLDERS_TAB, FolderFragment.class)));
         }
 
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, true)) {
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, false)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.tracks_menu)
                     .setTag(SettingsActivity.SONGS_TAB)
