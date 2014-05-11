@@ -42,7 +42,6 @@ public class MusicUtils {
     private static final String LOGTAG = "MusicUtils";
 
     public interface Defs {
-        public final static int ADD_TO_PLAYLIST = 1;
         public final static int USE_AS_RINGTONE = 2;
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
@@ -58,7 +57,6 @@ public class MusicUtils {
         public final static int TRACK_INFO = 20;
         public final static int SEARCH_FOR = 21;
         public final static int PLAY_ALL_NEXT = 22;
-        public final static int ADD_ALL_TO_PLAYLIST = 23;
         public final static int PLAYLIST_SELECTED_ALL = 24;
         public final static int NEW_PLAYLIST_ALL = 25;
         public final static int DELETE_ALL = 26;

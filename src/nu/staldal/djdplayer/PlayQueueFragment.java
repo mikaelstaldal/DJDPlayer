@@ -257,7 +257,7 @@ public class PlayQueueFragment extends ListFragment
         mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
 
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
+        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
         if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);

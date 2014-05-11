@@ -24,10 +24,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.view.ContextMenu;
-import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
+import android.view.*;
 import android.widget.AdapterView;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
@@ -122,7 +119,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
             }
         }
 
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_all_to_playlist);
+        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
         menu.add(0, DELETE_ALL, 0, R.string.delete_all);
