@@ -61,7 +61,11 @@ public class MusicUtils {
         public final static int NEW_PLAYLIST_ALL = 25;
         public final static int DELETE_ALL = 26;
         public final static int SEARCH_FOR_CATEGORY = 27;
-        public final static int CHILD_MENU_BASE = 28; // this should be the last item
+        public static final int DELETE_PLAYLIST = 28;
+        public static final int EDIT_PLAYLIST = 29;
+        public static final int RENAME_PLAYLIST = 30;
+        public static final int EXPORT_PLAYLIST = 31;
+        public final static int CHILD_MENU_BASE = 32; // this should be the last item
 
         public final static int INTERLEAVE_ALL = 1000;
     }
@@ -704,6 +708,40 @@ public class MusicUtils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    static void renamePlaylist(Context context, long playlistId, String name) {
+        if (name != null && name.length() > 0) {
+            if (idForPlaylist(context, name) >= 0) {
+                Toast.makeText(context, R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
+            } else {
+                ContentValues values = new ContentValues(1);
+                values.put(MediaStore.Audio.Playlists.NAME, name);
+                context.getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                        values,
+                        MediaStore.Audio.Playlists._ID + "=?",
+                        new String[]{Long.valueOf(playlistId).toString()});
+
+                Toast.makeText(context, R.string.playlist_renamed_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    static int idForPlaylist(Context context, String name) {
+        Cursor c = MusicUtils.query(context, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Audio.Playlists._ID},
+                MediaStore.Audio.Playlists.NAME + "=?",
+                new String[]{name},
+                MediaStore.Audio.Playlists.NAME);
+        int id = -1;
+        if (c != null) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                id = c.getInt(0);
+            }
+            c.close();
+        }
+        return id;
     }
 }
 

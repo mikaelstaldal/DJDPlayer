@@ -50,8 +50,10 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
     long selectedId;
 
     private Uri uri;
+    private boolean isPlaylist;
     private long playlist;
-    private long album;
+    private boolean isAlbum;
+    private boolean isMedadataCategory;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,12 +67,18 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         String uriString = getArguments() != null ? getArguments().getString(URI) : null;
         if (uriString != null) {
             uri = Uri.parse(uriString);
-            playlist = uriString.startsWith(MusicContract.Playlist.CONTENT_URI.toString()) ? ContentUris.parseId(uri) : -1;
-            album = uriString.startsWith(MusicContract.Album.CONTENT_URI.toString()) ? ContentUris.parseId(uri) : -1;
+            isPlaylist = uriString.startsWith(MusicContract.Playlist.CONTENT_URI.toString());
+            playlist = isPlaylist ? ContentUris.parseId(uri) : -1;
+            isAlbum = uriString.startsWith(MusicContract.Album.CONTENT_URI.toString());
+            isMedadataCategory = uriString.startsWith(MusicContract.Artist.CONTENT_URI.toString())
+                    || uriString.startsWith(MusicContract.Album.CONTENT_URI.toString())
+                    || uriString.startsWith(MusicContract.Genre.CONTENT_URI.toString());
         } else {
             uri = MusicContract.CONTENT_URI;
+            isPlaylist = false;
             playlist = -1;
-            album = -1;
+            isAlbum = false;
+            isMedadataCategory = false;
         }
     }
 
@@ -293,14 +301,24 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             }
         }
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
+        if (!isPlaylist) {
+            SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
+            MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
 
-        menu.add(0, DELETE_ALL, 0, R.string.delete_all).setIcon(R.drawable.ic_menu_delete);
+            menu.add(0, DELETE_ALL, 0, R.string.delete_all).setIcon(R.drawable.ic_menu_delete);
+        }
 
         CharSequence title = getActivity().getTitle();
-        if (title != null && !title.equals(MediaStore.UNKNOWN_STRING)) {
+        if (isMedadataCategory && title != null && !title.equals(MediaStore.UNKNOWN_STRING)) {
             menu.add(0, SEARCH_FOR_CATEGORY, 0, R.string.search_for).setIcon(R.drawable.ic_menu_search);
+        }
+
+        if (playlist == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+            menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
+        }
+
+        if (playlist >= 0) {
+            menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
         }
 
         sectionMenu.show();
@@ -378,6 +396,23 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             case SEARCH_FOR_CATEGORY:
                 startActivity(MusicUtils.searchForCategory(getActivity().getTitle(),
                         MediaStore.Audio.Media.CONTENT_TYPE, getResources()));
+                return true;
+
+            case EDIT_PLAYLIST:
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.weekpicker_title)
+                        .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                int numweeks = which + 1;
+                                MusicUtils.setIntPref(TrackFragment.this.getActivity(), SettingsActivity.NUMWEEKS,
+                                        numweeks);
+                                getLoaderManager().restartLoader(0, null, TrackFragment.this);
+                            }
+                        }).show();
+                return true;
+
+            case EXPORT_PLAYLIST:
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(getActivity().getTitle(), playlist);
                 return true;
 
             default:
@@ -474,8 +509,8 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
                 if (indexer != null) {
                     indexer.setCursor(cursor);
-                } else if (!TrackFragment.this.isEditMode() && TrackFragment.this.album == -1) {
-                    String alpha = TrackFragment.this.getString(R.string.fast_scroll_alphabet);
+                } else if (!isEditMode() && !isAlbum) {
+                    String alpha = getString(R.string.fast_scroll_alphabet);
 
                     indexer = new MusicAlphabetIndexer(cursor, titleIdx, alpha);
                 }

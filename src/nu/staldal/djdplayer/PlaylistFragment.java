@@ -43,11 +43,7 @@ public class PlaylistFragment extends CategoryFragment {
     private static final String CURRENT_PLAYLIST = "currentplaylist";
     private static final String CURRENT_PLAYLIST_NAME = "currentplaylistname";
 
-    private static final int DELETE_PLAYLIST = CHILD_MENU_BASE + 1;
-    private static final int EDIT_PLAYLIST = CHILD_MENU_BASE + 2;
-    private static final int RENAME_PLAYLIST = CHILD_MENU_BASE + 3;
-    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 4;
-    private static final int EXPORT_PLAYLIST = CHILD_MENU_BASE + 5;
+    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 1;
 
     private long currentId;
     private String playlistName;
@@ -144,7 +140,9 @@ public class PlaylistFragment extends CategoryFragment {
             menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
         }
 
-        menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
+        if (currentId >= 0) {
+            menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
+        }
     }
 
     @Override
@@ -167,9 +165,6 @@ public class PlaylistFragment extends CategoryFragment {
                         MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
                 getActivity().getContentResolver().delete(uri, null, null);
                 Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
-                if (adapter.getCursor().getCount() == 0) {
-                    getActivity().setTitle(R.string.no_playlists_title);
-                }
                 return true;
 
             case EDIT_PLAYLIST:
@@ -210,7 +205,7 @@ public class PlaylistFragment extends CategoryFragment {
                             .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    renamePlaylist(playlistId, mPlaylist.getText().toString());
+                                    MusicUtils.renamePlaylist(getActivity(), playlistId, mPlaylist.getText().toString());
                                 }
                             }).show();
                 }
@@ -229,40 +224,6 @@ public class PlaylistFragment extends CategoryFragment {
                 }
         }
         return super.onContextItemSelected(item);
-    }
-
-    private void renamePlaylist(long playlistId, String name) {
-        if (name != null && name.length() > 0) {
-            if (idForPlaylist(name) >= 0) {
-                Toast.makeText(getActivity(), R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
-            } else {
-                ContentValues values = new ContentValues(1);
-                values.put(MediaStore.Audio.Playlists.NAME, name);
-                getActivity().getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                        values,
-                        MediaStore.Audio.Playlists._ID + "=?",
-                        new String[]{Long.valueOf(playlistId).toString()});
-
-                Toast.makeText(getActivity(), R.string.playlist_renamed_message, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private int idForPlaylist(String name) {
-        Cursor c = MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Playlists._ID},
-                MediaStore.Audio.Playlists.NAME + "=?",
-                new String[]{name},
-                MediaStore.Audio.Playlists.NAME);
-        int id = -1;
-        if (c != null) {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
-                id = c.getInt(0);
-            }
-            c.close();
-        }
-        return id;
     }
 
     @Override
