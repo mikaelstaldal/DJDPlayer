@@ -467,24 +467,22 @@ public class MusicProvider extends ContentProvider {
     }
 
     public static String calcTitle(Context context, Uri uri) {
-        long id = ContentUris.parseId(uri);
-
         switch (MusicProvider.sURIMatcher.match(uri)) {
             case MusicProvider.FOLDER_MEMBERS:
                 File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
                 return uri.getLastPathSegment().substring(root.getAbsolutePath().length() + 1);
 
             case MusicProvider.PLAYLIST_MEMBERS: {
-                if (id == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
+                if (ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                     return context.getString(R.string.recentlyadded_title);
-                } else if (id == MusicContract.Playlist.ALL_SONGS) {
+                } else if (ContentUris.parseId(uri) == MusicContract.Playlist.ALL_SONGS) {
                     return context.getString(R.string.all_songs_title);
                 } else {
                     String[] cols = new String[]{
                             MediaStore.Audio.Playlists.NAME
                     };
                     Cursor cursor = context.getContentResolver().query(
-                            ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, id),
+                            ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
                             cols, null, null, null);
                     if (cursor != null) {
                         try {
@@ -504,7 +502,7 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Genres.NAME
                 };
                 Cursor cursor = context.getContentResolver().query(
-                        ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, id),
+                        ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
                         cols, null, null, null);
                 if (cursor != null) {
                     try {
@@ -523,7 +521,7 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Artists.ARTIST
                 };
                 Cursor cursor = context.getContentResolver().query(
-                        ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, id),
+                        ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
                         cols, null, null, null);
                 if (cursor != null) {
                     try {
@@ -543,7 +541,7 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Albums.ALBUM
                 };
                 Cursor cursor = context.getContentResolver().query(
-                        ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, id),
+                        ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
                         cols, null, null, null);
                 if (cursor != null) {
                     try {
