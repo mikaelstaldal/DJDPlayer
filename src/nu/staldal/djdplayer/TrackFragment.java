@@ -20,7 +20,6 @@ package nu.staldal.djdplayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.content.pm.PackageManager;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.Uri;
@@ -164,7 +163,9 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             menu.add(0, REMOVE_FROM_PLAYLIST, 0, R.string.remove_from_playlist);
         }
 
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+        if (!isEditMode()) {
+            menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+        }
 
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         selectedPosition = mi.position;
