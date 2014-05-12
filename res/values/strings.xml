@@ -78,6 +78,7 @@
     <string name="rescan">Rescan music</string>
 
     <string name="delete_song_title">Delete song?</string>
+    <string name="delete_playlist_title">Delete playlist?</string>
     <string name="delete_songs_title">Delete songs?</string>
 
     <!-- Delete confirmation dialog when deleting an entire artist -->
@@ -97,6 +98,9 @@
 
     <!-- Delete confirmation dialog when deleting a single song -->
     <string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted.</string>
+
+    <!-- Delete confirmation dialog when deleting a playlist -->
+    <string name="delete_playlist_desc">\"<xliff:g id="playlist">%s</xliff:g>\" will be deleted.</string>
 
     <!-- Delete confirmation dialog, confirmation button text -->
     <string name="delete_confirm_button_text">Delete</string>

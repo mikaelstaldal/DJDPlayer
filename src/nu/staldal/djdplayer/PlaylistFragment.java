@@ -161,10 +161,26 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
 
             case DELETE_PLAYLIST:
-                Uri uri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
-                getActivity().getContentResolver().delete(uri, null, null);
-                Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
+                String desc = String.format(getString(R.string.delete_playlist_desc),
+                        adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME)));
+                new AlertDialog.Builder(getActivity())
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.delete_playlist_title)
+                        .setMessage(desc)
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Uri uri = ContentUris.withAppendedId(
+                                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
+                                getActivity().getContentResolver().delete(uri, null, null);
+                                Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
+                            }
+                        }).show();
                 return true;
 
             case EDIT_PLAYLIST:
