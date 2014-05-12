@@ -149,6 +149,16 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (menuInfoIn == null) return;
 
+        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
+        selectedPosition = mi.position;
+        adapter.getCursor().moveToPosition(selectedPosition);
+        try {
+            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+            selectedId = adapter.getCursor().getLong(id_idx);
+        } catch (IllegalArgumentException ex) {
+            selectedId = mi.id;
+        }
+
         menu.setHeaderTitle(adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                 MediaStore.Audio.AudioColumns.TITLE)));
 
@@ -165,16 +175,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
         if (!isEditMode()) {
             menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
-        }
-
-        AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
-        selectedPosition = mi.position;
-        adapter.getCursor().moveToPosition(selectedPosition);
-        try {
-            int id_idx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-            selectedId = adapter.getCursor().getLong(id_idx);
-        } catch (IllegalArgumentException ex) {
-            selectedId = mi.id;
         }
 
         menu.add(0, TRACK_INFO, 0, R.string.info);
