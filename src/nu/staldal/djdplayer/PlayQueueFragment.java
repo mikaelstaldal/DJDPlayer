@@ -18,7 +18,6 @@ package nu.staldal.djdplayer;
 import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.content.*;
-import android.content.pm.PackageManager;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -257,11 +256,10 @@ public class PlayQueueFragment extends ListFragment
         mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
 
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
+
         SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
-        if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
-        }
+
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
 
         menu.add(0, TRACK_INFO, 0, R.string.info);
@@ -295,11 +293,6 @@ public class PlayQueueFragment extends ListFragment
                 MusicUtils.addToPlaylist(getActivity(), new long[] { mSelectedId }, playlist);
                 return true;
             }
-
-            case USE_AS_RINGTONE:
-                // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(getActivity(), mSelectedId);
-                return true;
 
             case DELETE_ITEM: {
                 final long [] list = new long[1];

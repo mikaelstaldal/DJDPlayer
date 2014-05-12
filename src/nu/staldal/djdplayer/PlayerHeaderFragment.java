@@ -18,7 +18,6 @@ package nu.staldal.djdplayer;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.*;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.*;
@@ -32,7 +31,6 @@ public class PlayerHeaderFragment extends Fragment implements
     private static final String LOGTAG = "PlayerHeaderFragment";
 
     private static final int ADD_TO_PLAYLIST2 = CHILD_MENU_BASE+4;
-    private static final int USE_AS_RINGTONE2 = CHILD_MENU_BASE+5;
     private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
     private static final int TRACK_INFO2 = CHILD_MENU_BASE+7;
     private static final int SHARE_VIA2 = CHILD_MENU_BASE+8;
@@ -100,10 +98,6 @@ public class PlayerHeaderFragment extends Fragment implements
         SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST2, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
-        if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            menu.add(0, USE_AS_RINGTONE2, 0, R.string.ringtone_menu);
-        }
-
         menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);
 
         menu.add(0, TRACK_INFO2, 0, R.string.info);
@@ -132,11 +126,6 @@ public class PlayerHeaderFragment extends Fragment implements
                 MusicUtils.addToPlaylist(getActivity(), list, playlist);
                 return true;
             }
-
-            case USE_AS_RINGTONE2:
-                // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(getActivity(), service.getAudioId());
-                return true;
 
             case DELETE_ITEM2: {
                 final long [] list = new long[1];

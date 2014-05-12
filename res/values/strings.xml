@@ -178,14 +178,10 @@
     <string name="repeat_stopafter_notif">Stop after current song</string>
     <!-- Toast after turning repeat all on -->
     <string name="repeat_all_notif">Repeating all songs</string>
-    <!-- Individual song context menu item -->
-    <string name="ringtone_menu">Use as phone ringtone</string>
     <!-- Menu item -->
     <string name="share_via">Share via</string>
     <!-- Menu item -->
     <string name="zoom_queue">Zoom queue</string>
-    <!-- Toast after setting a song as phone ringtone -->
-    <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone</string>
     <!-- Context menu item -->
     <string name="play_now">Play now</string>
     <!-- Context menu item -->

@@ -30,9 +30,6 @@
     <!-- To prevent device from going to sleep while playing music in background -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <!-- To set ring tone -->
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
-
     <!-- To delete music files, and manipulate play lists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 

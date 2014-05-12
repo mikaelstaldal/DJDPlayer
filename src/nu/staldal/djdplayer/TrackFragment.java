@@ -156,15 +156,16 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
         menu.add(0, PLAY_NEXT, 0, R.string.play_next);
         menu.add(0, QUEUE, 0, R.string.queue);
+
         SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
+
         if (isEditMode()) {
             menu.add(0, REMOVE_FROM_PLAYLIST, 0, R.string.remove_from_playlist);
         }
-        if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
-        }
+
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+
         AdapterView.AdapterContextMenuInfo mi = (AdapterView.AdapterContextMenuInfo) menuInfoIn;
         selectedPosition = mi.position;
         adapter.getCursor().moveToPosition(selectedPosition);
@@ -213,11 +214,6 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 MusicUtils.addToPlaylist(getActivity(), new long[]{selectedId}, playlist);
                 return true;
             }
-
-            case USE_AS_RINGTONE:
-                // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(getActivity(), selectedId);
-                return true;
 
             case DELETE_ITEM: {
                 final long[] list = new long[1];

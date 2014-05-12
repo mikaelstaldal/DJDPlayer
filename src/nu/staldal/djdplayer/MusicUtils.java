@@ -42,7 +42,6 @@ public class MusicUtils {
     private static final String LOGTAG = "MusicUtils";
 
     public interface Defs {
-        public final static int USE_AS_RINGTONE = 2;
         public final static int PLAYLIST_SELECTED = 3;
         public final static int NEW_PLAYLIST = 4;
         public final static int PLAY_ALL_NOW = 5;
@@ -551,45 +550,6 @@ public class MusicUtils {
         Editor ed = prefs.edit();
         ed.putString(name, value);
         ed.apply();
-    }
-
-    static void setRingtone(Context context, long id) {
-        ContentResolver resolver = context.getContentResolver();
-        // Set the flag in the database to mark this as a ringtone
-        Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
-        try {
-            ContentValues values = new ContentValues(2);
-            values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
-            values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
-            resolver.update(ringUri, values, null, null);
-        } catch (UnsupportedOperationException ex) {
-            // most likely the card just got unmounted
-            Log.e(LOGTAG, "couldn't set ringtone flag for id " + id);
-            return;
-        }
-
-        String[] cols = new String[] {
-                MediaStore.Audio.AudioColumns._ID,
-                MediaStore.Audio.AudioColumns.DATA,
-                MediaStore.Audio.AudioColumns.TITLE
-        };
-
-        String where = MediaStore.Audio.AudioColumns._ID + "=" + id;
-        Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                cols, where , null, null);
-        try {
-            if (cursor != null && cursor.getCount() == 1) {
-                // Set the system setting to make this the current ringtone
-                cursor.moveToFirst();
-                Settings.System.putString(resolver, Settings.System.RINGTONE, ringUri.toString());
-                String message = context.getString(R.string.ringtone_set, cursor.getString(2));
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     static int getCardId(Context context) {
