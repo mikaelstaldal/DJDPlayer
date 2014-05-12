@@ -21,15 +21,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
 import java.io.File;
 
 public class PickMusicFolderActivity extends Activity {
+    private static final String LOGTAG = "PickMusicFolderActivity";
+
     public static final int PICK_DIRECTORY = 1;
 
     @Override
@@ -95,7 +99,10 @@ public class PickMusicFolderActivity extends Activity {
             editor.putString(SettingsActivity.MUSIC_FOLDER, folder);
             editor.apply();
 
-            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
+            if (Build.VERSION.SDK_INT < 19) {
+                Log.i(LOGTAG, "Rescanning music");
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
+            }
         }
     }
 }
