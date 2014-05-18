@@ -4,7 +4,7 @@
     <string-array name="pref_clickonsong_entries">
         <item>Play next</item>
         <item>Play now</item>
-        <item>Queue</item>
+        <item>Queue last</item>
     </string-array>
     <string-array name="pref_clickonsong_values">
         <item>PLAY_NEXT</item>

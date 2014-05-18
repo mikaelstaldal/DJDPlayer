@@ -59,10 +59,10 @@
     <!-- Menu item to play back all the songs in the currently showing list in list order after current song -->
     <string name="play_all_next">Play all next</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order after current play queue -->
-    <string name="queue_all">Queue all</string>
+    <string name="queue_all">Queue all last</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order interleaved with the current play queue -->
     <string name="interleave_all">Interleave</string>
-    <string name="interleaveNNN">Queue <xliff:g id="queue">%d</xliff:g> - list <xliff:g id="list">%d</xliff:g></string>
+    <string name="interleaveNNN">List-Queue <xliff:g id="queue">%d</xliff:g>:<xliff:g id="list">%d</xliff:g></string>
     <!-- Menu item to shuffle all songs in play queue -->
     <string name="shufflequeue">Shuffle queue</string>
     <!-- Menu item to shuffle all songs in play list -->
@@ -195,7 +195,7 @@
     <!-- Context menu item -->
     <string name="add_all_to_playlist">Add all to playlist</string>
     <!-- Context menu item -->
-    <string name="queue">Queue</string>
+    <string name="queue">Queue last</string>
     <!-- Context menu item -->
     <string name="new_playlist">New</string>
     <!-- Template for newly created playlist name -->
@@ -291,15 +291,15 @@
 
     <!-- Preferences -->
     <string name="behaviour">Behaviour</string>
-    <string name="clickonsong">Click on song</string>
+    <string name="clickonsong">When click on song</string>
     <string name="settings">Settings</string>
-    <string name="tabs">Tabs</string>
-    <string name="show_artists_tab">Show artists tab</string>
-    <string name="show_albums_tab">Show albums tab</string>
-    <string name="show_genres_tab">Show genres tab</string>
-    <string name="show_folders_tab">Show folders tab</string>
-    <string name="show_songs_tab">Show songs tab</string>
-    <string name="show_playlists_tab">Show playlists tab</string>
+    <string name="tabs">Show tabs</string>
+    <string name="show_artists_tab">Artists</string>
+    <string name="show_albums_tab">Albums</string>
+    <string name="show_genres_tab">Genres</string>
+    <string name="show_folders_tab">Folders</string>
+    <string name="show_songs_tab">Songs</string>
+    <string name="show_playlists_tab">Playlists</string>
     <string name="music_folder">Music folder</string>
     <string name="select_music_folder">Select music folder</string>
     <string name="pick_music_folder">Use as music folder</string>
