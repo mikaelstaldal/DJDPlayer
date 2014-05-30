@@ -52,7 +52,7 @@ public class FolderFragment extends CategoryFragment {
 
     @Override
     protected CursorAdapter createListAdapter() {
-        SimpleCursorAdapter listAdapter = new SimpleCursorAdapter(
+        SimpleCursorAdapter listAdapter = new SimpleCursorAdapterWithContextMenu(
                 getActivity(),
                 R.layout.track_list_item,
                 null,
@@ -75,10 +75,9 @@ public class FolderFragment extends CategoryFragment {
 
                         File currentFolder = MusicUtils.getCurrentFolder();
                         if (currentFolder != null && currentFolder.getAbsolutePath().equals(folder)) {
-                            ((ImageView) view).setImageResource(R.drawable.indicator_ic_mp_playing_list);
                             view.setVisibility(View.VISIBLE);
                         } else {
-                            view.setVisibility(View.GONE);
+                            view.setVisibility(View.INVISIBLE);
                         }
                         return true;
 

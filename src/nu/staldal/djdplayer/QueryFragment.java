@@ -115,7 +115,7 @@ public class QueryFragment extends TrackFragment {
                 new int[]{});
     }
 
-    static class QueryListAdapter extends SimpleCursorAdapter {
+    static class QueryListAdapter extends SimpleCursorAdapterWithContextMenu {
         QueryListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to) {
             super(context, layout, cursor, from, to, 0);
         }

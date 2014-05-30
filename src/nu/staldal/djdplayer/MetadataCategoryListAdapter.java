@@ -19,15 +19,13 @@ package nu.staldal.djdplayer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
-public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements SectionIndexer {
-    protected final Drawable mNowPlayingOverlay;
+public class MetadataCategoryListAdapter extends SimpleCursorAdapterWithContextMenu implements SectionIndexer {
     protected final Resources mResources;
     protected final String mUnknown;
 
@@ -45,9 +43,6 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         super(context, layout, cursor, from, to, 0);
         this.mActivity = currentActivity;
         this.mUnknown = context.getString(mActivity.getUnknownStringId());
-
-        Resources r = context.getResources();
-        mNowPlayingOverlay = r.getDrawable(R.drawable.indicator_ic_mp_playing_list);
 
         getIndexer(cursor);
         mResources = context.getResources();
@@ -91,10 +86,9 @@ public class MetadataCategoryListAdapter extends SimpleCursorAdapter implements 
         long currentId = mActivity.fetchCurrentlyPlayingCategoryId();
         ImageView iv = vh.play_indicator;
         if (currentId == id) {
-            iv.setImageDrawable(mNowPlayingOverlay);
             iv.setVisibility(View.VISIBLE);
         } else {
-            iv.setVisibility(View.GONE);
+            iv.setVisibility(View.INVISIBLE);
         }
     }
 

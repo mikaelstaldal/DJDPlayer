@@ -108,14 +108,13 @@ public class PlayQueueFragment extends ListFragment
     public void onServiceConnected(MediaPlaybackService s) {
         service = s;
         playQueueCursor = new PlayQueueCursor();
-        listAdapter = new SimpleCursorAdapter(
+        listAdapter = new SimpleCursorAdapterWithContextMenu(
                 getActivity(),
                 R.layout.edit_track_list_item,
                 playQueueCursor,
                 mCols,
                 new int[] { R.id.line1, R.id.line2, R.id.duration, R.id.play_indicator },
-                0
-        );
+                0);
         listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             final String unknownArtist = PlayQueueFragment.this.getActivity().getString(R.string.unknown_artist_name);
 
@@ -146,10 +145,9 @@ public class PlayQueueFragment extends ListFragment
                             int cursorPosition = cursor.getPosition();
                             int serviceQueuePosition = service.getQueuePosition();
                             if (cursorPosition == serviceQueuePosition) {
-                                ((ImageView) view).setImageResource(R.drawable.indicator_ic_mp_playing_list);
                                 view.setVisibility(View.VISIBLE);
                             } else {
-                                view.setVisibility(View.GONE);
+                                view.setVisibility(View.INVISIBLE);
                             }
                             return true;
                         }

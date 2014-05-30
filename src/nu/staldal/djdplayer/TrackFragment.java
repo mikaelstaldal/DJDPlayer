@@ -459,7 +459,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         return playlist >= 0;
     }
 
-    class TrackListAdapter extends SimpleCursorAdapter implements SectionIndexer {
+    class TrackListAdapter extends SimpleCursorAdapterWithContextMenu implements SectionIndexer {
         int titleIdx = -1;
         int artistIdx = -1;
         int durationIdx = -1;
@@ -571,10 +571,9 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             }
 
             if (cursor.getLong(audioIdIdx) == id) {
-                iv.setImageResource(R.drawable.indicator_ic_mp_playing_list);
                 iv.setVisibility(View.VISIBLE);
             } else {
-                iv.setVisibility(View.GONE);
+                iv.setVisibility(View.INVISIBLE);
             }
         }
 

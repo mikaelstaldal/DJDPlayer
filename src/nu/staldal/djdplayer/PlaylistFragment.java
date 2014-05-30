@@ -66,7 +66,7 @@ public class PlaylistFragment extends CategoryFragment {
 
     @Override
     protected CursorAdapter createListAdapter() {
-        SimpleCursorAdapter listAdapter = new SimpleCursorAdapter(
+        SimpleCursorAdapter listAdapter = new SimpleCursorAdapterWithContextMenu(
                 getActivity(),
                 R.layout.track_list_item,
                 null,
