@@ -81,4 +81,5 @@
 2.4
 ---
 * Hide rescan music on Android 4.4, since it does not work there
-* Improved tablet layout
+* Two column layout for tablets
+* Context menu button in lists
