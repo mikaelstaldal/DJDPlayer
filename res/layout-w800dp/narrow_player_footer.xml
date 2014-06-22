@@ -43,7 +43,7 @@
                 android:layout_weight="1"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingLeft="8dip"/>
+                android:paddingLeft="16dip"/>
 
         <nu.staldal.ui.RepeatingImageButton
                 android:id="@+id/prev"
@@ -80,7 +80,7 @@
                 android:layout_weight="1"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingRight="8dip"/>
+                android:paddingRight="16dip"/>
 
     </LinearLayout>
 
