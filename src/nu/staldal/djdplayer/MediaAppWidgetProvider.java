@@ -67,6 +67,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         
         views.setTextViewText(R.id.title, res.getText(R.string.widget_initial_text));
         views.setTextViewText(R.id.artist, "");
+        views.setTextViewText(R.id.genre, "");
 
         linkButtons(context, views, false /* not playing */);
         pushUpdate(context, appWidgetIds, views);
@@ -113,6 +114,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         
         CharSequence titleName = service.getTrackName();
         CharSequence artistName = service.getArtistName();
+        CharSequence genreName = service.getGenreName();
         CharSequence errorState = null;
         
         // Format title string with track number, or show SD card message
@@ -130,11 +132,12 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
             // Show error state to user
             views.setTextViewText(R.id.title, errorState);
             views.setTextViewText(R.id.artist, "");
-            
+            views.setTextViewText(R.id.genre, "");
         } else {
             // No error, so show normal titles
             views.setTextViewText(R.id.title, titleName);
-            views.setTextViewText(R.id.artist, " - " + artistName);
+            views.setTextViewText(R.id.artist, artistName);
+            views.setTextViewText(R.id.genre, genreName);
         }
         
         // Set correct drawable for pause state
