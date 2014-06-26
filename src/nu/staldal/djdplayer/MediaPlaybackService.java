@@ -781,10 +781,12 @@ public class MediaPlaybackService extends Service {
 
     private void updatePlaylist() {
         if (mPlayListLen == 0) {
-            mCursor.close();
-            mCursor = null;
-            mGenreId = -1;
-            mGenreName = null;
+            if (mCursor != null) {
+                mCursor.close();
+                mCursor = null;
+                mGenreId = -1;
+                mGenreName = null;
+            }
             notifyChange(META_CHANGED);
         }
         notifyChange(QUEUE_CHANGED);
@@ -1013,7 +1015,7 @@ public class MediaPlaybackService extends Service {
                 
                 try {
                     mCursor = resolver.query(uri, mCursorCols, where, selectionArgs, null);
-                    if  (mCursor != null) {
+                    if (mCursor != null) {
                         if (mCursor.getCount() == 0) {
                             mCursor.close();
                             mCursor = null;
