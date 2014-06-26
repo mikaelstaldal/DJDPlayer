@@ -289,7 +289,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
         menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
         menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.btn_playback_ic_play_small);
+        menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.ic_menu_play_clip);
         SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
                 R.drawable.ic_menu_interleave);
         for (int i = 1; i <= 5; i++) {
