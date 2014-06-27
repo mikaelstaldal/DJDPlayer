@@ -118,6 +118,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
 
         if (service.getAudioId() != -1) {
             setPauseButtonImage();
+            totalTime.setText(MusicUtils.formatDuration(getActivity(), service.duration()));
         }
     }
 
