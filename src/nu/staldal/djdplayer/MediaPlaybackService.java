@@ -561,13 +561,14 @@ public class MediaPlaybackService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(LOGTAG, "onStartCommand intent=" + intent + " flags=" + flags + " startId=" + startId);
+
         mServiceStartId = startId;
         mDelayedStopHandler.removeCallbacksAndMessages(null);
 
         if (intent != null) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
-            Log.d(LOGTAG, "onStartCommand " + action + " / " + cmd);
 
             if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
                 next(true);
@@ -1117,16 +1118,14 @@ public class MediaPlaybackService extends Service {
         views.setTextViewText(R.id.trackname, trackname);
         views.setTextViewText(R.id.artistname, artistname);
         views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(this, 0,
-                new Intent(this, MediaPlaybackService.class)
-                        .setAction(MediaPlaybackService.SERVICECMD)
-                        .putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDPAUSE), 0));
+                new Intent(MediaPlaybackService.PAUSE_ACTION).setClass(this, MediaPlaybackService.class),
+                0));
         Notification status = new Notification();
         status.contentView = views;
         status.flags |= Notification.FLAG_ONGOING_EVENT;
         status.icon = R.drawable.stat_notify_musicplayer;
         status.contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent("nu.staldal.djdplayer.PLAYBACK_VIEWER")
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                new Intent(this, MediaPlaybackActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 0);
 
         return status;

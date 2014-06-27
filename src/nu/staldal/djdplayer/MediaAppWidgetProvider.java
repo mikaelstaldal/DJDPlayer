@@ -162,40 +162,21 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
      *            otherwise we launch {@link MusicBrowserActivity}.
      */
     private void linkButtons(Context context, RemoteViews views, boolean playerActive) {
-        // Connect up various buttons and touch events
-        Intent intent;
-        PendingIntent pendingIntent;
-        
-        final ComponentName serviceName = new ComponentName(context, MediaPlaybackService.class);
-        
         if (playerActive) {
-            intent = new Intent(context, MediaPlaybackActivity.class);
-            pendingIntent = PendingIntent.getActivity(context,
-                    0 /* no requestCode */, intent, 0 /* no flags */);
-            views.setOnClickPendingIntent(R.id.appwidget, pendingIntent);
+            views.setOnClickPendingIntent(R.id.appwidget, PendingIntent.getActivity(context,
+                    0, new Intent(context, MediaPlaybackActivity.class), 0));
         } else {
-            intent = new Intent(context, MusicBrowserActivity.class);
-            pendingIntent = PendingIntent.getActivity(context,
-                    0 /* no requestCode */, intent, 0 /* no flags */);
-            views.setOnClickPendingIntent(R.id.appwidget, pendingIntent);
+            views.setOnClickPendingIntent(R.id.appwidget, PendingIntent.getActivity(context,
+                    0, new Intent(context, MusicBrowserActivity.class), 0));
         }
-        
-        intent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
-        intent.setComponent(serviceName);
-        pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.pause, pendingIntent);
-        
-        intent = new Intent(MediaPlaybackService.NEXT_ACTION);
-        intent.setComponent(serviceName);
-        pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.next, pendingIntent);
 
-        intent = new Intent(MediaPlaybackService.PREVIOUS_ACTION);
-        intent.setComponent(serviceName);
-        pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.prev, pendingIntent);
+        views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(context,
+                0, new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION).setClass(context, MediaPlaybackService.class), 0));
+
+        views.setOnClickPendingIntent(R.id.next, PendingIntent.getService(context,
+                0, new Intent(MediaPlaybackService.NEXT_ACTION).setClass(context, MediaPlaybackService.class), 0));
+
+        views.setOnClickPendingIntent(R.id.prev, PendingIntent.getService(context,
+                0, new Intent(MediaPlaybackService.PREVIOUS_ACTION).setClass(context, MediaPlaybackService.class), 0));
     }
 }

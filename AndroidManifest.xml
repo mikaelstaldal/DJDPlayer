@@ -122,10 +122,6 @@
                 <data android:mimeType="application/ogg"/>
                 <data android:mimeType="application/x-ogg"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="nu.staldal.djdplayer.PLAYBACK_VIEWER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
 
         <activity android:name=".PlaylistShortcutActivity"
