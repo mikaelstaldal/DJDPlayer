@@ -157,18 +157,15 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
     /**
      * Link up various button actions using pending intents.
      * 
-     * @param playerActive True if player is active in background, which means
-     *            widget click will launch {@link MediaPlaybackActivity},
-     *            otherwise we launch {@link MusicBrowserActivity}.
+     * @param playerActive {@code true} if player is active in background
      */
     private void linkButtons(Context context, RemoteViews views, boolean playerActive) {
-        if (playerActive) {
-            views.setOnClickPendingIntent(R.id.appwidget, PendingIntent.getActivity(context,
-                    0, new Intent(context, MediaPlaybackActivity.class), 0));
-        } else {
-            views.setOnClickPendingIntent(R.id.appwidget, PendingIntent.getActivity(context,
-                    0, new Intent(context, MusicBrowserActivity.class), 0));
-        }
+        Class<?> activityClass = playerActive && !context.getResources().getBoolean(R.bool.tablet_layout)
+                ? MediaPlaybackActivity.class
+                : MusicBrowserActivity.class;
+
+        views.setOnClickPendingIntent(R.id.appwidget, PendingIntent.getActivity(context,
+                0, new Intent(context, activityClass), 0));
 
         views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(context,
                 0, new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION).setClass(context, MediaPlaybackService.class), 0));

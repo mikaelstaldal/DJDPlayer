@@ -1114,6 +1114,10 @@ public class MediaPlaybackService extends Service {
             }
         }
 
+        Class<?> activityClass = getResources().getBoolean(R.bool.tablet_layout)
+                ? MusicBrowserActivity.class
+                : MediaPlaybackActivity.class;
+
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
         views.setTextViewText(R.id.trackname, trackname);
         views.setTextViewText(R.id.artistname, artistname);
@@ -1125,7 +1129,7 @@ public class MediaPlaybackService extends Service {
         status.flags |= Notification.FLAG_ONGOING_EVENT;
         status.icon = R.drawable.stat_notify_musicplayer;
         status.contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MediaPlaybackActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                new Intent(this, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 0);
 
         return status;
