@@ -43,11 +43,11 @@
     <ImageView
             android:id="@+id/context_menu"
             android:src="@drawable/ic_context_menu"
-            android:paddingTop="6dip"
             android:paddingRight="4dip"
             android:layout_toLeftOf="@id/play_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="44dip"
+            android:layout_height="44dip"
+            android:contentDescription="@string/context_menu"/>
 
     <TextView
             android:id="@+id/duration"
