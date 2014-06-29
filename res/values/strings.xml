@@ -135,10 +135,6 @@
     <!-- Menu item -->
     <string name="create_new_playlist">Create playlist</string>
     <string name="playlist_already_exists">Playlist already exists</string>
-    <!-- Title of screen when there are no songs, or if the SD card is busy -->
-    <string name="no_tracks_title">No songs</string>
-    <!-- Title of screen when there are no playlists, or if the SD card is busy -->
-    <string name="no_playlists_title">No playlists</string>
     <!-- Playlist context menu item to delete the selected playlist. -->
     <string name="delete_playlist_menu">Delete</string>
     <!-- Playlist context menu item to edit the selected playlist -->
@@ -264,11 +260,6 @@
 
     <!-- title of contextual music search menu -->
     <string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
-
-    <!-- Menu in music picker to sort the list by track/song name. -->
-    <string name="sort_by_track">Sort by title</string>
-    <!-- Menu in music picker to sort the list by artist name. -->
-    <string name="sort_by_artist">Sort by artist</string>
 
     <!-- The string used to describe Music as a searchable item within system search settings. -->
     <string name="search_settings_description">Artists, albums, and tracks</string>
