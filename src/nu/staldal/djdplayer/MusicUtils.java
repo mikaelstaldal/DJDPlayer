@@ -26,7 +26,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.SubMenu;
 import android.widget.Toast;
@@ -654,10 +653,6 @@ public class MusicUtils {
         intent.putExtra(SearchManager.QUERY, categoryName);
 
         return Intent.createChooser(intent, resources.getString(R.string.mediasearch, categoryName));
-    }
-
-    static long parseLong(String s) {
-        return (s == null) ? -1 : Long.parseLong(s);
     }
 
     static boolean isLong(String s) {

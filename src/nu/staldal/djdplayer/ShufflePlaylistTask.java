@@ -23,6 +23,7 @@ import android.widget.Toast;
 import java.util.Random;
 
 public class ShufflePlaylistTask extends AsyncTask<Object,Void,Void> {
+    @SuppressWarnings("unused")
     private static final String LOGTAG = "ShufflePlaylistTask";
 
     private final Context context;

@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class CreatePlaylist extends DialogFragment {
+    @SuppressWarnings("unused")
     private static final String LOGTAG = "CreatePlaylist";
 
     private EditText mPlaylist;
