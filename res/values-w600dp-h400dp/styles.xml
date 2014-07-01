@@ -1,0 +1,22 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="TrackInfoBox">
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="TrackInfoLine">
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <style name="TrackInfoLastLine">
+    </style>
+
+    <style name="TrackInfoKeyText">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingRight">6dp</item>
+    </style>
+
+    <style name="TrackInfoValueText">
+        <item name="android:textSize">18sp</item>
+    </style>
+</resources>
