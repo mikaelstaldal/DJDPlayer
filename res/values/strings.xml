@@ -76,6 +76,7 @@
 
     <!-- Menu item to rescan music library -->
     <string name="rescan">Rescan music</string>
+    <string name="rescan_now">Rescan music now</string>
 
     <string name="delete_song_title">Delete song?</string>
     <string name="delete_playlist_title">Delete playlist?</string>
