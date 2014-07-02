@@ -43,8 +43,6 @@ public class PlaylistFragment extends CategoryFragment {
     private static final String CURRENT_PLAYLIST = "currentplaylist";
     private static final String CURRENT_PLAYLIST_NAME = "currentplaylistname";
 
-    private static final int CREATE_NEW_PLAYLIST = CHILD_MENU_BASE + 1;
-
     private long currentId;
     private String playlistName;
 
@@ -265,7 +263,7 @@ public class PlaylistFragment extends CategoryFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.add(0, CREATE_NEW_PLAYLIST, 0, R.string.create_new_playlist).setIcon(R.drawable.ic_menu_add);
+        inflater.inflate(R.menu.playlists_menu, menu);
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -273,7 +271,7 @@ public class PlaylistFragment extends CategoryFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case CREATE_NEW_PLAYLIST:
+            case R.id.create_new_playlist:
                 CreatePlaylist.showMe(getActivity(), null);
                 return true;
         }

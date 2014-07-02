@@ -4,16 +4,19 @@
     <item
             android:id="@+id/search"
             android:icon="@drawable/ic_menu_search"
-            android:title="@string/search_title"/>
+            android:title="@string/search_title"
+            android:orderInCategory="11"/>
 
     <item
             android:id="@+id/effect_panel"
             android:icon="@drawable/ic_menu_eq"
-            android:title="@string/effectspanel"/>
+            android:title="@string/effectspanel"
+            android:orderInCategory="16"/>
 
     <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_menu_preferences"
-            android:title="@string/settings"/>
+            android:title="@string/settings"
+            android:orderInCategory="17"/>
 
 </menu>
