@@ -24,7 +24,6 @@ public class SettingsActivity extends Activity {
     public static final String SHOW_ALBUMS_TAB = "show_albums_tab";
     public static final String SHOW_GENRES_TAB = "show_genres_tab";
     public static final String SHOW_FOLDERS_TAB = "show_folders_tab";
-    public static final String SHOW_SONGS_TAB = "show_songs_tab";
     public static final String SHOW_PLAYLISTS_TAB = "show_playlists_tab";
     public static final String MUSIC_FOLDER = "music_folder";
 
@@ -46,7 +45,6 @@ public class SettingsActivity extends Activity {
     public static final String ALBUMS_TAB = "albums";
     public static final String GENRES_TAB = "genres";
     public static final String FOLDERS_TAB = "folders";
-    public static final String SONGS_TAB = "songs";
     public static final String PLAYLISTS_TAB = "playlists";
 
     @Override

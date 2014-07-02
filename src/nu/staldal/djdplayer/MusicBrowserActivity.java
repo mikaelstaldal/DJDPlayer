@@ -244,7 +244,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 || key.equals(SettingsActivity.SHOW_ALBUMS_TAB)
                 || key.equals(SettingsActivity.SHOW_GENRES_TAB)
                 || key.equals(SettingsActivity.SHOW_FOLDERS_TAB)
-                || key.equals(SettingsActivity.SHOW_SONGS_TAB)
                 || key.equals(SettingsActivity.SHOW_PLAYLISTS_TAB)) {
             invalidateTabs = true;
         }
@@ -279,13 +278,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                     .setText(R.string.folders_menu)
                     .setTag(SettingsActivity.FOLDERS_TAB)
                     .setTabListener(new TabListener<>(this, SettingsActivity.FOLDERS_TAB, FolderFragment.class)));
-        }
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_SONGS_TAB, false)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.tracks_menu)
-                    .setTag(SettingsActivity.SONGS_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.SONGS_TAB, TrackFragment.class)));
         }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {

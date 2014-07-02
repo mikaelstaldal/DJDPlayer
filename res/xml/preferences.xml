@@ -26,10 +26,6 @@
             android:title="@string/show_folders_tab"
             android:defaultValue="true" />
         <CheckBoxPreference
-            android:key="show_songs_tab"
-            android:title="@string/show_songs_tab"
-            android:defaultValue="false" />
-        <CheckBoxPreference
             android:key="show_playlists_tab"
             android:title="@string/show_playlists_tab"
             android:defaultValue="true" />
