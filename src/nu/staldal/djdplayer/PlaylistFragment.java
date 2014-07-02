@@ -264,8 +264,6 @@ public class PlaylistFragment extends CategoryFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.playlists_menu, menu);
-
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

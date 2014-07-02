@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -117,8 +116,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.player_menu, menu);
+        getMenuInflater().inflate(R.menu.player_menu, menu);
 
         return true;
     }
