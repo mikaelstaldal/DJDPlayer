@@ -16,7 +16,7 @@
         <CheckBoxPreference
             android:key="show_albums_tab"
             android:title="@string/show_albums_tab"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
         <CheckBoxPreference
             android:key="show_genres_tab"
             android:title="@string/show_genres_tab"

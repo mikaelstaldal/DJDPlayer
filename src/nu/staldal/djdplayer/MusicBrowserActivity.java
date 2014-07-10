@@ -259,7 +259,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                     .setTabListener(new TabListener<>(this, SettingsActivity.ARTISTS_TAB, ArtistFragment.class)));
         }
 
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, false)) {
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, true)) {
             actionBar.addTab(actionBar.newTab()
                     .setText(R.string.albums_menu)
                     .setTag(SettingsActivity.ALBUMS_TAB)
