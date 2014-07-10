@@ -183,12 +183,14 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
                     if (playerHeaderDivider != null) playerHeaderDivider.setVisibility(View.VISIBLE);
                     if (playerFooterDivider != null) playerFooterDivider.setVisibility(View.VISIBLE);
                     playQueueFragment.setQueueZoomed(false);
+                    item.setIcon(R.drawable.ic_menu_zoom);
                 } else {
                     playerHeaderFragment.hide();
                     playerFooterFragment.hide();
                     if (playerHeaderDivider != null) playerHeaderDivider.setVisibility(View.GONE);
                     if (playerFooterDivider != null) playerFooterDivider.setVisibility(View.GONE);
                     playQueueFragment.setQueueZoomed(true);
+                    item.setIcon(R.drawable.ic_menu_unzoom);
                 }
                 return true;
 

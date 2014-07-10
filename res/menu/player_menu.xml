@@ -2,45 +2,51 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+            android:id="@+id/search"
+            android:icon="@drawable/ic_menu_search"
+            android:title="@string/search_title"
+            android:showAsAction="ifRoom"
+            android:orderInCategory="11"/>
+
+    <item
             android:id="@+id/repeat"
             android:title="@string/repeat"
-            android:showAsAction="always"/>
+            android:showAsAction="always"
+            android:orderInCategory="12"/>
 
     <item
             android:id="@+id/shuffle"
             android:icon="@drawable/ic_menu_shuffle"
             android:title="@string/shufflequeue"
-            android:showAsAction="always"/>
+            android:showAsAction="always"
+            android:orderInCategory="13"/>
 
     <group android:id="@+id/playing_items">
 
         <item
                 android:id="@+id/uniqueify"
                 android:icon="@drawable/ic_menu_uniqueify"
-                android:title="@string/uniqueifyqueue"/>
+                android:title="@string/uniqueifyqueue"
+                android:orderInCategory="14"/>
 
         <item
                 android:id="@+id/clear_queue"
                 android:icon="@drawable/ic_menu_clear_playlist"
-                android:title="@string/clear_queue"/>
+                android:title="@string/clear_queue"
+                android:orderInCategory="15"/>
 
     </group>
-
-    <item
-            android:id="@+id/search"
-            android:icon="@drawable/ic_menu_search"
-            android:title="@string/search_title"
-            android:showAsAction="ifRoom"/>
 
     <item
             android:id="@+id/effect_panel"
             android:icon="@drawable/ic_menu_eq"
             android:title="@string/effectspanel"
-            android:showAsAction="ifRoom"/>
+            android:orderInCategory="16"/>
 
     <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_menu_preferences"
-            android:title="@string/settings"/>
+            android:title="@string/settings"
+            android:orderInCategory="17"/>
 
 </menu>
