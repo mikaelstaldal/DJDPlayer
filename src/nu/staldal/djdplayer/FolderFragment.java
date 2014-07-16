@@ -166,6 +166,7 @@ public class FolderFragment extends CategoryFragment {
                 MusicUtils.queueNext(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
             }
+
             case QUEUE_ALL: {
                 MusicUtils.queue(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
