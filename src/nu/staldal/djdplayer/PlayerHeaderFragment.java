@@ -30,7 +30,6 @@ public class PlayerHeaderFragment extends Fragment implements
     @SuppressWarnings("unused")
     private static final String LOGTAG = "PlayerHeaderFragment";
 
-    private static final int ADD_TO_PLAYLIST2 = CHILD_MENU_BASE+4;
     private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
     private static final int TRACK_INFO2 = CHILD_MENU_BASE+7;
     private static final int SHARE_VIA2 = CHILD_MENU_BASE+8;
@@ -95,7 +94,7 @@ public class PlayerHeaderFragment extends Fragment implements
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (service == null) return;
 
-        SubMenu sub = menu.addSubMenu(0, ADD_TO_PLAYLIST2, 0, R.string.add_to_playlist);
+        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
         menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);

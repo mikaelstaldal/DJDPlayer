@@ -34,6 +34,9 @@ public class PlayQueueFragment extends ListFragment
         implements FragmentServiceConnection, AbsListView.OnScrollListener, MusicUtils.Defs {
     private static final String LOGTAG = "PlayQueueFragment";
 
+    private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+1;
+    private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+2;
+
     final static String[] mCols = new String[] {
             MediaStore.Audio.AudioColumns.TITLE,
             MediaStore.Audio.AudioColumns.ARTIST,
@@ -256,7 +259,7 @@ public class PlayQueueFragment extends ListFragment
         menu.add(0, PLAY_NOW, 0, R.string.play_now);
 
         SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
 
@@ -281,12 +284,12 @@ public class PlayQueueFragment extends ListFragment
                 return true;
             }
 
-            case NEW_PLAYLIST: {
+            case NEW_PLAYLIST2: {
                 CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
-            case PLAYLIST_SELECTED: {
+            case PLAYLIST_SELECTED2: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), new long[] { mSelectedId }, playlist);
                 return true;
