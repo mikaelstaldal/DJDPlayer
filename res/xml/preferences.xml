@@ -44,4 +44,11 @@
                 android:targetClass="nu.staldal.djdplayer.PickMusicFolderActivity" />
         </Preference>
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/about">
+        <Preference android:title="@string/about">
+            <intent
+                android:targetPackage="nu.staldal.djdplayer"
+                android:targetClass="nu.staldal.djdplayer.AboutActivity" />
+        </Preference>
+    </PreferenceCategory>
 </PreferenceScreen>

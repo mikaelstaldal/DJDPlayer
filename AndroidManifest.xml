@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
           android:versionCode="14219"
-          android:versionName="2.6beta"
+          android:versionName="@string/versionName"
           android:installLocation="auto">
 
     <!-- Require 4.0, target 4.0.3 (Ice Cream Sandwich) -->
@@ -140,6 +140,8 @@
 
         <activity android:name=".PickMusicFolderActivity"
             android:theme="@style/Theme.Dialog" />
+
+        <activity android:name=".AboutActivity" />
 
         <service android:name=".MediaPlaybackService"
                  android:exported="false"/>
