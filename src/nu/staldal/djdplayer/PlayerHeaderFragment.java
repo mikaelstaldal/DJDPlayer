@@ -43,6 +43,7 @@ public class PlayerHeaderFragment extends Fragment implements
     private TextView trackNameView;
     private TextView artistNameView;
     private TextView genreNameView;
+    private View trackNameContainer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,10 +54,18 @@ public class PlayerHeaderFragment extends Fragment implements
         trackNameView = (TextView) view.findViewById(R.id.trackname);
         artistNameView = (TextView) view.findViewById(R.id.artistname);
         genreNameView = (TextView) view.findViewById(R.id.genrename);
+        trackNameContainer = view.findViewById(R.id.trackname_container);
 
-        registerForContextMenu(trackNameView);
+        registerForContextMenu(trackNameContainer);
         artistNameView.setOnLongClickListener(this);
         genreNameView.setOnLongClickListener(this);
+
+        view.findViewById(R.id.context_menu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                trackNameContainer.showContextMenu();
+            }
+        });
 
         return view;
     }
