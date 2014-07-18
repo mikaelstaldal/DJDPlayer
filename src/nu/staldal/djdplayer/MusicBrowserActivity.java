@@ -160,7 +160,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     private Uri fixUri(Uri uri) {
         String lastPathSegment = uri.getLastPathSegment();
-        if (MusicUtils.isLong(lastPathSegment)) {
+        try {
             long id = Long.parseLong(lastPathSegment);
             if (uri.toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
                 return MusicContract.Album.getMembersUri(id);
@@ -173,7 +173,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             } else {
                 return uri;
             }
-        } else {
+        } catch (NumberFormatException e) {
             return uri;
         }
     }
