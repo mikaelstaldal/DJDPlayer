@@ -119,8 +119,6 @@
     <string name="genres_menu">Genres</string>
     <!-- Category label on Library screen -->
     <string name="folders_menu">Folders</string>
-    <!-- Category label on Library screen -->
-    <string name="tracks_menu">Songs</string>
     <!-- Songs screen title -->
     <string name="tracks_title">Songs</string>
     <!-- Category label on Library screen -->
