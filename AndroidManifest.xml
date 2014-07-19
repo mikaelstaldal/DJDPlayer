@@ -17,7 +17,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer"
-          android:versionCode="14219"
+          android:versionCode="14220"
           android:versionName="@string/versionName"
           android:installLocation="auto">
 
