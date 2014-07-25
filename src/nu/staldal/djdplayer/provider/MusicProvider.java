@@ -138,7 +138,7 @@ public class MusicProvider extends ContentProvider {
 
     private Cursor fetchFolders() {
         File root = fetchRoot();
-        MatrixCursor cursor = new MatrixCursor(new String[]{
+        MatrixCursor cursor = new MatrixCursor(new String[] {
                 MusicContract.Folder._ID,
                 MusicContract.Folder._COUNT,
                 MusicContract.Folder.PATH,
@@ -481,7 +481,7 @@ public class MusicProvider extends ContentProvider {
                 } else if (ContentUris.parseId(uri) == MusicContract.Playlist.ALL_SONGS) {
                     return context.getString(R.string.all_songs_title);
                 } else {
-                    String[] cols = new String[]{
+                    String[] cols = new String[] {
                             MediaStore.Audio.Playlists.NAME
                     };
                     Cursor cursor = context.getContentResolver().query(
@@ -497,11 +497,11 @@ public class MusicProvider extends ContentProvider {
                             cursor.close();
                         }
                     }
+                    return context.getString(R.string.unknown_playlist_name);
                 }
-                return context.getString(R.string.unknown_playlist_name);
             }
             case MusicProvider.GENRE_MEMBERS: {
-                String[] cols = new String[]{
+                String[] cols = new String[] {
                         MediaStore.Audio.Genres.NAME
                 };
                 Cursor cursor = context.getContentResolver().query(
@@ -520,7 +520,7 @@ public class MusicProvider extends ContentProvider {
                 return context.getString(R.string.unknown_genre_name);
             }
             case MusicProvider.ARTIST_MEMBERS: {
-                String[] cols = new String[]{
+                String[] cols = new String[] {
                         MediaStore.Audio.Artists.ARTIST
                 };
                 Cursor cursor = context.getContentResolver().query(
@@ -540,7 +540,7 @@ public class MusicProvider extends ContentProvider {
             }
             case MusicProvider.ALBUM_MEMBERS: {
                 String fancyName = null;
-                String[] cols = new String[]{
+                String[] cols = new String[] {
                         MediaStore.Audio.Albums.ALBUM
                 };
                 Cursor cursor = context.getContentResolver().query(
