@@ -360,7 +360,8 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Genres._ID,
                         MediaStore.Audio.Genres.NAME
                 },
-                null, null,
+                MediaStore.Audio.Genres.NAME + " != ''",
+                null,
                 MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
 
         if (cursor == null) return null;
@@ -384,7 +385,8 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Artists.ARTIST,
                         MediaStore.Audio.Artists.NUMBER_OF_TRACKS
                 },
-                null, null,
+                MediaStore.Audio.Artists.ARTIST + " != ''",
+                null,
                 MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
     }
 
@@ -395,7 +397,8 @@ public class MusicProvider extends ContentProvider {
                         MediaStore.Audio.Albums.ALBUM,
                         MediaStore.Audio.Albums.NUMBER_OF_SONGS,
                 },
-                null, null,
+                MediaStore.Audio.Albums.ALBUM + " != ''",
+                null,
                 MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
