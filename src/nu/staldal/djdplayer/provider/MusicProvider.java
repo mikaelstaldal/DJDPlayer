@@ -501,6 +501,7 @@ public class MusicProvider extends ContentProvider {
                 }
             }
             case MusicProvider.GENRE_MEMBERS: {
+                String fancyName = null;
                 String[] cols = new String[] {
                         MediaStore.Audio.Genres.NAME
                 };
@@ -511,15 +512,20 @@ public class MusicProvider extends ContentProvider {
                     try {
                         if (cursor.getCount() != 0) {
                             cursor.moveToFirst();
-                            return ID3Utils.decodeGenre(cursor.getString(0));
+                            fancyName = cursor.getString(0);
                         }
                     } finally {
                         cursor.close();
                     }
                 }
-                return context.getString(R.string.unknown_genre_name);
+                if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
+                    return context.getString(R.string.unknown_genre_name);
+                } else {
+                    return ID3Utils.decodeGenre(fancyName);
+                }
             }
             case MusicProvider.ARTIST_MEMBERS: {
+                String fancyName = null;
                 String[] cols = new String[] {
                         MediaStore.Audio.Artists.ARTIST
                 };
@@ -530,13 +536,17 @@ public class MusicProvider extends ContentProvider {
                     try {
                         if (cursor.getCount() != 0) {
                             cursor.moveToFirst();
-                            return cursor.getString(0);
+                            fancyName = cursor.getString(0);
                         }
                     } finally {
                         cursor.close();
                     }
                 }
-                return context.getString(R.string.unknown_artist_name);
+                if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
+                    return context.getString(R.string.unknown_artist_name);
+                } else {
+                    return fancyName;
+                }
             }
             case MusicProvider.ALBUM_MEMBERS: {
                 String fancyName = null;
