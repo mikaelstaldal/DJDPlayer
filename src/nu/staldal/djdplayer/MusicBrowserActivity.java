@@ -19,6 +19,7 @@ package nu.staldal.djdplayer;
 
 import android.app.*;
 import android.content.*;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
@@ -27,7 +28,10 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -111,29 +115,39 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.i(LOGTAG, "onNewIntent - " + intent);
-        parseIntent(intent, false);
+        boolean addToBackStack = parseIntent(intent, false);
         if (songToPlay > -1) {
             if (service != null) {
                 MusicUtils.playSong(this, songToPlay);
                 songToPlay = -1;
             }
-        } else {
+        }
+        if (addToBackStack) {
             backStack.add(getIntent());
             setIntent(intent);
         }
     }
 
-    private void parseIntent(Intent intent, boolean onCreate) {
+    private boolean parseIntent(Intent intent, boolean onCreate) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())
                 && intent.getData() != null
                 && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
                 && MusicUtils.isLong(intent.getData().getLastPathSegment())) {
             songToPlay = ContentUris.parseId(intent.getData());
-            if (!onCreate) return;
+            if (!onCreate) return false;
             uri = null;
             title = null;
             searchResult = false;
-        } else if ((Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_PICK.equals(intent.getAction())) && intent.getData() != null) {
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())
+                && intent.getData() != null
+                && intent.getData().getScheme().equals("file")) {
+            songToPlay = fetchSongIdFromPath(intent.getData().getPath());
+            if (!onCreate) return false;
+            uri = null;
+            title = null;
+            searchResult = false;
+        } else if ((Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_PICK.equals(intent.getAction()))
+                && intent.getData() != null) {
             songToPlay = -1;
             uri = fixUri(intent.getData());
             title = MusicProvider.calcTitle(this, uri);
@@ -155,6 +169,30 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             enterCategoryMode();
         } else {
             enterSongsMode();
+        }
+
+        return true;
+    }
+
+    private long fetchSongIdFromPath(String path) {
+        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Audio.Media._ID },
+                MediaStore.Audio.Media.DATA + "=?",
+                new String[] { path },
+                null);
+        if (cursor == null) {
+            Log.w(LOGTAG, "Unable to fetch Song Id (cursor is null) for " + path);
+            return -1;
+        }
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+            } else {
+                Log.w(LOGTAG, "Unable to fetch Song Id (cursor is empty) for " + path);
+                return -1;
+            }
+        } finally {
+            cursor.close();
         }
     }
 

@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.content.*;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -88,7 +87,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
         playerFooterFragment.onServiceConnected(service);
 
         invalidateOptionsMenu();
-        startPlayback();
+        updateTrackInfo();
 
         // Assume something is playing when the service says it is,
         // but also if the audio ID is valid but the service is paused.
@@ -246,33 +245,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
             Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
-    }
-
-    private void startPlayback() {
-        if (service == null)
-            return;
-        Intent intent = getIntent();
-        Uri uri = intent.getData();
-        if (uri != null && uri.toString().length() > 0) {
-            // If this is a file:// URI, just use the path directly instead
-            // of going through the open-from-filedescriptor codepath.
-            String filename;
-            if ("file".equals(uri.getScheme())) {
-                filename = uri.getPath();
-            } else {
-                filename = uri.toString();
-            }
-            try {
-                service.stop();
-                service.open(filename);
-                service.play();
-                setIntent(new Intent());
-            } catch (Exception ex) {
-                Log.d(LOGTAG, "couldn't start playback: " + ex);
-            }
-        }
-
-        updateTrackInfo();
     }
 
     public void onServiceDisconnected(ComponentName name) {
