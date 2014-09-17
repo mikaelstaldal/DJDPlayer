@@ -30,13 +30,6 @@ public class PlayerHeaderFragment extends Fragment implements
     @SuppressWarnings("unused")
     private static final String LOGTAG = "PlayerHeaderFragment";
 
-    private static final int DELETE_ITEM2 = CHILD_MENU_BASE+6;
-    private static final int TRACK_INFO2 = CHILD_MENU_BASE+7;
-    private static final int SHARE_VIA2 = CHILD_MENU_BASE+8;
-    private static final int SEARCH_FOR2 = CHILD_MENU_BASE+9;
-    private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+10;
-    private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+11;
-
     private MediaPlaybackService service;
 
     private View mainView;

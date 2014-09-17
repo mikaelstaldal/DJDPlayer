@@ -34,9 +34,6 @@ public class PlayQueueFragment extends ListFragment
         implements FragmentServiceConnection, AbsListView.OnScrollListener, MusicUtils.Defs {
     private static final String LOGTAG = "PlayQueueFragment";
 
-    private static final int NEW_PLAYLIST2 = CHILD_MENU_BASE+1;
-    private static final int PLAYLIST_SELECTED2 = CHILD_MENU_BASE+2;
-
     final static String[] mCols = new String[] {
             MediaStore.Audio.AudioColumns.TITLE,
             MediaStore.Audio.AudioColumns.ARTIST,
@@ -256,16 +253,16 @@ public class PlayQueueFragment extends ListFragment
         playQueueCursor.moveToPosition(mSelectedPosition);
         mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
 
-        menu.add(0, PLAY_NOW, 0, R.string.play_now);
+        menu.add(0, PLAY_NOW2, 0, R.string.play_now);
 
         SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST3, PLAYLIST_SELECTED3);
 
-        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
+        menu.add(0, DELETE_ITEM3, 0, R.string.delete_item);
 
-        menu.add(0, TRACK_INFO, 0, R.string.info);
+        menu.add(0, TRACK_INFO3, 0, R.string.info);
 
-        menu.add(0, SHARE_VIA, 0, R.string.share_via);
+        menu.add(0, SHARE_VIA3, 0, R.string.share_via);
 
         // only add the 'search' menu if the selected item is music
         if (MusicUtils.isMusic(playQueueCursor)) {
@@ -279,23 +276,23 @@ public class PlayQueueFragment extends ListFragment
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_NOW: {
+            case PLAY_NOW2: {
                 if (service != null) service.setQueuePosition(mSelectedPosition);
                 return true;
             }
 
-            case NEW_PLAYLIST2: {
+            case NEW_PLAYLIST3: {
                 CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
                 return true;
             }
 
-            case PLAYLIST_SELECTED2: {
+            case PLAYLIST_SELECTED3: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), new long[] { mSelectedId }, playlist);
                 return true;
             }
 
-            case DELETE_ITEM: {
+            case DELETE_ITEM3: {
                 final long [] list = new long[1];
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
@@ -320,13 +317,13 @@ public class PlayQueueFragment extends ListFragment
                 return true;
             }
 
-            case TRACK_INFO:
+            case TRACK_INFO3:
                 TrackInfoFragment.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
 
                 return true;
 
-            case SHARE_VIA:
+            case SHARE_VIA3:
                 startActivity(MusicUtils.shareVia(
                         mSelectedId,
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),

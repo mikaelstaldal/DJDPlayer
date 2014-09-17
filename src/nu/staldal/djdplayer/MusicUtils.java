@@ -41,31 +41,44 @@ public class MusicUtils {
     private static final String LOGTAG = "MusicUtils";
 
     public interface Defs {
-        public final static int PLAYLIST_SELECTED = 3;
-        public final static int NEW_PLAYLIST = 4;
-        public final static int PLAY_ALL_NOW = 5;
-        public final static int SHUFFLE_PLAYLIST = 9;
-        public final static int UNIQUEIFY_PLAYLIST = 10;
-        public final static int QUEUE_ALL = 11;
-        public final static int DELETE_ITEM = 12;
-        public final static int QUEUE = 14;
-        public final static int PLAY_NOW = 15;
-        public final static int PLAY_NEXT = 16;
-        public final static int SHARE_VIA = 19;
-        public final static int TRACK_INFO = 20;
-        public final static int SEARCH_FOR = 21;
-        public final static int PLAY_ALL_NEXT = 22;
-        public final static int PLAYLIST_SELECTED_ALL = 24;
-        public final static int NEW_PLAYLIST_ALL = 25;
-        public final static int DELETE_ALL = 26;
-        public final static int SEARCH_FOR_CATEGORY = 27;
+        public static final int PLAYLIST_SELECTED = 3;
+        public static final int NEW_PLAYLIST = 4;
+        public static final int PLAY_ALL_NOW = 5;
+        public static final int SHUFFLE_PLAYLIST = 9;
+        public static final int UNIQUEIFY_PLAYLIST = 10;
+        public static final int QUEUE_ALL = 11;
+        public static final int DELETE_ITEM = 12;
+        public static final int QUEUE = 14;
+        public static final int PLAY_NOW = 15;
+        public static final int PLAY_NEXT = 16;
+        public static final int SHARE_VIA = 19;
+        public static final int TRACK_INFO = 20;
+        public static final int SEARCH_FOR_TRACK = 21;
+        public static final int PLAY_ALL_NEXT = 22;
+        public static final int PLAYLIST_SELECTED_ALL = 24;
+        public static final int NEW_PLAYLIST_ALL = 25;
+        public static final int DELETE_ALL = 26;
+        public static final int SEARCH_FOR_CATEGORY = 27;
         public static final int DELETE_PLAYLIST = 28;
         public static final int EDIT_PLAYLIST = 29;
         public static final int RENAME_PLAYLIST = 30;
         public static final int EXPORT_PLAYLIST = 31;
-        public final static int CHILD_MENU_BASE = 32; // this should be the last item
+        public static final int NEW_PLAYLIST2 = 32;
+        public static final int PLAYLIST_SELECTED2 = 33;
+        public static final int SEARCH_FOR = 34;
+        public static final int DELETE_ITEM2 = 35;
+        public static final int TRACK_INFO2 = 36;
+        public static final int SHARE_VIA2 = 37;
+        public static final int SEARCH_FOR2 = 38;
+        public static final int NEW_PLAYLIST3 = 39;
+        public static final int PLAYLIST_SELECTED3 = 40;
+        public static final int REMOVE_FROM_PLAYLIST = 41;
+        public static final int TRACK_INFO3 = 42;
+        public static final int PLAY_NOW2 = 43;
+        public static final int SHARE_VIA3 = 44;
+        public static final int DELETE_ITEM3 = 45;
 
-        public final static int INTERLEAVE_ALL = 1000;
+        public static final int INTERLEAVE_ALL = 1000;
     }
 
     /**
@@ -101,7 +114,7 @@ public class MusicUtils {
     }
     
     public static MediaPlaybackService sService = null;
-    private final static HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<>();
+    private static final HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<>();
 
     public static class ServiceToken {
         final ContextWrapper mWrappedContext;
@@ -215,7 +228,7 @@ public class MusicUtils {
         return false;
     }
 
-    public final static long [] sEmptyList = new long[0];
+    public static final long [] sEmptyList = new long[0];
 
     public static long [] getSongListForCursorAndClose(Cursor cursor) {
         try {

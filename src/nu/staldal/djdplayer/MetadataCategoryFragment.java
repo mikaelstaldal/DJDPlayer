@@ -28,8 +28,6 @@ import android.view.*;
 import android.widget.AdapterView;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
-    protected final static int SEARCH_FOR = CHILD_MENU_BASE;
-
     public static final String CURRENT_NAME = "CURRENT_NAME";
     public static final String IS_UNKNOWN = "IS_UNKNOWN";
 
@@ -125,7 +123,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         menu.add(0, DELETE_ALL, 0, R.string.delete_all);
 
         if (!mIsUnknown) {
-            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+            menu.add(0, SEARCH_FOR_CATEGORY, 0, R.string.search_for);
         }
     }
 
@@ -190,7 +188,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                 return true;
             }
 
-            case SEARCH_FOR:
+            case SEARCH_FOR_CATEGORY:
                 Intent intent = MusicUtils.searchForCategory(mCurrentName, getEntryContentType(), getResources());
                 addExtraSearchData(intent);
                 startActivity(intent);

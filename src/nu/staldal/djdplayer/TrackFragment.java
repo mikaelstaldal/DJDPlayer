@@ -39,10 +39,6 @@ import java.util.Set;
 public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, PopupMenu.OnMenuItemClickListener, WithSectionMenu {
     private static final String LOGTAG = "TrackFragment";
 
-    private static final int REMOVE_FROM_PLAYLIST = CHILD_MENU_BASE + 2;
-    private static final int TRACK_INFO = CHILD_MENU_BASE + 3;
-    private static final int SEARCH_FOR = CHILD_MENU_BASE + 4;
-
     public static final String URI = "uri";
 
     int selectedPosition;
@@ -183,7 +179,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
         // only add the 'search' menu if the selected item is music
         if (MusicUtils.isMusic(adapter.getCursor())) {
-            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+            menu.add(0, SEARCH_FOR_TRACK, 0, R.string.search_for);
         }
     }
 
@@ -259,7 +255,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 ));
                 return true;
 
-            case SEARCH_FOR:
+            case SEARCH_FOR_TRACK:
                 String currentTrackName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(
                         MediaStore.Audio.AudioColumns.TITLE));
 
