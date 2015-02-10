@@ -136,7 +136,7 @@ public class MusicProvider extends ContentProvider {
     }
 
     private Cursor fetchFolders() {
-        File root = fetchRoot();
+        File root = fetchRoot(getContext());
         MatrixCursor cursor = new MatrixCursor(new String[] {
                 MusicContract.Folder._ID,
                 MusicContract.Folder._COUNT,
@@ -239,8 +239,8 @@ public class MusicProvider extends ContentProvider {
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
 
-    private File fetchRoot() {
-        return new File(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SettingsActivity.MUSIC_FOLDER,
+    private static File fetchRoot(Context context) {
+        return new File(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.MUSIC_FOLDER,
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath()));
     }
 
@@ -434,7 +434,7 @@ public class MusicProvider extends ContentProvider {
     public static String calcTitle(Context context, Uri uri) {
         switch (MusicProvider.sURIMatcher.match(uri)) {
             case MusicProvider.FOLDER_MEMBERS:
-                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+                File root = fetchRoot(context);
                 return uri.getLastPathSegment().substring(root.getAbsolutePath().length() + 1);
 
             case MusicProvider.PLAYLIST_MEMBERS: {
