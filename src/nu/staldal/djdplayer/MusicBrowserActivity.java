@@ -221,7 +221,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         title = null;
 
         ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setHomeButtonEnabled(false);
@@ -324,6 +323,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                     .setTag(SettingsActivity.PLAYLISTS_TAB)
                     .setTabListener(new TabListener<>(this, SettingsActivity.PLAYLISTS_TAB, PlaylistFragment.class)));
         }
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
 
     private boolean hasMenuKey() {
