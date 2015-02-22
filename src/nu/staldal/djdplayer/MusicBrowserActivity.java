@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -39,6 +40,7 @@ import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.djdplayer.provider.MusicProvider;
 import nu.staldal.ui.WithSectionMenu;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
@@ -71,6 +73,10 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        if (Build.VERSION.SDK_INT >= 19 || !hasMenuKey()) {
+            disableStackedActionBar(getActionBar());
+        }
+
         setContentView(R.layout.music_browser_activity);
 
         Button playQueueButton = (Button)findViewById(R.id.playqueue_button);
@@ -93,6 +99,26 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
         token = MusicUtils.bindToService(this, this);
+    }
+
+    private boolean hasMenuKey() {
+        return ViewConfiguration.get(this).hasPermanentMenuKey();
+    }
+
+    /**
+     * Workaround to avoid stacked Action Bar.
+     *
+     * http://developer.android.com/guide/topics/ui/actionbar.html#Tabs
+     */
+    private void disableStackedActionBar(ActionBar actionBar) {
+        try {
+            Method setHasEmbeddedTabsMethod = actionBar.getClass()
+                .getDeclaredMethod("setHasEmbeddedTabs", boolean.class);
+            setHasEmbeddedTabsMethod.setAccessible(true);
+            setHasEmbeddedTabsMethod.invoke(actionBar, true);
+        } catch (Exception e) {
+            Log.w(LOGTAG, "Unable to configure ActionBar tabs", e);
+        }
     }
 
     public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -325,10 +351,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         }
 
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-    }
-
-    private boolean hasMenuKey() {
-        return ViewConfiguration.get(this).hasPermanentMenuKey();
     }
 
     @Override
