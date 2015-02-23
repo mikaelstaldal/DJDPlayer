@@ -117,6 +117,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
 
         getMenuInflater().inflate(R.menu.player_menu, menu);
 
+        if (MusicUtils.android44OrLater() || !MusicUtils.hasMenuKey(this)) {
+            menu.findItem(R.id.shuffle).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        }
+
         return true;
     }
 

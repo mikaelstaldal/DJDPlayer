@@ -21,7 +21,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -99,7 +98,7 @@ public class PickMusicFolderActivity extends Activity {
             editor.putString(SettingsActivity.MUSIC_FOLDER, folder);
             editor.apply();
 
-            if (Build.VERSION.SDK_INT < 19) {
+            if (!MusicUtils.android44OrLater()) {
                 Log.i(LOGTAG, "Rescanning music");
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())));
             }

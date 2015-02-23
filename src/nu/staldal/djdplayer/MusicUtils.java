@@ -24,10 +24,12 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.SubMenu;
+import android.view.ViewConfiguration;
 import android.widget.Toast;
 import nu.staldal.djdplayer.provider.ID3Utils;
 
@@ -711,6 +713,14 @@ public class MusicUtils {
             c.close();
         }
         return id;
+    }
+
+    static boolean android44OrLater() {
+        return Build.VERSION.SDK_INT >= 19;
+    }
+
+    static boolean hasMenuKey(Context context) {
+        return ViewConfiguration.get(context).hasPermanentMenuKey();
     }
 }
 

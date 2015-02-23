@@ -18,7 +18,6 @@ package nu.staldal.djdplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -28,7 +27,7 @@ public class RescanActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (Build.VERSION.SDK_INT >= 19) {
+        if (MusicUtils.android44OrLater()) {
             Log.w(LOGTAG, "Cannot rescan music on Android 4.4 or later");
         } else {
             Log.i(LOGTAG, "Rescanning music");

@@ -23,7 +23,6 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -32,7 +31,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -73,7 +71,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        if (Build.VERSION.SDK_INT >= 19 || !hasMenuKey()) {
+        if (MusicUtils.android44OrLater() || !MusicUtils.hasMenuKey(this)) {
             disableStackedActionBar(getActionBar());
         }
 
@@ -99,10 +97,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
         token = MusicUtils.bindToService(this, this);
-    }
-
-    private boolean hasMenuKey() {
-        return ViewConfiguration.get(this).hasPermanentMenuKey();
     }
 
     /**
