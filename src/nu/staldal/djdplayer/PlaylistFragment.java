@@ -140,6 +140,7 @@ public class PlaylistFragment extends CategoryFragment {
 
         if (currentId >= 0) {
             menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
+            menu.add(0, SHARE_PLAYLIST, 0, R.string.share_via);
         }
     }
 
@@ -225,8 +226,13 @@ public class PlaylistFragment extends CategoryFragment {
                 }
                 return true;
             }
+
             case EXPORT_PLAYLIST:
-                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId);
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId, false);
+                return true;
+
+            case SHARE_PLAYLIST:
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId, true);
                 return true;
 
             default:

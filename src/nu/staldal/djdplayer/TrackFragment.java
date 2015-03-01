@@ -312,6 +312,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
 
         if (playlist >= 0) {
             menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
+            menu.add(0, SHARE_PLAYLIST, 0, R.string.share_via);
         }
 
         sectionMenu.show();
@@ -405,7 +406,11 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
                 return true;
 
             case EXPORT_PLAYLIST:
-                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(getActivity().getTitle(), playlist);
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(getActivity().getTitle(), playlist, false);
+                return true;
+
+            case SHARE_PLAYLIST:
+                new ExportPlaylistTask(getActivity().getApplicationContext()).execute(getActivity().getTitle(), playlist, true);
                 return true;
 
             default:

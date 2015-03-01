@@ -16,7 +16,9 @@
 package nu.staldal.djdplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -27,7 +29,7 @@ import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.io.*;
 
-public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
+public class ExportPlaylistTask extends AsyncTask<Object,Void,File> {
     private static final String LOGTAG = "ExportPlaylistTask";
 
     private final Context context;
@@ -37,15 +39,25 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
     }
 
     @Override
-    protected Void doInBackground(Object... params) {
+    protected File doInBackground(Object... params) {
         String playlistName = (String)params[0];
         long playlistId = (Long)params[1];
+        boolean shouldShare = (Boolean)params[2];
 
-        String dir = PreferenceManager.getDefaultSharedPreferences(context).getString(
+        String musicDir = PreferenceManager.getDefaultSharedPreferences(context).getString(
                 SettingsActivity.MUSIC_FOLDER,
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
-        int prefix = dir.length()+1;
-        File file = new File(dir, playlistName+".txt");
+
+        File file = shouldShare
+                ? new File(context.getExternalCacheDir(), playlistName+".m3u")
+                : new File(musicDir, playlistName+".txt");
+
+        export(playlistId, musicDir.length()+1, file);
+
+        return shouldShare ? file : null;
+    }
+
+    private void export(long playlistId, int prefix, File file) {
         Writer writer = null;
         Cursor cursor = null;
         try {
@@ -70,17 +82,37 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,Void> {
             Log.w(LOGTAG, "Unable to export playlist", e);
         } finally {
             try {
+                if (cursor != null) cursor.close();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "Unable to close cursor", e);
+            }
+            try {
                 if (writer != null) writer.close();
             } catch (IOException e) {
                 Log.w(LOGTAG, "Unable to close exported playlist", e);
             }
-            if (cursor != null) cursor.close();
         }
-        return null;
     }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        Toast.makeText(context, R.string.playlist_exported, Toast.LENGTH_SHORT).show();
+    protected void onPostExecute(File file) {
+        if (file != null) {
+            String fileName = file.getName();
+            share(file, fileName.substring(0, fileName.length()-4));
+        } else {
+            Toast.makeText(context, R.string.playlist_exported, Toast.LENGTH_SHORT).show();
+        }
     }
+
+    private void share(File file, CharSequence playlistName) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        intent.putExtra(Intent.EXTRA_SUBJECT, playlistName);
+        intent.setType("audio/x-mpegurl");
+
+        Intent chooser = Intent.createChooser(intent, context.getString(R.string.share_via));
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(chooser);
+    }
+
 }

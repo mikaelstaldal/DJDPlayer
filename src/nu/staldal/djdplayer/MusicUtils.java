@@ -79,6 +79,7 @@ public class MusicUtils {
         public static final int PLAY_NOW2 = 43;
         public static final int SHARE_VIA3 = 44;
         public static final int DELETE_ITEM3 = 45;
+        public static final int SHARE_PLAYLIST = 46;
 
         public static final int INTERLEAVE_ALL = 1000;
     }
