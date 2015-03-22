@@ -328,6 +328,6 @@
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
-    <string name="versionName">2.7beta1</string>
+    <string name="versionName">2.7</string>
 
 </resources>
