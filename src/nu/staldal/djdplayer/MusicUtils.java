@@ -84,6 +84,8 @@ public class MusicUtils {
         public static final int INTERLEAVE_ALL = 1000;
     }
 
+    public static final String AUDIO_X_MPEGURL = "audio/x-mpegurl";
+
     /**
      * This is now only used for the query screen
      */
@@ -462,27 +464,32 @@ public class MusicUtils {
             // unless the selected item represents something playable
             Log.e(LOGTAG, "ListSelection null");
         } else {
-            int size = ids.length;
-            ContentResolver resolver = context.getContentResolver();
-            // need to determine the number of items currently in the playlist,
-            // so the play_order field can be maintained.
             Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistid);
-            Cursor cur = resolver.query(uri, new String[] { "count(*)" }, null, null, null);
-            if (cur != null) {
-                cur.moveToFirst();
-                int base = cur.getInt(0);
-                cur.close();
-                int numInserted = 0;
-                for (int i = 0; i < size; i += 1000) {
-                    makeInsertItems(ids, i, 1000, base);
-                    numInserted += resolver.bulkInsert(uri, sContentValuesCache);
-                }
-                Toast.makeText(context, context.getResources().getQuantityString(
-                        R.plurals.NNNtrackstoplaylist, numInserted, numInserted), Toast.LENGTH_SHORT).show();
-                //mLastPlaylistSelected = playlistid;
-            } else {
-                Log.w(LOGTAG, "Unable to lookup playlist: " + playlistid);
+            int numInserted = addToPlaylist(context, ids, uri);
+            Toast.makeText(context, context.getResources().getQuantityString(
+                    R.plurals.NNNtrackstoplaylist, numInserted, numInserted), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static int addToPlaylist(Context context, long[] ids, Uri uri) {
+        int size = ids.length;
+        ContentResolver resolver = context.getContentResolver();
+        // need to determine the number of items currently in the playlist,
+        // so the play_order field can be maintained.
+        Cursor cur = resolver.query(uri, new String[] { "count(*)" }, null, null, null);
+        if (cur != null) {
+            cur.moveToFirst();
+            int base = cur.getInt(0);
+            cur.close();
+            int numInserted = 0;
+            for (int i = 0; i < size; i += 1000) {
+                makeInsertItems(ids, i, 1000, base);
+                numInserted += resolver.bulkInsert(uri, sContentValuesCache);
             }
+            return numInserted;
+        } else {
+            Log.w(LOGTAG, "Unable to lookup playlist: " + uri.toString());
+            return -1;
         }
     }
 
@@ -582,7 +589,7 @@ public class MusicUtils {
     static IdAndName fetchGenre(Context context, long songId) {
         Cursor c = context.getContentResolver().query(
                 Uri.parse("content://media/external/audio/media/" + String.valueOf(songId) + "/genres"),
-                new String[] { MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
+                new String[]{MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME},
                 null,
                 null,
                 null);
@@ -682,9 +689,15 @@ public class MusicUtils {
         }
     }
 
+    static Uri createPlaylist(Context context, String name) {
+        ContentValues values = new ContentValues(1);
+        values.put(MediaStore.Audio.Playlists.NAME, name);
+        return context.getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
+    }
+
     static void renamePlaylist(Context context, long playlistId, String name) {
         if (name != null && name.length() > 0) {
-            if (idForPlaylist(context, name) >= 0) {
+            if (playlistExists(context, name)) {
                 Toast.makeText(context, R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
             } else {
                 ContentValues values = new ContentValues(1);
@@ -699,21 +712,14 @@ public class MusicUtils {
         }
     }
 
-    static int idForPlaylist(Context context, String name) {
-        Cursor c = MusicUtils.query(context, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+    static boolean playlistExists(Context context, String name) {
+        Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Playlists._ID},
                 MediaStore.Audio.Playlists.NAME + "=?",
                 new String[]{name},
-                MediaStore.Audio.Playlists.NAME);
-        int id = -1;
-        if (c != null) {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
-                id = c.getInt(0);
-            }
-            c.close();
-        }
-        return id;
+                null);
+
+        return cursor != null && cursor.moveToFirst();
     }
 
     static boolean android44OrLater() {

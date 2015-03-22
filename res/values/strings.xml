@@ -308,6 +308,9 @@
     <string name="id">ID</string>
     <string name="date_added">Added</string>
 
+    <string name="playlist_imported">Playlist imported</string>
+    <string name="unable_to_import_playlist">Unable to import playlist</string>
+
     <string name="playlist_exported">Playlist exported</string>
     <string name="playlist_shuffled">Playlist shuffled</string>
 

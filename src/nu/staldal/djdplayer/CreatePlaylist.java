@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
@@ -68,12 +67,10 @@ public class CreatePlaylist extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         String name = mPlaylist.getText().toString();
                         if (name != null && name.length() > 0) {
-                            if (idForPlaylist(name) >= 0) {
+                            if (MusicUtils.playlistExists(getActivity(), name)) {
                                 Toast.makeText(getActivity(), R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
                             } else {
-                                ContentValues values = new ContentValues(1);
-                                values.put(MediaStore.Audio.Playlists.NAME, name);
-                                Uri uri = getActivity().getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
+                                Uri uri = MusicUtils.createPlaylist(getActivity(), name);
                                 long[] songs = getArguments().getLongArray("songs");
                                 if (songs != null) {
                                     MusicUtils.addToPlaylist(getActivity(), songs, Integer.valueOf(uri.getLastPathSegment()));
@@ -83,23 +80,6 @@ public class CreatePlaylist extends DialogFragment {
                         CreatePlaylist.this.getDialog().dismiss();
                     }
                 }).create();
-    }
-
-    private int idForPlaylist(String name) {
-        Cursor c = MusicUtils.query(getActivity(), MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Playlists._ID},
-                MediaStore.Audio.Playlists.NAME + "=?",
-                new String[]{name},
-                MediaStore.Audio.Playlists.NAME);
-        int id = -1;
-        if (c != null) {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
-                id = c.getInt(0);
-            }
-            c.close();
-        }
-        return id;
     }
 
     @Override

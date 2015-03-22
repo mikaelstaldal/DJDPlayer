@@ -151,6 +151,15 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private boolean parseIntent(Intent intent, boolean onCreate) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())
                 && intent.getData() != null
+                && intent.getType() != null && intent.getType().startsWith(MusicUtils.AUDIO_X_MPEGURL)) {
+            new ImportPlaylistTask(getApplicationContext()).execute(intent.getData());
+            songToPlay = -1;
+            uri = null;
+            title = null;
+            searchResult = false;
+            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, SettingsActivity.PLAYLISTS_TAB);
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())
+                && intent.getData() != null
                 && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
                 && MusicUtils.isLong(intent.getData().getLastPathSegment())) {
             songToPlay = ContentUris.parseId(intent.getData());
