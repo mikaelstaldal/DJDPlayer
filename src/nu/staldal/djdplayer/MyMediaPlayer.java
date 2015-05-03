@@ -86,7 +86,6 @@ class MyMediaPlayer {
         }
     };
 
-
     public void setDataSource(String path) {
         try {
             mMediaPlayer.reset();
@@ -122,9 +121,33 @@ class MyMediaPlayer {
         mMediaPlayer.start();
     }
 
+    public void pause() {
+        mMediaPlayer.pause();
+    }
+
     public void stop() {
         mMediaPlayer.reset();
         mIsInitialized = false;
+    }
+
+    public long duration() {
+        return mMediaPlayer.getDuration();
+    }
+
+    public long currentPosition() {
+        return mMediaPlayer.getCurrentPosition();
+    }
+
+    public void seek(long whereto) {
+        mMediaPlayer.seekTo((int)whereto);
+    }
+
+    public void setVolume(float vol) {
+        mMediaPlayer.setVolume(vol, vol);
+    }
+
+    public int getAudioSessionId() {
+        return mMediaPlayer.getAudioSessionId();
     }
 
     public void releaseWakeLock() {
@@ -146,27 +169,4 @@ class MyMediaPlayer {
         mWakeLock.release();
     }
 
-    public void pause() {
-        mMediaPlayer.pause();
-    }
-
-    public long duration() {
-        return mMediaPlayer.getDuration();
-    }
-
-    public long position() {
-        return mMediaPlayer.getCurrentPosition();
-    }
-
-    public void seek(long whereto) {
-        mMediaPlayer.seekTo((int)whereto);
-    }
-
-    public void setVolume(float vol) {
-        mMediaPlayer.setVolume(vol, vol);
-    }
-
-    public int getAudioSessionId() {
-        return mMediaPlayer.getAudioSessionId();
-    }
 }

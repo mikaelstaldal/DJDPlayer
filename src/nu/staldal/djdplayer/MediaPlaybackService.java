@@ -531,7 +531,7 @@ public class MediaPlaybackService extends Service {
         }
         ed.putInt(SettingsActivity.CURPOS, mPlayPos);
         if (mPlayer.isInitialized()) {
-            ed.putLong(SettingsActivity.SEEKPOS, mPlayer.position());
+            ed.putLong(SettingsActivity.SEEKPOS, mPlayer.currentPosition());
         }
         ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
         ed.apply();
@@ -1072,7 +1072,7 @@ public class MediaPlaybackService extends Service {
             // if we are at the end of the song, go to the next song first
             long duration = mPlayer.duration();
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
-                    mPlayer.position() >= duration - 2000) {
+                    mPlayer.currentPosition() >= duration - 2000) {
                 next(true);
             }
 
@@ -1544,7 +1544,7 @@ public class MediaPlaybackService extends Service {
      */
     public long position() {
         if (mPlayer.isInitialized()) {
-            return mPlayer.position();
+            return mPlayer.currentPosition();
         }
         return -1;
     }
