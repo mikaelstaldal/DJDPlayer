@@ -116,13 +116,13 @@ public class PlayerHeaderFragment extends Fragment implements
 
         switch (item.getItemId()) {
             case NEW_PLAYLIST2: {
-                CreatePlaylist.showMe(getActivity(), new long[] { MusicUtils.getCurrentAudioId() });
+                CreatePlaylist.showMe(getActivity(), new long[] { service.getAudioId() });
                 return true;
             }
 
             case PLAYLIST_SELECTED2: {
                 long [] list = new long[1];
-                list[0] = MusicUtils.getCurrentAudioId();
+                list[0] = service.getAudioId();
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), list, playlist);
                 return true;
@@ -130,7 +130,7 @@ public class PlayerHeaderFragment extends Fragment implements
 
             case DELETE_ITEM2: {
                 final long [] list = new long[1];
-                list[0] = MusicUtils.getCurrentAudioId();
+                list[0] = service.getAudioId();
                 String f = getString(R.string.delete_song_desc, service.getTrackName());
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -152,15 +152,15 @@ public class PlayerHeaderFragment extends Fragment implements
 
             case TRACK_INFO2: {
                 TrackInfoFragment.showMe(getActivity(),
-                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MusicUtils.getCurrentAudioId()));
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, service.getAudioId()));
 
                 return true;
             }
 
             case SHARE_VIA2: {
                 startActivity(MusicUtils.shareVia(
-                        MusicUtils.getCurrentAudioId(),
-                        MusicUtils.getCurrentMimeType(),
+                        service.getAudioId(),
+                        service.getMimeType(),
                         getResources()));
                 return true;
             }

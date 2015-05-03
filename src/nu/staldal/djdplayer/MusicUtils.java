@@ -86,6 +86,8 @@ public class MusicUtils {
 
     public static final String AUDIO_X_MPEGURL = "audio/x-mpegurl";
 
+    public static final long [] sEmptyList = new long[0];
+
     /**
      * This is now only used for the query screen
      */
@@ -205,35 +207,12 @@ public class MusicUtils {
         return null;
     }
 
-    public static String getCurrentMimeType() {
-        if (sService != null) {
-            return sService.getMimeType();
-        }
-        return null;
-    }
-
     public static long getCurrentArtistId() {
         if (MusicUtils.sService != null) {
             return sService.getArtistId();
         }
         return -1;
     }
-
-    public static long getCurrentAudioId() {
-        if (MusicUtils.sService != null) {
-            return sService.getAudioId();
-        }
-        return -1;
-    }
-    
-    public static boolean isPlaying() {
-        if (MusicUtils.sService != null) {
-            return sService.isPlaying();
-        }
-        return false;
-    }
-
-    public static final long [] sEmptyList = new long[0];
 
     public static long [] getSongListForCursorAndClose(Cursor cursor) {
         try {
@@ -393,6 +372,13 @@ public class MusicUtils {
          } else {
              queueAndPlayImmediately(context, songs);
          }
+    }
+
+    private static boolean isPlaying() {
+        if (MusicUtils.sService != null) {
+            return sService.isPlaying();
+        }
+        return false;
     }
 
     public static void queue(Context context, long[] list) {
