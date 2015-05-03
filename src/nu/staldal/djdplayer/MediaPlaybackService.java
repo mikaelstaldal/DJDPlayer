@@ -117,41 +117,36 @@ public class MediaPlaybackService extends Service {
      */
     private static final int IDLE_DELAY = 60000;
 
+
+    // Delegates
+
+    private AudioManager mAudioManager;
+    private SharedPreferences mPreferences;
+    private MyMediaPlayer mPlayer;
+    private RemoteControlClient mRemoteControlClient;
+
+
     // Mutable state
 
-    private RemoteControlClient mRemoteControlClient;
-    private MyMediaPlayer mPlayer;
     private int mRepeatMode = REPEAT_NONE;
     private long[] mPlayList = new long[0];
     private int mPlayListLen = 0;
-    private Cursor mCursor;
+    private int mPlayPos = -1;
+    private Cursor mCursor = null;
     private long mGenreId = -1;
     private String mGenreName = null;
-    private int mPlayPos = -1;
     private int mOpenFailedCounter = 0;
-    private BroadcastReceiver mUnmountReceiver = null;
     private int mServiceStartId = -1;
     private boolean mServiceInUse = false;
     private boolean mIsSupposedToBePlaying = false;
     private boolean mQuietMode = false;
-    private AudioManager mAudioManager;
     private boolean mQueueIsSaveable = true;
-
-    // Used to track what type of audio focus loss caused the playback to pause
-    private boolean mPausedByTransientLossOfFocus = false;
-
-    private SharedPreferences mPreferences;
-
-    // Used to distinguish between different cards when saving/restoring playlists.
-    // This will have to change if we want to support multiple simultaneous cards.
-    private int mCardId;
-
-    // End of mutable state
+    private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
+    private float mCurrentVolume = 1.0f;
+    private int mCardId; // Used to distinguish between different cards when saving/restoring playlists.
 
 
     private final Handler mMediaplayerHandler = new Handler() {
-        float mCurrentVolume = 1.0f;
-
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
@@ -313,7 +308,31 @@ public class MediaPlaybackService extends Service {
         }
     };
 
+    /**
+     * Registers an intent to listen for ACTION_MEDIA_EJECT notifications.
+     * The intent will call closeExternalStorageFiles() if the external media
+     * is going to be ejected, so applications can clean up any files they have open.
+     */
+    private final BroadcastReceiver mUnmountReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
+                saveQueue(true);
+                mQueueIsSaveable = false;
+                closeExternalStorageFiles();
+            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
+                reloadQueue();
+                mQueueIsSaveable = true;
+                notifyChange(QUEUE_CHANGED);
+                notifyChange(META_CHANGED);
+            }
+        }
+    };
+
     private final OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
+        @Override
         public void onAudioFocusChange(int focusChange) {
             mMediaplayerHandler.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
         }
@@ -337,9 +356,14 @@ public class MediaPlaybackService extends Service {
                 MediaButtonIntentReceiver.class.getName()));
 
         mPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+
         mCardId = MusicUtils.getCardId(this);
 
-        registerExternalStorageListener();
+        IntentFilter iFilter = new IntentFilter();
+        iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
+        iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        iFilter.addDataScheme("file");
+        registerReceiver(mUnmountReceiver, iFilter);
 
         // Needs to be done in this thread, since otherwise ApplicationContext.getPowerManager() crashes.
         mPlayer = new MyMediaPlayer(this, mMediaplayerHandler);
@@ -471,7 +495,6 @@ public class MediaPlaybackService extends Service {
         mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
 
         mPlayer.release();
-        mPlayer = null;
 
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
 
@@ -487,10 +510,8 @@ public class MediaPlaybackService extends Service {
         }
 
         unregisterReceiver(mIntentReceiver);
-        if (mUnmountReceiver != null) {
-            unregisterReceiver(mUnmountReceiver);
-            mUnmountReceiver = null;
-        }
+        unregisterReceiver(mUnmountReceiver);
+
         super.onDestroy();
     }
 
@@ -635,38 +656,6 @@ public class MediaPlaybackService extends Service {
                 repmode = REPEAT_NONE;
             }
             mRepeatMode = repmode;
-        }
-    }
-
-    /**
-     * Registers an intent to listen for ACTION_MEDIA_EJECT notifications.
-     * The intent will call closeExternalStorageFiles() if the external media
-     * is going to be ejected, so applications can clean up any files they have open.
-     */
-    public void registerExternalStorageListener() {
-        if (mUnmountReceiver == null) {
-            mUnmountReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
-                        saveQueue(true);
-                        mQueueIsSaveable = false;
-                        closeExternalStorageFiles();
-                    } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                        mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
-                        reloadQueue();
-                        mQueueIsSaveable = true;
-                        notifyChange(QUEUE_CHANGED);
-                        notifyChange(META_CHANGED);
-                    }
-                }
-            };
-            IntentFilter iFilter = new IntentFilter();
-            iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
-            iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-            iFilter.addDataScheme("file");
-            registerReceiver(mUnmountReceiver, iFilter);
         }
     }
 
