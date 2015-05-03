@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2014 Mikael Ståldal
+ * Copyright (C) 2012-2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     }
 
     public void onServiceConnected(ComponentName name, IBinder binder) {
-        service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
+        service = ((MediaPlaybackService.LocalBinder)binder).getService();
 
         notifyFragmentConnected(R.id.player_header, service);
         notifyFragmentConnected(R.id.playqueue, service);

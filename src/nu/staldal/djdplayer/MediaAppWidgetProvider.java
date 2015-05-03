@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
- * Copyright (C) 2013 Mikael Ståldal
+ * Copyright (C) 2013-2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,10 @@ import android.widget.RemoteViews;
 public class MediaAppWidgetProvider extends AppWidgetProvider {
     public static final String CMDAPPWIDGETUPDATE = "appwidgetupdate";
 
-    private static MediaAppWidgetProvider sInstance;
+    private static final MediaAppWidgetProvider INSTANCE = new MediaAppWidgetProvider();
     
-    static synchronized MediaAppWidgetProvider getInstance() {
-        if (sInstance == null) {
-            sInstance = new MediaAppWidgetProvider();
-        }
-        return sInstance;
+    static MediaAppWidgetProvider getInstance() {
+        return INSTANCE;
     }
 
     @Override

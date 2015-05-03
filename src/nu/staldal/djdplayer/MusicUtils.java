@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2012-2014 Mikael Ståldal
+ * Copyright (C) 2012-2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,45 +43,45 @@ public class MusicUtils {
     private static final String LOGTAG = "MusicUtils";
 
     public interface Defs {
-        public static final int PLAYLIST_SELECTED = 3;
-        public static final int NEW_PLAYLIST = 4;
-        public static final int PLAY_ALL_NOW = 5;
-        public static final int SHUFFLE_PLAYLIST = 9;
-        public static final int UNIQUEIFY_PLAYLIST = 10;
-        public static final int QUEUE_ALL = 11;
-        public static final int DELETE_ITEM = 12;
-        public static final int QUEUE = 14;
-        public static final int PLAY_NOW = 15;
-        public static final int PLAY_NEXT = 16;
-        public static final int SHARE_VIA = 19;
-        public static final int TRACK_INFO = 20;
-        public static final int SEARCH_FOR_TRACK = 21;
-        public static final int PLAY_ALL_NEXT = 22;
-        public static final int PLAYLIST_SELECTED_ALL = 24;
-        public static final int NEW_PLAYLIST_ALL = 25;
-        public static final int DELETE_ALL = 26;
-        public static final int SEARCH_FOR_CATEGORY = 27;
-        public static final int DELETE_PLAYLIST = 28;
-        public static final int EDIT_PLAYLIST = 29;
-        public static final int RENAME_PLAYLIST = 30;
-        public static final int EXPORT_PLAYLIST = 31;
-        public static final int NEW_PLAYLIST2 = 32;
-        public static final int PLAYLIST_SELECTED2 = 33;
-        public static final int SEARCH_FOR = 34;
-        public static final int DELETE_ITEM2 = 35;
-        public static final int TRACK_INFO2 = 36;
-        public static final int SHARE_VIA2 = 37;
-        public static final int SEARCH_FOR2 = 38;
-        public static final int NEW_PLAYLIST3 = 39;
-        public static final int PLAYLIST_SELECTED3 = 40;
-        public static final int REMOVE_FROM_PLAYLIST = 41;
-        public static final int TRACK_INFO3 = 42;
-        public static final int PLAY_NOW2 = 43;
-        public static final int SHARE_VIA3 = 44;
-        public static final int DELETE_ITEM3 = 45;
-        public static final int SHARE_PLAYLIST = 46;
+        int PLAYLIST_SELECTED = 3;
+        int NEW_PLAYLIST = 4;
+        int PLAY_ALL_NOW = 5;
+        int SHUFFLE_PLAYLIST = 9;
+        int UNIQUEIFY_PLAYLIST = 10;
+        int QUEUE_ALL = 11;
+        int DELETE_ITEM = 12;
+        int QUEUE = 14;
+        int PLAY_NOW = 15;
+        int PLAY_NEXT = 16;
+        int SHARE_VIA = 19;
+        int TRACK_INFO = 20;
+        int SEARCH_FOR_TRACK = 21;
+        int PLAY_ALL_NEXT = 22;
+        int PLAYLIST_SELECTED_ALL = 24;
+        int NEW_PLAYLIST_ALL = 25;
+        int DELETE_ALL = 26;
+        int SEARCH_FOR_CATEGORY = 27;
+        int DELETE_PLAYLIST = 28;
+        int EDIT_PLAYLIST = 29;
+        int RENAME_PLAYLIST = 30;
+        int EXPORT_PLAYLIST = 31;
+        int NEW_PLAYLIST2 = 32;
+        int PLAYLIST_SELECTED2 = 33;
+        int SEARCH_FOR = 34;
+        int DELETE_ITEM2 = 35;
+        int TRACK_INFO2 = 36;
+        int SHARE_VIA2 = 37;
+        int SEARCH_FOR2 = 38;
+        int NEW_PLAYLIST3 = 39;
+        int PLAYLIST_SELECTED3 = 40;
+        int REMOVE_FROM_PLAYLIST = 41;
+        int TRACK_INFO3 = 42;
+        int PLAY_NOW2 = 43;
+        int SHARE_VIA3 = 44;
+        int DELETE_ITEM3 = 45;
+        int SHARE_PLAYLIST = 46;
 
-        public static final int INTERLEAVE_ALL = 1000;
+        int INTERLEAVE_ALL = 1000;
     }
 
     public static final String AUDIO_X_MPEGURL = "audio/x-mpegurl";
@@ -170,7 +170,7 @@ public class MusicUtils {
         }
         
         public void onServiceConnected(ComponentName className, android.os.IBinder service) {
-            sService = ((MediaPlaybackService.MediaPlaybackServiceBinder)service).getService();
+            sService = ((MediaPlaybackService.LocalBinder)service).getService();
             if (mCallback != null) {
                 mCallback.onServiceConnected(className, service);
             }

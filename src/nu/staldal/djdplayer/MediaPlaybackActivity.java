@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2014 Mikael Ståldal
+ * Copyright (C) 2012-2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
     }
 
     public void onServiceConnected(ComponentName name, IBinder binder) {
-        service = ((MediaPlaybackService.MediaPlaybackServiceBinder)binder).getService();
+        service = ((MediaPlaybackService.LocalBinder)binder).getService();
 
         playerHeaderFragment.onServiceConnected(service);
         playQueueFragment.onServiceConnected(service);
