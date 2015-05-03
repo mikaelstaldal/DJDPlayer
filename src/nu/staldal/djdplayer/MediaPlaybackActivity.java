@@ -91,7 +91,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
 
         // Assume something is playing when the service says it is,
         // but also if the audio ID is valid but the service is paused.
-        if (this.service.getAudioId() >= 0 || this.service.isPlaying() || this.service.getPath() != null) {
+        if (this.service.getAudioId() >= 0 || this.service.isPlaying()) {
             // something is playing now, we're done
             return;
         }
