@@ -121,7 +121,6 @@ public class MediaPlaybackService extends Service {
 
     private RemoteControlClient mRemoteControlClient;
     private MyMediaPlayer mPlayer;
-    private String mFileToPlay;
     private int mRepeatMode = REPEAT_NONE;
     private long[] mPlayList = new long[0];
     private int mPlayListLen = 0;
@@ -1031,8 +1030,7 @@ public class MediaPlaybackService extends Service {
                     Log.w(LOGTAG, "Error", ex);
                 }
             }
-            mFileToPlay = path;
-            mPlayer.setDataSource(mFileToPlay);
+            mPlayer.setDataSource(path);
             if (!mPlayer.isInitialized()) {
                 stop(true);
                 if (mOpenFailedCounter++ < 10 && mPlayListLen > 1) {
@@ -1095,7 +1093,7 @@ public class MediaPlaybackService extends Service {
         String trackname;
         String artistname;
         if (getAudioId() < 0) { // streaming
-            trackname = getPath();
+            trackname = getString(R.string.streaming);
             artistname = null;
         } else {
             trackname = getTrackName();
@@ -1130,7 +1128,6 @@ public class MediaPlaybackService extends Service {
         if (mPlayer.isInitialized()) {
             mPlayer.stop();
         }
-        mFileToPlay = null;
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
@@ -1380,14 +1377,6 @@ public class MediaPlaybackService extends Service {
 
     public int getRepeatMode() {
         return mRepeatMode;
-    }
-
-    /**
-     * Returns the path of the currently playing file, or null if
-     * no file is currently playing.
-     */
-    private String getPath() {
-        return mFileToPlay;
     }
 
     /**

@@ -325,6 +325,8 @@
 
     <string name="context_menu">Context menu</string>
 
+    <string name="streaming">Streaming</string>
+
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
