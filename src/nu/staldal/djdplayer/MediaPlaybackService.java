@@ -28,19 +28,15 @@ import android.database.sqlite.SQLiteException;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.media.RemoteControlClient;
-import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.*;
-import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -85,9 +81,10 @@ public class MediaPlaybackService extends Service {
     public static final String PREVIOUS_ACTION = "nu.staldal.djdplayer.musicservicecommand.previous";
     public static final String NEXT_ACTION = "nu.staldal.djdplayer.musicservicecommand.next";
 
-    private static final int TRACK_ENDED = 1;
-    private static final int RELEASE_WAKELOCK = 2;
-    private static final int SERVER_DIED = 3;
+    public static final int TRACK_ENDED = 1;
+    public static final int RELEASE_WAKELOCK = 2;
+    public static final int SERVER_DIED = 3;
+
     private static final int FOCUSCHANGE = 4;
     private static final int FADEDOWN = 5;
     private static final int FADEUP = 6;
@@ -123,7 +120,7 @@ public class MediaPlaybackService extends Service {
     // Mutable state
 
     private RemoteControlClient mRemoteControlClient;
-    private MultiPlayer mPlayer;
+    private MyMediaPlayer mPlayer;
     private String mFileToPlay;
     private int mRepeatMode = REPEAT_NONE;
     private long[] mPlayList = new long[0];
@@ -134,7 +131,6 @@ public class MediaPlaybackService extends Service {
     private int mPlayPos = -1;
     private int mOpenFailedCounter = 0;
     private BroadcastReceiver mUnmountReceiver = null;
-    private WakeLock mWakeLock;
     private int mServiceStartId = -1;
     private boolean mServiceInUse = false;
     private boolean mIsSupposedToBePlaying = false;
@@ -208,7 +204,7 @@ public class MediaPlaybackService extends Service {
                     }
                     break;
                 case RELEASE_WAKELOCK:
-                    mWakeLock.release();
+                    mPlayer.releaseWakeLock();
                     break;
 
                 case FOCUSCHANGE:
@@ -347,8 +343,7 @@ public class MediaPlaybackService extends Service {
         registerExternalStorageListener();
 
         // Needs to be done in this thread, since otherwise ApplicationContext.getPowerManager() crashes.
-        mPlayer = new MultiPlayer();
-        mPlayer.setHandler(mMediaplayerHandler);
+        mPlayer = new MyMediaPlayer(this, mMediaplayerHandler);
 
         reloadQueue();
 
@@ -361,10 +356,6 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(PREVIOUS_ACTION);
         commandFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mIntentReceiver, commandFilter);
-
-        PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
-        mWakeLock.setReferenceCounted(false);
 
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(new ComponentName(this.getPackageName(),
@@ -480,12 +471,6 @@ public class MediaPlaybackService extends Service {
                 MediaButtonIntentReceiver.class.getName()));
         mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
 
-        // release all MediaPlayer resources, including the native player and wakelocks
-        Intent i = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-        i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
-        i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-        sendBroadcast(i);
-
         mPlayer.release();
         mPlayer = null;
 
@@ -507,7 +492,6 @@ public class MediaPlaybackService extends Service {
             unregisterReceiver(mUnmountReceiver);
             mUnmountReceiver = null;
         }
-        mWakeLock.release();
         super.onDestroy();
     }
 
@@ -1587,127 +1571,4 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    /**
-     * Provides a unified interface for dealing with midi files and other media files.
-     */
-    private class MultiPlayer {
-        private MediaPlayer mMediaPlayer = new MediaPlayer();
-        private Handler mHandler;
-        private boolean mIsInitialized = false;
-
-        public MultiPlayer() {
-            mMediaPlayer.setWakeMode(MediaPlaybackService.this, PowerManager.PARTIAL_WAKE_LOCK);
-        }
-
-        public void setDataSource(String path) {
-            try {
-                mMediaPlayer.reset();
-                mMediaPlayer.setOnPreparedListener(null);
-                if (path.startsWith("content://")) {
-                    mMediaPlayer.setDataSource(MediaPlaybackService.this, Uri.parse(path));
-                } else {
-                    mMediaPlayer.setDataSource(path);
-                }
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mMediaPlayer.prepare();
-            } catch (IOException | IllegalArgumentException e) {
-                Log.w(LOGTAG, "Couldn't open audio file: " + path, e);
-                mIsInitialized = false;
-                return;
-            }
-            mMediaPlayer.setOnCompletionListener(listener);
-            mMediaPlayer.setOnErrorListener(errorListener);
-
-            Intent i = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-            i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
-            i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-            sendBroadcast(i);
-
-            mIsInitialized = true;
-        }
-
-        public boolean isInitialized() {
-            return mIsInitialized;
-        }
-
-        public void start() {
-            Log.d(LOGTAG, "MultiPlayer.start called");
-            mMediaPlayer.start();
-        }
-
-        public void stop() {
-            mMediaPlayer.reset();
-            mIsInitialized = false;
-        }
-
-        /**
-         * You CANNOT use this player anymore after calling release()
-         */
-        public void release() {
-            stop();
-            mMediaPlayer.release();
-        }
-
-        public void pause() {
-            mMediaPlayer.pause();
-        }
-
-        public void setHandler(Handler handler) {
-            mHandler = handler;
-        }
-
-        final MediaPlayer.OnCompletionListener listener = new MediaPlayer.OnCompletionListener() {
-            public void onCompletion(MediaPlayer mp) {
-                // Acquire a temporary wakelock, since when we return from
-                // this callback the MediaPlayer will release its wakelock
-                // and allow the device to go to sleep.
-                // This temporary wakelock is released when the RELEASE_WAKELOCK
-                // message is processed, but just in case, put a timeout on it.
-                mWakeLock.acquire(30000);
-                mHandler.sendEmptyMessage(TRACK_ENDED);
-                mHandler.sendEmptyMessage(RELEASE_WAKELOCK);
-            }
-        };
-
-        final MediaPlayer.OnErrorListener errorListener = new MediaPlayer.OnErrorListener() {
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                switch (what) {
-                    case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                        mIsInitialized = false;
-                        mMediaPlayer.release();
-                        // Creating a new MediaPlayer and settings its wakemode does not
-                        // require the media service, so it's OK to do this now, while the
-                        // service is still being restarted
-                        mMediaPlayer = new MediaPlayer();
-                        mMediaPlayer.setWakeMode(MediaPlaybackService.this, PowerManager.PARTIAL_WAKE_LOCK);
-                        mHandler.sendMessageDelayed(mHandler.obtainMessage(SERVER_DIED), 2000);
-                        return true;
-                    default:
-                        Log.d("MultiPlayer", "Error: " + what + "," + extra);
-                        break;
-                }
-                return false;
-            }
-        };
-
-        public long duration() {
-            return mMediaPlayer.getDuration();
-        }
-
-        public long position() {
-            return mMediaPlayer.getCurrentPosition();
-        }
-
-        public void seek(long whereto) {
-            mMediaPlayer.seekTo((int)whereto);
-        }
-
-        public void setVolume(float vol) {
-            mMediaPlayer.setVolume(vol, vol);
-        }
-
-        public int getAudioSessionId() {
-            return mMediaPlayer.getAudioSessionId();
-        }
-    }
 }
