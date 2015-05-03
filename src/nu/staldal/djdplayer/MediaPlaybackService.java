@@ -982,7 +982,7 @@ public class MediaPlaybackService extends Service {
      *
      * @param path The full path of the file to be opened.
      */
-    public void open(String path) {
+    private void open(String path) {
         synchronized (this) {
             if (path == null) {
                 return;
