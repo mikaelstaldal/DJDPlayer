@@ -30,6 +30,10 @@ import java.io.IOException;
 class MyMediaPlayer {
     private static final String LOGTAG = "MyMediaPlayer";
 
+    public static final int TRACK_ENDED = 1;
+    public static final int RELEASE_WAKELOCK = 2;
+    public static final int SERVER_DIED = 3;
+
     private final Context mContext;
     private final Handler mHandler;
     private final PowerManager.WakeLock mWakeLock;
@@ -59,8 +63,8 @@ class MyMediaPlayer {
             // This temporary wakelock is released when the RELEASE_WAKELOCK
             // message is processed, but just in case, put a timeout on it.
             mWakeLock.acquire(30000);
-            mHandler.sendEmptyMessage(MediaPlaybackService.TRACK_ENDED);
-            mHandler.sendEmptyMessage(MediaPlaybackService.RELEASE_WAKELOCK);
+            mHandler.sendEmptyMessage(TRACK_ENDED);
+            mHandler.sendEmptyMessage(RELEASE_WAKELOCK);
         }
     };
 
@@ -76,7 +80,7 @@ class MyMediaPlayer {
                     // service is still being restarted
                     mMediaPlayer = new MediaPlayer();
                     mMediaPlayer.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);
-                    mHandler.sendMessageDelayed(mHandler.obtainMessage(MediaPlaybackService.SERVER_DIED), 2000);
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(SERVER_DIED), 2000);
                     return true;
 
                 default:

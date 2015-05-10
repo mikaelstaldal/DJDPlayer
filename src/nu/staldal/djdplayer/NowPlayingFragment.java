@@ -32,7 +32,7 @@ public class NowPlayingFragment extends Fragment implements FragmentServiceConne
     @SuppressWarnings("UnusedDeclaration")
     private static final String LOGTAG = "NowPlayingFragment";
 
-    private MediaPlaybackService service;
+    private MediaPlayback service;
 
     private View nowPlaying;
     private TextView titleView;
@@ -85,7 +85,7 @@ public class NowPlayingFragment extends Fragment implements FragmentServiceConne
     }
 
     @Override
-    public void onServiceConnected(MediaPlaybackService s) {
+    public void onServiceConnected(MediaPlayback s) {
         service = s;
         updateNowPlaying();
     }

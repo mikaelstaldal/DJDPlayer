@@ -38,7 +38,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
     @SuppressWarnings("unused")
     private static final String LOGTAG = "PlayerFooterFragment";
 
-    private MediaPlaybackService service;
+    private MediaPlayback service;
 
     private View mainView;
     private TextView currentTime;
@@ -113,7 +113,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
     }
 
     @Override
-    public void onServiceConnected(MediaPlaybackService s) {
+    public void onServiceConnected(MediaPlayback s) {
         service = s;
 
         if (service.getAudioId() != -1) {

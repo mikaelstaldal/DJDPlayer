@@ -43,7 +43,7 @@ public class PlayQueueFragment extends ListFragment
             MediaStore.Audio.AudioColumns.MIME_TYPE
     };
 
-    private MediaPlaybackService service;
+    private MediaPlayback service;
 
     PlayQueueCursor playQueueCursor;
     SimpleCursorAdapter listAdapter;
@@ -105,7 +105,7 @@ public class PlayQueueFragment extends ListFragment
     }
 
     @Override
-    public void onServiceConnected(MediaPlaybackService s) {
+    public void onServiceConnected(MediaPlayback s) {
         service = s;
         playQueueCursor = new PlayQueueCursor();
         listAdapter = new SimpleCursorAdapterWithContextMenu(

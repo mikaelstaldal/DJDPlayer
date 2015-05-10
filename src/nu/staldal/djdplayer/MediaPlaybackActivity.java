@@ -34,7 +34,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
     private static final String LOGTAG = "MediaPlaybackActivity";
 
     private MusicUtils.ServiceToken token = null;
-    private MediaPlaybackService service = null;
+    private MediaPlayback service = null;
 
     private PlayerHeaderFragment playerHeaderFragment;
     private PlayQueueFragment playQueueFragment;
@@ -146,13 +146,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
 
         if (service != null) {
             switch (service.getRepeatMode()) {
-                case MediaPlaybackService.REPEAT_ALL:
+                case MediaPlayback.REPEAT_ALL:
                     item.setIcon(R.drawable.ic_mp_repeat_all_btn);
                     break;
-                case MediaPlaybackService.REPEAT_CURRENT:
+                case MediaPlayback.REPEAT_CURRENT:
                     item.setIcon(R.drawable.ic_mp_repeat_once_btn);
                     break;
-                case MediaPlaybackService.REPEAT_STOPAFTER:
+                case MediaPlayback.REPEAT_STOPAFTER:
                     item.setIcon(R.drawable.ic_mp_repeat_stopafter_btn);
                     break;
                 default:
@@ -235,17 +235,17 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
             return;
         }
         int mode = service.getRepeatMode();
-        if (mode == MediaPlaybackService.REPEAT_NONE) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+        if (mode == MediaPlayback.REPEAT_NONE) {
+            service.setRepeatMode(MediaPlayback.REPEAT_ALL);
             Toast.makeText(this, R.string.repeat_all_notif, Toast.LENGTH_SHORT).show();
-        } else if (mode == MediaPlaybackService.REPEAT_ALL) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
+        } else if (mode == MediaPlayback.REPEAT_ALL) {
+            service.setRepeatMode(MediaPlayback.REPEAT_CURRENT);
             Toast.makeText(this, R.string.repeat_current_notif, Toast.LENGTH_SHORT).show();
-        } else if (mode == MediaPlaybackService.REPEAT_CURRENT) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_STOPAFTER);
+        } else if (mode == MediaPlayback.REPEAT_CURRENT) {
+            service.setRepeatMode(MediaPlayback.REPEAT_STOPAFTER);
             Toast.makeText(this, R.string.repeat_stopafter_notif, Toast.LENGTH_SHORT).show();
         } else {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
+            service.setRepeatMode(MediaPlayback.REPEAT_NONE);
             Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();

@@ -120,7 +120,7 @@ public class MusicUtils {
         return songs_albums.toString();
     }
     
-    public static MediaPlaybackService sService = null;
+    public static MediaPlayback sService = null;
     private static final HashMap<Context, ServiceBinder> sConnectionMap = new HashMap<>();
 
     public static class ServiceToken {
@@ -357,7 +357,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        sService.enqueue(list, MediaPlaybackService.LAST);
+        sService.enqueue(list, MediaPlayback.LAST);
         String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplayqueue, list.length, list.length);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -377,7 +377,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        sService.enqueue(songs, MediaPlaybackService.NEXT);
+        sService.enqueue(songs, MediaPlayback.NEXT);
         Toast.makeText(context, R.string.will_play_next, Toast.LENGTH_SHORT).show();
     }
 
@@ -385,7 +385,7 @@ public class MusicUtils {
         if (sService == null) {
             return;
         }
-        sService.enqueue(songs, MediaPlaybackService.NOW);
+        sService.enqueue(songs, MediaPlayback.NOW);
     }
 
     private static ContentValues[] sContentValuesCache = null;

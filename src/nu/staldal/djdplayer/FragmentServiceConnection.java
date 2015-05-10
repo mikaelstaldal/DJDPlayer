@@ -16,7 +16,7 @@
 package nu.staldal.djdplayer;
 
 public interface FragmentServiceConnection {
-    void onServiceConnected(MediaPlaybackService service);
+    void onServiceConnected(MediaPlayback service);
 
     void onServiceDisconnected();
 }

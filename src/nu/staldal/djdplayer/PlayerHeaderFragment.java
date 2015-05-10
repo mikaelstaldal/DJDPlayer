@@ -30,7 +30,7 @@ public class PlayerHeaderFragment extends Fragment implements
     @SuppressWarnings("unused")
     private static final String LOGTAG = "PlayerHeaderFragment";
 
-    private MediaPlaybackService service;
+    private MediaPlayback service;
 
     private View mainView;
     private TextView trackNameView;
@@ -64,7 +64,7 @@ public class PlayerHeaderFragment extends Fragment implements
     }
 
     @Override
-    public void onServiceConnected(MediaPlaybackService s) {
+    public void onServiceConnected(MediaPlayback s) {
         service = s;
 
         update();

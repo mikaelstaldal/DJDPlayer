@@ -51,7 +51,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private ImageView categoryMenuView;
 
     private MusicUtils.ServiceToken token = null;
-    private MediaPlaybackService service = null;
+    private MediaPlayback service = null;
 
     private boolean invalidateTabs = false;
     private long songToPlay = -1;
@@ -456,13 +456,13 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         if (item != null) {
             if (service != null) {
                 switch (service.getRepeatMode()) {
-                    case MediaPlaybackService.REPEAT_ALL:
+                    case MediaPlayback.REPEAT_ALL:
                         item.setIcon(R.drawable.ic_mp_repeat_all_btn);
                         break;
-                    case MediaPlaybackService.REPEAT_CURRENT:
+                    case MediaPlayback.REPEAT_CURRENT:
                         item.setIcon(R.drawable.ic_mp_repeat_once_btn);
                         break;
-                    case MediaPlaybackService.REPEAT_STOPAFTER:
+                    case MediaPlayback.REPEAT_STOPAFTER:
                         item.setIcon(R.drawable.ic_mp_repeat_stopafter_btn);
                         break;
                     default:
@@ -527,17 +527,17 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             return;
         }
         int mode = service.getRepeatMode();
-        if (mode == MediaPlaybackService.REPEAT_NONE) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+        if (mode == MediaPlayback.REPEAT_NONE) {
+            service.setRepeatMode(MediaPlayback.REPEAT_ALL);
             Toast.makeText(this, R.string.repeat_all_notif, Toast.LENGTH_SHORT).show();
-        } else if (mode == MediaPlaybackService.REPEAT_ALL) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_CURRENT);
+        } else if (mode == MediaPlayback.REPEAT_ALL) {
+            service.setRepeatMode(MediaPlayback.REPEAT_CURRENT);
             Toast.makeText(this, R.string.repeat_current_notif, Toast.LENGTH_SHORT).show();
-        } else if (mode == MediaPlaybackService.REPEAT_CURRENT) {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_STOPAFTER);
+        } else if (mode == MediaPlayback.REPEAT_CURRENT) {
+            service.setRepeatMode(MediaPlayback.REPEAT_STOPAFTER);
             Toast.makeText(this, R.string.repeat_stopafter_notif, Toast.LENGTH_SHORT).show();
         } else {
-            service.setRepeatMode(MediaPlaybackService.REPEAT_NONE);
+            service.setRepeatMode(MediaPlayback.REPEAT_NONE);
             Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
@@ -554,7 +554,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         }
     }
 
-    private void notifyFragmentConnected(int id, MediaPlaybackService service) {
+    private void notifyFragmentConnected(int id, MediaPlayback service) {
         Fragment fragment = getFragmentManager().findFragmentById(id);
         if (fragment != null && fragment.isInLayout()) {
             ((FragmentServiceConnection) fragment).onServiceConnected(service);
