@@ -186,34 +186,6 @@ public class MusicUtils {
         }
     }
 
-    public static long getCurrentAlbumId() {
-        if (sService != null) {
-            return sService.getAlbumId();
-        }
-        return -1;
-    }
-
-    public static long getCurrentGenreId() {
-        if (sService != null) {
-            return sService.getGenreId();
-        }
-        return -1;
-    }
-
-    public static File getCurrentFolder() {
-        if (sService != null) {
-            return sService.getFolder();
-        }
-        return null;
-    }
-
-    public static long getCurrentArtistId() {
-        if (MusicUtils.sService != null) {
-            return sService.getArtistId();
-        }
-        return -1;
-    }
-
     public static long [] getSongListForCursorAndClose(Cursor cursor) {
         try {
             return getSongListForCursor(cursor);

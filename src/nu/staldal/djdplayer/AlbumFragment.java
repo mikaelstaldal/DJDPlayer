@@ -45,7 +45,9 @@ public class AlbumFragment extends MetadataCategoryFragment {
 
     @Override
     protected long fetchCurrentlyPlayingCategoryId() {
-        return MusicUtils.getCurrentAlbumId();
+        return (MusicUtils.sService != null)
+                ? MusicUtils.sService.getAlbumId()
+                : -1;
     }
 
     @Override

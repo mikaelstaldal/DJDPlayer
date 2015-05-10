@@ -45,7 +45,9 @@ public class ArtistFragment extends MetadataCategoryFragment {
 
     @Override
     protected long fetchCurrentlyPlayingCategoryId() {
-        return MusicUtils.getCurrentArtistId();
+        return (MusicUtils.sService != null)
+                ? MusicUtils.sService.getArtistId()
+                : -1;
     }
 
     @Override

@@ -73,7 +73,10 @@ public class FolderFragment extends CategoryFragment {
                     case R.id.play_indicator:
                         String folder = cursor.getString(columnIndex);
 
-                        File currentFolder = MusicUtils.getCurrentFolder();
+                        File currentFolder = (MusicUtils.sService != null)
+                                ? MusicUtils.sService.getFolder()
+                                : null;
+
                         if (currentFolder != null && currentFolder.getAbsolutePath().equals(folder)) {
                             view.setVisibility(View.VISIBLE);
                         } else {
