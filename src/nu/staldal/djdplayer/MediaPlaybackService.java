@@ -52,21 +52,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public static final String META_CHANGED = "nu.staldal.djdplayer.metachanged";
     public static final String QUEUE_CHANGED = "nu.staldal.djdplayer.queuechanged";
 
-    public static final String SERVICECMD = "nu.staldal.djdplayer.musicservicecommand";
-    public static final String CMDNAME = "command";
-    public static final String CMDTOGGLEPAUSE = "togglepause";
-    public static final String CMDSTOP = "stop";
-    public static final String CMDPLAY = "play";
-    public static final String CMDPAUSE = "pause";
-    public static final String CMDPREVIOUS = "previous";
-    public static final String CMDNEXT = "next";
-    public static final String CMDAPPWIDGETUPDATE = "appwidgetupdate";
-
     public static final String TOGGLEPAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.togglepause";
     public static final String PLAY_ACTION = "nu.staldal.djdplayer.musicservicecommand.play";
     public static final String PAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.pause";
+    public static final String STOP_ACTION = "nu.staldal.djdplayer.musicservicecommand.stop";
     public static final String PREVIOUS_ACTION = "nu.staldal.djdplayer.musicservicecommand.previous";
     public static final String NEXT_ACTION = "nu.staldal.djdplayer.musicservicecommand.next";
+    public static final String APPWIDGETUPDATE_ACTION = "nu.staldal.djdplayer.musicservicecommand.appwidgetupdate";
 
     private static final int PLAYBACKSERVICE_STATUS = 1;
 
@@ -259,32 +251,31 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            String cmd = intent.getStringExtra("command");
-            Log.i(LOGTAG, "mIntentReceiver.onReceive " + action + " / " + cmd);
+            Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
-            } else if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
+            } else if (NEXT_ACTION.equals(action)) {
                 next(true);
-            } else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
+            } else if (PREVIOUS_ACTION.equals(action)) {
                 prev();
-            } else if (CMDTOGGLEPAUSE.equals(cmd) || TOGGLEPAUSE_ACTION.equals(action)) {
+            } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
                     mPausedByTransientLossOfFocus = false;
                 } else {
                     play();
                 }
-            } else if (CMDPLAY.equals(cmd) || PLAY_ACTION.equals(action)) {
+            } else if (PLAY_ACTION.equals(action)) {
                 play();
-            } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
+            } else if (PAUSE_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
-            } else if (CMDSTOP.equals(cmd)) {
+            } else if (STOP_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
                 seek(0);
-            } else if (CMDAPPWIDGETUPDATE.equals(cmd)) {
+            } else if (APPWIDGETUPDATE_ACTION.equals(action)) {
                 // Someone asked us to refresh a set of specific widgets, probably
                 // because they were just added.
                 int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
@@ -356,12 +347,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         reloadQueue();
 
         IntentFilter commandFilter = new IntentFilter();
-        commandFilter.addAction(SERVICECMD);
         commandFilter.addAction(TOGGLEPAUSE_ACTION);
         commandFilter.addAction(PLAY_ACTION);
         commandFilter.addAction(PAUSE_ACTION);
+        commandFilter.addAction(STOP_ACTION);
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
+        commandFilter.addAction(APPWIDGETUPDATE_ACTION);
         commandFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mIntentReceiver, commandFilter);
 
@@ -390,30 +382,29 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         if (intent != null) {
             String action = intent.getAction();
-            String cmd = intent.getStringExtra("command");
 
-            if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
+            if (NEXT_ACTION.equals(action)) {
                 next(true);
-            } else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
+            } else if (PREVIOUS_ACTION.equals(action)) {
                 if (position() < 2000) {
                     prev();
                 } else {
                     seek(0);
                     play();
                 }
-            } else if (CMDTOGGLEPAUSE.equals(cmd) || TOGGLEPAUSE_ACTION.equals(action)) {
+            } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
                     mPausedByTransientLossOfFocus = false;
                 } else {
                     play();
                 }
-            } else if (CMDPLAY.equals(cmd) || PLAY_ACTION.equals(action)) {
+            } else if (PLAY_ACTION.equals(action)) {
                 play();
-            } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
+            } else if (PAUSE_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
-            } else if (CMDSTOP.equals(cmd)) {
+            } else if (STOP_ACTION.equals(action)) {
                 pause();
                 mPausedByTransientLossOfFocus = false;
                 seek(0);

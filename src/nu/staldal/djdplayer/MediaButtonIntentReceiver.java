@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2014 Mikael Ståldal
+ * Copyright (C) 2014-2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,62 +32,55 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
-            Log.d(LOGTAG, "Received: " + intent.toString());
-
             KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             
             if (event == null) {
                 return;
             }
 
-            int keycode = event.getKeyCode();
-            int action = event.getAction();
-            long eventtime = event.getEventTime();
+            Log.d(LOGTAG, "Button: " + event.toString());
 
-            // single quick press: pause/resume. 
+            // single quick press: pause/resume.
             // double press: next track
 
-            String command = null;
-            switch (keycode) {
+            String action = null;
+            switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
-                    command = MediaPlaybackService.CMDPLAY;
+                    action = MediaPlaybackService.PLAY_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                    command = MediaPlaybackService.CMDPAUSE;
+                    action = MediaPlaybackService.PAUSE_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_STOP:
-                    command = MediaPlaybackService.CMDSTOP;
+                    action = MediaPlaybackService.STOP_ACTION;
                     break;
                 case KeyEvent.KEYCODE_HEADSETHOOK:
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    command = MediaPlaybackService.CMDTOGGLEPAUSE;
+                    action = MediaPlaybackService.TOGGLEPAUSE_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
-                    command = MediaPlaybackService.CMDNEXT;
+                    action = MediaPlaybackService.NEXT_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                    command = MediaPlaybackService.CMDPREVIOUS;
+                    action = MediaPlaybackService.PREVIOUS_ACTION;
                     break;
             }
 
-            if (command != null) {
-                if (action == KeyEvent.ACTION_DOWN) {
+            if (action != null) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (!mDown) {
                         // if this isn't a repeat event
 
                         // The service may or may not be running, but we need to send it a command.
                         Intent i = new Intent(context, MediaPlaybackService.class);
-                        i.setAction(MediaPlaybackService.SERVICECMD);
-                        if (keycode == KeyEvent.KEYCODE_HEADSETHOOK &&
-                                eventtime - mLastClickTime < 300) {
-                            i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDNEXT);
-                            context.startService(i);
+                        if (event.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK && event.getEventTime() - mLastClickTime < 300) {
+                            action = MediaPlaybackService.NEXT_ACTION;
                             mLastClickTime = 0;
                         } else {
-                            i.putExtra(MediaPlaybackService.CMDNAME, command);
-                            context.startService(i);
-                            mLastClickTime = eventtime;
+                            mLastClickTime = event.getEventTime();
                         }
+                        i.setAction(action);
+                        context.startService(i);
 
                         mDown = true;
                     }
