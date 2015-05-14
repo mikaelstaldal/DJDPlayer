@@ -60,6 +60,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public static final String CMDPAUSE = "pause";
     public static final String CMDPREVIOUS = "previous";
     public static final String CMDNEXT = "next";
+    public static final String CMDAPPWIDGETUPDATE = "appwidgetupdate";
 
     public static final String TOGGLEPAUSE_ACTION = "nu.staldal.djdplayer.musicservicecommand.togglepause";
     public static final String PLAY_ACTION = "nu.staldal.djdplayer.musicservicecommand.play";
@@ -283,7 +284,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 pause();
                 mPausedByTransientLossOfFocus = false;
                 seek(0);
-            } else if (MediaAppWidgetProvider.CMDAPPWIDGETUPDATE.equals(cmd)) {
+            } else if (CMDAPPWIDGETUPDATE.equals(cmd)) {
                 // Someone asked us to refresh a set of specific widgets, probably
                 // because they were just added.
                 int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
