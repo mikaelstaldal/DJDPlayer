@@ -20,18 +20,20 @@ package nu.staldal.djdplayer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.KeyEvent;
 
-/**
- * 
- */
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
+    private static final String LOGTAG = "MediaButtonIntentRecv";
+
     private static long mLastClickTime = 0;
     private static boolean mDown = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
+            Log.d(LOGTAG, "Received: " + intent.toString());
+
             KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             
             if (event == null) {
