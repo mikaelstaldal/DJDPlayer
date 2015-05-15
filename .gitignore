@@ -1,7 +1,10 @@
 gen/*
 out/*
 bin/*
+build/*
 local.properties
+gradle.properties
 tests/gen/*
 .idea
 *.iml
+.gradle
