@@ -292,6 +292,9 @@
     <string name="music_folder">Music folder</string>
     <string name="select_music_folder">Select music folder</string>
     <string name="pick_music_folder">Use as music folder</string>
+    <string name="fade">Fading</string>
+    <string name="fade_out_seconds">Fade out seconds</string>
+    <string name="fade_in_seconds">Fade in seconds</string>
 
     <!-- Info -->
     <string name="title">Title</string>

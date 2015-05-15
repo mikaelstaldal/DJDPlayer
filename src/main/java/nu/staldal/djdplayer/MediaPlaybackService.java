@@ -21,7 +21,15 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
@@ -30,7 +38,12 @@ import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.net.Uri;
-import android.os.*;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -127,6 +140,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
+            int fadeInSeconds = PreferenceManager.getDefaultSharedPreferences(MediaPlaybackService.this).getInt(SettingsActivity.FADE_IN_SECONDS, 0);
             switch (msg.what) {
                 case FADEDOWN:
                     mCurrentVolume -= .05f;
@@ -138,7 +152,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     mPlayer.setVolume(mCurrentVolume);
                     break;
                 case FADEUP:
-                    mCurrentVolume += .01f;
+                    mCurrentVolume += .01f / Math.max(fadeInSeconds, 1);
                     if (mCurrentVolume < 1.0f) {
                         mMediaplayerHandler.sendEmptyMessageDelayed(FADEUP, 10);
                     } else {
@@ -171,6 +185,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             break;
 
                         default:
+                            if (fadeInSeconds > 0) {
+                                mCurrentVolume = 0f;
+                            }
                             next(false);
                     }
                     break;

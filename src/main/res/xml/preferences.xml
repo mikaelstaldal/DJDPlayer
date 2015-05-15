@@ -30,6 +30,18 @@
             android:title="@string/show_playlists_tab"
             android:defaultValue="true" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/fade">
+        <nu.staldal.djdplayer.DurationPreference
+                android:key="fade_out_seconds"
+                android:title="@string/fade_out_seconds"
+                android:defaultValue="0">
+        </nu.staldal.djdplayer.DurationPreference>
+        <nu.staldal.djdplayer.DurationPreference
+                android:key="fade_in_seconds"
+                android:title="@string/fade_in_seconds"
+                android:defaultValue="0">
+        </nu.staldal.djdplayer.DurationPreference>
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/rescan">
         <Preference android:title="@string/rescan_now" >
             <intent
