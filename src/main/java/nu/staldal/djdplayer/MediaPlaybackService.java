@@ -111,7 +111,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     // Delegates
 
     private AudioManager mAudioManager;
-    private SharedPreferences mPreferences;
+    private SharedPreferences mPersistentState;
+    private SharedPreferences mSettings;
     private MyMediaPlayer mPlayer;
     private RemoteControlClient mRemoteControlClient;
 
@@ -140,8 +141,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MediaPlaybackService.this);
-            int fadeInSeconds = Integer.parseInt(preferences.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+            int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
             switch (msg.what) {
                 case FADEDOWN:
                     mCurrentVolume -= .05f;
@@ -349,7 +349,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
 
-        mPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+        mPersistentState = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+
+        mSettings = PreferenceManager.getDefaultSharedPreferences(this);
 
         mCardId = MusicUtils.getCardId(this);
 
@@ -514,7 +516,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             return;
         }
 
-        Editor ed = mPreferences.edit();
+        Editor ed = mPersistentState.edit();
         //long start = System.currentTimeMillis();
         if (full) {
             StringBuilder q = new StringBuilder();
@@ -557,13 +559,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         String q = null;
 
         int id = mCardId;
-        if (mPreferences.contains(SettingsActivity.CARDID)) {
-            id = mPreferences.getInt(SettingsActivity.CARDID, ~mCardId);
+        if (mPersistentState.contains(SettingsActivity.CARDID)) {
+            id = mPersistentState.getInt(SettingsActivity.CARDID, ~mCardId);
         }
         if (id == mCardId) {
             // Only restore the saved playlist if the card is still
             // the same one as when the playlist was saved
-            q = mPreferences.getString(SettingsActivity.PLAYQUEUE, "");
+            q = mPersistentState.getString(SettingsActivity.PLAYQUEUE, "");
         }
         int qlen = q != null ? q.length() : 0;
         if (qlen > 1) {
@@ -594,7 +596,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             }
             mPlayListLen = plen;
 
-            int pos = mPreferences.getInt(SettingsActivity.CURPOS, 0);
+            int pos = mPersistentState.getInt(SettingsActivity.CURPOS, 0);
             if (pos < 0 || pos >= mPlayListLen) {
                 // The saved playlist is bogus, discard it
                 mPlayListLen = 0;
@@ -641,11 +643,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 return;
             }
 
-            long seekpos = mPreferences.getLong(SettingsActivity.SEEKPOS, 0);
+            long seekpos = mPersistentState.getLong(SettingsActivity.SEEKPOS, 0);
             seek(seekpos >= 0 && seekpos < duration() ? seekpos : 0);
             //Log.d(LOGTAG, "restored queue, currently at position " + position() + "/" + duration() + " (requested " + seekpos + ")");
 
-            int repmode = mPreferences.getInt(SettingsActivity.REPEATMODE, REPEAT_NONE);
+            int repmode = mPersistentState.getInt(SettingsActivity.REPEATMODE, REPEAT_NONE);
             if (repmode != REPEAT_ALL && repmode != REPEAT_CURRENT) {
                 repmode = REPEAT_NONE;
             }
