@@ -79,6 +79,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private static final int DUCK = 5;
     private static final int FADEUP = 6;
     private static final int FADEDOWN = 7;
+    private static final int START_NEXT = 8;
 
     private static final char HEXDIGITS[] = new char[]{
             '0', '1', '2', '3',
@@ -142,8 +143,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
+
             int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
+            int pauseSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.PAUSE_SECONDS, "0"));
             int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+
             switch (msg.what) {
                 case DUCK:
                     mCurrentVolume -= .05f;
@@ -154,6 +158,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
+
                 case FADEDOWN:
                     mCurrentVolume -= .01f / Math.max(fadeOutSeconds, 1);
                     if (mCurrentVolume > 0.0f) {
@@ -163,6 +168,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
+
                 case FADEUP:
                     mCurrentVolume += .01f / Math.max(fadeInSeconds, 1);
                     if (mCurrentVolume < 1.0f) {
@@ -176,6 +182,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
+
                 case MyMediaPlayer.SERVER_DIED:
                     if (mIsSupposedToBePlaying) {
                         next(true);
@@ -187,29 +194,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         openCurrent();
                     }
                     break;
-                case MyMediaPlayer.TRACK_ENDED:
-                    switch (mRepeatMode) {
-                        case REPEAT_CURRENT:
-                            seek(0);
-                            if (fadeInSeconds > 0) {
-                                mCurrentVolume = 0f;
-                            }
-                            play();
-                            break;
 
-                        case REPEAT_STOPAFTER:
-                            gotoIdleState();
-                            mIsSupposedToBePlaying = false;
-                            notifyChange(PLAYSTATE_CHANGED);
-                            break;
-
-                        default:
-                            if (fadeInSeconds > 0) {
-                                mCurrentVolume = 0f;
-                            }
-                            next(false);
-                    }
-                    break;
                 case MyMediaPlayer.RELEASE_WAKELOCK:
                     mPlayer.releaseWakeLock();
                     break;
@@ -263,9 +248,53 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     break;
 
-                default:
+                case MyMediaPlayer.TRACK_ENDED:
+                    switch (mRepeatMode) {
+                        case REPEAT_STOPAFTER:
+                            stopAfter();
+                            break;
+
+                        default:
+                            if (pauseSeconds > 0) {
+                                mMediaplayerHandler.sendEmptyMessageDelayed(START_NEXT, pauseSeconds * 1000);
+                            } else {
+                                startNext(fadeInSeconds);
+                            }
+                    }
+                    break;
+
+                case START_NEXT:
+                    startNext(fadeInSeconds);
                     break;
             }
+        }
+
+        private void startNext(int fadeInSeconds) {
+            switch (mRepeatMode) {
+                case REPEAT_STOPAFTER:
+                    stopAfter();
+                    break;
+
+                case REPEAT_CURRENT:
+                    seek(0);
+                    if (fadeInSeconds > 0) {
+                        mCurrentVolume = 0f;
+                    }
+                    play();
+                    break;
+
+                default:
+                    if (fadeInSeconds > 0) {
+                        mCurrentVolume = 0f;
+                    }
+                    next(false);
+            }
+        }
+
+        private void stopAfter() {
+            gotoIdleState();
+            mIsSupposedToBePlaying = false;
+            notifyChange(PLAYSTATE_CHANGED);
         }
     };
 
