@@ -140,7 +140,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
-            int fadeInSeconds = PreferenceManager.getDefaultSharedPreferences(MediaPlaybackService.this).getInt(SettingsActivity.FADE_IN_SECONDS, 0);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MediaPlaybackService.this);
+            int fadeInSeconds = Integer.parseInt(preferences.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
             switch (msg.what) {
                 case FADEDOWN:
                     mCurrentVolume -= .05f;

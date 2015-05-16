@@ -31,16 +31,18 @@
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/fade">
-        <nu.staldal.djdplayer.DurationPreference
-                android:key="fade_out_seconds"
-                android:title="@string/fade_out_seconds"
-                android:defaultValue="0">
-        </nu.staldal.djdplayer.DurationPreference>
-        <nu.staldal.djdplayer.DurationPreference
-                android:key="fade_in_seconds"
-                android:title="@string/fade_in_seconds"
-                android:defaultValue="0">
-        </nu.staldal.djdplayer.DurationPreference>
+        <ListPreference
+            android:key="fade_out_seconds"
+            android:title="@string/fade_out_seconds"
+            android:entries="@array/pref_duration_entries"
+            android:entryValues="@array/pref_duration_values"
+            android:defaultValue="0" />
+        <ListPreference
+            android:key="fade_in_seconds"
+            android:title="@string/fade_in_seconds"
+            android:entries="@array/pref_duration_entries"
+            android:entryValues="@array/pref_duration_values"
+            android:defaultValue="0" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/music_folder">
         <Preference android:title="@string/select_music_folder">
