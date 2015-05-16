@@ -175,10 +175,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mMediaplayerHandler.sendEmptyMessageDelayed(FADEUP, 10);
                     } else {
                         mCurrentVolume = 1.0f;
-                        if (fadeOutSeconds > 0) {
-                            long timeLeftMillis = mPlayer.duration() - mPlayer.currentPosition();
-                            mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis-fadeOutSeconds*1000);
-                        }
+                        scheduleFadeOut(fadeOutSeconds);
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
@@ -1539,6 +1536,16 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             if (pos < 0) pos = 0;
             if (pos > mPlayer.duration()) pos = mPlayer.duration();
             mPlayer.seek(pos);
+
+            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
+            scheduleFadeOut(fadeOutSeconds);
+        }
+    }
+
+    private void scheduleFadeOut(int fadeOutSeconds) {
+        if (fadeOutSeconds > 0) {
+            long timeLeftMillis = mPlayer.duration() - mPlayer.currentPosition();
+            mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis-fadeOutSeconds*1000);
         }
     }
 
