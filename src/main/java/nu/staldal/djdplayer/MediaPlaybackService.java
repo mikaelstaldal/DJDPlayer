@@ -76,8 +76,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private static final int PLAYBACKSERVICE_STATUS = 1;
 
     private static final int FOCUSCHANGE = 4;
-    private static final int FADEDOWN = 5;
+    private static final int DUCK = 5;
     private static final int FADEUP = 6;
+    private static final int FADEDOWN = 7;
 
     private static final char HEXDIGITS[] = new char[]{
             '0', '1', '2', '3',
@@ -141,14 +142,24 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
+            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
             int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
             switch (msg.what) {
-                case FADEDOWN:
+                case DUCK:
                     mCurrentVolume -= .05f;
                     if (mCurrentVolume > .2f) {
-                        mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, 10);
+                        mMediaplayerHandler.sendEmptyMessageDelayed(DUCK, 10);
                     } else {
                         mCurrentVolume = .2f;
+                    }
+                    mPlayer.setVolume(mCurrentVolume);
+                    break;
+                case FADEDOWN:
+                    mCurrentVolume -= .01f / Math.max(fadeOutSeconds, 1);
+                    if (mCurrentVolume > 0.0f) {
+                        mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, 10);
+                    } else {
+                        mCurrentVolume = 0.0f;
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
@@ -158,6 +169,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mMediaplayerHandler.sendEmptyMessageDelayed(FADEUP, 10);
                     } else {
                         mCurrentVolume = 1.0f;
+                        if (fadeOutSeconds > 0) {
+                            long timeLeftMillis = mPlayer.duration() - mPlayer.currentPosition();
+                            mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis-fadeOutSeconds*1000);
+                        }
                     }
                     mPlayer.setVolume(mCurrentVolume);
                     break;
@@ -213,7 +228,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                             mMediaplayerHandler.removeMessages(FADEUP);
-                            mMediaplayerHandler.sendEmptyMessage(FADEDOWN);
+                            mMediaplayerHandler.removeMessages(FADEDOWN);
+                            mMediaplayerHandler.sendEmptyMessage(DUCK);
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
@@ -234,6 +250,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                 mPlayer.setVolume(mCurrentVolume);
                                 play(); // also queues a fade-in
                             } else {
+                                mMediaplayerHandler.removeMessages(DUCK);
                                 mMediaplayerHandler.removeMessages(FADEDOWN);
                                 mMediaplayerHandler.sendEmptyMessage(FADEUP);
                             }
@@ -1041,6 +1058,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             mPlayer.start();
             // make sure we fade in, in case a previous fadein was stopped because
             // of another focus loss
+            mMediaplayerHandler.removeMessages(DUCK);
             mMediaplayerHandler.removeMessages(FADEDOWN);
             mMediaplayerHandler.sendEmptyMessage(FADEUP);
 
@@ -1090,6 +1108,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     private void stop(boolean remove_status_icon) {
         if (mPlayer.isInitialized()) {
+            mMediaplayerHandler.removeMessages(FADEDOWN);
             mPlayer.stop();
         }
         if (mCursor != null) {
@@ -1110,6 +1129,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public void pause() {
         synchronized (this) {
             mMediaplayerHandler.removeMessages(FADEUP);
+            mMediaplayerHandler.removeMessages(FADEDOWN);
             if (isPlaying()) {
                 mPlayer.pause();
                 gotoIdleState();
