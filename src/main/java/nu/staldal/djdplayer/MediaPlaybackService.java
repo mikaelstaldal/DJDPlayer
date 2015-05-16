@@ -191,6 +191,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     switch (mRepeatMode) {
                         case REPEAT_CURRENT:
                             seek(0);
+                            if (fadeInSeconds > 0) {
+                                mCurrentVolume = 0f;
+                            }
                             play();
                             break;
 
