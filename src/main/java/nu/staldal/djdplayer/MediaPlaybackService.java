@@ -1535,6 +1535,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public void seek(long pos) {
         if (mPlayer.isInitialized()) {
+            mMediaplayerHandler.removeMessages(FADEDOWN);
             if (pos < 0) pos = 0;
             if (pos > mPlayer.duration()) pos = mPlayer.duration();
             mPlayer.seek(pos);
