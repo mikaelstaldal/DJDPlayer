@@ -697,7 +697,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
      * The intent has an action that is one of
      * "nu.staldal.djdplayer.metachanged"
      * "nu.staldal.djdplayer.queuechanged",
-     * "nu.staldal.djdplayer.playbackcomplete"
      * "nu.staldal.djdplayer.playstatechanged"
      * respectively indicating that a new track has
      * started playing, that the playback queue has
