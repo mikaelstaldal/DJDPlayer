@@ -294,7 +294,6 @@
     <string name="pick_music_folder">Use as music folder</string>
     <string name="fade">Fading</string>
     <string name="fade_out_seconds">Fade out</string>
-    <string name="pause_seconds">Pause between songs</string>
     <string name="fade_in_seconds">Fade in</string>
 
     <!-- Info -->
@@ -334,6 +333,6 @@
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
-    <string name="versionName">2.8beta1</string>
+    <string name="versionName">2.8beta2</string>
 
 </resources>

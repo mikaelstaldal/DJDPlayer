@@ -27,7 +27,6 @@ public class SettingsActivity extends Activity {
     public static final String SHOW_PLAYLISTS_TAB = "show_playlists_tab";
     public static final String MUSIC_FOLDER = "music_folder";
     public static final String FADE_OUT_SECONDS = "fade_out_seconds";
-    public static final String PAUSE_SECONDS = "pause_seconds";
     public static final String FADE_IN_SECONDS = "fade_in_seconds";
 
     public static final String PLAYQUEUE = "queue";
