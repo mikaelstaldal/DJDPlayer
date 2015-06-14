@@ -295,6 +295,7 @@
     <string name="fade">Fading</string>
     <string name="fade_out_seconds">Fade out</string>
     <string name="fade_in_seconds">Fade in</string>
+    <string name="cross_fade_seconds">Cross fade</string>
 
     <!-- Info -->
     <string name="title">Title</string>
@@ -333,6 +334,6 @@
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
-    <string name="versionName">2.8beta2</string>
+    <string name="versionName">2.8beta3</string>
 
 </resources>

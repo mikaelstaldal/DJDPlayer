@@ -23,7 +23,6 @@ import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -114,7 +113,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private AudioManager mAudioManager;
     private SharedPreferences mPersistentState;
     private SharedPreferences mSettings;
-    private MyMediaPlayer mPlayer;
+    private MyMediaPlayer[] mPlayers = new MyMediaPlayer[2];
     private RemoteControlClient mRemoteControlClient;
 
 
@@ -135,231 +134,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private boolean mQueueIsSaveable = true;
     private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
     private float mCurrentVolume = 1.0f;
+    private MyMediaPlayer mCurrentPlayer;
+    private MyMediaPlayer mNextPlayer;
     private int mCardId; // Used to distinguish between different cards when saving/restoring playlists.
 
 
-    private final Handler mMediaplayerHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Log.d(LOGTAG, "handleMessage " + msg.what);
-
-            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
-            int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
-
-            switch (msg.what) {
-                case DUCK:
-                    mCurrentVolume -= .05f;
-                    if (mCurrentVolume > .2f) {
-                        mMediaplayerHandler.sendEmptyMessageDelayed(DUCK, 10);
-                    } else {
-                        mCurrentVolume = .2f;
-                    }
-                    mPlayer.setVolume(mCurrentVolume);
-                    break;
-
-                case FADEDOWN:
-                    mCurrentVolume -= .01f / Math.max(fadeOutSeconds, 1);
-                    if (mCurrentVolume > 0.0f) {
-                        mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, 10);
-                    } else {
-                        mCurrentVolume = 0.0f;
-                    }
-                    mPlayer.setVolume(mCurrentVolume);
-                    break;
-
-                case FADEUP:
-                    mCurrentVolume += .01f / Math.max(fadeInSeconds, 1);
-                    if (mCurrentVolume < 1.0f) {
-                        mMediaplayerHandler.sendEmptyMessageDelayed(FADEUP, 10);
-                    } else {
-                        mCurrentVolume = 1.0f;
-                        scheduleFadeOut(fadeOutSeconds);
-                    }
-                    mPlayer.setVolume(mCurrentVolume);
-                    break;
-
-                case MyMediaPlayer.SERVER_DIED:
-                    if (mIsSupposedToBePlaying) {
-                        next(true);
-                    } else {
-                        // the server died when we were idle, so just
-                        // reopen the same song (it will start again
-                        // from the beginning though when the user
-                        // restarts)
-                        openCurrent();
-                    }
-                    break;
-
-                case MyMediaPlayer.RELEASE_WAKELOCK:
-                    mPlayer.releaseWakeLock();
-                    break;
-
-                case FOCUSCHANGE:
-                    // This code is here so we can better synchronize it with the code that handles fade-in
-                    switch (msg.arg1) {
-                        case AudioManager.AUDIOFOCUS_LOSS:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
-                            mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
-                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
-                            mAudioManager.abandonAudioFocus(mAudioFocusListener);
-                            if (isPlaying()) {
-                                mPausedByTransientLossOfFocus = false;
-                            }
-                            pause();
-                            break;
-                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
-                            mMediaplayerHandler.removeMessages(FADEUP);
-                            mMediaplayerHandler.removeMessages(FADEDOWN);
-                            mMediaplayerHandler.sendEmptyMessage(DUCK);
-                            break;
-                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
-                            if (isPlaying()) {
-                                mPausedByTransientLossOfFocus = true;
-                            }
-                            pause();
-                            break;
-                        case AudioManager.AUDIOFOCUS_GAIN:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
-                            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
-                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
-
-                            if (!isPlaying() && mPausedByTransientLossOfFocus) {
-                                mPausedByTransientLossOfFocus = false;
-                                mCurrentVolume = 0f;
-                                mPlayer.setVolume(mCurrentVolume);
-                                play(); // also queues a fade-in
-                            } else {
-                                mMediaplayerHandler.removeMessages(DUCK);
-                                mMediaplayerHandler.removeMessages(FADEDOWN);
-                                mMediaplayerHandler.sendEmptyMessage(FADEUP);
-                            }
-                            break;
-                        default:
-                            Log.e(LOGTAG, "Unknown audio focus change code");
-                    }
-                    break;
-
-                case MyMediaPlayer.TRACK_ENDED:
-                    switch (mRepeatMode) {
-                        case REPEAT_STOPAFTER:
-                            gotoIdleState();
-                            mIsSupposedToBePlaying = false;
-                            notifyChange(PLAYSTATE_CHANGED);
-                            break;
-
-                        case REPEAT_CURRENT:
-                            seek(0);
-                            if (fadeInSeconds > 0) {
-                                mCurrentVolume = 0f;
-                            }
-                            play();
-                            break;
-
-                        default:
-                            if (fadeInSeconds > 0) {
-                                mCurrentVolume = 0f;
-                            }
-                            next(false);
-                    }
-                    break;
-            }
-        }
-    };
-
-    private final Handler mDelayedStopHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // Check again to make sure nothing is playing right now
-            if (isPlaying() || mPausedByTransientLossOfFocus || mServiceInUse
-                    || mMediaplayerHandler.hasMessages(MyMediaPlayer.TRACK_ENDED)) {
-                return;
-            }
-            // save the queue again, because it might have changed
-            // since the user exited the music app (because of
-            // the play-position changed)
-            saveQueue(true);
-            stopSelf(mServiceStartId);
-        }
-    };
-
-    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
-            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
-                pause();
-                mPausedByTransientLossOfFocus = false;
-            } else if (NEXT_ACTION.equals(action)) {
-                next(true);
-            } else if (PREVIOUS_ACTION.equals(action)) {
-                prev();
-            } else if (TOGGLEPAUSE_ACTION.equals(action)) {
-                if (isPlaying()) {
-                    pause();
-                    mPausedByTransientLossOfFocus = false;
-                } else {
-                    play();
-                }
-            } else if (PLAY_ACTION.equals(action)) {
-                play();
-            } else if (PAUSE_ACTION.equals(action)) {
-                pause();
-                mPausedByTransientLossOfFocus = false;
-            } else if (STOP_ACTION.equals(action)) {
-                pause();
-                mPausedByTransientLossOfFocus = false;
-                seek(0);
-            } else if (APPWIDGETUPDATE_ACTION.equals(action)) {
-                // Someone asked us to refresh a set of specific widgets, probably
-                // because they were just added.
-                int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-                MediaAppWidgetProvider.getInstance().performUpdate(MediaPlaybackService.this, appWidgetIds);
-            }
-        }
-    };
-
-    /**
-     * Registers an intent to listen for ACTION_MEDIA_EJECT notifications.
-     * The intent will call closeExternalStorageFiles() if the external media
-     * is going to be ejected, so applications can clean up any files they have open.
-     */
-    private final BroadcastReceiver mUnmountReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
-                saveQueue(true);
-                mQueueIsSaveable = false;
-                closeExternalStorageFiles();
-            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
-                reloadQueue();
-                mQueueIsSaveable = true;
-                notifyChange(QUEUE_CHANGED);
-                notifyChange(META_CHANGED);
-            }
-        }
-    };
-
-    private final OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
-        @Override
-        public void onAudioFocusChange(int focusChange) {
-            mMediaplayerHandler.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
-        }
-    };
-
     // Local Binder pattern
+
     private final IBinder mLocalBinder = new LocalBinder();
     public class LocalBinder extends Binder {
         public MediaPlayback getService() {
             return MediaPlaybackService.this;
         }
     }
+
 
     @Override
     public void onCreate() {
@@ -383,7 +171,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         registerReceiver(mUnmountReceiver, iFilter);
 
         // Needs to be done in this thread, since otherwise ApplicationContext.getPowerManager() crashes.
-        mPlayer = new MyMediaPlayer(this, mMediaplayerHandler);
+        mPlayers[0] = new MyMediaPlayer(this, new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                handlePlayerCallback(0, msg);
+            }
+        });
+        mPlayers[1] = new MyMediaPlayer(this, new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                handlePlayerCallback(1, msg);
+            }
+        });
+        mCurrentPlayer = mPlayers[0];
+        mNextPlayer = mPlayers[1];
 
         reloadQueue();
 
@@ -488,8 +289,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         // If there is a playlist but playback is paused, then wait a while
         // before stopping the service, so that pause/resume isn't slow.
-        // Also delay stopping the service if we're transitioning between tracks.
-        if (mPlayListLen > 0 || mMediaplayerHandler.hasMessages(MyMediaPlayer.TRACK_ENDED)) {
+        if (mPlayListLen > 0) {
             Message msg = mDelayedStopHandler.obtainMessage();
             mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
             return true;
@@ -511,13 +311,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 MediaButtonIntentReceiver.class.getName()));
         mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
 
-        mPlayer.release();
+        for (MyMediaPlayer player : mPlayers) player.release();
 
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
 
         // make sure there aren't any other messages coming
         mDelayedStopHandler.removeCallbacksAndMessages(null);
-        mMediaplayerHandler.removeCallbacksAndMessages(null);
+        mPlaybackHander.removeCallbacksAndMessages(null);
 
         if (mCursor != null) {
             mCursor.close();
@@ -531,6 +331,230 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         super.onDestroy();
     }
+
+    private void handlePlayerCallback(int player, Message msg) {
+        Log.d(LOGTAG, "handlePlayerCallback " + player + " " + msg.what);
+
+        int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
+        int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+        int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
+
+        switch (msg.what) {
+            case MyMediaPlayer.SERVER_DIED:
+                if (mIsSupposedToBePlaying) {
+                    next(true);
+                } else {
+                    // the server died when we were idle, so just reopen the same song
+                    // (it will start again from the beginning though when the user restarts)
+                    openCurrent();
+                }
+                break;
+
+            case MyMediaPlayer.RELEASE_WAKELOCK:
+                mPlayers[player].releaseWakeLock();
+                break;
+
+
+            case MyMediaPlayer.TRACK_ENDED:
+                switch (mRepeatMode) {
+                    case REPEAT_STOPAFTER:
+                        gotoIdleState();
+                        mIsSupposedToBePlaying = false;
+                        notifyChange(PLAYSTATE_CHANGED);
+                        break;
+
+                    case REPEAT_CURRENT:
+                        seek(0);
+                        if (fadeInSeconds > 0) {
+                            mCurrentVolume = 0f;
+                        }
+                        play();
+                        break;
+
+                    default:
+                        if (fadeInSeconds > 0) {
+                            mCurrentVolume = 0f;
+                        }
+                        next(false);
+                }
+                break;
+        }
+    }
+
+    private final Handler mPlaybackHander = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(LOGTAG, "handleMessage " + msg.what);
+
+            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
+            int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+            int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
+
+            switch (msg.what) {
+                case DUCK:
+                    mCurrentVolume -= .05f;
+                    if (mCurrentVolume > .2f) {
+                        mPlaybackHander.sendEmptyMessageDelayed(DUCK, 10);
+                    } else {
+                        mCurrentVolume = .2f;
+                    }
+                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    break;
+
+                case FADEDOWN:
+                    mCurrentVolume -= .01f / Math.max(fadeOutSeconds, 1);
+                    if (mCurrentVolume > 0.0f) {
+                        mPlaybackHander.sendEmptyMessageDelayed(FADEDOWN, 10);
+                    } else {
+                        mCurrentVolume = 0.0f;
+                    }
+                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    break;
+
+                case FADEUP:
+                    mCurrentVolume += .01f / Math.max(fadeInSeconds, 1);
+                    if (mCurrentVolume < 1.0f) {
+                        mPlaybackHander.sendEmptyMessageDelayed(FADEUP, 10);
+                    } else {
+                        mCurrentVolume = 1.0f;
+                        scheduleFadeOut(fadeOutSeconds);
+                    }
+                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    break;
+
+                case FOCUSCHANGE:
+                    // This code is here so we can better synchronize it with the code that handles fade-in
+                    switch (msg.arg1) {
+                        case AudioManager.AUDIOFOCUS_LOSS:
+                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
+                            mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
+                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
+                            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+                            mAudioManager.abandonAudioFocus(mAudioFocusListener);
+                            if (isPlaying()) {
+                                mPausedByTransientLossOfFocus = false;
+                            }
+                            pause();
+                            break;
+                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                            mPlaybackHander.removeMessages(FADEUP);
+                            mPlaybackHander.removeMessages(FADEDOWN);
+                            mPlaybackHander.sendEmptyMessage(DUCK);
+                            break;
+                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
+                            if (isPlaying()) {
+                                mPausedByTransientLossOfFocus = true;
+                            }
+                            pause();
+                            break;
+                        case AudioManager.AUDIOFOCUS_GAIN:
+                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
+                            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
+                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
+                            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+
+                            if (!isPlaying() && mPausedByTransientLossOfFocus) {
+                                mPausedByTransientLossOfFocus = false;
+                                mCurrentVolume = 0f;
+                                mCurrentPlayer.setVolume(mCurrentVolume);
+                                play(); // also queues a fade-in
+                            } else {
+                                mPlaybackHander.removeMessages(DUCK);
+                                mPlaybackHander.removeMessages(FADEDOWN);
+                                mPlaybackHander.sendEmptyMessage(FADEUP);
+                            }
+                            break;
+                        default:
+                            Log.e(LOGTAG, "Unknown audio focus change code");
+                    }
+                    break;
+            }
+        }
+    };
+
+    private final Handler mDelayedStopHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // Check again to make sure nothing is playing right now
+            if (isPlaying() || mPausedByTransientLossOfFocus || mServiceInUse) {
+                return;
+            }
+            // save the queue again, because it might have changed
+            // since the user exited the music app (because of
+            // the play-position changed)
+            saveQueue(true);
+            stopSelf(mServiceStartId);
+        }
+    };
+
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+                pause();
+                mPausedByTransientLossOfFocus = false;
+            } else if (NEXT_ACTION.equals(action)) {
+                next(true);
+            } else if (PREVIOUS_ACTION.equals(action)) {
+                prev();
+            } else if (TOGGLEPAUSE_ACTION.equals(action)) {
+                if (isPlaying()) {
+                    pause();
+                    mPausedByTransientLossOfFocus = false;
+                } else {
+                    play();
+                }
+            } else if (PLAY_ACTION.equals(action)) {
+                play();
+            } else if (PAUSE_ACTION.equals(action)) {
+                pause();
+                mPausedByTransientLossOfFocus = false;
+            } else if (STOP_ACTION.equals(action)) {
+                pause();
+                mPausedByTransientLossOfFocus = false;
+                seek(0);
+            } else if (APPWIDGETUPDATE_ACTION.equals(action)) {
+                // Someone asked us to refresh a set of specific widgets, probably
+                // because they were just added.
+                int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+                MediaAppWidgetProvider.getInstance().performUpdate(MediaPlaybackService.this, appWidgetIds);
+            }
+        }
+    };
+
+    /**
+     * Registers an intent to listen for ACTION_MEDIA_EJECT notifications.
+     * The intent will call closeExternalStorageFiles() if the external media
+     * is going to be ejected, so applications can clean up any files they have open.
+     */
+    private final BroadcastReceiver mUnmountReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
+                saveQueue(true);
+                mQueueIsSaveable = false;
+                closeExternalStorageFiles();
+            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
+                reloadQueue();
+                mQueueIsSaveable = true;
+                notifyChange(QUEUE_CHANGED);
+                notifyChange(META_CHANGED);
+            }
+        }
+    };
+
+    private final OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            mPlaybackHander.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
+        }
+    };
 
     private void saveQueue(boolean full) {
         if (!mQueueIsSaveable) {
@@ -567,8 +591,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             ed.putInt(SettingsActivity.CARDID, mCardId);
         }
         ed.putInt(SettingsActivity.CURPOS, mPlayPos);
-        if (mPlayer.isInitialized()) {
-            ed.putLong(SettingsActivity.SEEKPOS, mPlayer.currentPosition());
+        if (mCurrentPlayer.isInitialized()) {
+            ed.putLong(SettingsActivity.SEEKPOS, mCurrentPlayer.currentPosition());
         }
         ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
         ed.apply();
@@ -658,7 +682,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             mQuietMode = true;
             openCurrent();
             mQuietMode = false;
-            if (!mPlayer.isInitialized()) {
+            if (!mCurrentPlayer.isInitialized()) {
                 // couldn't restore the saved state
                 mPlayListLen = 0;
                 return;
@@ -950,80 +974,16 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mGenreName = idAndName.name;
                     }
                 }
-                open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
-                // go to bookmark if needed
-                if (isPodcast()) {
-                    long bookmark = getBookmark();
-                    // Start playing a little bit before the bookmark,
-                    // so it's easier to get back in to the narrative.
-                    seek(bookmark - 5000);
-                }
-            }
-        }
-    }
-
-    /**
-     * Opens the specified file and readies it for playback.
-     *
-     * @param path The full path of the file to be opened.
-     */
-    private void open(String path) {
-        synchronized (this) {
-            if (path == null) {
-                return;
             }
 
-            // if mCursor is null, try to associate path with a database cursor
-            if (mCursor == null) {
-
-                ContentResolver resolver = getContentResolver();
-                Uri uri;
-                String where;
-                String selectionArgs[];
-                if (path.startsWith("content://media/")) {
-                    uri = Uri.parse(path);
-                    where = null;
-                    selectionArgs = null;
-                } else {
-                    uri = MediaStore.Audio.Media.getContentUriForPath(path);
-                    where = MediaStore.Audio.AudioColumns.DATA + "=?";
-                    selectionArgs = new String[]{path};
-                }
-
-                try {
-                    mCursor = resolver.query(uri, CURSOR_COLS, where, selectionArgs, null);
-                    if (mCursor != null) {
-                        if (mCursor.getCount() == 0) {
-                            mCursor.close();
-                            mCursor = null;
-                            mGenreId = -1;
-                            mGenreName = null;
-                        } else {
-                            if (mCursor.moveToNext()) {
-                                IdAndName idAndName = MusicUtils.fetchGenre(this, mCursor.getLong(IDCOLIDX));
-                                if (idAndName != null) {
-                                    mGenreId = idAndName.id;
-                                    mGenreName = idAndName.name;
-                                }
-                            }
-                            ensurePlayListCapacity(1);
-                            mPlayListLen = 1;
-                            mPlayList[0] = mCursor.getLong(IDCOLIDX);
-                            mPlayPos = 0;
-                        }
-                    }
-                } catch (UnsupportedOperationException ex) {
-                    Log.w(LOGTAG, "Error", ex);
-                }
-            }
-            mPlayer.setDataSource(path);
-            if (!mPlayer.isInitialized()) {
+            mCurrentPlayer.setDataSource(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
+            if (!mCurrentPlayer.isInitialized()) {
                 stop(true);
                 if (mOpenFailedCounter++ < 10 && mPlayListLen > 1) {
                     // beware: this ends up being recursive because next() calls open() again.
                     next(false);
                 }
-                if (!mPlayer.isInitialized() && mOpenFailedCounter != 0) {
+                if (!mCurrentPlayer.isInitialized() && mOpenFailedCounter != 0) {
                     // need to make sure we only shows this once
                     mOpenFailedCounter = 0;
                     if (!mQuietMode) {
@@ -1033,6 +993,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 }
             } else {
                 mOpenFailedCounter = 0;
+            }
+            // go to bookmark if needed
+            if (isPodcast()) {
+                long bookmark = getBookmark();
+                // Start playing a little bit before the bookmark,
+                // so it's easier to get back in to the narrative.
+                seek(bookmark - 5000);
             }
         }
     }
@@ -1050,20 +1017,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 MediaButtonIntentReceiver.class.getName()));
         mAudioManager.registerRemoteControlClient(mRemoteControlClient);
 
-        if (mPlayer.isInitialized()) {
+        if (mCurrentPlayer.isInitialized()) {
             // if we are at the end of the song, go to the next song first
-            long duration = mPlayer.duration();
+            long duration = mCurrentPlayer.duration();
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
-                    mPlayer.currentPosition() >= duration - 2000) {
+                    mCurrentPlayer.currentPosition() >= duration - 2000) {
                 next(true);
             }
 
-            mPlayer.start();
+            mCurrentPlayer.start();
             // make sure we fade in, in case a previous fadein was stopped because
             // of another focus loss
-            mMediaplayerHandler.removeMessages(DUCK);
-            mMediaplayerHandler.removeMessages(FADEDOWN);
-            mMediaplayerHandler.sendEmptyMessage(FADEUP);
+            mPlaybackHander.removeMessages(DUCK);
+            mPlaybackHander.removeMessages(FADEDOWN);
+            mPlaybackHander.sendEmptyMessage(FADEUP);
 
             startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
 
@@ -1110,9 +1077,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private void stop(boolean remove_status_icon) {
-        if (mPlayer.isInitialized()) {
-            mMediaplayerHandler.removeMessages(FADEDOWN);
-            mPlayer.stop();
+        if (mCurrentPlayer.isInitialized()) {
+            mPlaybackHander.removeMessages(FADEDOWN);
+            mCurrentPlayer.stop();
         }
         if (mCursor != null) {
             mCursor.close();
@@ -1131,10 +1098,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public void pause() {
         synchronized (this) {
-            mMediaplayerHandler.removeMessages(FADEUP);
-            mMediaplayerHandler.removeMessages(FADEDOWN);
+            mPlaybackHander.removeMessages(FADEUP);
+            mPlaybackHander.removeMessages(FADEDOWN);
             if (isPlaying()) {
-                mPlayer.pause();
+                mCurrentPlayer.pause();
                 gotoIdleState();
                 mIsSupposedToBePlaying = false;
                 notifyChange(PLAYSTATE_CHANGED);
@@ -1354,7 +1321,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public long getAudioId() {
         synchronized (this) {
-            if (mPlayPos >= 0 && mPlayer.isInitialized()) {
+            if (mPlayPos >= 0 && mCurrentPlayer.isInitialized()) {
                 return mPlayList[mPlayPos];
             }
         }
@@ -1489,27 +1456,27 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     @Override
     public long duration() {
-        if (mPlayer.isInitialized()) {
-            return mPlayer.duration();
+        if (mCurrentPlayer.isInitialized()) {
+            return mCurrentPlayer.duration();
         }
         return -1;
     }
 
     @Override
     public long position() {
-        if (mPlayer.isInitialized()) {
-            return mPlayer.currentPosition();
+        if (mCurrentPlayer.isInitialized()) {
+            return mCurrentPlayer.currentPosition();
         }
         return -1;
     }
 
     @Override
     public void seek(long pos) {
-        if (mPlayer.isInitialized()) {
-            mMediaplayerHandler.removeMessages(FADEDOWN);
+        if (mCurrentPlayer.isInitialized()) {
+            mPlaybackHander.removeMessages(FADEDOWN);
             if (pos < 0) pos = 0;
-            if (pos > mPlayer.duration()) pos = mPlayer.duration();
-            mPlayer.seek(pos);
+            if (pos > mCurrentPlayer.duration()) pos = mCurrentPlayer.duration();
+            mCurrentPlayer.seek(pos);
 
             int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
             scheduleFadeOut(fadeOutSeconds);
@@ -1518,15 +1485,15 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     private void scheduleFadeOut(int fadeOutSeconds) {
         if (fadeOutSeconds > 0) {
-            long timeLeftMillis = mPlayer.duration() - mPlayer.currentPosition();
-            mMediaplayerHandler.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis-fadeOutSeconds*1000);
+            long timeLeftMillis = mCurrentPlayer.duration() - mCurrentPlayer.currentPosition();
+            mPlaybackHander.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis - fadeOutSeconds * 1000);
         }
     }
 
     @Override
     public int getAudioSessionId() {
         synchronized (this) {
-            return mPlayer.getAudioSessionId();
+            return mCurrentPlayer.getAudioSessionId();
         }
     }
 
