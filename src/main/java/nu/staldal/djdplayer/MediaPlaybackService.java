@@ -751,15 +751,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             }
 
             if (mPlayListLen > 0) {
-                stop(false);
+                stop();
                 if (prepare(mPlayList[mPlayPos])) {
                     fetchMetadata(mPlayList[mPlayPos]);
+                } else {
+                    mPlayListLen = 0;
+                    return;
                 }
-            }
-            if (!mPlayers[mCurrentPlayer].isInitialized()) {
-                // couldn't restore the saved state
-                mPlayListLen = 0;
-                return;
             }
 
             long seekpos = mPersistentState.getLong(SettingsActivity.SEEKPOS, 0);
@@ -779,7 +777,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
      */
     private void closeExternalStorageFiles() {
         // stop playback and clean up if the SD card is going to be unmounted.
-        stop(true);
+        stop();
+        gotoIdleState();
         notifyChange(QUEUE_CHANGED);
         notifyChange(META_CHANGED);
     }
@@ -886,7 +885,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             if ((action == NEXT || action == NOW) && mPlayPos + 1 < mPlayListLen) {
                 addToPlayList(list, mPlayPos + 1);
                 if (action == NOW) {
-                    stop(false);
+                    stop();
                     mPlayPos++;
                     prepareAndPlay(mPlayList[mPlayPos]);
                     return;
@@ -894,14 +893,14 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else {
                 addToPlayList(list, Integer.MAX_VALUE);
                 if (action == NOW) {
-                    stop(false);
+                    stop();
                     mPlayPos = mPlayListLen - list.length;
                     prepareAndPlay(mPlayList[mPlayPos]);
                     return;
                 }
             }
             if (mPlayPos < 0) {
-                stop(false);
+                stop();
                 mPlayPos = 0;
                 prepareAndPlay(mPlayList[mPlayPos]);
             }
@@ -967,10 +966,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 mPlayPos = 0;
             }
 
-            stop(false);
-            if (mPlayListLen > 0) {
-                prepareAndPlay(mPlayList[mPlayPos]);
-            }
+            stop();
+            prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
 
@@ -1140,28 +1137,26 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         return status;
     }
 
-    private void stop(boolean remove_status_icon) {
-        if (mPlayers[mCurrentPlayer].isInitialized()) {
-            mPlaybackHander.removeMessages(FADEDOWN);
-            mPlaybackHander.removeMessages(CROSSFADE);
-            mPlayers[mCurrentPlayer].stop();
-        }
+    private void stop() {
+        mPlaybackHander.removeMessages(DUCK);
+        mPlaybackHander.removeMessages(FADEUP);
+        mPlaybackHander.removeMessages(FADEDOWN);
+        mPlaybackHander.removeMessages(CROSSFADE);
+        for (MyMediaPlayer player : mPlayers) player.stop();
         resetMetadata();
-        if (remove_status_icon) {
-            gotoIdleState();
-        } else {
-            stopForeground(false);
-        }
     }
 
     @Override
     public void pause() {
         synchronized (this) {
+            mPlaybackHander.removeMessages(DUCK);
             mPlaybackHander.removeMessages(FADEUP);
             mPlaybackHander.removeMessages(FADEDOWN);
             mPlaybackHander.removeMessages(CROSSFADE);
             if (isPlaying()) {
-                mPlayers[mCurrentPlayer].pause();
+                for (MyMediaPlayer player : mPlayers) {
+                    if (player.isPlaying()) player.pause();
+                }
                 gotoIdleState();
                 notifyChange(PLAYSTATE_CHANGED);
             }
@@ -1183,7 +1178,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else {
                 mPlayPos = mPlayListLen - 1;
             }
-            stop(false);
+            stop();
             prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
@@ -1199,7 +1194,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else {
                 mPlayPos++;
             }
-            stop(false);
+            stop();
             prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
@@ -1242,15 +1237,15 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
             if (gotonext) {
                 if (mPlayListLen == 0) {
-                    stop(true);
+                    stop();
+                    gotoIdleState();
                     mPlayPos = -1;
-                    resetMetadata();
                 } else {
                     if (mPlayPos >= mPlayListLen) {
                         mPlayPos = 0;
                     }
                     boolean wasPlaying = isPlaying();
-                    stop(false);
+                    stop();
 
                     if (prepare(mPlayList[mPlayPos])) {
                         fetchMetadata(mPlayList[mPlayPos]);
@@ -1350,7 +1345,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public void setQueuePosition(int pos) {
         synchronized (this) {
             if (pos > mPlayListLen - 1) return;
-            stop(false);
+            stop();
             mPlayPos = pos;
             prepareAndPlay(mPlayList[mPlayPos]);
         }
@@ -1438,6 +1433,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public void seek(long pos) {
         if (mPlayers[mCurrentPlayer].isInitialized()) {
+            mPlaybackHander.removeMessages(DUCK);
+            mPlaybackHander.removeMessages(FADEUP);
             mPlaybackHander.removeMessages(FADEDOWN);
             mPlaybackHander.removeMessages(CROSSFADE);
             if (pos < 0) pos = 0;
