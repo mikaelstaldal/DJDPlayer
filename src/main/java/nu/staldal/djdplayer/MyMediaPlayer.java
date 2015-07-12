@@ -117,7 +117,7 @@ class MyMediaPlayer {
         i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mContext.getPackageName());
         mContext.sendBroadcast(i);
 
-        Log.i(LOGTAG, "Prepared song: " + path);
+        Log.d(LOGTAG, "Prepared song: " + path);
 
         mIsInitialized = true;
         return true;
@@ -125,6 +125,10 @@ class MyMediaPlayer {
 
     public boolean isInitialized() {
         return mIsInitialized;
+    }
+
+    public boolean isPlaying() {
+        return mMediaPlayer.isPlaying();
     }
 
     public void start() {

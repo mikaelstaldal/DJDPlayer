@@ -75,6 +75,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private static final int FADEUP = 6;
     private static final int FADEDOWN = 7;
     private static final int PREPARE_NEXT = 8;
+    private static final int CROSSFADE = 9;
 
     private static final char HEXDIGITS[] = new char[]{
             '0', '1', '2', '3',
@@ -131,9 +132,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private boolean mIsSupposedToBePlaying = false;
     private boolean mQueueIsSaveable = true;
     private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
-    private float mCurrentVolume = 1.0f;
-    private MyMediaPlayer mCurrentPlayer;
-    private MyMediaPlayer mNextPlayer;
+    private float[] mCurrentVolume = new float[2];
+    private int mCurrentPlayer;
+    private int mNextPlayer;
     private int mCardId; // Used to distinguish between different cards when saving/restoring playlists.
 
 
@@ -181,8 +182,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 handlePlayerCallback(1, msg);
             }
         });
-        mCurrentPlayer = mPlayers[0];
-        mNextPlayer = mPlayers[1];
+        mCurrentPlayer = 0;
+        mNextPlayer = 1;
+
+        mCurrentVolume[0] = 1.0f;
+        mCurrentVolume[1] = 1.0f;
 
         reloadQueue();
 
@@ -326,9 +330,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private void handlePlayerCallback(int player, Message msg) {
         Log.d(LOGTAG, "handlePlayerCallback " + player + " " + msg.what);
 
-        int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
         int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
-        int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
 
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
@@ -362,7 +364,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     case REPEAT_CURRENT:
                         seek(0);
                         if (fadeInSeconds > 0) {
-                            mCurrentVolume = 0f;
+                            mCurrentVolume[mCurrentPlayer] = 0f;
                         }
                         play();
                         break;
@@ -388,13 +390,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                 mPlayPos++;
                             }
 
-                            if (mCurrentPlayer.isInitialized()) {
-                                mCurrentPlayer.stop();
+                            if (mPlayers[mCurrentPlayer].isInitialized()) {
+                                mPlayers[mCurrentPlayer].stop();
                             }
 
                             swapPlayers();
 
-                            if (!mCurrentPlayer.isInitialized()) {
+                            if (!mPlayers[mCurrentPlayer].isInitialized()) {
                                 while (!prepare(mPlayList[mPlayPos])) {
                                     if (mPlayPos >= mPlayListLen - 1) { // we're at the end of the list
                                         Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
@@ -404,14 +406,19 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                     }
                                 }
                             }
-                            if (fadeInSeconds > 0) {
-                                mCurrentVolume = 0f;
-                            }
 
-                            mCurrentPlayer.start();
-                            mPlaybackHander.removeMessages(DUCK);
-                            mPlaybackHander.removeMessages(FADEDOWN);
-                            mPlaybackHander.sendEmptyMessage(FADEUP);
+                            if (!mPlayers[mCurrentPlayer].isPlaying()) {
+                                if (fadeInSeconds > 0) {
+                                    mCurrentVolume[mCurrentPlayer] = 0f;
+                                    mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
+                                }
+                                mPlayers[mCurrentPlayer].start();
+
+                                mPlaybackHander.removeMessages(DUCK);
+                                mPlaybackHander.removeMessages(FADEDOWN);
+                                mPlaybackHander.removeMessages(CROSSFADE);
+                                mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
+                            }
 
                             fetchMetadata(mPlayList[mPlayPos]);
                             startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
@@ -424,7 +431,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private void swapPlayers() {
-        MyMediaPlayer tmp = mCurrentPlayer;
+        int tmp = mCurrentPlayer;
         mCurrentPlayer = mNextPlayer;
         mNextPlayer = tmp;
     }
@@ -436,40 +443,39 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
             int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
             int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
-            int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
 
             switch (msg.what) {
                 case DUCK:
-                    mCurrentVolume -= .05f;
-                    if (mCurrentVolume > .2f) {
-                        mPlaybackHander.sendEmptyMessageDelayed(DUCK, 10);
+                    mCurrentVolume[msg.arg1] -= .05f;
+                    if (mCurrentVolume[msg.arg1] > .2f) {
+                        mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(DUCK, msg.arg1, 0), 10);
                     } else {
-                        mCurrentVolume = .2f;
+                        mCurrentVolume[msg.arg1] = .2f;
                     }
-                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    mPlayers[msg.arg1].setVolume(mCurrentVolume[msg.arg1]);
                     break;
 
                 case FADEDOWN:
-                    mCurrentVolume -= .01f / Math.max(fadeOutSeconds, 1);
-                    if (mCurrentVolume > 0.0f) {
-                        mPlaybackHander.sendEmptyMessageDelayed(FADEDOWN, 10);
+                    mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeOutSeconds, 1);
+                    if (mCurrentVolume[msg.arg1] > 0.0f) {
+                        mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, msg.arg1, 0), 10);
                     } else {
-                        mCurrentVolume = 0.0f;
+                        mCurrentVolume[msg.arg1] = 0.0f;
                     }
-                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    mPlayers[msg.arg1].setVolume(mCurrentVolume[msg.arg1]);
                     break;
 
                 case FADEUP:
-                    mCurrentVolume += .01f / Math.max(fadeInSeconds, 1);
-                    if (mCurrentVolume < 1.0f) {
-                        mPlaybackHander.sendEmptyMessageDelayed(FADEUP, 10);
+                    mCurrentVolume[msg.arg1] += .01f / Math.max(fadeInSeconds, 1);
+                    if (mCurrentVolume[msg.arg1] < 1.0f) {
+                        mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
                     } else {
-                        mCurrentVolume = 1.0f;
+                        mCurrentVolume[msg.arg1] = 1.0f;
 
                         mPlaybackHander.sendEmptyMessage(PREPARE_NEXT);
-                        scheduleFadeOut(fadeOutSeconds);
+                        scheduleFadeOut();
                     }
-                    mCurrentPlayer.setVolume(mCurrentVolume);
+                    mPlayers[msg.arg1].setVolume(mCurrentVolume[msg.arg1]);
                     break;
 
                 case FOCUSCHANGE:
@@ -490,7 +496,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                             mPlaybackHander.removeMessages(FADEUP);
                             mPlaybackHander.removeMessages(FADEDOWN);
-                            mPlaybackHander.sendEmptyMessage(DUCK);
+                            mPlaybackHander.removeMessages(CROSSFADE);
+                            mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(DUCK, mCurrentPlayer, 0));
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
@@ -507,13 +514,14 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
                             if (!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
-                                mCurrentVolume = 0f;
-                                mCurrentPlayer.setVolume(mCurrentVolume);
+                                mCurrentVolume[mCurrentPlayer] = 0f;
+                                mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
                                 play(); // also queues a fade-in
                             } else {
                                 mPlaybackHander.removeMessages(DUCK);
                                 mPlaybackHander.removeMessages(FADEDOWN);
-                                mPlaybackHander.sendEmptyMessage(FADEUP);
+                                mPlaybackHander.removeMessages(CROSSFADE);
+                                mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
                             }
                             break;
                         default:
@@ -525,9 +533,25 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     synchronized (this) {
                         if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
                             long nextId = mPlayList[mPlayPos + 1];
-                            mNextPlayer.prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
+                            mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
                         }
                     }
+                    break;
+
+                case CROSSFADE:
+                    if (mPlayers[mNextPlayer].isInitialized()) {
+                        if (fadeInSeconds > 0) {
+                            mCurrentVolume[mNextPlayer]= 0f;
+                            mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
+                        }
+                        mPlayers[mNextPlayer].start();
+
+                        mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
+
+                    } else {
+                        Log.w(LOGTAG, "Unable to cross-fade since next song is not prepared");
+                    }
+
                     break;
             }
         }
@@ -650,8 +674,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             ed.putInt(SettingsActivity.CARDID, mCardId);
         }
         ed.putInt(SettingsActivity.CURPOS, mPlayPos);
-        if (mCurrentPlayer.isInitialized()) {
-            ed.putLong(SettingsActivity.SEEKPOS, mCurrentPlayer.currentPosition());
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
+            ed.putLong(SettingsActivity.SEEKPOS, mPlayers[mCurrentPlayer].currentPosition());
         }
         ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
         ed.apply();
@@ -733,7 +757,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     fetchMetadata(mPlayList[mPlayPos]);
                 }
             }
-            if (!mCurrentPlayer.isInitialized()) {
+            if (!mPlayers[mCurrentPlayer].isInitialized()) {
                 // couldn't restore the saved state
                 mPlayListLen = 0;
                 return;
@@ -1001,7 +1025,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private boolean prepare(long audioId) {
-        return mCurrentPlayer.prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(audioId));
+        return mPlayers[mCurrentPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(audioId));
     }
 
     private void fetchMetadata(long audioId) {
@@ -1057,20 +1081,21 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 MediaButtonIntentReceiver.class.getName()));
         mAudioManager.registerRemoteControlClient(mRemoteControlClient);
 
-        if (mCurrentPlayer.isInitialized()) {
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
             // if we are at the end of the song, go to the next song first
-            long duration = mCurrentPlayer.duration();
+            long duration = mPlayers[mCurrentPlayer].duration();
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
-                    mCurrentPlayer.currentPosition() >= duration - 2000) {
+                    mPlayers[mCurrentPlayer].currentPosition() >= duration - 2000) {
                 next();
             }
 
-            mCurrentPlayer.start();
+            mPlayers[mCurrentPlayer].start();
             // make sure we fade in, in case a previous fadein was stopped because
             // of another focus loss
             mPlaybackHander.removeMessages(DUCK);
             mPlaybackHander.removeMessages(FADEDOWN);
-            mPlaybackHander.sendEmptyMessage(FADEUP);
+            mPlaybackHander.removeMessages(CROSSFADE);
+            mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
 
             startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
 
@@ -1117,9 +1142,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private void stop(boolean remove_status_icon) {
-        if (mCurrentPlayer.isInitialized()) {
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
             mPlaybackHander.removeMessages(FADEDOWN);
-            mCurrentPlayer.stop();
+            mPlaybackHander.removeMessages(CROSSFADE);
+            mPlayers[mCurrentPlayer].stop();
         }
         resetMetadata();
         if (remove_status_icon) {
@@ -1134,8 +1160,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         synchronized (this) {
             mPlaybackHander.removeMessages(FADEUP);
             mPlaybackHander.removeMessages(FADEDOWN);
+            mPlaybackHander.removeMessages(CROSSFADE);
             if (isPlaying()) {
-                mCurrentPlayer.pause();
+                mPlayers[mCurrentPlayer].pause();
                 gotoIdleState();
                 notifyChange(PLAYSTATE_CHANGED);
             }
@@ -1306,7 +1333,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public long getAudioId() {
         synchronized (this) {
-            if (mPlayPos >= 0 && mCurrentPlayer.isInitialized()) {
+            if (mPlayPos >= 0 && mPlayers[mCurrentPlayer].isInitialized()) {
                 return mPlayList[mPlayPos];
             }
         }
@@ -1395,44 +1422,50 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     @Override
     public long duration() {
-        if (mCurrentPlayer.isInitialized()) {
-            return mCurrentPlayer.duration();
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
+            return mPlayers[mCurrentPlayer].duration();
         }
         return -1;
     }
 
     @Override
     public long position() {
-        if (mCurrentPlayer.isInitialized()) {
-            return mCurrentPlayer.currentPosition();
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
+            return mPlayers[mCurrentPlayer].currentPosition();
         }
         return -1;
     }
 
     @Override
     public void seek(long pos) {
-        if (mCurrentPlayer.isInitialized()) {
+        if (mPlayers[mCurrentPlayer].isInitialized()) {
             mPlaybackHander.removeMessages(FADEDOWN);
+            mPlaybackHander.removeMessages(CROSSFADE);
             if (pos < 0) pos = 0;
-            if (pos > mCurrentPlayer.duration()) pos = mCurrentPlayer.duration();
-            mCurrentPlayer.seek(pos);
+            if (pos > mPlayers[mCurrentPlayer].duration()) pos = mPlayers[mCurrentPlayer].duration();
+            mPlayers[mCurrentPlayer].seek(pos);
 
-            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
-            scheduleFadeOut(fadeOutSeconds);
+            scheduleFadeOut();
         }
     }
 
-    private void scheduleFadeOut(int fadeOutSeconds) {
+    private void scheduleFadeOut() {
+        int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
+        int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
+
         if (fadeOutSeconds > 0) {
-            long timeLeftMillis = mCurrentPlayer.duration() - mCurrentPlayer.currentPosition();
-            mPlaybackHander.sendEmptyMessageDelayed(FADEDOWN, timeLeftMillis - fadeOutSeconds * 1000);
+            long timeLeftMillis = mPlayers[mCurrentPlayer].duration() - mPlayers[mCurrentPlayer].currentPosition();
+            if (crossFadeSeconds > 0) {
+                mPlaybackHander.sendEmptyMessageDelayed(CROSSFADE, timeLeftMillis - fadeOutSeconds * 1000);
+            }
+            mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, mCurrentPlayer, 0), timeLeftMillis - fadeOutSeconds * 1000);
         }
     }
 
     @Override
     public int getAudioSessionId() {
         synchronized (this) {
-            return mCurrentPlayer.getAudioSessionId();
+            return mPlayers[mCurrentPlayer].getAudioSessionId();
         }
     }
 
