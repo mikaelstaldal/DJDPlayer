@@ -330,7 +330,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private void handlePlayerCallback(int player, Message msg) {
         Log.d(LOGTAG, "handlePlayerCallback " + player + " " + msg.what);
 
-        int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+        int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
 
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
@@ -363,7 +363,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
                     case REPEAT_CURRENT:
                         seek(0);
-                        if (fadeInSeconds > 0) {
+                        if (fadeSeconds > 0) {
                             mCurrentVolume[mCurrentPlayer] = 0f;
                         }
                         play();
@@ -408,7 +408,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             }
 
                             if (!mPlayers[mCurrentPlayer].isPlaying()) {
-                                if (fadeInSeconds > 0) {
+                                if (fadeSeconds > 0) {
                                     mCurrentVolume[mCurrentPlayer] = 0f;
                                     mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
                                 }
@@ -441,8 +441,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage " + msg.what);
 
-            int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
-            int fadeInSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_IN_SECONDS, "0"));
+            int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
 
             switch (msg.what) {
                 case DUCK:
@@ -456,7 +455,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEDOWN:
-                    mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeOutSeconds, 1);
+                    mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] > 0.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, msg.arg1, 0), 10);
                     } else {
@@ -466,7 +465,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEUP:
-                    mCurrentVolume[msg.arg1] += .01f / Math.max(fadeInSeconds, 1);
+                    mCurrentVolume[msg.arg1] += .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] < 1.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
                     } else {
@@ -540,7 +539,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
                 case CROSSFADE:
                     if (mPlayers[mNextPlayer].isInitialized()) {
-                        if (fadeInSeconds > 0) {
+                        if (fadeSeconds > 0) {
                             mCurrentVolume[mNextPlayer]= 0f;
                             mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
                         }
@@ -1450,12 +1449,12 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private void scheduleFadeOut() {
-        int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_OUT_SECONDS, "0"));
-        int crossFadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.CROSS_FADE_SECONDS, "0"));
+        int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
+        boolean crossFade = mSettings.getBoolean(SettingsActivity.CROSS_FADE, false);
 
         if (fadeOutSeconds > 0) {
             long timeLeftMillis = mPlayers[mCurrentPlayer].duration() - mPlayers[mCurrentPlayer].currentPosition();
-            if (crossFadeSeconds > 0) {
+            if (crossFade) {
                 mPlaybackHander.sendEmptyMessageDelayed(CROSSFADE, timeLeftMillis - fadeOutSeconds * 1000);
             }
             mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, mCurrentPlayer, 0), timeLeftMillis - fadeOutSeconds * 1000);

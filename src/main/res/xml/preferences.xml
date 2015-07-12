@@ -32,23 +32,15 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/fade">
         <ListPreference
-            android:key="fade_out_seconds"
-            android:title="@string/fade_out_seconds"
+            android:key="fade_seconds"
+            android:title="@string/fade_seconds"
             android:entries="@array/pref_duration_entries"
             android:entryValues="@array/pref_duration_values"
             android:defaultValue="0" />
-        <ListPreference
-            android:key="fade_in_seconds"
-            android:title="@string/fade_in_seconds"
-            android:entries="@array/pref_duration_entries"
-            android:entryValues="@array/pref_duration_values"
-            android:defaultValue="0" />
-        <ListPreference
-            android:key="cross_fade_seconds"
-            android:title="@string/cross_fade_seconds"
-            android:entries="@array/pref_duration_entries"
-            android:entryValues="@array/pref_duration_values"
-            android:defaultValue="0" />
+        <CheckBoxPreference
+            android:key="cross_fade"
+            android:title="@string/cross_fade"
+            android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/rescan">
         <Preference android:title="@string/rescan_now" >
