@@ -19,7 +19,15 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -502,8 +510,7 @@ public class MusicUtils {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             return;
         }
-        sService.open(list, 0);
-        sService.play();
+        sService.load(list, 0);
     }
 
     public static void shuffleArray(long[] array) {

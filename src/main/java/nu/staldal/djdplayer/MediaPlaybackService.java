@@ -23,20 +23,16 @@ import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -78,6 +74,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private static final int DUCK = 5;
     private static final int FADEUP = 6;
     private static final int FADEDOWN = 7;
+    private static final int PREPARE_NEXT = 8;
 
     private static final char HEXDIGITS[] = new char[]{
             '0', '1', '2', '3',
@@ -87,20 +84,15 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     };
 
     private static final String[] CURSOR_COLS = new String[]{
-            "audio._id AS _id",             // index must match IDCOLIDX below
+            "audio._id AS _id",
             MediaStore.Audio.AudioColumns.ARTIST,
             MediaStore.Audio.AudioColumns.ALBUM,
             MediaStore.Audio.AudioColumns.TITLE,
             MediaStore.Audio.AudioColumns.DATA,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
             MediaStore.Audio.AudioColumns.ALBUM_ID,
-            MediaStore.Audio.AudioColumns.ARTIST_ID,
-            MediaStore.Audio.AudioColumns.IS_PODCAST, // index must match PODCASTCOLIDX below
-            MediaStore.Audio.AudioColumns.BOOKMARK    // index must match BOOKMARKCOLIDX below
+            MediaStore.Audio.AudioColumns.ARTIST_ID
     };
-    private static final int IDCOLIDX = 0;
-    private static final int PODCASTCOLIDX = 8;
-    private static final int BOOKMARKCOLIDX = 9;
 
     /**
      * Interval after which we stop the service when idle.
@@ -123,14 +115,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private long[] mPlayList = new long[0];
     private int mPlayListLen = 0;
     private int mPlayPos = -1;
-    private Cursor mCursor = null;
-    private long mGenreId = -1;
+
     private String mGenreName = null;
-    private int mOpenFailedCounter = 0;
+    private long mGenreId = -1;
+    private String mArtistName = null;
+    private long mArtistId = -1;
+    private String mAlbumName = null;
+    private long mAlbumId = -1;
+    private String mMimeType = null;
+    private File mFolder = null;
+    private String mTrackName = null;
+
     private int mServiceStartId = -1;
     private boolean mServiceInUse = false;
     private boolean mIsSupposedToBePlaying = false;
-    private boolean mQuietMode = false;
     private boolean mQueueIsSaveable = true;
     private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
     private float mCurrentVolume = 1.0f;
@@ -226,7 +224,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             String action = intent.getAction();
 
             if (NEXT_ACTION.equals(action)) {
-                next(true);
+                next();
             } else if (PREVIOUS_ACTION.equals(action)) {
                 if (position() < 2000) {
                     prev();
@@ -319,13 +317,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         mPlaybackHander.removeCallbacksAndMessages(null);
 
-        if (mCursor != null) {
-            mCursor.close();
-            mCursor = null;
-            mGenreId = -1;
-            mGenreName = null;
-        }
-
         unregisterReceiver(mIntentReceiver);
         unregisterReceiver(mUnmountReceiver);
 
@@ -342,11 +333,17 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
                 if (mIsSupposedToBePlaying) {
-                    next(true);
+                    next();
                 } else {
                     // the server died when we were idle, so just reopen the same song
                     // (it will start again from the beginning though when the user restarts)
-                    openCurrent();
+                    synchronized (this) {
+                        if (mPlayListLen > 0) {
+                            if (prepare(mPlayList[mPlayPos])) {
+                                fetchMetadata(mPlayList[mPlayPos]);
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -359,7 +356,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 switch (mRepeatMode) {
                     case REPEAT_STOPAFTER:
                         gotoIdleState();
-                        mIsSupposedToBePlaying = false;
                         notifyChange(PLAYSTATE_CHANGED);
                         break;
 
@@ -371,14 +367,66 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         play();
                         break;
 
-                    default:
-                        if (fadeInSeconds > 0) {
-                            mCurrentVolume = 0f;
+                    case REPEAT_NONE:
+                    case REPEAT_ALL:
+                        synchronized (this) {
+                            if (mPlayListLen <= 0) {
+                                gotoIdleState();
+                                notifyChange(PLAYSTATE_CHANGED);
+                                break;
+                            }
+
+                            if (mPlayPos >= mPlayListLen - 1) {  // we're at the end of the list
+                                if (mRepeatMode == REPEAT_NONE) {
+                                    gotoIdleState();
+                                    notifyChange(PLAYSTATE_CHANGED);
+                                    break;
+                                } else {
+                                    mPlayPos = 0;
+                                }
+                            } else {
+                                mPlayPos++;
+                            }
+
+                            if (mCurrentPlayer.isInitialized()) {
+                                mCurrentPlayer.stop();
+                            }
+
+                            swapPlayers();
+
+                            if (!mCurrentPlayer.isInitialized()) {
+                                while (!prepare(mPlayList[mPlayPos])) {
+                                    if (mPlayPos >= mPlayListLen - 1) { // we're at the end of the list
+                                        Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
+                                        break;
+                                    } else {
+                                        mPlayPos++;
+                                    }
+                                }
+                            }
+                            if (fadeInSeconds > 0) {
+                                mCurrentVolume = 0f;
+                            }
+
+                            mCurrentPlayer.start();
+                            mPlaybackHander.removeMessages(DUCK);
+                            mPlaybackHander.removeMessages(FADEDOWN);
+                            mPlaybackHander.sendEmptyMessage(FADEUP);
+
+                            fetchMetadata(mPlayList[mPlayPos]);
+                            startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
+                            notifyChange(META_CHANGED);
                         }
-                        next(false);
+                        break;
                 }
                 break;
         }
+    }
+
+    private void swapPlayers() {
+        MyMediaPlayer tmp = mCurrentPlayer;
+        mCurrentPlayer = mNextPlayer;
+        mNextPlayer = tmp;
     }
 
     private final Handler mPlaybackHander = new Handler() {
@@ -417,6 +465,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mPlaybackHander.sendEmptyMessageDelayed(FADEUP, 10);
                     } else {
                         mCurrentVolume = 1.0f;
+
+                        mPlaybackHander.sendEmptyMessage(PREPARE_NEXT);
                         scheduleFadeOut(fadeOutSeconds);
                     }
                     mCurrentPlayer.setVolume(mCurrentVolume);
@@ -470,6 +520,15 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             Log.e(LOGTAG, "Unknown audio focus change code");
                     }
                     break;
+
+                case PREPARE_NEXT:
+                    synchronized (this) {
+                        if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
+                            long nextId = mPlayList[mPlayPos + 1];
+                            mNextPlayer.prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
+                        }
+                    }
+                    break;
             }
         }
     };
@@ -498,7 +557,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 pause();
                 mPausedByTransientLossOfFocus = false;
             } else if (NEXT_ACTION.equals(action)) {
-                next(true);
+                next();
             } else if (PREVIOUS_ACTION.equals(action)) {
                 prev();
             } else if (TOGGLEPAUSE_ACTION.equals(action)) {
@@ -668,20 +727,12 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 crsr.close();
             }
 
-            // Make sure we don't auto-skip to the next song, since that
-            // also starts playback. What could happen in that case is:
-            // - music is paused
-            // - go to UMS and delete some files, including the currently playing one
-            // - come back from UMS
-            // (time passes)
-            // - music app is killed for some reason (out of memory)
-            // - music service is restarted, service restores state, doesn't find
-            //   the "current" file, goes to the next and: playback starts on its
-            //   own, potentially at some random inconvenient time.
-            mOpenFailedCounter = 20;
-            mQuietMode = true;
-            openCurrent();
-            mQuietMode = false;
+            if (mPlayListLen > 0) {
+                stop(false);
+                if (prepare(mPlayList[mPlayPos])) {
+                    fetchMetadata(mPlayList[mPlayPos]);
+                }
+            }
             if (!mCurrentPlayer.isInitialized()) {
                 // couldn't restore the saved state
                 mPlayListLen = 0;
@@ -798,12 +849,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     private void updatePlaylist() {
         if (mPlayListLen == 0) {
-            if (mCursor != null) {
-                mCursor.close();
-                mCursor = null;
-                mGenreId = -1;
-                mGenreName = null;
-            }
+            resetMetadata();
             notifyChange(META_CHANGED);
         }
         notifyChange(QUEUE_CHANGED);
@@ -811,32 +857,41 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     @Override
     public void enqueue(long[] list, int action) {
+        if (list.length == 0) return;
+
         synchronized (this) {
             if ((action == NEXT || action == NOW) && mPlayPos + 1 < mPlayListLen) {
                 addToPlayList(list, mPlayPos + 1);
                 if (action == NOW) {
+                    stop(false);
                     mPlayPos++;
-                    openCurrent();
-                    play();
-                    notifyChange(META_CHANGED);
+                    prepareAndPlay(mPlayList[mPlayPos]);
                     return;
                 }
             } else {
                 addToPlayList(list, Integer.MAX_VALUE);
                 if (action == NOW) {
+                    stop(false);
                     mPlayPos = mPlayListLen - list.length;
-                    openCurrent();
-                    play();
-                    notifyChange(META_CHANGED);
+                    prepareAndPlay(mPlayList[mPlayPos]);
                     return;
                 }
             }
             if (mPlayPos < 0) {
+                stop(false);
                 mPlayPos = 0;
-                openCurrent();
-                play();
-                notifyChange(META_CHANGED);
+                prepareAndPlay(mPlayList[mPlayPos]);
             }
+        }
+    }
+
+    private void prepareAndPlay(long audioId) {
+        if (prepare(audioId)) {
+            fetchMetadata(audioId);
+            play();
+            notifyChange(META_CHANGED);
+        } else {
+            Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -866,9 +921,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void open(long[] list, int position) {
+    public void load(long[] list, int position) {
         synchronized (this) {
-            long oldId = getAudioId();
             int listlength = list.length;
             boolean newlist = true;
             if (mPlayListLen == listlength) {
@@ -890,10 +944,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 mPlayPos = 0;
             }
 
-            saveBookmarkIfNeeded();
-            openCurrent();
-            if (oldId != getAudioId()) {
-                notifyChange(META_CHANGED);
+            stop(false);
+            if (mPlayListLen > 0) {
+                prepareAndPlay(mPlayList[mPlayPos]);
             }
         }
     }
@@ -947,61 +1000,48 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         }
     }
 
-    private void openCurrent() {
-        synchronized (this) {
-            if (mCursor != null) {
-                mCursor.close();
-                mCursor = null;
-                mGenreId = -1;
-                mGenreName = null;
-            }
+    private boolean prepare(long audioId) {
+        return mCurrentPlayer.prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(audioId));
+    }
 
-            if (mPlayListLen == 0) {
-                return;
-            }
-            stop(false);
+    private void fetchMetadata(long audioId) {
+        resetMetadata();
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                CURSOR_COLS, "_id=" + String.valueOf(audioId), null, null);
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    mArtistName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                    mArtistId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST_ID));
+                    mAlbumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                    mAlbumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+                    mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
+                    mFolder = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA))).getParentFile();
+                    mTrackName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
 
-            String id = String.valueOf(mPlayList[mPlayPos]);
-
-            mCursor = getContentResolver().query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    CURSOR_COLS, "_id=" + id, null, null);
-            if (mCursor != null) {
-                if (mCursor.moveToFirst()) {
-                    IdAndName idAndName = MusicUtils.fetchGenre(this, mCursor.getLong(IDCOLIDX));
+                    IdAndName idAndName = MusicUtils.fetchGenre(this, audioId);
                     if (idAndName != null) {
                         mGenreId = idAndName.id;
                         mGenreName = idAndName.name;
                     }
                 }
-            }
-
-            mCurrentPlayer.setDataSource(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
-            if (!mCurrentPlayer.isInitialized()) {
-                stop(true);
-                if (mOpenFailedCounter++ < 10 && mPlayListLen > 1) {
-                    // beware: this ends up being recursive because next() calls open() again.
-                    next(false);
-                }
-                if (!mCurrentPlayer.isInitialized() && mOpenFailedCounter != 0) {
-                    // need to make sure we only shows this once
-                    mOpenFailedCounter = 0;
-                    if (!mQuietMode) {
-                        Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
-                    }
-                    Log.d(LOGTAG, "Failed to open file for playback");
-                }
-            } else {
-                mOpenFailedCounter = 0;
-            }
-            // go to bookmark if needed
-            if (isPodcast()) {
-                long bookmark = getBookmark();
-                // Start playing a little bit before the bookmark,
-                // so it's easier to get back in to the narrative.
-                seek(bookmark - 5000);
+            } finally {
+                cursor.close();
             }
         }
+    }
+
+    private void resetMetadata() {
+        mGenreName = null;
+        mGenreId = -1;
+        mArtistName = null;
+        mArtistId = -1;
+        mAlbumName = null;
+        mAlbumId = -1;
+        mMimeType = null;
+        mFolder = null;
+        mTrackName = null;
     }
 
     @Override
@@ -1022,7 +1062,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             long duration = mCurrentPlayer.duration();
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
                     mCurrentPlayer.currentPosition() >= duration - 2000) {
-                next(true);
+                next();
             }
 
             mCurrentPlayer.start();
@@ -1081,15 +1121,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             mPlaybackHander.removeMessages(FADEDOWN);
             mCurrentPlayer.stop();
         }
-        if (mCursor != null) {
-            mCursor.close();
-            mCursor = null;
-            mGenreId = -1;
-            mGenreName = null;
-        }
+        resetMetadata();
         if (remove_status_icon) {
             gotoIdleState();
-            mIsSupposedToBePlaying = false;
         } else {
             stopForeground(false);
         }
@@ -1103,9 +1137,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             if (isPlaying()) {
                 mCurrentPlayer.pause();
                 gotoIdleState();
-                mIsSupposedToBePlaying = false;
                 notifyChange(PLAYSTATE_CHANGED);
-                saveBookmarkIfNeeded();
             }
         }
     }
@@ -1118,46 +1150,31 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public void prev() {
         synchronized (this) {
+            if (mPlayListLen <= 0) return;
+
             if (mPlayPos > 0) {
                 mPlayPos--;
             } else {
                 mPlayPos = mPlayListLen - 1;
             }
-            saveBookmarkIfNeeded();
             stop(false);
-            openCurrent();
-            play();
-            notifyChange(META_CHANGED);
+            prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
 
     @Override
-    public void next(boolean force) {
+    public void next() {
         synchronized (this) {
-            if (mPlayListLen <= 0) {
-                //Log.d(LOGTAG, "No play queue");
-                return;
-            }
+            if (mPlayListLen <= 0) return;
 
             if (mPlayPos >= mPlayListLen - 1) {
                 // we're at the end of the list
-                if (mRepeatMode == REPEAT_NONE && !force) {
-                    // all done
-                    gotoIdleState();
-                    mIsSupposedToBePlaying = false;
-                    notifyChange(PLAYSTATE_CHANGED);
-                    return;
-                } else if (mRepeatMode == REPEAT_ALL || force) {
-                    mPlayPos = 0;
-                }
+                mPlayPos = 0;
             } else {
                 mPlayPos++;
             }
-            saveBookmarkIfNeeded();
             stop(false);
-            openCurrent();
-            play();
-            notifyChange(META_CHANGED);
+            prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
 
@@ -1166,35 +1183,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         Message msg = mDelayedStopHandler.obtainMessage();
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
         stopForeground(true);
-    }
-
-    private void saveBookmarkIfNeeded() {
-        try {
-            if (isPodcast()) {
-                long pos = position();
-                long bookmark = getBookmark();
-                long duration = duration();
-                if ((pos < bookmark && (pos + 10000) > bookmark) ||
-                        (pos > bookmark && (pos - 10000) < bookmark)) {
-                    // The existing bookmark is close to the current
-                    // position, so don't update it.
-                    return;
-                }
-                if (pos < 15000 || (pos + 10000) > duration) {
-                    // if we're near the start or end, clear the bookmark
-                    pos = 0;
-                }
-
-                // write 'pos' to the bookmark field
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Audio.AudioColumns.BOOKMARK, pos);
-                Uri uri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mCursor.getLong(IDCOLIDX));
-                getContentResolver().update(uri, values, null, null);
-            }
-        } catch (SQLiteException ex) {
-            Log.w(LOGTAG, "Error", ex);
-        }
+        mIsSupposedToBePlaying = false;
     }
 
     @Override
@@ -1229,24 +1218,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 if (mPlayListLen == 0) {
                     stop(true);
                     mPlayPos = -1;
-                    if (mCursor != null) {
-                        mCursor.close();
-                        mCursor = null;
-                        mGenreId = -1;
-                        mGenreName = null;
-                    }
+                    resetMetadata();
                 } else {
                     if (mPlayPos >= mPlayListLen) {
                         mPlayPos = 0;
                     }
                     boolean wasPlaying = isPlaying();
                     stop(false);
-                    openCurrent();
-                    if (wasPlaying) {
-                        play();
+
+                    if (prepare(mPlayList[mPlayPos])) {
+                        fetchMetadata(mPlayList[mPlayPos]);
+                        if (wasPlaying) play();
+                        notifyChange(META_CHANGED);
                     }
                 }
-                notifyChange(META_CHANGED);
             }
             return last - first + 1;
         }
@@ -1338,60 +1323,44 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public void setQueuePosition(int pos) {
         synchronized (this) {
+            if (pos > mPlayListLen - 1) return;
             stop(false);
             mPlayPos = pos;
-            openCurrent();
-            play();
-            notifyChange(META_CHANGED);
+            prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
 
     @Override
     public String getArtistName() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+            return mArtistName;
         }
     }
 
     @Override
     public long getArtistId() {
         synchronized (this) {
-            if (mCursor == null) {
-                return -1;
-            }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST_ID));
+            return mArtistId;
         }
     }
 
     @Override
     public String getAlbumName() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+            return mAlbumName;
         }
     }
 
     @Override
     public long getAlbumId() {
         synchronized (this) {
-            if (mCursor == null) {
-                return -1;
-            }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+            return mAlbumId;
         }
     }
 
     @Override
     public String getGenreName() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
             return mGenreName;
         }
     }
@@ -1399,9 +1368,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public long getGenreId() {
         synchronized (this) {
-            if (mCursor == null) {
-                return -1;
-            }
             return mGenreId;
         }
     }
@@ -1409,48 +1375,21 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     @Override
     public String getMimeType() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
+            return mMimeType;
         }
     }
 
     @Override
     public File getFolder() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return new File(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA))).getParentFile();
+            return mFolder;
         }
     }
 
     @Override
     public String getTrackName() {
         synchronized (this) {
-            if (mCursor == null) {
-                return null;
-            }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
-        }
-    }
-
-    private boolean isPodcast() {
-        synchronized (this) {
-            if (mCursor == null) {
-                return false;
-            }
-            return (mCursor.getInt(PODCASTCOLIDX) > 0);
-        }
-    }
-
-    private long getBookmark() {
-        synchronized (this) {
-            if (mCursor == null) {
-                return 0;
-            }
-            return mCursor.getLong(BOOKMARKCOLIDX);
+            return mTrackName;
         }
     }
 

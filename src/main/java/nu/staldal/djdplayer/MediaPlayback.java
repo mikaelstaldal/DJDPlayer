@@ -53,7 +53,7 @@ public interface MediaPlayback {
      *
      * @param list The new list of tracks.
      */
-    void open(long[] list, int position);
+    void load(long[] list, int position);
 
     /**
      * Moves the item at index1 to index2.
@@ -89,7 +89,7 @@ public interface MediaPlayback {
 
     void prev();
 
-    void next(boolean force);
+    void next();
 
     /**
      * Removes the range of tracks specified from the play list. If a file within the range is

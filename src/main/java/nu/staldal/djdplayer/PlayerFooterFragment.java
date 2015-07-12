@@ -96,7 +96,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
         nextButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (service == null) return;
-                service.next(true);
+                service.next();
             }
         });
         nextButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
@@ -256,7 +256,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
             long duration = service.duration();
             if (newpos >= duration) {
                 // move to next track
-                service.next(true);
+                service.next();
                 startSeekPos -= duration; // is OK to go negative
                 newpos -= duration;
             }

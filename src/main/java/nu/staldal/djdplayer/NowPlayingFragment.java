@@ -64,7 +64,7 @@ public class NowPlayingFragment extends Fragment implements FragmentServiceConne
         nowPlaying.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (service != null) service.next(true);
+                if (service != null) service.next();
             }
         });
         playPauseButton = (ImageButton) nowPlaying.findViewById(R.id.pause);

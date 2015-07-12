@@ -90,7 +90,10 @@ class MyMediaPlayer {
         }
     };
 
-    public void setDataSource(String path) {
+    /**
+     * @return true if successful, false if failed
+     */
+    public boolean prepare(String path) {
         try {
             mMediaPlayer.reset();
             mMediaPlayer.setOnPreparedListener(null);
@@ -104,7 +107,7 @@ class MyMediaPlayer {
         } catch (IOException | IllegalArgumentException e) {
             Log.w(LOGTAG, "Couldn't open audio file: " + path, e);
             mIsInitialized = false;
-            return;
+            return false;
         }
         mMediaPlayer.setOnCompletionListener(listener);
         mMediaPlayer.setOnErrorListener(errorListener);
@@ -114,7 +117,10 @@ class MyMediaPlayer {
         i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mContext.getPackageName());
         mContext.sendBroadcast(i);
 
+        Log.i(LOGTAG, "Prepared song: " + path);
+
         mIsInitialized = true;
+        return true;
     }
 
     public boolean isInitialized() {
