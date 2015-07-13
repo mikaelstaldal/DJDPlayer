@@ -24,7 +24,7 @@
         <item>8 seconds</item>
         <item>9 seconds</item>
         <item>10 seconds</item>
-        <item>11 second</item>
+        <item>11 seconds</item>
         <item>12 seconds</item>
         <item>13 seconds</item>
         <item>14 seconds</item>
@@ -34,6 +34,16 @@
         <item>18 seconds</item>
         <item>19 seconds</item>
         <item>20 seconds</item>
+        <item>21 seconds</item>
+        <item>22 seconds</item>
+        <item>23 seconds</item>
+        <item>24 seconds</item>
+        <item>25 seconds</item>
+        <item>26 seconds</item>
+        <item>27 seconds</item>
+        <item>28 seconds</item>
+        <item>29 seconds</item>
+        <item>30 seconds</item>
     </string-array>
     <string-array name="pref_duration_values">
         <item>0</item>
@@ -57,6 +67,16 @@
         <item>18</item>
         <item>19</item>
         <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
     </string-array>
 
 </resources>
