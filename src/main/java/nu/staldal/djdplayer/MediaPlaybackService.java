@@ -420,6 +420,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                     mCurrentVolume[mCurrentPlayer] = 0f;
                                     mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
                                 }
+                                Log.d(LOGTAG, "Starting playback");
                                 mPlayers[mCurrentPlayer].start();
 
                                 mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
@@ -542,11 +543,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         }
                     }
                     if (mPlayers[mNextPlayer].isInitialized()) {
-                        Log.d(LOGTAG, "Cross-fading");
                         if (fadeSeconds > 0) {
                             mCurrentVolume[mNextPlayer]= 0f;
                             mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
                         }
+                        Log.d(LOGTAG, "Cross-fading");
                         mPlayers[mNextPlayer].start();
 
                         mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
