@@ -152,6 +152,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public void onCreate() {
         super.onCreate();
 
+        Log.i(LOGTAG, "onCreate");
+
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
@@ -304,6 +306,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     @Override
     public void onDestroy() {
+        Log.i(LOGTAG, "onDestroy");
+
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
@@ -328,12 +332,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private void handlePlayerCallback(int player, Message msg) {
-        Log.d(LOGTAG, "handlePlayerCallback " + player + " " + msg.what);
-
-        int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
-
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
+                Log.d(LOGTAG, "MediaPlayer died: " + player);
                 if (mIsSupposedToBePlaying) {
                     next();
                 } else {
@@ -350,18 +351,22 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 break;
 
             case MyMediaPlayer.RELEASE_WAKELOCK:
+                Log.d(LOGTAG, "MediaPlayer release wakelock: " + player);
                 mPlayers[player].releaseWakeLock();
                 break;
 
 
             case MyMediaPlayer.TRACK_ENDED:
+                int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
                 switch (mRepeatMode) {
                     case REPEAT_STOPAFTER:
+                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_STOPAFTER: " + player);
                         gotoIdleState();
                         notifyChange(PLAYSTATE_CHANGED);
                         break;
 
                     case REPEAT_CURRENT:
+                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_CURRENT: " + player);
                         seek(0);
                         if (fadeSeconds > 0) {
                             mCurrentVolume[mCurrentPlayer] = 0f;
@@ -371,6 +376,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
                     case REPEAT_NONE:
                     case REPEAT_ALL:
+                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_NONE/REPEAT_ALL: " + player);
                         synchronized (this) {
                             if (mPlayListLen <= 0) {
                                 gotoIdleState();
@@ -439,12 +445,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private final Handler mPlaybackHander = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            Log.d(LOGTAG, "handleMessage " + msg.what);
-
             int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
 
             switch (msg.what) {
                 case DUCK:
+                    Log.v(LOGTAG, "handleMessage DUCK: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .05f;
                     if (mCurrentVolume[msg.arg1] > .2f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(DUCK, msg.arg1, 0), 10);
@@ -455,6 +460,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEDOWN:
+                    Log.v(LOGTAG, "handleMessage FADEDOWN: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] > 0.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, msg.arg1, 0), 10);
@@ -465,6 +471,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEUP:
+                    Log.v(LOGTAG, "handleMessage FADEUP: " + msg.arg1);
                     mCurrentVolume[msg.arg1] += .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] < 1.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
@@ -481,7 +488,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     // This code is here so we can better synchronize it with the code that handles fade-in
                     switch (msg.arg1) {
                         case AudioManager.AUDIOFOCUS_LOSS:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
+                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
                             mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
                             mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
@@ -492,21 +499,21 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             pause();
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                             mPlaybackHander.removeMessages(FADEUP);
                             mPlaybackHander.removeMessages(FADEDOWN);
                             mPlaybackHander.removeMessages(CROSSFADE);
                             mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(DUCK, mCurrentPlayer, 0));
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
+                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
                             if (isPlaying()) {
                                 mPausedByTransientLossOfFocus = true;
                             }
                             pause();
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
-                            Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
+                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
                             mAudioManager.registerRemoteControlClient(mRemoteControlClient);
@@ -524,21 +531,25 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             }
                             break;
                         default:
-                            Log.e(LOGTAG, "Unknown audio focus change code");
+                            Log.w(LOGTAG, "Unknown audio focus change code: " + msg.arg1);
                     }
                     break;
 
                 case PREPARE_NEXT:
+                    Log.d(LOGTAG, "handleMessage PREPARE_NEXT");
                     synchronized (this) {
                         if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
                             long nextId = mPlayList[mPlayPos + 1];
+                            Log.d(LOGTAG, "Preparing next song " + nextId);
                             mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
                         }
                     }
                     break;
 
                 case CROSSFADE:
+                    Log.d(LOGTAG, "handleMessage CROSSFADE");
                     if (mPlayers[mNextPlayer].isInitialized()) {
+                        Log.d(LOGTAG, "Cross-fading");
                         if (fadeSeconds > 0) {
                             mCurrentVolume[mNextPlayer]= 0f;
                             mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
@@ -546,7 +557,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mPlayers[mNextPlayer].start();
 
                         mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
-
                     } else {
                         Log.w(LOGTAG, "Unable to cross-fade since next song is not prepared");
                     }
@@ -668,7 +678,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     q.append(";");
                 }
             }
-            //Log.i("@@@@ service", "created queue string in " + (System.currentTimeMillis() - start) + " ms");
             ed.putString(SettingsActivity.PLAYQUEUE, q.toString());
             ed.putInt(SettingsActivity.CARDID, mCardId);
         }
@@ -678,8 +687,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         }
         ed.putInt(SettingsActivity.REPEATMODE, mRepeatMode);
         ed.apply();
-
-        //Log.i("@@@@ service", "saved state in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     private void reloadQueue() {
@@ -696,7 +703,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         }
         int qlen = q != null ? q.length() : 0;
         if (qlen > 1) {
-            //Log.i("@@@@ service", "loaded queue: " + q);
             int plen = 0;
             int n = 0;
             int shift = 0;
@@ -762,7 +768,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
             long seekpos = mPersistentState.getLong(SettingsActivity.SEEKPOS, 0);
             seek(seekpos >= 0 && seekpos < duration() ? seekpos : 0);
-            //Log.d(LOGTAG, "restored queue, currently at position " + position() + "/" + duration() + " (requested " + seekpos + ")");
 
             int repmode = mPersistentState.getInt(SettingsActivity.REPEATMODE, REPEAT_NONE);
             if (repmode != REPEAT_ALL && repmode != REPEAT_CURRENT) {
@@ -1021,6 +1026,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private boolean prepare(long audioId) {
+        Log.d(LOGTAG, "Preparing song " + audioId);
         return mPlayers[mCurrentPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(audioId));
     }
 
@@ -1448,6 +1454,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private void scheduleFadeOut() {
         int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
         boolean crossFade = mSettings.getBoolean(SettingsActivity.CROSS_FADE, false);
+
+        Log.d(LOGTAG, "Scheduling fade out " + fadeOutSeconds + " seconds with cross-fade=" + crossFade);
 
         if (fadeOutSeconds > 0) {
             long timeLeftMillis = mPlayers[mCurrentPlayer].duration() - mPlayers[mCurrentPlayer].currentPosition();
