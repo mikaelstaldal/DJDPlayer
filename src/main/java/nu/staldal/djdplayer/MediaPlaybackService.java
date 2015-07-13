@@ -74,8 +74,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private static final int DUCK = 5;
     private static final int FADEUP = 6;
     private static final int FADEDOWN = 7;
-    private static final int PREPARE_NEXT = 8;
-    private static final int CROSSFADE = 9;
+    private static final int CROSSFADE = 8;
 
     private static final char HEXDIGITS[] = new char[]{
             '0', '1', '2', '3',
@@ -477,8 +476,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
                     } else {
                         mCurrentVolume[msg.arg1] = 1.0f;
-
-                        mPlaybackHander.sendEmptyMessage(PREPARE_NEXT);
                         scheduleFadeOut();
                     }
                     mPlayers[msg.arg1].setVolume(mCurrentVolume[msg.arg1]);
@@ -535,15 +532,14 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     break;
 
-                case PREPARE_NEXT:
-                    Log.d(LOGTAG, "handleMessage PREPARE_NEXT");
-                    prepareNext();
-                    break;
-
                 case CROSSFADE:
                     Log.d(LOGTAG, "handleMessage CROSSFADE");
                     if (!mPlayers[mNextPlayer].isInitialized()) {
-                        prepareNext();
+                        if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
+                            long nextId = mPlayList[mPlayPos + 1];
+                            Log.d(LOGTAG, "Preparing next song " + nextId);
+                            mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
+                        }
                     }
                     if (mPlayers[mNextPlayer].isInitialized()) {
                         Log.d(LOGTAG, "Cross-fading");
@@ -560,14 +556,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             }
         }
     };
-
-    private void prepareNext() {
-        if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
-            long nextId = mPlayList[mPlayPos + 1];
-            Log.d(LOGTAG, "Preparing next song " + nextId);
-            mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
-        }
-    }
 
     private final Handler mDelayedStopHandler = new Handler() {
         @Override
