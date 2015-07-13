@@ -330,7 +330,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         super.onDestroy();
     }
 
-    private void handlePlayerCallback(int player, Message msg) {
+    private synchronized void handlePlayerCallback(int player, Message msg) {
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
                 Log.d(LOGTAG, "MediaPlayer died: " + player);
@@ -339,11 +339,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 } else {
                     // the server died when we were idle, so just reopen the same song
                     // (it will start again from the beginning though when the user restarts)
-                    synchronized (this) {
-                        if (mPlayListLen > 0) {
-                            if (prepare(mPlayList[mPlayPos])) {
-                                fetchMetadata(mPlayList[mPlayPos]);
-                            }
+                    if (mPlayListLen > 0) {
+                        if (prepare(mPlayList[mPlayPos])) {
+                            fetchMetadata(mPlayList[mPlayPos]);
                         }
                     }
                 }
@@ -379,57 +377,55 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     case REPEAT_NONE:
                     case REPEAT_ALL:
                         Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_NONE/REPEAT_ALL: " + player);
-                        synchronized (this) {
-                            if (mPlayListLen <= 0) {
+                        if (mPlayListLen <= 0) {
+                            gotoIdleState();
+                            notifyChange(PLAYSTATE_CHANGED);
+                            break;
+                        }
+
+                        if (mPlayPos >= mPlayListLen - 1) {  // we're at the end of the list
+                            if (mRepeatMode == REPEAT_NONE) {
                                 gotoIdleState();
                                 notifyChange(PLAYSTATE_CHANGED);
                                 break;
+                            } else {
+                                mPlayPos = 0;
                             }
+                        } else {
+                            mPlayPos++;
+                        }
 
-                            if (mPlayPos >= mPlayListLen - 1) {  // we're at the end of the list
-                                if (mRepeatMode == REPEAT_NONE) {
-                                    gotoIdleState();
-                                    notifyChange(PLAYSTATE_CHANGED);
+                        if (mPlayers[mCurrentPlayer].isInitialized()) {
+                            mPlayers[mCurrentPlayer].stop();
+                        }
+
+                        swapPlayers();
+
+                        if (!mPlayers[mCurrentPlayer].isInitialized()) {
+                            while (!prepare(mPlayList[mPlayPos])) {
+                                if (mPlayPos >= mPlayListLen - 1) { // we're at the end of the list
+                                    Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
                                     break;
                                 } else {
-                                    mPlayPos = 0;
-                                }
-                            } else {
-                                mPlayPos++;
-                            }
-
-                            if (mPlayers[mCurrentPlayer].isInitialized()) {
-                                mPlayers[mCurrentPlayer].stop();
-                            }
-
-                            swapPlayers();
-
-                            if (!mPlayers[mCurrentPlayer].isInitialized()) {
-                                while (!prepare(mPlayList[mPlayPos])) {
-                                    if (mPlayPos >= mPlayListLen - 1) { // we're at the end of the list
-                                        Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
-                                        break;
-                                    } else {
-                                        mPlayPos++;
-                                    }
+                                    mPlayPos++;
                                 }
                             }
-
-                            if (!mPlayers[mCurrentPlayer].isPlaying()) {
-                                if (fadeSeconds > 0) {
-                                    mCurrentVolume[mCurrentPlayer] = 0f;
-                                    mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
-                                }
-                                Log.d(LOGTAG, "Starting playback");
-                                mPlayers[mCurrentPlayer].start();
-
-                                mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
-                            }
-
-                            fetchMetadata(mPlayList[mPlayPos]);
-                            startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
-                            notifyChange(META_CHANGED);
                         }
+
+                        if (!mPlayers[mCurrentPlayer].isPlaying()) {
+                            if (fadeSeconds > 0) {
+                                mCurrentVolume[mCurrentPlayer] = 0f;
+                                mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
+                            }
+                            Log.d(LOGTAG, "Starting playback");
+                            mPlayers[mCurrentPlayer].start();
+
+                            mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
+                        }
+
+                        fetchMetadata(mPlayList[mPlayPos]);
+                        startForeground(PLAYBACKSERVICE_STATUS, buildNotification());
+                        notifyChange(META_CHANGED);
                         break;
                 }
                 break;
