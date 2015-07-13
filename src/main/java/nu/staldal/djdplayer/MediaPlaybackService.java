@@ -358,6 +358,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
             case MyMediaPlayer.TRACK_ENDED:
                 int fadeSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
+                mPlaybackHander.removeMessages(DUCK);
+                mPlaybackHander.removeMessages(FADEDOWN);
+                mPlaybackHander.removeMessages(CROSSFADE);
                 switch (mRepeatMode) {
                     case REPEAT_STOPAFTER:
                         Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_STOPAFTER: " + player);
@@ -420,9 +423,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                 }
                                 mPlayers[mCurrentPlayer].start();
 
-                                mPlaybackHander.removeMessages(DUCK);
-                                mPlaybackHander.removeMessages(FADEDOWN);
-                                mPlaybackHander.removeMessages(CROSSFADE);
                                 mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
                             }
 
@@ -1455,14 +1455,18 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         int fadeOutSeconds = Integer.parseInt(mSettings.getString(SettingsActivity.FADE_SECONDS, "0"));
         boolean crossFade = mSettings.getBoolean(SettingsActivity.CROSS_FADE, false);
 
-        Log.d(LOGTAG, "Scheduling fade out " + fadeOutSeconds + " seconds with cross-fade=" + crossFade);
-
         if (fadeOutSeconds > 0) {
             long timeLeftMillis = mPlayers[mCurrentPlayer].duration() - mPlayers[mCurrentPlayer].currentPosition();
-            if (crossFade) {
-                mPlaybackHander.sendEmptyMessageDelayed(CROSSFADE, timeLeftMillis - fadeOutSeconds * 1000);
+            if (timeLeftMillis > 0) {
+                long delayMillis = timeLeftMillis - fadeOutSeconds * 1000;
+                Log.d(LOGTAG, "Scheduling fade out " + fadeOutSeconds + " seconds with cross-fade=" + crossFade + " in " + delayMillis + " ms");
+                if (crossFade) {
+                    mPlaybackHander.sendEmptyMessageDelayed(CROSSFADE, delayMillis);
+                }
+                mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, mCurrentPlayer, 0), delayMillis);
+            } else {
+                Log.w(LOGTAG, "timeLeft is " + timeLeftMillis + " ms");
             }
-            mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, mCurrentPlayer, 0), timeLeftMillis - fadeOutSeconds * 1000);
         }
     }
 
