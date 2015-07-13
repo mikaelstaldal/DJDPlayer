@@ -537,17 +537,14 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
                 case PREPARE_NEXT:
                     Log.d(LOGTAG, "handleMessage PREPARE_NEXT");
-                    synchronized (this) {
-                        if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
-                            long nextId = mPlayList[mPlayPos + 1];
-                            Log.d(LOGTAG, "Preparing next song " + nextId);
-                            mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
-                        }
-                    }
+                    prepareNext();
                     break;
 
                 case CROSSFADE:
                     Log.d(LOGTAG, "handleMessage CROSSFADE");
+                    if (!mPlayers[mNextPlayer].isInitialized()) {
+                        prepareNext();
+                    }
                     if (mPlayers[mNextPlayer].isInitialized()) {
                         Log.d(LOGTAG, "Cross-fading");
                         if (fadeSeconds > 0) {
@@ -557,14 +554,20 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mPlayers[mNextPlayer].start();
 
                         mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
-                    } else {
-                        Log.w(LOGTAG, "Unable to cross-fade since next song is not prepared");
                     }
 
                     break;
             }
         }
     };
+
+    private void prepareNext() {
+        if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
+            long nextId = mPlayList[mPlayPos + 1];
+            Log.d(LOGTAG, "Preparing next song " + nextId);
+            mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
+        }
+    }
 
     private final Handler mDelayedStopHandler = new Handler() {
         @Override
