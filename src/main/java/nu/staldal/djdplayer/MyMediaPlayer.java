@@ -84,7 +84,7 @@ class MyMediaPlayer {
                     return true;
 
                 default:
-                    Log.w(LOGTAG, "Error: " + what + "," + extra);
+                    Log.w(LOGTAG, "MediaPlayer error: " + what + "," + extra);
                     return false;
             }
         }
