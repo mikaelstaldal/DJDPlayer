@@ -129,9 +129,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     private int mServiceStartId = -1;
     private boolean mServiceInUse = false;
-    private boolean mIsSupposedToBePlaying = false;
+    private volatile boolean mIsSupposedToBePlaying = false;
     private boolean mQueueIsSaveable = true;
-    private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
+    private volatile boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
     private float[] mCurrentVolume = new float[2];
     private volatile int mCurrentPlayer;
     private volatile int mNextPlayer;
@@ -518,7 +518,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                 mCurrentVolume[mCurrentPlayer] = 0f;
                                 mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
                                 play(); // also queues a fade-in
-                            } else {
+                            } else if (isPlaying()) {
                                 mPlaybackHander.removeMessages(DUCK);
                                 mPlaybackHander.removeMessages(FADEDOWN);
                                 mPlaybackHander.removeMessages(CROSSFADE);
@@ -1151,17 +1151,21 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         mPlaybackHander.removeMessages(FADEUP);
         mPlaybackHander.removeMessages(FADEDOWN);
         mPlaybackHander.removeMessages(CROSSFADE);
-        if (isPlaying()) {
-            for (MyMediaPlayer player : mPlayers) {
-                if (player.isPlaying()) player.pause();
-            }
-            gotoIdleState();
+
+        boolean wasPlaying = isPlaying();
+
+        for (MyMediaPlayer player : mPlayers) {
+            if (player.isPlaying()) player.pause();
+        }
+        gotoIdleState();
+
+        if (wasPlaying) {
             notifyChange(PLAYSTATE_CHANGED);
         }
     }
 
     @Override
-    public synchronized boolean isPlaying() {
+    public boolean isPlaying() {
         return mIsSupposedToBePlaying;
     }
 
@@ -1419,7 +1423,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             if (pos > mPlayers[mCurrentPlayer].duration()) pos = mPlayers[mCurrentPlayer].duration();
             mPlayers[mCurrentPlayer].seek(pos);
 
-            scheduleFadeOut();
+            if (mIsSupposedToBePlaying) {
+                scheduleFadeOut();
+            }
         }
     }
 
