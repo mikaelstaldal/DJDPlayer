@@ -792,10 +792,12 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
      * Notify the change-receivers that something has changed.
      * The intent that is sent contains the following data
      * for the currently playing track:
-     * "id" - Integer: the database row ID
+     * "id" - Long: the database row ID
      * "artist" - String: the name of the artist
      * "album" - String: the name of the album
+     * "genre" - String: the name of the genre
      * "track" - String: the name of the track
+     * "playing" - Boolean: is playing now
      * The intent has an action that is one of
      * "nu.staldal.djdplayer.metachanged"
      * "nu.staldal.djdplayer.queuechanged",
@@ -808,9 +810,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
      */
     private void notifyChange(String what) {
         Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(getAudioId()));
+        i.putExtra("id", getAudioId());
         i.putExtra("artist", getArtistName());
         i.putExtra("album", getAlbumName());
+        i.putExtra("genre", getGenreName());
         i.putExtra("track", getTrackName());
         i.putExtra("playing", isPlaying());
         sendStickyBroadcast(i);
