@@ -241,7 +241,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
-                    mPausedByTransientLossOfFocus = false;
                 } else {
                     play();
                 }
@@ -249,10 +248,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 play();
             } else if (PAUSE_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
             } else if (STOP_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
                 seek(0);
             }
         }
@@ -488,9 +485,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
                             mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
-                            if (isPlaying()) {
-                                mPausedByTransientLossOfFocus = false;
-                            }
                             pause();
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
@@ -502,10 +496,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
-                            if (isPlaying()) {
+                            boolean wasPlaying = isPlaying();
+                            pause();
+                            if (wasPlaying) {
                                 mPausedByTransientLossOfFocus = true;
                             }
-                            pause();
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
@@ -579,7 +574,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
             } else if (NEXT_ACTION.equals(action)) {
                 next();
             } else if (PREVIOUS_ACTION.equals(action)) {
@@ -587,7 +581,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
-                    mPausedByTransientLossOfFocus = false;
                 } else {
                     play();
                 }
@@ -595,10 +588,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 play();
             } else if (PAUSE_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
             } else if (STOP_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
                 seek(0);
             } else if (APPWIDGETUPDATE_ACTION.equals(action)) {
                 // Someone asked us to refresh a set of specific widgets, probably
@@ -1162,6 +1153,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         if (wasPlaying) {
             notifyChange(PLAYSTATE_CHANGED);
         }
+
+        mPausedByTransientLossOfFocus = false;
     }
 
     @Override
