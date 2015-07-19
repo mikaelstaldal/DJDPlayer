@@ -105,7 +105,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private AudioManager mAudioManager;
     private SharedPreferences mPersistentState;
     private SharedPreferences mSettings;
-    private MyMediaPlayer[] mPlayers = new MyMediaPlayer[2];
+    private final MyMediaPlayer[] mPlayers = new MyMediaPlayer[2];
     private RemoteControlClient mRemoteControlClient;
 
 
@@ -132,8 +132,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     private boolean mQueueIsSaveable = true;
     private boolean mPausedByTransientLossOfFocus = false; // Used to track what type of audio focus loss caused the playback to pause
     private float[] mCurrentVolume = new float[2];
-    private int mCurrentPlayer;
-    private int mNextPlayer;
+    private volatile int mCurrentPlayer;
+    private volatile int mNextPlayer;
     private int mCardId; // Used to distinguish between different cards when saving/restoring playlists.
 
 
@@ -871,32 +871,30 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void enqueue(long[] list, int action) {
+    public synchronized void enqueue(long[] list, int action) {
         if (list.length == 0) return;
 
-        synchronized (this) {
-            if ((action == NEXT || action == NOW) && mPlayPos + 1 < mPlayListLen) {
-                addToPlayList(list, mPlayPos + 1);
-                if (action == NOW) {
-                    stop();
-                    mPlayPos++;
-                    prepareAndPlay(mPlayList[mPlayPos]);
-                    return;
-                }
-            } else {
-                addToPlayList(list, Integer.MAX_VALUE);
-                if (action == NOW) {
-                    stop();
-                    mPlayPos = mPlayListLen - list.length;
-                    prepareAndPlay(mPlayList[mPlayPos]);
-                    return;
-                }
-            }
-            if (mPlayPos < 0) {
+        if ((action == NEXT || action == NOW) && mPlayPos + 1 < mPlayListLen) {
+            addToPlayList(list, mPlayPos + 1);
+            if (action == NOW) {
                 stop();
-                mPlayPos = 0;
+                mPlayPos++;
                 prepareAndPlay(mPlayList[mPlayPos]);
+                return;
             }
+        } else {
+            addToPlayList(list, Integer.MAX_VALUE);
+            if (action == NOW) {
+                stop();
+                mPlayPos = mPlayListLen - list.length;
+                prepareAndPlay(mPlayList[mPlayPos]);
+                return;
+            }
+        }
+        if (mPlayPos < 0) {
+            stop();
+            mPlayPos = 0;
+            prepareAndPlay(mPlayList[mPlayPos]);
         }
     }
 
@@ -911,106 +909,96 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void interleave(long[] newList, int currentCount, int newCount) {
-        synchronized (this) {
-            long[] destList = new long[mPlayListLen + newList.length];
+    public synchronized void interleave(long[] newList, int currentCount, int newCount) {
+        long[] destList = new long[mPlayListLen + newList.length];
 
-            int destI = 0;
-            int currentI = 0;
-            int newI = 0;
-            while (destI < destList.length) {
-                for (int i = 0; i < currentCount; i++) {
-                    if (currentI >= mPlayListLen) break;
-                    destList[destI++] = mPlayList[currentI++];
-                }
-                for (int i = 0; i < newCount; i++) {
-                    if (newI >= newList.length) break;
-                    destList[destI++] = newList[newI++];
-                }
+        int destI = 0;
+        int currentI = 0;
+        int newI = 0;
+        while (destI < destList.length) {
+            for (int i = 0; i < currentCount; i++) {
+                if (currentI >= mPlayListLen) break;
+                destList[destI++] = mPlayList[currentI++];
             }
-
-            mPlayList = destList;
-            mPlayListLen = mPlayList.length;
-            updatePlaylist();
+            for (int i = 0; i < newCount; i++) {
+                if (newI >= newList.length) break;
+                destList[destI++] = newList[newI++];
+            }
         }
+
+        mPlayList = destList;
+        mPlayListLen = mPlayList.length;
+        updatePlaylist();
     }
 
     @Override
-    public void load(long[] list, int position) {
-        synchronized (this) {
-            int listlength = list.length;
-            boolean newlist = true;
-            if (mPlayListLen == listlength) {
-                // possible fast path: list might be the same
-                newlist = false;
-                for (int i = 0; i < listlength; i++) {
-                    if (list[i] != mPlayList[i]) {
-                        newlist = true;
-                        break;
-                    }
+    public synchronized void load(long[] list, int position) {
+        int listlength = list.length;
+        boolean newlist = true;
+        if (mPlayListLen == listlength) {
+            // possible fast path: list might be the same
+            newlist = false;
+            for (int i = 0; i < listlength; i++) {
+                if (list[i] != mPlayList[i]) {
+                    newlist = true;
+                    break;
                 }
             }
-            if (newlist) {
-                addToPlayList(list, -1);
-            }
-            if (position >= 0) {
-                mPlayPos = position;
-            } else {
-                mPlayPos = 0;
-            }
-
-            stop();
-            prepareAndPlay(mPlayList[mPlayPos]);
         }
+        if (newlist) {
+            addToPlayList(list, -1);
+        }
+        if (position >= 0) {
+            mPlayPos = position;
+        } else {
+            mPlayPos = 0;
+        }
+
+        stop();
+        prepareAndPlay(mPlayList[mPlayPos]);
     }
 
     @Override
-    public void moveQueueItem(int index1, int index2) {
-        synchronized (this) {
-            if (index1 >= mPlayListLen) {
-                index1 = mPlayListLen - 1;
-            }
-            if (index2 >= mPlayListLen) {
-                index2 = mPlayListLen - 1;
-            }
-            if (index1 < index2) {
-                long tmp = mPlayList[index1];
-                System.arraycopy(mPlayList, index1 + 1, mPlayList, index1, index2 - index1);
-                mPlayList[index2] = tmp;
-                if (mPlayPos == index1) {
-                    mPlayPos = index2;
-                } else if (mPlayPos >= index1 && mPlayPos <= index2) {
-                    mPlayPos--;
-                }
-            } else if (index2 < index1) {
-                long tmp = mPlayList[index1];
-                System.arraycopy(mPlayList, index2, mPlayList, index2 + 1, index1 - index2);
-                mPlayList[index2] = tmp;
-                if (mPlayPos == index1) {
-                    mPlayPos = index2;
-                } else if (mPlayPos >= index2 && mPlayPos <= index1) {
-                    mPlayPos++;
-                }
-            }
-            notifyChange(QUEUE_CHANGED);
+    public synchronized void moveQueueItem(int index1, int index2) {
+        if (index1 >= mPlayListLen) {
+            index1 = mPlayListLen - 1;
         }
+        if (index2 >= mPlayListLen) {
+            index2 = mPlayListLen - 1;
+        }
+        if (index1 < index2) {
+            long tmp = mPlayList[index1];
+            System.arraycopy(mPlayList, index1 + 1, mPlayList, index1, index2 - index1);
+            mPlayList[index2] = tmp;
+            if (mPlayPos == index1) {
+                mPlayPos = index2;
+            } else if (mPlayPos >= index1 && mPlayPos <= index2) {
+                mPlayPos--;
+            }
+        } else if (index2 < index1) {
+            long tmp = mPlayList[index1];
+            System.arraycopy(mPlayList, index2, mPlayList, index2 + 1, index1 - index2);
+            mPlayList[index2] = tmp;
+            if (mPlayPos == index1) {
+                mPlayPos = index2;
+            } else if (mPlayPos >= index2 && mPlayPos <= index1) {
+                mPlayPos++;
+            }
+        }
+        notifyChange(QUEUE_CHANGED);
     }
 
     @Override
-    public long[] getQueue() {
-        synchronized (this) {
-            int len = mPlayListLen;
-            long[] list = new long[len];
-            System.arraycopy(mPlayList, 0, list, 0, len);
-            return list;
-        }
+    public synchronized long[] getQueue() {
+        int len = mPlayListLen;
+        long[] list = new long[len];
+        System.arraycopy(mPlayList, 0, list, 0, len);
+        return list;
     }
 
     @Override
-    public int getQueueLength() {
-        synchronized (this) {
-            return mPlayListLen;
-        }
+    public synchronized int getQueueLength() {
+        return mPlayListLen;
     }
 
     private boolean prepare(long audioId) {
@@ -1059,7 +1047,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void play() {
+    public synchronized void play() {
         int result = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -1141,56 +1129,50 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void pause() {
-        synchronized (this) {
-            mPlaybackHander.removeMessages(DUCK);
-            mPlaybackHander.removeMessages(FADEUP);
-            mPlaybackHander.removeMessages(FADEDOWN);
-            mPlaybackHander.removeMessages(CROSSFADE);
-            if (isPlaying()) {
-                for (MyMediaPlayer player : mPlayers) {
-                    if (player.isPlaying()) player.pause();
-                }
-                gotoIdleState();
-                notifyChange(PLAYSTATE_CHANGED);
+    public synchronized void pause() {
+        mPlaybackHander.removeMessages(DUCK);
+        mPlaybackHander.removeMessages(FADEUP);
+        mPlaybackHander.removeMessages(FADEDOWN);
+        mPlaybackHander.removeMessages(CROSSFADE);
+        if (isPlaying()) {
+            for (MyMediaPlayer player : mPlayers) {
+                if (player.isPlaying()) player.pause();
             }
+            gotoIdleState();
+            notifyChange(PLAYSTATE_CHANGED);
         }
     }
 
     @Override
-    public boolean isPlaying() {
+    public synchronized boolean isPlaying() {
         return mIsSupposedToBePlaying;
     }
 
     @Override
-    public void prev() {
-        synchronized (this) {
-            if (mPlayListLen <= 0) return;
+    public synchronized void prev() {
+        if (mPlayListLen <= 0) return;
 
-            if (mPlayPos > 0) {
-                mPlayPos--;
-            } else {
-                mPlayPos = mPlayListLen - 1;
-            }
-            stop();
-            prepareAndPlay(mPlayList[mPlayPos]);
+        if (mPlayPos > 0) {
+            mPlayPos--;
+        } else {
+            mPlayPos = mPlayListLen - 1;
         }
+        stop();
+        prepareAndPlay(mPlayList[mPlayPos]);
     }
 
     @Override
-    public void next() {
-        synchronized (this) {
-            if (mPlayListLen <= 0) return;
+    public synchronized void next() {
+        if (mPlayListLen <= 0) return;
 
-            if (mPlayPos >= mPlayListLen - 1) {
-                // we're at the end of the list
-                mPlayPos = 0;
-            } else {
-                mPlayPos++;
-            }
-            stop();
-            prepareAndPlay(mPlayList[mPlayPos]);
+        if (mPlayPos >= mPlayListLen - 1) {
+            // we're at the end of the list
+            mPlayPos = 0;
+        } else {
+            mPlayPos++;
         }
+        stop();
+        prepareAndPlay(mPlayList[mPlayPos]);
     }
 
     private void gotoIdleState() {
@@ -1202,7 +1184,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public int removeTracks(int first, int last) {
+    public synchronized int removeTracks(int first, int last) {
         int numremoved = removeTracksInternal(first, last);
         if (numremoved > 0) {
             notifyChange(QUEUE_CHANGED);
@@ -1211,56 +1193,52 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private int removeTracksInternal(int first, int last) {
-        synchronized (this) {
-            if (last < first) return 0;
-            if (first < 0) first = 0;
-            if (last >= mPlayListLen) last = mPlayListLen - 1;
+        if (last < first) return 0;
+        if (first < 0) first = 0;
+        if (last >= mPlayListLen) last = mPlayListLen - 1;
 
-            boolean gotonext = false;
-            if (first <= mPlayPos && mPlayPos <= last) {
-                mPlayPos = first;
-                gotonext = true;
-            } else if (mPlayPos > last) {
-                mPlayPos -= (last - first + 1);
-            }
-            int num = mPlayListLen - last - 1;
-            for (int i = 0; i < num; i++) {
-                mPlayList[first + i] = mPlayList[last + 1 + i];
-            }
-            mPlayListLen -= last - first + 1;
+        boolean gotonext = false;
+        if (first <= mPlayPos && mPlayPos <= last) {
+            mPlayPos = first;
+            gotonext = true;
+        } else if (mPlayPos > last) {
+            mPlayPos -= (last - first + 1);
+        }
+        int num = mPlayListLen - last - 1;
+        for (int i = 0; i < num; i++) {
+            mPlayList[first + i] = mPlayList[last + 1 + i];
+        }
+        mPlayListLen -= last - first + 1;
 
-            if (gotonext) {
-                if (mPlayListLen == 0) {
-                    stop();
-                    gotoIdleState();
-                    mPlayPos = -1;
-                } else {
-                    if (mPlayPos >= mPlayListLen) {
-                        mPlayPos = 0;
-                    }
-                    boolean wasPlaying = isPlaying();
-                    stop();
+        if (gotonext) {
+            if (mPlayListLen == 0) {
+                stop();
+                gotoIdleState();
+                mPlayPos = -1;
+            } else {
+                if (mPlayPos >= mPlayListLen) {
+                    mPlayPos = 0;
+                }
+                boolean wasPlaying = isPlaying();
+                stop();
 
-                    if (prepare(mPlayList[mPlayPos])) {
-                        fetchMetadata(mPlayList[mPlayPos]);
-                        if (wasPlaying) play();
-                        notifyChange(META_CHANGED);
-                    }
+                if (prepare(mPlayList[mPlayPos])) {
+                    fetchMetadata(mPlayList[mPlayPos]);
+                    if (wasPlaying) play();
+                    notifyChange(META_CHANGED);
                 }
             }
-            return last - first + 1;
         }
+        return last - first + 1;
     }
 
     @Override
-    public int removeTrack(long id) {
+    public synchronized int removeTrack(long id) {
         int numremoved = 0;
-        synchronized (this) {
-            for (int i = 0; i < mPlayListLen; i++) {
-                if (mPlayList[i] == id) {
-                    numremoved += removeTracksInternal(i, i);
-                    i--;
-                }
+        for (int i = 0; i < mPlayListLen; i++) {
+            if (mPlayList[i] == id) {
+                numremoved += removeTracksInternal(i, i);
+                i--;
             }
         }
         if (numremoved > 0) {
@@ -1270,142 +1248,113 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void doShuffle() {
-        synchronized (this) {
-            Random random = new Random();
-            for (int i = 0; i < mPlayListLen; i++) {
-                if (i != mPlayPos) {
-                    int randomPosition = random.nextInt(mPlayListLen);
-                    while (randomPosition == mPlayPos) randomPosition = random.nextInt(mPlayListLen);
-                    long temp = mPlayList[i];
-                    mPlayList[i] = mPlayList[randomPosition];
-                    mPlayList[randomPosition] = temp;
-                }
+    public synchronized void doShuffle() {
+        Random random = new Random();
+        for (int i = 0; i < mPlayListLen; i++) {
+            if (i != mPlayPos) {
+                int randomPosition = random.nextInt(mPlayListLen);
+                while (randomPosition == mPlayPos) randomPosition = random.nextInt(mPlayListLen);
+                long temp = mPlayList[i];
+                mPlayList[i] = mPlayList[randomPosition];
+                mPlayList[randomPosition] = temp;
             }
-            notifyChange(QUEUE_CHANGED);
         }
+        notifyChange(QUEUE_CHANGED);
     }
 
     @Override
-    public void uniqueify() {
-        synchronized (this) {
-            if (!isPlaying()) {
-                boolean modified = false;
-                Set<Long> found = new HashSet<>();
-                for (int i = mPlayListLen - 1; i >= 0; i--) {
-                    if (!found.add(mPlayList[i])) {
-                        removeTracksInternal(i, i);
-                        modified = true;
-                    }
+    public synchronized void uniqueify() {
+        if (!isPlaying()) {
+            boolean modified = false;
+            Set<Long> found = new HashSet<>();
+            for (int i = mPlayListLen - 1; i >= 0; i--) {
+                if (!found.add(mPlayList[i])) {
+                    removeTracksInternal(i, i);
+                    modified = true;
                 }
-                if (modified) {
-                    notifyChange(QUEUE_CHANGED);
-                }
+            }
+            if (modified) {
+                notifyChange(QUEUE_CHANGED);
             }
         }
     }
 
     @Override
-    public void setRepeatMode(int repeatmode) {
-        synchronized (this) {
-            mRepeatMode = repeatmode;
-            saveQueue(false);
-        }
+    public synchronized void setRepeatMode(int repeatmode) {
+        mRepeatMode = repeatmode;
+        saveQueue(false);
     }
 
     @Override
-    public int getRepeatMode() {
+    public synchronized int getRepeatMode() {
         return mRepeatMode;
     }
 
     @Override
-    public long getAudioId() {
-        synchronized (this) {
-            if (mPlayPos >= 0 && mPlayers[mCurrentPlayer].isInitialized()) {
-                return mPlayList[mPlayPos];
-            }
-        }
-        return -1;
-    }
-
-    @Override
-    public int getQueuePosition() {
-        synchronized (this) {
-            return mPlayPos;
+    public synchronized long getAudioId() {
+        if (mPlayPos >= 0 && mPlayers[mCurrentPlayer].isInitialized()) {
+            return mPlayList[mPlayPos];
+        } else {
+            return -1;
         }
     }
 
     @Override
-    public void setQueuePosition(int pos) {
-        synchronized (this) {
-            if (pos > mPlayListLen - 1) return;
-            stop();
-            mPlayPos = pos;
-            prepareAndPlay(mPlayList[mPlayPos]);
-        }
+    public synchronized int getQueuePosition() {
+        return mPlayPos;
     }
 
     @Override
-    public String getArtistName() {
-        synchronized (this) {
-            return mArtistName;
-        }
+    public synchronized void setQueuePosition(int pos) {
+        if (pos > mPlayListLen - 1) return;
+        stop();
+        mPlayPos = pos;
+        prepareAndPlay(mPlayList[mPlayPos]);
     }
 
     @Override
-    public long getArtistId() {
-        synchronized (this) {
-            return mArtistId;
-        }
+    public synchronized String getArtistName() {
+        return mArtistName;
     }
 
     @Override
-    public String getAlbumName() {
-        synchronized (this) {
-            return mAlbumName;
-        }
+    public synchronized long getArtistId() {
+        return mArtistId;
     }
 
     @Override
-    public long getAlbumId() {
-        synchronized (this) {
-            return mAlbumId;
-        }
+    public synchronized String getAlbumName() {
+        return mAlbumName;
     }
 
     @Override
-    public String getGenreName() {
-        synchronized (this) {
-            return mGenreName;
-        }
+    public synchronized long getAlbumId() {
+        return mAlbumId;
     }
 
     @Override
-    public long getGenreId() {
-        synchronized (this) {
-            return mGenreId;
-        }
+    public synchronized String getGenreName() {
+        return mGenreName;
     }
 
     @Override
-    public String getMimeType() {
-        synchronized (this) {
-            return mMimeType;
-        }
+    public synchronized long getGenreId() {
+        return mGenreId;
     }
 
     @Override
-    public File getFolder() {
-        synchronized (this) {
-            return mFolder;
-        }
+    public synchronized String getMimeType() {
+        return mMimeType;
     }
 
     @Override
-    public String getTrackName() {
-        synchronized (this) {
-            return mTrackName;
-        }
+    public synchronized File getFolder() {
+        return mFolder;
+    }
+
+    @Override
+    public synchronized String getTrackName() {
+        return mTrackName;
     }
 
     @Override
@@ -1425,7 +1374,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
-    public void seek(long pos) {
+    public synchronized void seek(long pos) {
         if (mPlayers[mCurrentPlayer].isInitialized()) {
             mPlaybackHander.removeMessages(DUCK);
             mPlaybackHander.removeMessages(FADEUP);
@@ -1460,9 +1409,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     @Override
     public int getAudioSessionId() {
-        synchronized (this) {
-            return mPlayers[mCurrentPlayer].getAudioSessionId();
-        }
+        return mPlayers[mCurrentPlayer].getAudioSessionId();
     }
 
 }
