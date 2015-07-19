@@ -33,6 +33,7 @@ import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -162,7 +163,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mCardId = MusicUtils.getCardId(this);
+        mCardId = fetchCardId();
 
         IntentFilter iFilter = new IntentFilter();
         iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
@@ -620,7 +621,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 mQueueIsSaveable = false;
                 closeExternalStorageFiles();
             } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
+                mCardId = fetchCardId();
                 reloadQueue();
                 mQueueIsSaveable = true;
                 notifyChange(QUEUE_CHANGED);
@@ -628,6 +629,17 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             }
         }
     };
+
+    private int fetchCardId() {
+        Cursor c = getContentResolver().query(Uri.parse("content://media/external/fs_id"), null, null, null, null);
+        int id = -1;
+        if (c != null) {
+            c.moveToFirst();
+            id = c.getInt(0);
+            c.close();
+        }
+        return id;
+    }
 
     private final OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
         @Override

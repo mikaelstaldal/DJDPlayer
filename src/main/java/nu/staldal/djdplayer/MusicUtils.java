@@ -539,18 +539,6 @@ public class MusicUtils {
         ed.apply();
     }
 
-    static int getCardId(Context context) {
-        ContentResolver res = context.getContentResolver();
-        Cursor c = res.query(Uri.parse("content://media/external/fs_id"), null, null, null, null);
-        int id = -1;
-        if (c != null) {
-            c.moveToFirst();
-            id = c.getInt(0);
-            c.close();
-        }
-        return id;
-    }
-
     static IdAndName fetchGenre(Context context, long songId) {
         Cursor c = context.getContentResolver().query(
                 Uri.parse("content://media/external/audio/media/" + String.valueOf(songId) + "/genres"),
