@@ -41,6 +41,18 @@
             android:contentDescription="@string/playing"/>
 
     <ImageView
+            android:id="@+id/crossfade_indicator"
+            android:src="@drawable/indicator_ic_mp_crossfading_list"
+            android:visibility="invisible"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/duration"
+            android:layout_marginTop="10dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dip"
+            android:contentDescription="@string/crossfading"/>
+
+    <ImageView
             android:id="@+id/context_menu"
             android:src="@drawable/ic_context_menu"
             android:paddingRight="10dip"

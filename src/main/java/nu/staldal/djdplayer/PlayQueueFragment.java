@@ -17,15 +17,30 @@ package nu.staldal.djdplayer;
 
 import android.app.AlertDialog;
 import android.app.ListFragment;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import nu.staldal.ui.TouchInterceptor;
 
 import java.util.Arrays;
@@ -38,6 +53,7 @@ public class PlayQueueFragment extends ListFragment
             MediaStore.Audio.AudioColumns.TITLE,
             MediaStore.Audio.AudioColumns.ARTIST,
             MediaStore.Audio.AudioColumns.DURATION,
+            MediaStore.Audio.AudioColumns._ID,
             MediaStore.Audio.AudioColumns._ID,
             MediaStore.Audio.AudioColumns.ALBUM,
             MediaStore.Audio.AudioColumns.MIME_TYPE
@@ -113,7 +129,7 @@ public class PlayQueueFragment extends ListFragment
                 R.layout.edit_track_list_item,
                 playQueueCursor,
                 mCols,
-                new int[] { R.id.line1, R.id.line2, R.id.duration, R.id.play_indicator },
+                new int[] { R.id.line1, R.id.line2, R.id.duration, R.id.play_indicator, R.id.crossfade_indicator },
                 0);
         listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             final String unknownArtist = PlayQueueFragment.this.getActivity().getString(R.string.unknown_artist_name);
@@ -143,8 +159,18 @@ public class PlayQueueFragment extends ListFragment
                     case R.id.play_indicator:
                         if (service != null) {
                             int cursorPosition = cursor.getPosition();
-                            int serviceQueuePosition = service.getQueuePosition();
-                            if (cursorPosition == serviceQueuePosition) {
+                            if (cursorPosition == service.getQueuePosition()) {
+                                view.setVisibility(View.VISIBLE);
+                            } else {
+                                view.setVisibility(View.INVISIBLE);
+                            }
+                            return true;
+                        }
+
+                    case R.id.crossfade_indicator:
+                        if (service != null) {
+                            int cursorPosition = cursor.getPosition();
+                            if (cursorPosition == service.getCrossfadeQueuePosition()) {
                                 view.setVisibility(View.VISIBLE);
                             } else {
                                 view.setVisibility(View.INVISIBLE);

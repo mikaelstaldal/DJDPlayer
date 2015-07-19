@@ -548,6 +548,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                         mPlayers[mNextPlayer].start();
 
                         mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
+
+                        notifyChange(META_CHANGED);
                     }
 
                     break;
@@ -1315,8 +1317,26 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @Override
+    public synchronized long getCrossfadeAudioId() {
+        if (mPlayPos >= 0 && mPlayers[mNextPlayer].isPlaying()) {
+            return mPlayList[mPlayPos + 1];
+        } else {
+            return -1;
+        }
+    }
+
+    @Override
     public synchronized int getQueuePosition() {
         return mPlayPos;
+    }
+
+    @Override
+    public synchronized int getCrossfadeQueuePosition() {
+        if (mPlayPos >= 0 && mPlayers[mNextPlayer].isPlaying()) {
+            return mPlayPos + 1;
+        } else {
+            return -1;
+        }
     }
 
     @Override

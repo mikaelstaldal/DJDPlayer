@@ -126,11 +126,23 @@ public interface MediaPlayback {
     long getAudioId();
 
     /**
+     * Returns the rowid of the currently crossfading file, or -1 if
+     * no file is currently crossfading.
+     */
+    long getCrossfadeAudioId();
+
+    /**
      * Returns the position in the queue
      *
      * @return the position in the queue
      */
     int getQueuePosition();
+
+    /**
+     * Returns the position in the queue currently crossfading file, or -1 if
+     * no file is currently crossfading.
+     */
+    int getCrossfadeQueuePosition();
 
     /**
      * Starts playing the track at the given position in the queue.

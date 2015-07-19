@@ -19,15 +19,33 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Loader;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AlphabetIndexer;
+import android.widget.CursorAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.SectionIndexer;
+import android.widget.TextView;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.ui.TouchInterceptor;
 import nu.staldal.ui.WithSectionMenu;
@@ -476,6 +494,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             TextView line2;
             TextView duration;
             ImageView play_indicator;
+            ImageView crossfade_indicator;
             CharArrayBuffer buffer1;
             char[] buffer2;
         }
@@ -529,6 +548,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             vh.line2 = (TextView) v.findViewById(R.id.line2);
             vh.duration = (TextView) v.findViewById(R.id.duration);
             vh.play_indicator = (ImageView) v.findViewById(R.id.play_indicator);
+            vh.crossfade_indicator = (ImageView) v.findViewById(R.id.crossfade_indicator);
             vh.buffer1 = new CharArrayBuffer(100);
             vh.buffer2 = new char[200];
             v.setTag(vh);
@@ -565,16 +585,27 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             builder.getChars(0, len, vh.buffer2, 0);
             vh.line2.setText(vh.buffer2, 0, len);
 
-            ImageView iv = vh.play_indicator;
-            long id = -1;
+            long audioId = cursor.getLong(audioIdIdx);
+
+            long playingId = -1;
             if (MusicUtils.sService != null) {
-                id = MusicUtils.sService.getAudioId();
+                playingId = MusicUtils.sService.getAudioId();
             }
 
-            if (cursor.getLong(audioIdIdx) == id) {
-                iv.setVisibility(View.VISIBLE);
+            long crossfadingId = -1;
+            if (MusicUtils.sService != null) {
+                crossfadingId = MusicUtils.sService.getCrossfadeAudioId();
+            }
+
+            if (audioId == playingId) {
+                vh.play_indicator.setVisibility(View.VISIBLE);
+                vh.crossfade_indicator.setVisibility(View.INVISIBLE);
+            } else if (audioId == crossfadingId) {
+                vh.play_indicator.setVisibility(View.INVISIBLE);
+                vh.crossfade_indicator.setVisibility(View.VISIBLE);
             } else {
-                iv.setVisibility(View.INVISIBLE);
+                vh.play_indicator.setVisibility(View.INVISIBLE);
+                vh.crossfade_indicator.setVisibility(View.INVISIBLE);
             }
         }
 
