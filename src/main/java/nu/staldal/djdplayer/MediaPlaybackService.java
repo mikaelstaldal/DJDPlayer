@@ -446,7 +446,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
             switch (msg.what) {
                 case DUCK:
-                    Log.v(LOGTAG, "handleMessage DUCK: " + msg.arg1);
+                    // Log.v(LOGTAG, "handleMessage DUCK: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .05f;
                     if (mCurrentVolume[msg.arg1] > .2f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(DUCK, msg.arg1, 0), 10);
@@ -457,7 +457,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEDOWN:
-                    Log.v(LOGTAG, "handleMessage FADEDOWN: " + msg.arg1);
+                    // Log.v(LOGTAG, "handleMessage FADEDOWN: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] > 0.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, msg.arg1, 0), 10);
@@ -468,7 +468,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     break;
 
                 case FADEUP:
-                    Log.v(LOGTAG, "handleMessage FADEUP: " + msg.arg1);
+                    // Log.v(LOGTAG, "handleMessage FADEUP: " + msg.arg1);
                     mCurrentVolume[msg.arg1] += .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] < 1.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
