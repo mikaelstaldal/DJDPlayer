@@ -119,3 +119,4 @@
 2.8.1
 -----
 * Bug fix in removing dups from playlist
+* Show filename of exported playlist

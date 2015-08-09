@@ -27,9 +27,14 @@ import android.util.Log;
 import android.widget.Toast;
 import nu.staldal.djdplayer.provider.MusicContract;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
-public class ExportPlaylistTask extends AsyncTask<Object,Void,File> {
+public class ExportPlaylistTask extends AsyncTask<Object,Void,Object[]> {
     private static final String LOGTAG = "ExportPlaylistTask";
 
     private final Context context;
@@ -39,7 +44,7 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,File> {
     }
 
     @Override
-    protected File doInBackground(Object... params) {
+    protected Object[] doInBackground(Object... params) {
         String playlistName = (String)params[0];
         long playlistId = (Long)params[1];
         boolean shouldShare = (Boolean)params[2];
@@ -54,7 +59,7 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,File> {
 
         export(playlistId, musicDir.length()+1, file);
 
-        return shouldShare ? file : null;
+        return new Object[] { file, shouldShare };
     }
 
     private void export(long playlistId, int prefix, File file) {
@@ -95,12 +100,15 @@ public class ExportPlaylistTask extends AsyncTask<Object,Void,File> {
     }
 
     @Override
-    protected void onPostExecute(File file) {
-        if (file != null) {
+    protected void onPostExecute(Object[] params) {
+        File file = (File)params[0];
+        boolean shouldShare = (Boolean)params[1];
+
+        if (shouldShare) {
             String fileName = file.getName();
             share(file, fileName.substring(0, fileName.length()-4));
         } else {
-            Toast.makeText(context, R.string.playlist_exported, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getResources().getString(R.string.playlist_exported, file.getAbsolutePath()), Toast.LENGTH_LONG).show();
         }
     }
 
