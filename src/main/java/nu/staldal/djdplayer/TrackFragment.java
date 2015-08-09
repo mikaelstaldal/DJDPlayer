@@ -141,22 +141,28 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         return new CursorLoader(getActivity(), uri, null, null, null, null);
     }
 
-    private boolean removePlaylistItem(int which) {
+    private void removePlaylistItem(int which) {
         View v = getListView().getChildAt(which - getListView().getFirstVisiblePosition());
-        if (v == null) {
-            Log.d(LOGTAG, "No view when removing playlist item " + which);
-            return false;
+        if (v != null) {
+            v.setVisibility(View.GONE);
+            getListView().invalidateViews();
         }
-        v.setVisibility(View.GONE);
-        getListView().invalidateViews();
-        int colidx = adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
+        removeItemFromPlaylist(which);
+        if (v != null) {
+            v.setVisibility(View.VISIBLE);
+            getListView().invalidateViews();
+        }
+    }
+
+    private void removeItemFromPlaylist(int which) {
         adapter.getCursor().moveToPosition(which);
-        long id = adapter.getCursor().getLong(colidx);
+        long itemId = adapter.getCursor().getLong(adapter.getCursor().getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID));
+        Log.d(LOGTAG, "Removing item " + itemId + " from playlist " + uri.toString());
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist);
-        boolean ret = getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri, id), null, null) > 0;
-        v.setVisibility(View.VISIBLE);
-        getListView().invalidateViews();
-        return ret;
+        int rowCount = getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri, itemId), null, null);
+        if (rowCount < 1) {
+            Log.i(LOGTAG, "Unable to remove item " + itemId + " from playlist " + uri.toString());
+        }
     }
 
     @Override
