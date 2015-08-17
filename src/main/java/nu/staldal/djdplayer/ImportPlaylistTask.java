@@ -26,7 +26,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
@@ -76,17 +80,17 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
         } finally {
             try {
                 if (is != null) is.close();
-
-                if (ContentResolver.SCHEME_FILE.equals(playlistToImport.getScheme())) {
-                    boolean successful = new File(playlistToImport.getPath()).delete();
-                    if (!successful) Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
-                }
             } catch (IOException e) {
                 Log.w(LOGTAG, "Unable to close playlist: " + playlistToImport.toString(), e);
             }
         }
 
         if (!songIds.isEmpty()) {
+            if (ContentResolver.SCHEME_FILE.equals(playlistToImport.getScheme())) {
+                boolean successful = new File(playlistToImport.getPath()).delete();
+                if (!successful) Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
+            }
+
             Uri createdPlaylist = MusicUtils.createPlaylist(context, name);
             long[] ids = new long[songIds.size()];
             for (int i = 0; i < ids.length; i++) ids[i] = songIds.get(i);
