@@ -76,19 +76,24 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             }
         } catch (IOException e) {
             Log.w(LOGTAG, "Unable to read playlist: " + playlistToImport.toString(), e);
+            MusicUtils.reportError(context, "Unable to read playlist: " + playlistToImport.toString(), e);
             return context.getString(R.string.unable_to_import_playlist);
         } finally {
             try {
                 if (is != null) is.close();
             } catch (IOException e) {
                 Log.w(LOGTAG, "Unable to close playlist: " + playlistToImport.toString(), e);
+                MusicUtils.reportError(context, "Unable to close playlist: " + playlistToImport.toString(), e);
             }
         }
 
         if (!songIds.isEmpty()) {
             if (ContentResolver.SCHEME_FILE.equals(playlistToImport.getScheme())) {
                 boolean successful = new File(playlistToImport.getPath()).delete();
-                if (!successful) Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
+                if (!successful) {
+                    Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
+                    MusicUtils.reportError(context, "Unable to delete playlist file: " + playlistToImport.toString());
+                }
             }
 
             Uri createdPlaylist = MusicUtils.createPlaylist(context, name);
@@ -97,6 +102,8 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             MusicUtils.addToPlaylist(context, ids, createdPlaylist);
             return context.getString(R.string.playlist_imported);
         } else {
+            Log.w(LOGTAG, "Empty playlist: " + playlistToImport.toString());
+            MusicUtils.reportError(context, "Empty playlist: " + playlistToImport.toString());
             return context.getString(R.string.unable_to_import_playlist);
         }
     }

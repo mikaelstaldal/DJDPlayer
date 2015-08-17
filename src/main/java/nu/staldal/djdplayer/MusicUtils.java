@@ -41,7 +41,9 @@ import android.view.ViewConfiguration;
 import android.widget.Toast;
 import nu.staldal.djdplayer.provider.ID3Utils;
 
+import java.io.CharArrayWriter;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -681,6 +683,32 @@ public class MusicUtils {
 
     static boolean hasMenuKey(Context context) {
         return ViewConfiguration.get(context).hasPermanentMenuKey();
+    }
+
+    static void reportError(Context context, String text) {
+        reportError(context, text, null);
+    }
+
+    static void reportError(Context context, String text, Throwable t) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        if (t != null) {
+            CharArrayWriter buffer = new CharArrayWriter();
+            PrintWriter pw = new PrintWriter(buffer);
+            pw.append(text);
+            pw.append('\n');
+            t.printStackTrace(pw);
+            pw.flush();
+            intent.putExtra(Intent.EXTRA_TEXT, buffer.toString());
+        } else {
+            intent.putExtra(Intent.EXTRA_TEXT, text);
+        }
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"djdplayer@staldal.nu"});
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Error report from DJD Player");
+
+        Intent chooser = Intent.createChooser(intent, context.getString(R.string.report_error));
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(chooser);
     }
 }
 

@@ -331,6 +331,8 @@
 
     <string name="streaming">Streaming</string>
 
+    <string name="report_error">Report error</string>
+
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
