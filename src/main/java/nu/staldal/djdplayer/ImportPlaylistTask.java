@@ -87,25 +87,20 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             }
         }
 
-        if (!songIds.isEmpty()) {
-            if (ContentResolver.SCHEME_FILE.equals(playlistToImport.getScheme())) {
-                boolean successful = new File(playlistToImport.getPath()).delete();
-                if (!successful) {
-                    Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
-                    MusicUtils.reportError(context, "Unable to delete playlist file: " + playlistToImport.toString());
-                }
-            }
+        Uri createdPlaylist = MusicUtils.createPlaylist(context, name);
+        long[] ids = new long[songIds.size()];
+        for (int i = 0; i < ids.length; i++) ids[i] = songIds.get(i);
+        MusicUtils.addToPlaylist(context, ids, createdPlaylist);
 
-            Uri createdPlaylist = MusicUtils.createPlaylist(context, name);
-            long[] ids = new long[songIds.size()];
-            for (int i = 0; i < ids.length; i++) ids[i] = songIds.get(i);
-            MusicUtils.addToPlaylist(context, ids, createdPlaylist);
-            return context.getString(R.string.playlist_imported);
-        } else {
-            Log.w(LOGTAG, "Empty playlist: " + playlistToImport.toString());
-            MusicUtils.reportError(context, "Empty playlist: " + playlistToImport.toString());
-            return context.getString(R.string.unable_to_import_playlist);
+        if (ContentResolver.SCHEME_FILE.equals(playlistToImport.getScheme())) {
+            boolean successful = new File(playlistToImport.getPath()).delete();
+            if (!successful) {
+                Log.w(LOGTAG, "Unable to delete playlist file: " + playlistToImport.toString());
+                MusicUtils.reportError(context, "Unable to delete playlist file: " + playlistToImport.toString());
+            }
         }
+
+        return context.getString(R.string.playlist_imported);
     }
 
     private void parseLine(String musicDir, ArrayList<Long> songIds, String line) {
