@@ -65,6 +65,8 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
                 SettingsActivity.MUSIC_FOLDER,
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
 
+        Log.d(LOGTAG, "musicDir: " + musicDir);
+
         InputStream is = null;
         try {
             is = context.getContentResolver().openInputStream(playlistToImport);
@@ -87,6 +89,8 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             }
         }
 
+        Log.d(LOGTAG, "playlist read, found " + songIds.size() + " songs to import");
+
         Uri createdPlaylist = MusicUtils.createPlaylist(context, name);
         long[] ids = new long[songIds.size()];
         for (int i = 0; i < ids.length; i++) ids[i] = songIds.get(i);
@@ -100,12 +104,16 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             }
         }
 
+        Log.d(LOGTAG, "Import done");
+
         return context.getString(R.string.playlist_imported);
     }
 
     private void parseLine(String musicDir, ArrayList<Long> songIds, String line) {
         if (!line.isEmpty() && line.charAt(0) != '#') {
+            Log.d(LOGTAG, "Line: " + line);
             String songPath = (line.charAt(0) == '/') ? line : musicDir + '/' + line;
+            Log.d(LOGTAG, "songPath: " + songPath);
             Cursor cursor = context.getContentResolver().query(
                     MediaStore.Audio.Media.getContentUriForPath(songPath),
                     new String[] { MediaStore.Audio.AudioColumns._ID },
@@ -115,6 +123,7 @@ public class ImportPlaylistTask extends AsyncTask<Uri,Void,CharSequence> {
             if (cursor != null && cursor.moveToFirst()) {
                 long id = cursor.getLong(0);
                 songIds.add(id);
+                Log.d(LOGTAG, "Found id: " + id);
             }
             if (cursor != null) cursor.close();
         }
