@@ -90,6 +90,8 @@ public class MusicUtils {
         int SHARE_VIA3 = 44;
         int DELETE_ITEM3 = 45;
         int SHARE_PLAYLIST = 46;
+        int NEW_PLAYLIST4 = 47;
+        int PLAYLIST_SELECTED4 = 48;
 
         int INTERLEAVE_ALL = 1000;
     }

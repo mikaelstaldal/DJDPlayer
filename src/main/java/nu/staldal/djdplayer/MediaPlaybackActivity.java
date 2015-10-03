@@ -18,7 +18,12 @@
 package nu.staldal.djdplayer;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
@@ -26,6 +31,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.Toast;
 
@@ -121,6 +127,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
             menu.findItem(R.id.shuffle).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         }
 
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, 16, R.string.add_all_to_playlist);
+        MusicUtils.makePlaylistMenu(this, sub, MusicUtils.Defs.NEW_PLAYLIST4, MusicUtils.Defs.PLAYLIST_SELECTED4);
+
         return true;
     }
 
@@ -211,6 +220,17 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
 
             case R.id.clear_queue:
                 if (service != null) service.removeTracks(0, Integer.MAX_VALUE);
+                return true;
+
+            case NEW_PLAYLIST4:
+                if (service != null) CreatePlaylist.showMe(this, service.getQueue());
+                return true;
+
+            case PLAYLIST_SELECTED4:
+                if (service != null) {
+                    long playlist = item.getIntent().getLongExtra("playlist", 0);
+                    MusicUtils.addToPlaylist(this, service.getQueue(), playlist);
+                }
                 return true;
 
             case R.id.settings:

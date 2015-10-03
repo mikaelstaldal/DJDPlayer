@@ -17,8 +17,16 @@
 
 package nu.staldal.djdplayer;
 
-import android.app.*;
-import android.content.*;
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.ContentUris;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
@@ -30,6 +38,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -429,6 +438,11 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         getMenuInflater().inflate(R.menu.browser_menu, menu);
 
+        if (getResources().getBoolean(R.bool.tablet_layout)) {
+            SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, 16, R.string.add_all_to_playlist);
+            MusicUtils.makePlaylistMenu(this, sub, MusicUtils.Defs.NEW_PLAYLIST4, MusicUtils.Defs.PLAYLIST_SELECTED4);
+        }
+
         return true;
     }
 
@@ -504,6 +518,17 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
             case R.id.clear_queue:
                 if (service != null) service.removeTracks(0, Integer.MAX_VALUE);
+                return true;
+
+            case NEW_PLAYLIST4:
+                if (service != null) CreatePlaylist.showMe(this, service.getQueue());
+                return true;
+
+            case PLAYLIST_SELECTED4:
+                if (service != null) {
+                    long playlist = item.getIntent().getLongExtra("playlist", 0);
+                    MusicUtils.addToPlaylist(this, service.getQueue(), playlist);
+                }
                 return true;
 
             case R.id.settings:
