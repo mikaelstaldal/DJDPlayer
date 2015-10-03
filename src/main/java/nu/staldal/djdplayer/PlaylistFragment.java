@@ -19,16 +19,30 @@ package nu.staldal.djdplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.ContentUris;
+import android.content.CursorLoader;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.*;
+import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.*;
+import android.widget.CursorAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 public class PlaylistFragment extends CategoryFragment {
@@ -129,6 +143,9 @@ public class PlaylistFragment extends CategoryFragment {
             }
         }
 
+        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist);
+        MusicUtils.makePlaylistMenu(getActivity(), sub);
+
         if (currentId >= 0) {
             menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
@@ -158,6 +175,16 @@ public class PlaylistFragment extends CategoryFragment {
             case QUEUE_ALL:
                 MusicUtils.queue(getActivity(), fetchSongList(currentId));
                 return true;
+
+            case NEW_PLAYLIST:
+                CreatePlaylist.showMe(getActivity(), fetchSongList(currentId));
+                return true;
+
+            case PLAYLIST_SELECTED: {
+                long playlist = item.getIntent().getLongExtra("playlist", 0);
+                MusicUtils.addToPlaylist(getActivity(), fetchSongList(currentId), playlist);
+                return true;
+            }
 
             case DELETE_PLAYLIST:
                 String desc = String.format(getString(R.string.delete_playlist_desc),

@@ -318,10 +318,10 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             }
         }
 
-        if (!isPlaylist) {
-            SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
-            MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
+        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
 
+        if (!isPlaylist) {
             menu.add(0, DELETE_ALL, 0, R.string.delete_all).setIcon(R.drawable.ic_menu_delete);
         }
 

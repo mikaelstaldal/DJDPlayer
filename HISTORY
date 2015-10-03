@@ -120,3 +120,4 @@
 -----
 * Bug fix in removing dups from playlist
 * Show filename of exported playlist
+* Add all songs in one playlist to another playlist
