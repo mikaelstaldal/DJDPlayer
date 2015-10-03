@@ -53,7 +53,7 @@ android {
             debuggable false
             signingConfig signingConfigs.release
         }
-        beta {
+        preview {
             debuggable true
             signingConfig signingConfigs.release
         }
