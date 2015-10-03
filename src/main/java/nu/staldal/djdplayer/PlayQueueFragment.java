@@ -281,7 +281,7 @@ public class PlayQueueFragment extends ListFragment
 
         menu.add(0, PLAY_NOW2, 0, R.string.play_now);
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST3, PLAYLIST_SELECTED3);
 
         menu.add(0, DELETE_ITEM3, 0, R.string.delete_item);

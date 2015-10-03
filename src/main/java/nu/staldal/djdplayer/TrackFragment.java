@@ -186,7 +186,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         menu.add(0, PLAY_NEXT, 0, R.string.play_next);
         menu.add(0, QUEUE, 0, R.string.queue);
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
         if (isEditMode()) {
@@ -310,7 +310,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
         menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now).setIcon(R.drawable.ic_menu_play_clip);
         menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next).setIcon(R.drawable.ic_menu_play_clip);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all).setIcon(R.drawable.ic_menu_play_clip);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all).setIcon(
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all).setIcon(
                 R.drawable.ic_menu_interleave);
         for (int i = 1; i <= 5; i++) {
             for (int j = 1; j <= 5; j++) {
@@ -318,7 +318,7 @@ public class TrackFragment extends BrowserFragment implements MusicUtils.Defs, P
             }
         }
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist).setIcon(R.drawable.ic_menu_add);
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST_ALL, PLAYLIST_SELECTED_ALL);
 
         if (!isPlaylist) {

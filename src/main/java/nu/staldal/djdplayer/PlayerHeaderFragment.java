@@ -17,10 +17,21 @@ package nu.staldal.djdplayer;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.*;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import nu.staldal.djdplayer.provider.MusicContract;
 
@@ -96,7 +107,7 @@ public class PlayerHeaderFragment extends Fragment implements
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfoIn) {
         if (service == null) return;
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_to_playlist);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
 
         menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);

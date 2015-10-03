@@ -135,7 +135,7 @@ public class PlaylistFragment extends CategoryFragment {
         menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
         menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all);
         for (int i = 1; i <= 5; i++) {
             for (int j = 1; j <= 5; j++) {
                 interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0,
@@ -143,7 +143,7 @@ public class PlaylistFragment extends CategoryFragment {
             }
         }
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
         if (currentId >= 0) {

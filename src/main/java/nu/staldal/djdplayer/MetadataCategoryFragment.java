@@ -24,7 +24,11 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.view.*;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
 import android.widget.AdapterView;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
@@ -109,7 +113,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
         menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
         menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(0, INTERLEAVE_ALL, 0, R.string.interleave_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
             for (int j = 1; j<=5; j++) {
                 interleave.add(2, INTERLEAVE_ALL+10*i+j, 0,
@@ -117,7 +121,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
             }
         }
 
-        SubMenu sub = menu.addSubMenu(0, Menu.NONE, 0, R.string.add_all_to_playlist);
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
         MusicUtils.makePlaylistMenu(getActivity(), sub);
 
         menu.add(0, DELETE_ALL, 0, R.string.delete_all);
