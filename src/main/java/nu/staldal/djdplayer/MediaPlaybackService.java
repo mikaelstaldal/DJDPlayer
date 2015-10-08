@@ -1124,26 +1124,15 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 .setContentText(artistName)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .setWhen(0);
+                .setWhen(0)
+                .addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
+                        getPendingIntentForAction(PREVIOUS_ACTION))
+                .addAction(android.R.drawable.ic_media_pause, getResources().getString(R.string.pause),
+                        getPendingIntentForAction(PAUSE_ACTION))
+                .addAction(android.R.drawable.ic_media_next, getResources().getString(R.string.next),
+                        getPendingIntentForAction(NEXT_ACTION));
+
         applyLillipopFunctionality(builder);
-
-        /*
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
-        views.setTextViewText(R.id.trackname, trackname);
-        views.setTextViewText(R.id.artistname, artistname);
-        views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(this, 0,
-                new Intent(PAUSE_ACTION).setClass(this, MediaPlaybackService.class),
-                0));
-                */
-
-        /*
-        Notification status = new Notification();
-        status.contentView = views;
-        status.flags |= Notification.FLAG_ONGOING_EVENT;
-        status.icon = R.drawable.stat_notify_musicplayer;
-        status.contentIntent = pendingIntent;
-        return status;
-        */
 
         return builder.build();
     }
@@ -1154,12 +1143,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             builder
                     .setCategory(Notification.CATEGORY_TRANSPORT)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
-                            getPendingIntentForAction(PREVIOUS_ACTION))
-                    .addAction(android.R.drawable.ic_media_pause, getResources().getString(R.string.pause),
-                            getPendingIntentForAction(PAUSE_ACTION))
-                    .addAction(android.R.drawable.ic_media_next, getResources().getString(R.string.next),
-                            getPendingIntentForAction(NEXT_ACTION))
                     .setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 1, 2));
         }
     }
