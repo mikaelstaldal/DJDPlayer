@@ -17,6 +17,7 @@
 
 package nu.staldal.djdplayer;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -29,12 +30,14 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -42,7 +45,6 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.io.File;
@@ -141,6 +143,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     // Local Binder pattern
 
     private final IBinder mLocalBinder = new LocalBinder();
+
     public class LocalBinder extends Binder {
         public MediaPlayback getService() {
             return MediaPlaybackService.this;
@@ -154,7 +157,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         Log.i(LOGTAG, "onCreate");
 
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
@@ -536,7 +539,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     }
                     if (mPlayers[mNextPlayer].isInitialized()) {
                         if (fadeSeconds > 0) {
-                            mCurrentVolume[mNextPlayer]= 0f;
+                            mCurrentVolume[mNextPlayer] = 0f;
                             mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
                         }
                         Log.d(LOGTAG, "Cross-fading");
@@ -664,7 +667,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     q.append("0;");
                 } else if (n > 0) {
                     while (n != 0) {
-                        int digit = (int)(n & 0xf);
+                        int digit = (int) (n & 0xf);
                         n >>>= 4;
                         q.append(HEXDIGITS[digit]);
                     }
@@ -1093,16 +1096,16 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private Notification buildNotification() {
-        String trackname;
-        String artistname;
+        String trackName;
+        String artistName;
         if (getAudioId() < 0) { // streaming
-            trackname = getString(R.string.streaming);
-            artistname = null;
+            trackName = getString(R.string.streaming);
+            artistName = null;
         } else {
-            trackname = getTrackName();
-            artistname = getArtistName();
-            if (artistname == null || artistname.equals(MediaStore.UNKNOWN_STRING)) {
-                artistname = getString(R.string.unknown_artist_name);
+            trackName = getTrackName();
+            artistName = getArtistName();
+            if (artistName == null || artistName.equals(MediaStore.UNKNOWN_STRING)) {
+                artistName = getString(R.string.unknown_artist_name);
             }
         }
 
@@ -1110,21 +1113,59 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 ? MusicBrowserActivity.class
                 : MediaPlaybackActivity.class;
 
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                0);
+
+        Notification.Builder builder = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.stat_notify_musicplayer)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.app_icon))
+                .setContentTitle(trackName)
+                .setContentText(artistName)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setWhen(0);
+        applyLillipopFunctionality(builder);
+
+        /*
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.statusbar);
         views.setTextViewText(R.id.trackname, trackname);
         views.setTextViewText(R.id.artistname, artistname);
         views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(this, 0,
                 new Intent(PAUSE_ACTION).setClass(this, MediaPlaybackService.class),
                 0));
+                */
+
+        /*
         Notification status = new Notification();
         status.contentView = views;
         status.flags |= Notification.FLAG_ONGOING_EVENT;
         status.icon = R.drawable.stat_notify_musicplayer;
-        status.contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                0);
-
+        status.contentIntent = pendingIntent;
         return status;
+        */
+
+        return builder.build();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void applyLillipopFunctionality(Notification.Builder builder) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder
+                    .setCategory(Notification.CATEGORY_TRANSPORT)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
+                            getPendingIntentForAction(PREVIOUS_ACTION))
+                    .addAction(android.R.drawable.ic_media_pause, getResources().getString(R.string.pause),
+                            getPendingIntentForAction(PAUSE_ACTION))
+                    .addAction(android.R.drawable.ic_media_next, getResources().getString(R.string.next),
+                            getPendingIntentForAction(NEXT_ACTION))
+                    .setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 1, 2));
+        }
+    }
+
+    private PendingIntent getPendingIntentForAction(String action) {
+        return PendingIntent.getService(this, 0, new Intent(action).setClass(this, MediaPlaybackService.class), 0);
     }
 
     private void stop() {

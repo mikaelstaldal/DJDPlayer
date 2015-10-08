@@ -16,7 +16,7 @@ allprojects {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 15
+    compileSdkVersion 22
     buildToolsVersion "23.0.1"
 
     compileOptions {
@@ -26,8 +26,8 @@ android {
 
     defaultConfig {
         applicationId "nu.staldal.djdplayer"
-        minSdkVersion 14
-        targetSdkVersion 15
+        minSdkVersion 16
+        targetSdkVersion 22
     }
 
     if (project.hasProperty("KEY_STORE")) {
@@ -64,5 +64,5 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
 }

@@ -122,3 +122,7 @@
 * Show filename of exported playlist
 * Add all songs in one playlist to another playlist
 * Add all songs in queue to a playlist
+
+2.10
+----
+* Playback buttons in notification
