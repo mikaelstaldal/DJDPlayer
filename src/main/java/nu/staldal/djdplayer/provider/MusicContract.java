@@ -31,8 +31,8 @@ public final class MusicContract {
     public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, MUSIC_PATH);
 
     protected interface FolderColumns {
-        public static final String PATH = "path";
-        public static final String NAME = "name";
+        String PATH = "path";
+        String NAME = "name";
     }
 
     public static class Folder implements BaseColumns, FolderColumns {
@@ -50,7 +50,7 @@ public final class MusicContract {
     }
 
     protected interface PlaylistColumns {
-        public static final String NAME = MediaStore.Audio.Playlists.NAME;
+        String NAME = MediaStore.Audio.Playlists.NAME;
     }
 
     public static class Playlist implements BaseColumns, PlaylistColumns {
@@ -71,7 +71,7 @@ public final class MusicContract {
     }
 
     protected interface GenreColumns {
-        public static final String NAME = MediaStore.Audio.Genres.NAME;
+        String NAME = MediaStore.Audio.Genres.NAME;
     }
 
     public static class Genre implements BaseColumns, GenreColumns {
@@ -89,8 +89,8 @@ public final class MusicContract {
     }
 
     protected interface ArtistColumns {
-        public static final String NAME = MediaStore.Audio.Artists.ARTIST;
-        public static final String COUNT = MediaStore.Audio.Artists.NUMBER_OF_TRACKS;
+        String NAME = MediaStore.Audio.Artists.ARTIST;
+        String COUNT = MediaStore.Audio.Artists.NUMBER_OF_TRACKS;
     }
 
     public static class Artist implements BaseColumns, ArtistColumns {
@@ -108,8 +108,8 @@ public final class MusicContract {
     }
 
     protected interface AlbumColumns {
-        public static final String NAME = MediaStore.Audio.Albums.ALBUM;
-        public static final String COUNT = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
+        String NAME = MediaStore.Audio.Albums.ALBUM;
+        String COUNT = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
     }
 
     public static class Album implements BaseColumns, AlbumColumns {
