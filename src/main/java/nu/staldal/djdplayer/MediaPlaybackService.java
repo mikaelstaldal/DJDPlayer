@@ -44,6 +44,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -1137,20 +1138,21 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 new Intent(this, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 0);
 
-        Notification.Builder builder = new Notification.Builder(this)
-                .setSmallIcon(R.drawable.stat_notify_musicplayer)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.app_icon))
-                .setContentTitle(trackName)
-                .setContentText(artistName)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .setWhen(0)
-                .addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
-                        getPendingIntentForAction(PREVIOUS_ACTION))
-                .addAction(android.R.drawable.ic_media_pause, getResources().getString(R.string.pause),
-                        getPendingIntentForAction(PAUSE_ACTION))
-                .addAction(android.R.drawable.ic_media_next, getResources().getString(R.string.next),
-                        getPendingIntentForAction(NEXT_ACTION));
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.drawable.stat_notify_musicplayer);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.app_icon));
+        builder.setContentTitle(trackName);
+        builder.setContentText(artistName);
+        builder.setContentIntent(pendingIntent);
+        builder.setOngoing(true);
+        builder.setWhen(0);
+        builder.addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
+                getPendingIntentForAction(PREVIOUS_ACTION));
+        builder.addAction(android.R.drawable.ic_media_pause, getResources().getString(R.string.pause),
+                getPendingIntentForAction(PAUSE_ACTION));
+        builder.addAction(android.R.drawable.ic_media_next, getResources().getString(R.string.next),
+                getPendingIntentForAction(NEXT_ACTION));
+        builder.setStyle(new NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2));
 
         applyLillipopFunctionality(builder);
 
@@ -1158,12 +1160,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void applyLillipopFunctionality(Notification.Builder builder) {
+    private void applyLillipopFunctionality(NotificationCompat.Builder builder) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder
                     .setCategory(Notification.CATEGORY_TRANSPORT)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 1, 2));
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
         }
     }
 
