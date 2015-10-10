@@ -66,7 +66,7 @@ public class CreatePlaylist extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String name = mPlaylist.getText().toString();
-                        if (name != null && name.length() > 0) {
+                        if (name.length() > 0) {
                             if (MusicUtils.playlistExists(getActivity(), name)) {
                                 Toast.makeText(getActivity(), R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
                             } else {

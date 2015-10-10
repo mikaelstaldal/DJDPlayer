@@ -66,7 +66,7 @@ public class PickMusicFolderActivity extends Activity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             String value = editor.getText().toString();
-                            if (value != null && value.length() > 0) {
+                            if (value.length() > 0) {
                                 setMusicFolder(value);
                                 finish();
                             }
