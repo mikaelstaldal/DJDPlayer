@@ -206,6 +206,17 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         commandFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mIntentReceiver, commandFilter);
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+            setupRemoteControl();
+        }
+
+        // If the service was idle, but got killed before it stopped itself, the
+        // system will relaunch it. Make sure it gets stopped again in that case.
+        Message msg = mDelayedStopHandler.obtainMessage();
+        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+    }
+
+    private void setupRemoteControl() {
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
@@ -215,11 +226,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE |
                         RemoteControlClient.FLAG_KEY_MEDIA_NEXT |
                         RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
-
-        // If the service was idle, but got killed before it stopped itself, the
-        // system will relaunch it. Make sure it gets stopped again in that case.
-        Message msg = mDelayedStopHandler.obtainMessage();
-        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
     }
 
     @Override
@@ -315,7 +321,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
-        mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+        }
 
         for (MyMediaPlayer player : mPlayers) player.release();
 
@@ -486,7 +494,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
                             mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+                                mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+                            }
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             pause();
                             break;
@@ -509,7 +519,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
                                     MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+                                mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+                            }
 
                             if (!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
@@ -823,6 +835,12 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         // Share this notification directly with our widgets
         MediaAppWidgetProvider.getInstance().notifyChange(this, what);
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+            updateRemoteControl();
+        }
+    }
+
+    private void updateRemoteControl() {
         mRemoteControlClient.setPlaybackState(isPlaying()
                 ? RemoteControlClient.PLAYSTATE_PLAYING
                 : RemoteControlClient.PLAYSTATE_PAUSED);
@@ -1068,7 +1086,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
-        mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
+            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+        }
 
         if (mPlayers[mCurrentPlayer].isInitialized()) {
             // if we are at the end of the song, go to the next song first
