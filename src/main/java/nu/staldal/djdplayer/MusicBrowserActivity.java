@@ -80,7 +80,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        if (MusicUtils.android44OrLater() || !MusicUtils.hasMenuKey(this)) {
+        if (MusicUtils.android44OrLater() || !MusicUtils.hasMenuKey(this)
+                || getResources().getBoolean(R.bool.tablet_layout)) {
             disableStackedActionBar(getActionBar());
         }
 
