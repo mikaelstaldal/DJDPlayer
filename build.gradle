@@ -49,6 +49,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFile getDefaultProguardFile('proguard-android.txt')
             debuggable false
             signingConfig signingConfigs.release
