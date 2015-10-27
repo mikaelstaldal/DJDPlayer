@@ -16,8 +16,9 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="nu.staldal.djdplayer"
-          android:versionCode="16211"
+          android:versionCode="16212"
           android:versionName="@string/versionName"
           android:installLocation="auto">
 
@@ -33,7 +34,16 @@
     <uses-feature android:name="android.software.app_widgets"
                   android:required="false"/>
 
+    <uses-feature android:name="android.software.leanback"
+                  android:required="false" />
+
+    <uses-feature android:name="android.hardware.touchscreen"
+                  android:required="false" />
+
+    <uses-sdk tools:overrideLibrary="android.support.v17.leanback" />
+
     <application android:icon="@drawable/app_icon"
+                 android:banner="@drawable/app_banner"
                  android:label="@string/applabel"
                  android:description="@string/appdescription"
                  android:theme="@style/Theme.Default"
@@ -101,6 +111,15 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+        </activity>
+
+        <activity android:name=".tv.BrowserActivity"
+                  android:theme="@style/Theme.Leanback.Browse">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <!-- This is the "current music playing" panel, which has special

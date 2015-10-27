@@ -527,7 +527,7 @@ public class MusicUtils {
         }
     }
 
-    static void setIntPref(Context context, String name, int value) {
+    public static void setIntPref(Context context, String name, int value) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
@@ -535,7 +535,7 @@ public class MusicUtils {
         ed.apply();
     }
 
-    static void setStringPref(Context context, String name, String value) {
+    public static void setStringPref(Context context, String name, String value) {
         SharedPreferences prefs =
             context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
@@ -543,7 +543,7 @@ public class MusicUtils {
         ed.apply();
     }
 
-    static IdAndName fetchGenre(Context context, long songId) {
+    public static IdAndName fetchGenre(Context context, long songId) {
         Cursor c = context.getContentResolver().query(
                 Uri.parse("content://media/external/audio/media/" + String.valueOf(songId) + "/genres"),
                 new String[]{MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME},
@@ -572,7 +572,7 @@ public class MusicUtils {
      * Returns false if the entry matches the naming pattern used for recordings,
      * or if it is marked as not music in the database.
      */
-    static boolean isMusic(Cursor c) {
+    public static boolean isMusic(Cursor c) {
         int titleidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.TITLE);
         int albumidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM);
         int artistidx = c.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST);
@@ -596,7 +596,7 @@ public class MusicUtils {
         return ismusic;
     }
 
-    static Intent shareVia(long audioId, String mimeType, Resources resources) {
+    public static Intent shareVia(long audioId, String mimeType, Resources resources) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_STREAM,
             ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId));
@@ -605,7 +605,7 @@ public class MusicUtils {
         return Intent.createChooser(intent, resources.getString(R.string.share_via));
     }
 
-    static Intent searchForTrack(String trackName, String artistNameForAlbum, String albumName, Resources resources) {
+    public static Intent searchForTrack(String trackName, String artistNameForAlbum, String albumName, Resources resources) {
         Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -625,7 +625,7 @@ public class MusicUtils {
         return Intent.createChooser(intent, resources.getString(R.string.mediasearch, trackName));
     }
 
-    static Intent searchForCategory(CharSequence categoryName, String contentType, Resources resources) {
+    public static Intent searchForCategory(CharSequence categoryName, String contentType, Resources resources) {
         Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -635,7 +635,7 @@ public class MusicUtils {
         return Intent.createChooser(intent, resources.getString(R.string.mediasearch, categoryName));
     }
 
-    static boolean isLong(String s) {
+    public static boolean isLong(String s) {
         if (s == null) return false;
         try {
             //noinspection ResultOfMethodCallIgnored
@@ -646,13 +646,13 @@ public class MusicUtils {
         }
     }
 
-    static Uri createPlaylist(Context context, String name) {
+    public static Uri createPlaylist(Context context, String name) {
         ContentValues values = new ContentValues(1);
         values.put(MediaStore.Audio.Playlists.NAME, name);
         return context.getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
     }
 
-    static void renamePlaylist(Context context, long playlistId, String name) {
+    public static void renamePlaylist(Context context, long playlistId, String name) {
         if (name != null && name.length() > 0) {
             if (playlistExists(context, name)) {
                 Toast.makeText(context, R.string.playlist_already_exists, Toast.LENGTH_SHORT).show();
@@ -669,7 +669,7 @@ public class MusicUtils {
         }
     }
 
-    static boolean playlistExists(Context context, String name) {
+    public static boolean playlistExists(Context context, String name) {
         Cursor cursor = MusicUtils.query(context, MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                 new String[]{MediaStore.Audio.Playlists._ID},
                 MediaStore.Audio.Playlists.NAME + "=?",
@@ -679,19 +679,19 @@ public class MusicUtils {
         return cursor != null && cursor.moveToFirst();
     }
 
-    static boolean android44OrLater() {
+    public static boolean android44OrLater() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     }
 
-    static boolean hasMenuKey(Context context) {
+    public static boolean hasMenuKey(Context context) {
         return ViewConfiguration.get(context).hasPermanentMenuKey();
     }
 
-    static void reportError(Context context, String text) {
+    public static void reportError(Context context, String text) {
         reportError(context, text, null);
     }
 
-    static void reportError(Context context, String text, Throwable t) {
+    public static void reportError(Context context, String text, Throwable t) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         if (t != null) {

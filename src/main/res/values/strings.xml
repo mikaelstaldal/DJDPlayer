@@ -331,11 +331,11 @@
 
     <string name="streaming">Streaming</string>
 
+    <string name="error_fetching_music">Error fetching music</string>
     <string name="report_error">Report error</string>
 
     <string name="about">About</string>
     <string name="by">by Mikael Ståldal</string>
     <string name="version">"version "</string>
-    <string name="versionName">2.10</string>
-
+    <string name="versionName">2.11beta1</string>
 </resources>
