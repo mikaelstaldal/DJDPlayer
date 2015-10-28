@@ -53,6 +53,7 @@ public class CategoryPresenter extends Presenter {
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
         ImageCardView cardView = (ImageCardView) viewHolder.view;
+
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
         cardView.setMainImage(null);
