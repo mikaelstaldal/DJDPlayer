@@ -29,6 +29,10 @@ import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
 import android.util.Log;
 import android.widget.Toast;
 import nu.staldal.djdplayer.FragmentServiceConnection;
@@ -41,7 +45,7 @@ import java.util.Map;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BrowserFragment extends BrowseFragment implements FragmentServiceConnection,
-        LoaderManager.LoaderCallbacks<Map<String,List<CategoryItem>>> {
+        LoaderManager.LoaderCallbacks<Map<String,List<CategoryItem>>>, OnItemViewClickedListener {
 
     private static final String TAG = BrowserFragment.class.getSimpleName();
 
@@ -59,6 +63,8 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
         setTitle(getString(R.string.applabel));
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
+
+        setOnItemViewClickedListener(this);
     }
 
     @Override
@@ -99,6 +105,12 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
     }
 
     @Override
+    public void onServiceConnected(MediaPlayback s) {
+        Log.i(TAG, "onServiceConnected");
+        service = s;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -106,6 +118,15 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
         getActivity().registerReceiver(statusListener, f);
+    }
+
+    @Override
+    public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object o,
+                              RowPresenter.ViewHolder rowViewHolder, Row row) {
+        if (o instanceof CategoryItem) {
+            CategoryItem item = (CategoryItem) o;
+            Log.d(TAG, "onItemClicked: row=" + row.getId() + " " + item.toString());
+        }
     }
 
     @Override
@@ -122,14 +143,9 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
     };
 
     @Override
-    public void onServiceConnected(MediaPlayback s) {
-        service = s;
-    }
-
-    @Override
     public void onServiceDisconnected() {
+        Log.i(TAG, "onServiceDisconnected");
         service = null;
     }
-
 
 }
