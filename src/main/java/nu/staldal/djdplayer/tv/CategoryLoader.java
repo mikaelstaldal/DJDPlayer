@@ -20,17 +20,18 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.util.Log;
+import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ListRow;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-public class CategoryLoader extends AsyncTaskLoader<Map<String, List<CategoryItem>>> {
+public class CategoryLoader extends AsyncTaskLoader<List<ListRow>> {
 
+    @SuppressWarnings("unused")
     private static final String TAG = CategoryLoader.class.getSimpleName();
 
     public CategoryLoader(Context context) {
@@ -38,9 +39,7 @@ public class CategoryLoader extends AsyncTaskLoader<Map<String, List<CategoryIte
     }
 
     @Override
-    public Map<String, List<CategoryItem>> loadInBackground() {
-        Log.i(TAG, "loadInBackground");
-
+    public List<ListRow> loadInBackground() {
         ContentResolver contentResolver = getContext().getContentResolver();
 
         // TODO fetch in parallel
@@ -78,32 +77,34 @@ public class CategoryLoader extends AsyncTaskLoader<Map<String, List<CategoryIte
                 MusicContract.Playlist.NAME + " != ''", null,
                 MusicContract.Playlist.NAME);
 
-        Map<String, List<CategoryItem>> data = new LinkedHashMap<>(5);
+        ArrayList<ListRow> data = new ArrayList<>(5);
 
-        data.put(getContext().getString(R.string.artists_menu), readCursor(artistCursor, MusicContract.Artist.NAME, MusicContract.Artist.COUNT));
-        data.put(getContext().getString(R.string.albums_menu), readCursor(albumCursor, MusicContract.Album.NAME, MusicContract.Album.COUNT));
-        data.put(getContext().getString(R.string.genres_menu), readCursor(genreCursor, MusicContract.Genre.NAME, MusicContract.Genre._COUNT));
-        data.put(getContext().getString(R.string.folders_menu), readCursor(folderCursor, MusicContract.Folder.NAME, MusicContract.Folder._COUNT));
-        data.put(getContext().getString(R.string.playlists_menu), readCursor(playlistCursor, MusicContract.Playlist.NAME, MusicContract.Playlist._COUNT));
+        data.add(readCursor(R.id.artists_section, getContext().getString(R.string.artists_menu), artistCursor, MusicContract.Artist.NAME, MusicContract.Artist.COUNT));
+        data.add(readCursor(R.id.albums_section, getContext().getString(R.string.albums_menu), albumCursor, MusicContract.Album.NAME, MusicContract.Album.COUNT));
+        data.add(readCursor(R.id.genres_sections, getContext().getString(R.string.genres_menu), genreCursor, MusicContract.Genre.NAME, MusicContract.Genre._COUNT));
+        data.add(readCursor(R.id.folders_section, getContext().getString(R.string.folders_menu), folderCursor, MusicContract.Folder.NAME, MusicContract.Folder._COUNT));
+        data.add(readCursor(R.id.playlists_section, getContext().getString(R.string.playlists_menu), playlistCursor, MusicContract.Playlist.NAME, MusicContract.Playlist._COUNT));
 
         return data;
     }
 
-    private List<CategoryItem> readCursor(Cursor cursor, String nameColumn, String countColumn) {
-        List<CategoryItem> list = new ArrayList<>();
+    private ListRow readCursor(long id, String name, Cursor cursor, String nameColumn, String countColumn) {
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter();
+
         if (cursor != null) {
             int idColumnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
             int nameColumnIndex = cursor.getColumnIndexOrThrow(nameColumn);
             int countColumnIndex = cursor.getColumnIndexOrThrow(countColumn);
             while (cursor.moveToNext()) {
-                list.add(new CategoryItem(
+                listRowAdapter.add(new CategoryItem(
                         cursor.getLong(idColumnIndex),
                         cursor.getString(nameColumnIndex),
                         cursor.getInt(countColumnIndex)));
             }
             cursor.close();
         }
-        return list;
+
+        return new ListRow(new HeaderItem(id, name), listRowAdapter);
     }
 
     @Override

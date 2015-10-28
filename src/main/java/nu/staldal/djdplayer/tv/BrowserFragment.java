@@ -26,13 +26,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
-import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v17.leanback.widget.SinglePresenterSelector;
 import android.util.Log;
 import android.widget.Toast;
 import nu.staldal.djdplayer.FragmentServiceConnection;
@@ -41,11 +41,10 @@ import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.R;
 
 import java.util.List;
-import java.util.Map;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BrowserFragment extends BrowseFragment implements FragmentServiceConnection,
-        LoaderManager.LoaderCallbacks<Map<String,List<CategoryItem>>>, OnItemViewClickedListener {
+        LoaderManager.LoaderCallbacks<List<ListRow>>, OnItemViewClickedListener {
 
     private static final String TAG = BrowserFragment.class.getSimpleName();
 
@@ -68,28 +67,19 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
     }
 
     @Override
-    public Loader<Map<String,List<CategoryItem>>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<ListRow>> onCreateLoader(int id, Bundle args) {
         return new CategoryLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(Loader<Map<String,List<CategoryItem>>> loader, Map<String,List<CategoryItem>> data) {
+    public void onLoadFinished(Loader<List<ListRow>> loader, List<ListRow> data) {
         adapter = new ArrayObjectAdapter(new ListRowPresenter());
-        CategoryPresenter presenter = new CategoryPresenter();
-
-        int index = 0;
 
         if (null != data && !data.isEmpty()) {
-            for (Map.Entry<String, List<CategoryItem>> entry : data.entrySet()) {
-                ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(presenter);
-
-                for (CategoryItem item : entry.getValue()) {
-                    listRowAdapter.add(item);
-                }
-
-                HeaderItem header = new HeaderItem(index, entry.getKey());
-                index++;
-                adapter.add(new ListRow(header, listRowAdapter));
+            CategoryPresenter presenter = new CategoryPresenter();
+            for (ListRow row : data) {
+                row.getAdapter().setPresenterSelector(new SinglePresenterSelector(presenter));
+                adapter.add(row);
             }
         } else {
             Log.e(TAG, "An error occurred fetching music");
@@ -100,7 +90,7 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
     }
 
     @Override
-    public void onLoaderReset(Loader<Map<String,List<CategoryItem>>> loader) {
+    public void onLoaderReset(Loader<List<ListRow>> loader) {
         adapter.clear();
     }
 
@@ -125,7 +115,27 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
                               RowPresenter.ViewHolder rowViewHolder, Row row) {
         if (o instanceof CategoryItem) {
             CategoryItem item = (CategoryItem) o;
-            Log.d(TAG, "onItemClicked: row=" + row.getId() + " " + item.toString());
+            switch ((int)row.getId()) {
+                case R.id.artists_section:
+                    Log.d(TAG, "artist: " + item.toString());
+                    break;
+
+                case R.id.albums_section:
+                    Log.d(TAG, "album: " + item.toString());
+                    break;
+
+                case R.id.genres_sections:
+                    Log.d(TAG, "genre: " + item.toString());
+                    break;
+
+                case R.id.folders_section:
+                    Log.d(TAG, "folder: " + item.toString());
+                    break;
+
+                case R.id.playlists_section:
+                    Log.d(TAG, "playlist: " + item.toString());
+                    break;
+            }
         }
     }
 
