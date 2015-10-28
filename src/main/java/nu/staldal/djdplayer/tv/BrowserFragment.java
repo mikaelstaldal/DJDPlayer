@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
@@ -86,6 +87,11 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
             Toast.makeText(getActivity(), R.string.error_fetching_music, Toast.LENGTH_LONG).show();
         }
 
+        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(new GridItemPresenter());
+        gridRowAdapter.add(new SettingsItem(R.id.settings_item, getString(R.string.settings)));
+        gridRowAdapter.add(new SettingsItem(R.id.effectspanel_item, getString(R.string.effectspanel)));
+        adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), gridRowAdapter));
+
         setAdapter(adapter);
     }
 
@@ -134,6 +140,17 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
 
                 case R.id.playlists_section:
                     Log.d(TAG, "playlist: " + item.toString());
+                    break;
+            }
+        } else if (o instanceof SettingsItem) {
+            SettingsItem item = (SettingsItem) o;
+            switch ((int)item.id) {
+                case R.id.settings_item:
+                    Log.d(TAG, "Settings");
+                    break;
+
+                case R.id.effectspanel_item:
+                    Log.d(TAG, "Effects panel");
                     break;
             }
         }

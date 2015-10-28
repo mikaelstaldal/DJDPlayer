@@ -6,5 +6,9 @@
     <item name="genres_sections" type="id"/>
     <item name="folders_section" type="id"/>
     <item name="playlists_section" type="id"/>
+    <item name="settings_section" type="id"/>
+
+    <item name="settings_item" type="id"/>
+    <item name="effectspanel_item" type="id"/>
 
 </resources>
