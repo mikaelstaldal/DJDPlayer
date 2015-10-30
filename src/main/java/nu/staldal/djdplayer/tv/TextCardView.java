@@ -20,12 +20,11 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import nu.staldal.djdplayer.R;
 
 /**
- * A card view with an {@link ImageView} as its main region.
+ * A card view with an {@link TextView} as its main region.
  */
 public class TextCardView extends BaseCardView {
 
