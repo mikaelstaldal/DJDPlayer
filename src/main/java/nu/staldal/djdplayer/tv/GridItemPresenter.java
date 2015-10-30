@@ -15,15 +15,18 @@
  */
 package nu.staldal.djdplayer.tv;
 
+import android.annotation.TargetApi;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.os.Build;
 import android.support.v17.leanback.widget.Presenter;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import nu.staldal.djdplayer.R;
 
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class GridItemPresenter extends Presenter {
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         TextView view = new TextView(parent.getContext());
@@ -35,7 +38,7 @@ public class GridItemPresenter extends Presenter {
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.setBackgroundColor(resources.getColor(R.color.standard_background));
-        view.setTextColor(Color.WHITE);
+        view.setTextColor(resources.getColor(R.color.lb_action_text_color));
         view.setTextSize(16);
         view.setGravity(Gravity.CENTER);
 
