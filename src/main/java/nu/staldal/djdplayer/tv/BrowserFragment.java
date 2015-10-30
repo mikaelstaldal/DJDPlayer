@@ -87,10 +87,10 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
             Toast.makeText(getActivity(), R.string.error_fetching_music, Toast.LENGTH_LONG).show();
         }
 
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(new GridItemPresenter());
-        gridRowAdapter.add(new SettingsItem(R.id.settings_item, getString(R.string.settings)));
-        gridRowAdapter.add(new SettingsItem(R.id.effectspanel_item, getString(R.string.effectspanel)));
-        adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), gridRowAdapter));
+        ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(new ActionPresenter());
+        rowAdapter.add(new SettingsItem(R.id.settings_item, getString(R.string.settings)));
+        rowAdapter.add(new SettingsItem(R.id.effectspanel_item, getString(R.string.effectspanel)));
+        adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), rowAdapter));
 
         setAdapter(adapter);
     }
