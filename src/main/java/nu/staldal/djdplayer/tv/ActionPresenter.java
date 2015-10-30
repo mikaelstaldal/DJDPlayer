@@ -16,13 +16,9 @@
 package nu.staldal.djdplayer.tv;
 
 import android.annotation.TargetApi;
-import android.content.res.Resources;
 import android.os.Build;
 import android.support.v17.leanback.widget.Presenter;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import nu.staldal.djdplayer.R;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -30,26 +26,19 @@ public class ActionPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        TextView view = new TextView(parent.getContext());
+        ActionCardView cardView = new ActionCardView(parent.getContext());
 
-        Resources resources = parent.getResources();
-        view.setLayoutParams(new ViewGroup.LayoutParams(
-                resources.getDimensionPixelSize(R.dimen.lb_basic_card_main_width),
-                resources.getDimensionPixelSize(R.dimen.settings_card_height)));
-        view.setTextColor(resources.getColor(R.color.lb_action_text_color));
-        view.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimensionPixelSize(R.dimen.lb_action_text_size));
-        view.setGravity(Gravity.CENTER);
+        cardView.setBackgroundColor(parent.getResources().getColor(R.color.standard_background));
+        cardView.setFocusable(true);
+        cardView.setFocusableInTouchMode(true);
 
-        view.setBackgroundColor(resources.getColor(R.color.standard_background));
-        view.setFocusable(true);
-        view.setFocusableInTouchMode(true);
-
-        return new ViewHolder(view);
+        return new ViewHolder(cardView);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        ((TextView) viewHolder.view).setText(item.toString());
+        ActionCardView cardView = (ActionCardView)viewHolder.view;
+        cardView.setText(item.toString());
     }
 
     @Override
