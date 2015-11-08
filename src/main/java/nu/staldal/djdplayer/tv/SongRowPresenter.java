@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,27 @@ package nu.staldal.djdplayer.tv;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.v17.leanback.widget.Presenter;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import nu.staldal.djdplayer.R;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class ActionPresenter extends Presenter {
+public class SongRowPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        ActionCardView cardView = new ActionCardView(parent.getContext());
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(R.layout.song_list_row, parent, false);
 
-        cardView.setBackgroundColor(parent.getResources().getColor(R.color.standard_background));
-        cardView.setFocusable(true);
-        cardView.setFocusableInTouchMode(true);
-
-        return new ViewHolder(cardView);
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        ActionCardView cardView = (ActionCardView)viewHolder.view;
-        cardView.setText(item.toString());
+        TextView view = (TextView)viewHolder.view;
+        view.setText(item.toString());
     }
 
     @Override

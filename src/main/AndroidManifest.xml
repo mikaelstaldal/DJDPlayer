@@ -122,6 +122,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+                android:name=".tv.CategoryDetailsActivity"
+                android:theme="@style/Theme.Leanback"/>
+
         <!-- This is the "current music playing" panel, which has special
              launch behavior.  We clear its task affinity, so it will not
              be associated with the main media task and if launched

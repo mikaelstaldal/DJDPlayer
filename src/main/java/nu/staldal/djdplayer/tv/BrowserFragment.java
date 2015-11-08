@@ -40,6 +40,7 @@ import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
         adapter = new ArrayObjectAdapter(new ListRowPresenter());
 
         if (null != data && !data.isEmpty()) {
-            CategoryPresenter presenter = new CategoryPresenter();
+            CategoryCardPresenter presenter = new CategoryCardPresenter();
             for (ListRow row : data) {
                 row.getAdapter().setPresenterSelector(new SinglePresenterSelector(presenter));
                 adapter.add(row);
@@ -87,9 +88,9 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
             Toast.makeText(getActivity(), R.string.error_fetching_music, Toast.LENGTH_LONG).show();
         }
 
-        ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(new ActionPresenter());
-        rowAdapter.add(new SettingsItem(R.id.settings_item, getString(R.string.settings)));
-        rowAdapter.add(new SettingsItem(R.id.effectspanel_item, getString(R.string.effectspanel)));
+        ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(new ActionCardPresenter());
+        rowAdapter.add(new SettingsItem(R.id.settings_action, getString(R.string.settings)));
+        rowAdapter.add(new SettingsItem(R.id.effectspanel_action, getString(R.string.effectspanel)));
         adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), rowAdapter));
 
         setAdapter(adapter);
@@ -121,35 +122,44 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
                               RowPresenter.ViewHolder rowViewHolder, Row row) {
         if (o instanceof CategoryItem) {
             CategoryItem item = (CategoryItem) o;
+            Intent intent = new Intent(Intent.ACTION_VIEW);
             switch ((int)row.getId()) {
                 case R.id.artists_section:
                     Log.d(TAG, "artist: " + item.toString());
+                    intent.setData(MusicContract.Artist.getMembersUri(item.id));
                     break;
 
                 case R.id.albums_section:
                     Log.d(TAG, "album: " + item.toString());
+                    intent.setData(MusicContract.Album.getMembersUri(item.id));
                     break;
 
                 case R.id.genres_sections:
                     Log.d(TAG, "genre: " + item.toString());
+                    intent.setData(MusicContract.Genre.getMembersUri(item.id));
                     break;
 
                 case R.id.folders_section:
                     Log.d(TAG, "folder: " + item.toString());
+                    intent.setData(MusicContract.Folder.getMembersUri(((FolderItem)item).path));
                     break;
 
                 case R.id.playlists_section:
                     Log.d(TAG, "playlist: " + item.toString());
+                    intent.setData(MusicContract.Playlist.getMembersUri(item.id));
                     break;
             }
+            intent.putExtra(CategoryDetailsActivity.TITLE, item.name);
+            intent.setClass(getActivity(), CategoryDetailsActivity.class);
+            startActivity(intent);
         } else if (o instanceof SettingsItem) {
             SettingsItem item = (SettingsItem) o;
             switch ((int)item.id) {
-                case R.id.settings_item:
+                case R.id.settings_action:
                     Log.d(TAG, "Settings");
                     break;
 
-                case R.id.effectspanel_item:
+                case R.id.effectspanel_action:
                     Log.d(TAG, "Effects panel");
                     break;
             }

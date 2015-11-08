@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mikael Ståldal
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import android.view.ViewGroup;
 import nu.staldal.djdplayer.R;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class CategoryPresenter extends Presenter {
+public class ActionCardPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        TextCardView cardView = new TextCardView(parent.getContext());
+        ActionCardView cardView = new ActionCardView(parent.getContext());
 
         cardView.setBackgroundColor(parent.getResources().getColor(R.color.standard_background));
         cardView.setFocusable(true);
@@ -36,13 +36,9 @@ public class CategoryPresenter extends Presenter {
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, Object o) {
-        CategoryItem item = (CategoryItem)o;
-        TextCardView cardView = (TextCardView)viewHolder.view;
-
-        cardView.setTitleText(item.name);
-        cardView.setContentText(
-                viewHolder.view.getContext().getResources().getQuantityString(R.plurals.Nsongs, item.count, item.count));
+    public void onBindViewHolder(ViewHolder viewHolder, Object item) {
+        ActionCardView cardView = (ActionCardView)viewHolder.view;
+        cardView.setText(item.toString());
     }
 
     @Override
