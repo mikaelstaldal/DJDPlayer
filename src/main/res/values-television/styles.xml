@@ -1,0 +1,13 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="SongListText">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="SongListText.Primary" parent="SongListText">
+        <item name="android:textColor">@color/song_row_primary_text</item>
+    </style>
+
+    <style name="SongListText.Secondary" parent="SongListText">
+        <item name="android:textColor">@color/song_row_secondary_text</item>
+    </style>
+</resources>

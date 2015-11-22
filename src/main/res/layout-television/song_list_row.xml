@@ -1,7 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@drawable/song_list_row_background"
-          android:focusable="true"
-          android:focusableInTouchMode="true"/>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:background="@drawable/song_list_row_background"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                tools:ignore="RtlCompat">
+
+    <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            style="@style/SongListText.Primary"
+            android:text="title"/>
+
+    <TextView
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/title"
+            style="@style/SongListText.Secondary"
+            android:text="@string/tv_titleartistseparator"/>
+
+    <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/separator"
+            style="@style/SongListText.Secondary"
+            android:ellipsize="end"
+            android:text="artist"/>
+
+    <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            style="@style/SongListText.Secondary"
+            android:text="2:35"/>
+
+</RelativeLayout>

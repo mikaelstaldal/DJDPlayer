@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="song_row_background">#384248</color>
+    <color name="song_row_background_selected">#4C555A</color>
+    <color name="song_row_primary_text">#EEEEEE</color>
+    <color name="song_row_secondary_text">#9EA2A5</color>
+</resources>

@@ -16,8 +16,8 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true"
-        android:drawable="@color/pressed_button" />
+          android:drawable="@color/song_row_background_selected"/>
 
     <item
-         android:drawable="@color/standard_background" />
+            android:drawable="@color/song_row_background"/>
 </selector>

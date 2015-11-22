@@ -33,9 +33,9 @@ import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v17.leanback.widget.TitleView;
 import android.support.v17.leanback.widget.VerticalGridView;
 import android.util.Log;
-import android.widget.TextView;
 import nu.staldal.djdplayer.R;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -67,8 +67,8 @@ public class CategoryDetailsActivity extends Activity implements LoaderManager.L
     private void buildUI() {
         setContentView(R.layout.tv_category_details_activity);
 
-        TextView categoryTitle = (TextView)findViewById(R.id.category_title);
-        categoryTitle.setText(title);
+        TitleView categoryTitle = (TitleView)findViewById(R.id.category_title);
+        categoryTitle.setTitle(title);
 
         /*
         ArrayObjectAdapter actionsAdapter = new ArrayObjectAdapter();
