@@ -1,18 +1,3 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <bool name="tablet_layout">false</bool>
-
-    <item name="artists_section" type="id"/>
-    <item name="albums_section" type="id"/>
-    <item name="genres_sections" type="id"/>
-    <item name="folders_section" type="id"/>
-    <item name="playlists_section" type="id"/>
-    <item name="settings_section" type="id"/>
-
-    <item name="settings_action" type="id"/>
-    <item name="effectspanel_action" type="id"/>
-
-    <item name="play_all_now_action" type="id"/>
-    <item name="play_all_next_action" type="id"/>
-    <item name="queue_all_last_action" type="id"/>
-
 </resources>

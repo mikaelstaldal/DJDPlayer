@@ -26,8 +26,11 @@ android {
 
     defaultConfig {
         applicationId "nu.staldal.djdplayer"
-        minSdkVersion 16
         targetSdkVersion 22
+
+        dependencies {
+            compile 'com.android.support:appcompat-v7:22.2.1'
+        }
     }
 
     if (project.hasProperty("KEY_STORE")) {
@@ -62,9 +65,18 @@ android {
             debuggable true
         }
     }
-}
 
-dependencies {
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.android.support:leanback-v17:22.2.1'
+    productFlavors {
+        mobile {
+            minSdkVersion 16
+        }
+        tv {
+            minSdkVersion 21
+
+            dependencies {
+                compile 'com.android.support:leanback-v17:22.2.1'
+            }
+        }
+    }
+
 }
