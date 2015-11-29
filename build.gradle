@@ -74,7 +74,7 @@ android {
             minSdkVersion 21
 
             dependencies {
-                compile 'com.android.support:leanback-v17:22.2.1'
+                tvCompile 'com.android.support:leanback-v17:22.2.1'
             }
         }
     }

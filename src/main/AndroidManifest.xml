@@ -16,7 +16,6 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
           package="nu.staldal.djdplayer"
           android:versionCode="16212"
           android:versionName="@string/versionName"
@@ -33,8 +32,6 @@
 
     <uses-feature android:name="android.software.app_widgets"
                   android:required="false"/>
-
-    <uses-sdk tools:overrideLibrary="android.support.v17.leanback" />
 
     <application android:icon="@drawable/app_icon"
                  android:label="@string/applabel"
