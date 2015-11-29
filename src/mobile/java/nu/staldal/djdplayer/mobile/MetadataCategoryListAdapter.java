@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -24,6 +24,9 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import nu.staldal.djdplayer.MusicAlphabetIndexer;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 
 public class MetadataCategoryListAdapter extends SimpleCursorAdapterWithContextMenu implements SectionIndexer {
     protected final Resources mResources;

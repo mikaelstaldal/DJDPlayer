@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -34,6 +34,12 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Toast;
+import nu.staldal.djdplayer.CreatePlaylist;
+import nu.staldal.djdplayer.MediaPlayback;
+import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, ServiceConnection {
 
@@ -66,7 +72,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
         playerHeaderDivider = findViewById(R.id.player_header_divider);
         playerFooterDivider = findViewById(R.id.player_footer_divider);
 
-        token = MusicUtils.bindToService(this, this);
+        token = MusicUtils.bindToService(this, this, MobileMediaPlaybackService.class);
     }
 
     @Override

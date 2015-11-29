@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -31,6 +31,11 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import nu.staldal.djdplayer.FragmentServiceConnection;
+import nu.staldal.djdplayer.MediaPlayback;
+import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
 import nu.staldal.ui.RepeatingImageButton;
 
 public class PlayerFooterFragment extends Fragment implements FragmentServiceConnection {

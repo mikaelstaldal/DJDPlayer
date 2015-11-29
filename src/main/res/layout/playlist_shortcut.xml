@@ -19,7 +19,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <fragment class="nu.staldal.djdplayer.PlaylistFragment"
+    <fragment class="nu.staldal.djdplayer.mobile.PlaylistFragment"
               android:id="@+id/playlist"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>

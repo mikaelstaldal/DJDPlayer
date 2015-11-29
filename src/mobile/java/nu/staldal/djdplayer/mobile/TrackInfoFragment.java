@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -30,6 +30,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
+import nu.staldal.djdplayer.IdAndName;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
 
 import java.io.File;
 import java.text.DateFormat;

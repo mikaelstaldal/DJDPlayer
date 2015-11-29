@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -43,6 +43,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import nu.staldal.djdplayer.CreatePlaylist;
+import nu.staldal.djdplayer.FragmentServiceConnection;
+import nu.staldal.djdplayer.ImportPlaylistTask;
+import nu.staldal.djdplayer.MediaPlayback;
+import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.djdplayer.provider.MusicProvider;
 import nu.staldal.ui.WithSectionMenu;
@@ -106,7 +114,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         parseIntent(getIntent(), true);
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-        token = MusicUtils.bindToService(this, this);
+        token = MusicUtils.bindToService(this, this, MobileMediaPlaybackService.class);
     }
 
     /**

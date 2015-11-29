@@ -25,7 +25,7 @@
                  android:layout_height="0dip"
                  android:layout_weight="1"/>
 
-    <fragment class="nu.staldal.djdplayer.NowPlayingFragment"
+    <fragment class="nu.staldal.djdplayer.mobile.NowPlayingFragment"
               android:id="@+id/nowplaying"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>

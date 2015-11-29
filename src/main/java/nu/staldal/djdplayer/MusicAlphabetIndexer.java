@@ -25,7 +25,7 @@ import android.widget.AlphabetIndexer;
  * are stripped of some prefixes such as "a", "an", "the" and some symbols.
  *
  */
-class MusicAlphabetIndexer extends AlphabetIndexer {
+public class MusicAlphabetIndexer extends AlphabetIndexer {
     
     public MusicAlphabetIndexer(Cursor cursor, int sortedColumnIndex, CharSequence alphabet) {
         super(cursor, sortedColumnIndex, alphabet);

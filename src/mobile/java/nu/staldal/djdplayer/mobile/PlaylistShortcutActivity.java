@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.os.Bundle;
+import nu.staldal.djdplayer.R;
 
 public class PlaylistShortcutActivity extends Activity {
     @Override

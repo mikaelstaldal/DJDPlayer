@@ -14,82 +14,79 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ListView;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.provider.ID3Utils;
 import nu.staldal.djdplayer.provider.MusicContract;
 
-public class AlbumFragment extends MetadataCategoryFragment {
+public class GenreFragment extends MetadataCategoryFragment {
 
     @Override
     protected String getSelectedCategoryId() {
-        return "selectedalbum";
+        return "selectedgenre";
     }
 
     @Override
     protected int getUnknownStringId() {
-        return R.string.unknown_album_name;
+        return R.string.unknown_genre_name;
     }
 
     @Override
     protected int getDeleteDescStringId() {
-        return R.string.delete_album_desc;
+        return R.string.delete_genre_desc;
     }
 
     @Override
     protected long fetchCurrentlyPlayingCategoryId() {
         return (MusicUtils.sService != null)
-                ? MusicUtils.sService.getAlbumId()
+                ? MusicUtils.sService.getGenreId()
                 : -1;
     }
 
     @Override
     protected String getEntryContentType() {
-        return MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE;
-    }
-
-    @Override
-    protected void addExtraSearchData(Intent i) {
-        i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, mCurrentName);
+        return MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE;
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] cols = new String[] {
-                MusicContract.Album._ID,
-                MusicContract.Album.NAME,
-                MusicContract.Album.COUNT,
+                MusicContract.Genre._ID,
+                MusicContract.Genre.NAME,
+                MusicContract.Genre._COUNT,
         };
 
-        return new CursorLoader(getActivity(), MusicContract.Album.CONTENT_URI, cols, null, null, null);
+        return new CursorLoader(getActivity(), MusicContract.Genre.CONTENT_URI, cols, null, null, null);
     }
 
     @Override
     protected String fetchCategoryName(Cursor cursor) {
-        return cursor.getString(getNameColumnIndex(cursor));
+        return ID3Utils.decodeGenre(cursor.getString(getNameColumnIndex(cursor)));
     }
 
     @Override
     protected int getNameColumnIndex(Cursor cursor) {
-        return cursor.getColumnIndexOrThrow(MusicContract.Album.NAME);
+        return cursor.getColumnIndexOrThrow(MusicContract.Genre.NAME);
     }
 
     @Override
     protected String getNumberOfSongsColumnName() {
-        return MusicContract.Album.COUNT;
+        return MusicContract.Genre._COUNT;
     }
 
     @Override
     protected long[] fetchSongList(long id) {
         Cursor cursor = MusicUtils.query(getActivity(),
-                MusicContract.Album.getMembersUri(id),
+                MusicContract.Genre.getMembersUri(id),
                 new String[] { MediaStore.Audio.AudioColumns._ID },
                 null,
                 null,
@@ -105,11 +102,11 @@ public class AlbumFragment extends MetadataCategoryFragment {
 
     @Override
     protected boolean shuffleSongs() {
-        return false;
+        return true;
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        viewCategory(MusicContract.Album.getMembersUri(id));
+        viewCategory(MusicContract.Genre.getMembersUri(id));
     }
 }

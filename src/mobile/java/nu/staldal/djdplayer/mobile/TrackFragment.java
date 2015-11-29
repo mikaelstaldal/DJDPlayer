@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,6 +46,14 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
+import nu.staldal.djdplayer.CreatePlaylist;
+import nu.staldal.djdplayer.ExportPlaylistTask;
+import nu.staldal.djdplayer.MusicAlphabetIndexer;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
+import nu.staldal.djdplayer.ShufflePlaylistTask;
+import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 import nu.staldal.djdplayer.provider.MusicContract;
 import nu.staldal.ui.TouchInterceptor;
 import nu.staldal.ui.WithSectionMenu;

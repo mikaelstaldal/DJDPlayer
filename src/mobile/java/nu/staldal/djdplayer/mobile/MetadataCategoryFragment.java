@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -30,6 +30,9 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
+import nu.staldal.djdplayer.CreatePlaylist;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
     public static final String CURRENT_NAME = "CURRENT_NAME";

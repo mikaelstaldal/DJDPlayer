@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import nu.staldal.djdplayer.MusicUtils;
 
 public abstract class CategoryFragment extends BrowserFragment implements MusicUtils.Defs {
     @Override

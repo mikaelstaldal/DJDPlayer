@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.CursorAdapter;
+import nu.staldal.djdplayer.MediaPlaybackService;
 
 public abstract class BrowserFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 

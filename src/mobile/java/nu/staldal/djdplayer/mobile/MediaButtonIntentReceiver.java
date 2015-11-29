@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -46,23 +46,23 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
             String action = null;
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
-                    action = MediaPlaybackService.PLAY_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.PLAY_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                    action = MediaPlaybackService.PAUSE_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.PAUSE_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_STOP:
-                    action = MediaPlaybackService.STOP_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.STOP_ACTION;
                     break;
                 case KeyEvent.KEYCODE_HEADSETHOOK:
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    action = MediaPlaybackService.TOGGLEPAUSE_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.TOGGLEPAUSE_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
-                    action = MediaPlaybackService.NEXT_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.NEXT_ACTION;
                     break;
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                    action = MediaPlaybackService.PREVIOUS_ACTION;
+                    action = nu.staldal.djdplayer.MediaPlaybackService.PREVIOUS_ACTION;
                     break;
             }
 
@@ -72,9 +72,9 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                         // if this isn't a repeat event
 
                         // The service may or may not be running, but we need to send it a command.
-                        Intent i = new Intent(context, MediaPlaybackService.class);
+                        Intent i = new Intent(context, MobileMediaPlaybackService.class);
                         if (event.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK && event.getEventTime() - mLastClickTime < 300) {
-                            action = MediaPlaybackService.NEXT_ACTION;
+                            action = nu.staldal.djdplayer.MediaPlaybackService.NEXT_ACTION;
                             mLastClickTime = 0;
                         } else {
                             mLastClickTime = event.getEventTime();

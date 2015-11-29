@@ -21,9 +21,7 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,8 +31,6 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
-import android.media.MediaMetadataRetriever;
-import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -57,7 +53,7 @@ import java.util.Set;
  * Provides "background" audio playback capabilities, allowing the
  * user to switch between activities without stopping playback.
  */
-public class MediaPlaybackService extends Service implements MediaPlayback {
+public abstract class MediaPlaybackService extends Service implements MediaPlayback {
     private static final String LOGTAG = "MediaPlaybackService";
 
     public static final String PLAYSTATE_CHANGED = "nu.staldal.djdplayer.playstatechanged";
@@ -70,7 +66,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     public static final String STOP_ACTION = "nu.staldal.djdplayer.musicservicecommand.stop";
     public static final String PREVIOUS_ACTION = "nu.staldal.djdplayer.musicservicecommand.previous";
     public static final String NEXT_ACTION = "nu.staldal.djdplayer.musicservicecommand.next";
-    public static final String APPWIDGETUPDATE_ACTION = "nu.staldal.djdplayer.musicservicecommand.appwidgetupdate";
 
     private static final int PLAYBACKSERVICE_STATUS = 1;
 
@@ -106,11 +101,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
     // Delegates
 
-    private AudioManager mAudioManager;
+    protected AudioManager mAudioManager;
     private SharedPreferences mPersistentState;
     private SharedPreferences mSettings;
     private final MyMediaPlayer[] mPlayers = new MyMediaPlayer[2];
-    private RemoteControlClient mRemoteControlClient;
 
 
     // Mutable state
@@ -160,9 +154,6 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
-
         mPersistentState = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
 
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -196,20 +187,18 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         reloadQueue();
 
-        IntentFilter commandFilter = new IntentFilter();
-        commandFilter.addAction(TOGGLEPAUSE_ACTION);
-        commandFilter.addAction(PLAY_ACTION);
-        commandFilter.addAction(PAUSE_ACTION);
-        commandFilter.addAction(STOP_ACTION);
-        commandFilter.addAction(NEXT_ACTION);
-        commandFilter.addAction(PREVIOUS_ACTION);
-        commandFilter.addAction(APPWIDGETUPDATE_ACTION);
-        commandFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        registerReceiver(mIntentReceiver, commandFilter);
+        IntentFilter actionFilter = new IntentFilter();
+        actionFilter.addAction(TOGGLEPAUSE_ACTION);
+        actionFilter.addAction(PLAY_ACTION);
+        actionFilter.addAction(PAUSE_ACTION);
+        actionFilter.addAction(STOP_ACTION);
+        actionFilter.addAction(NEXT_ACTION);
+        actionFilter.addAction(PREVIOUS_ACTION);
+        enrichActionFilter(actionFilter);
+        actionFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(mIntentReceiver, actionFilter);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-            setupRemoteControl();
-        }
+        additionalCreate();
 
         // If the service was idle, but got killed before it stopped itself, the
         // system will relaunch it. Make sure it gets stopped again in that case.
@@ -217,17 +206,9 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
     }
 
-    private void setupRemoteControl() {
-        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        mediaButtonIntent.setComponent(new ComponentName(this.getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
-        mRemoteControlClient = new RemoteControlClient(
-                PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0));
-        mRemoteControlClient.setTransportControlFlags(
-                RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE |
-                        RemoteControlClient.FLAG_KEY_MEDIA_NEXT |
-                        RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
-    }
+    protected void enrichActionFilter(IntentFilter actionFilter) { }
+
+    protected void additionalCreate() { }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -320,11 +301,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
         }
 
-        mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-            mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
-        }
+        additionalDestroy();
 
         for (MyMediaPlayer player : mPlayers) player.release();
 
@@ -339,6 +316,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
 
         super.onDestroy();
     }
+
+    protected void additionalDestroy() { }
 
     private synchronized void handlePlayerCallback(int player, Message msg) {
         switch (msg.what) {
@@ -493,11 +472,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                     switch (msg.arg1) {
                         case AudioManager.AUDIOFOCUS_LOSS:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
-                            mAudioManager.unregisterMediaButtonEventReceiver(new ComponentName(
-                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-                                mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
-                            }
+                            audioFocusLoss();
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             pause();
                             break;
@@ -518,11 +493,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
-                            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(
-                                    MediaPlaybackService.this.getPackageName(), MediaButtonIntentReceiver.class.getName()));
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-                                mAudioManager.registerRemoteControlClient(mRemoteControlClient);
-                            }
+                            audioFocusGain();
 
                             if (!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
@@ -568,6 +539,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         }
     };
 
+    protected void audioFocusGain() { }
+
+    protected void audioFocusLoss() {}
+
     private final Handler mDelayedStopHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -607,14 +582,13 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             } else if (STOP_ACTION.equals(action)) {
                 pause();
                 seek(0);
-            } else if (APPWIDGETUPDATE_ACTION.equals(action)) {
-                // Someone asked us to refresh a set of specific widgets, probably
-                // because they were just added.
-                int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-                MediaAppWidgetProvider.getInstance().performUpdate(MediaPlaybackService.this, appWidgetIds);
+            } else {
+                handleAdditionalActions(intent);
             }
         }
     };
+
+    protected void handleAdditionalActions(Intent intent) { }
 
     /**
      * Registers an intent to listen for ACTION_MEDIA_EJECT notifications.
@@ -833,26 +807,10 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             saveQueue(false);
         }
 
-        // Share this notification directly with our widgets
-        MediaAppWidgetProvider.getInstance().notifyChange(this, what);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-            updateRemoteControl();
-        }
+        extraNotifyChange(what);
     }
 
-    private void updateRemoteControl() {
-        mRemoteControlClient.setPlaybackState(isPlaying()
-                ? RemoteControlClient.PLAYSTATE_PLAYING
-                : RemoteControlClient.PLAYSTATE_PAUSED);
-
-        RemoteControlClient.MetadataEditor metadataEditor = mRemoteControlClient.editMetadata(true);
-        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName());
-        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName());
-        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getArtistName());
-        metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_GENRE, getGenreName());
-        metadataEditor.apply();
-    }
+    protected void extraNotifyChange(String what) { }
 
     private void ensurePlayListCapacity(int size) {
         if (size > mPlayList.length) {
@@ -1085,11 +1043,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             return;
         }
 
-        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) { // does not work in Lollipop
-            mAudioManager.registerRemoteControlClient(mRemoteControlClient);
-        }
+        beforePlay();
 
         if (mPlayers[mCurrentPlayer].isInitialized()) {
             // if we are at the end of the song, go to the next song first
@@ -1116,6 +1070,8 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
         }
     }
 
+    protected void beforePlay() { }
+
     private Notification buildNotification() {
         String trackName;
         String artistName;
@@ -1130,20 +1086,11 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
             }
         }
 
-        Class<?> activityClass = getResources().getBoolean(R.bool.tablet_layout)
-                ? MusicBrowserActivity.class
-                : MediaPlaybackActivity.class;
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                0);
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.stat_notify_musicplayer);
         builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.app_icon));
         builder.setContentTitle(trackName);
         builder.setContentText(artistName);
-        builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         builder.setWhen(0);
         builder.addAction(android.R.drawable.ic_media_previous, getResources().getString(R.string.prev),
@@ -1154,10 +1101,14 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
                 getPendingIntentForAction(NEXT_ACTION));
         builder.setStyle(new NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2));
 
+        enrichNotification(builder);
+
         applyLillipopFunctionality(builder);
 
         return builder.build();
     }
+
+    protected void enrichNotification(NotificationCompat.Builder builder) { }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void applyLillipopFunctionality(NotificationCompat.Builder builder) {
@@ -1169,7 +1120,7 @@ public class MediaPlaybackService extends Service implements MediaPlayback {
     }
 
     private PendingIntent getPendingIntentForAction(String action) {
-        return PendingIntent.getService(this, 0, new Intent(action).setClass(this, MediaPlaybackService.class), 0);
+        return PendingIntent.getService(this, 0, new Intent(action).setClass(this, getClass()), 0);
     }
 
     private void stop() {

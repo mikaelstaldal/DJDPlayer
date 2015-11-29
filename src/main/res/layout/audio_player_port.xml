@@ -22,7 +22,7 @@
 
     <fragment
             android:id="@+id/player_header"
-            android:name="nu.staldal.djdplayer.PlayerHeaderFragment"
+            android:name="nu.staldal.djdplayer.mobile.PlayerHeaderFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -34,7 +34,7 @@
 
     <fragment
             android:id="@+id/playqueue"
-            android:name="nu.staldal.djdplayer.PlayQueueFragment"
+            android:name="nu.staldal.djdplayer.mobile.PlayQueueFragment"
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"/>
@@ -47,7 +47,7 @@
 
     <fragment
             android:id="@+id/player_footer"
-            android:name="nu.staldal.djdplayer.PlayerFooterFragment"
+            android:name="nu.staldal.djdplayer.mobile.PlayerFooterFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

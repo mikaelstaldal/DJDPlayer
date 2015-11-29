@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.SearchManager;
 import android.content.*;
@@ -29,6 +29,9 @@ import android.view.ContextMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 public class QueryFragment extends TrackFragment {

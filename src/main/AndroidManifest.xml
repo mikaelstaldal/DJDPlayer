@@ -30,130 +30,16 @@
     <!-- To delete music files, and manipulate play lists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <uses-feature android:name="android.software.app_widgets"
-                  android:required="false"/>
-
-    <application android:icon="@drawable/app_icon"
-                 android:label="@string/applabel"
+    <application android:label="@string/applabel"
                  android:description="@string/appdescription"
-                 android:theme="@style/Theme.Default"
-                 android:allowTaskReparenting="true"
                  android:allowBackup="true">
 
-        <meta-data
-            android:name="android.app.default_searchable"
-            android:value=".MusicBrowserActivity" />
-
-        <activity android:name=".MusicBrowserActivity"
-                  android:theme="@style/Theme.Main"
-                  android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.MUSIC_PLAYER" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.APP_MUSIC" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.dir/audio"/>
-                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <data android:mimeType="vnd.android.cursor.dir/audio"/>
-                <data android:mimeType="vnd.android.cursor.dir/vnd.djdplayer.audio"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.MEDIA_SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="content"/>
-                <data android:host="media"/>
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file"/>
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="application/ogg"/>
-                <data android:mimeType="application/x-ogg"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
-
-        <!-- This is the "current music playing" panel, which has special
-             launch behavior.  We clear its task affinity, so it will not
-             be associated with the main media task and if launched
-             from a notification will not bring the rest of the media app
-             to the foreground.  We make it singleTask so that when others
-             launch it (such as media) we will launch in to our own task.
-             We set clearTaskOnLaunch because the user
-             can go to a playlist from this activity, so if they later return
-             to it we want it back in its initial state.  We exclude from
-             recents since this is accessible through a notification when
-             appropriate. -->
-        <activity android:name=".MediaPlaybackActivity"
-                android:taskAffinity=""
-                android:launchMode="singleTask"
-                android:clearTaskOnLaunch="true"
-                android:excludeFromRecents="true" />
-
-        <activity android:name=".PlaylistShortcutActivity"
-            android:label="@string/musicshortcutlabel"
-            android:icon="@drawable/ic_launcher_shortcut_music_playlist" >
-
-            <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <activity android:name=".SettingsActivity" />
-
-        <activity android:name=".RescanActivity" />
 
         <activity android:name=".PickMusicFolderActivity"
             android:theme="@style/Theme.Dialog" />
 
         <activity android:name=".AboutActivity" />
-
-        <service android:name=".MediaPlaybackService"
-                 android:exported="false"/>
-
-        <receiver android:name=".MediaAppWidgetProvider">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
-        </receiver>
-
-        <receiver android:name=".MediaButtonIntentReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
 
         <provider android:authorities="nu.staldal.djdplayer"
                   android:exported="false"

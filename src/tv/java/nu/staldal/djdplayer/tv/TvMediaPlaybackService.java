@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Mikael Ståldal
+ * Copyright (C) 2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
 
-public class NarrowPlayerFooterFragment extends PlayerFooterFragment {
+package nu.staldal.djdplayer.tv;
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.narrow_player_footer;
-    }
+import nu.staldal.djdplayer.MediaPlaybackService;
+
+public class TvMediaPlaybackService extends MediaPlaybackService {
+
+    @SuppressWarnings("unused")
+    private static final String LOGTAG = "TvMediaPlaybackService";
+
 }

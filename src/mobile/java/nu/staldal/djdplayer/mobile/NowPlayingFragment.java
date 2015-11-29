@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -27,6 +27,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import nu.staldal.djdplayer.FragmentServiceConnection;
+import nu.staldal.djdplayer.MediaPlayback;
+import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.R;
 
 public class NowPlayingFragment extends Fragment implements FragmentServiceConnection {
     @SuppressWarnings("UnusedDeclaration")

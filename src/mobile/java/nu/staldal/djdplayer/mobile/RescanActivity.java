@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import nu.staldal.djdplayer.MusicUtils;
 
 public class RescanActivity extends Activity {
     private static final String LOGTAG = "RescanActivity";

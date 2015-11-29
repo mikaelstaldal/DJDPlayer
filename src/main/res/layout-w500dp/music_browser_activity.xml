@@ -39,7 +39,7 @@
 
         <fragment
                 android:id="@+id/player_header"
-                android:name="nu.staldal.djdplayer.PlayerHeaderFragment"
+                android:name="nu.staldal.djdplayer.mobile.PlayerHeaderFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -63,7 +63,7 @@
 
         <fragment
                 android:id="@+id/player_footer"
-                android:name="nu.staldal.djdplayer.NarrowPlayerFooterFragment"
+                android:name="nu.staldal.djdplayer.mobile.NarrowPlayerFooterFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.widget.RemoteViews;
+import nu.staldal.djdplayer.R;
 
 /**
  * Simple widget to show currently playing song along
@@ -45,7 +46,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         
         // Send broadcast intent to any running MediaPlaybackService so it can
         // wrap around with an immediate update.
-        Intent updateIntent = new Intent(MediaPlaybackService.APPWIDGETUPDATE_ACTION);
+        Intent updateIntent = new Intent(MobileMediaPlaybackService.APPWIDGETUPDATE_ACTION);
         updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         updateIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         context.sendBroadcast(updateIntent);
@@ -88,12 +89,12 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Handle a change notification coming over from {@link MediaPlaybackService}
+     * Handle a change notification coming over from {@link MobileMediaPlaybackService}
      */
-    void notifyChange(MediaPlaybackService service, String what) {
+    void notifyChange(nu.staldal.djdplayer.MediaPlaybackService service, String what) {
         if (hasInstances(service)) {
-            if (MediaPlaybackService.META_CHANGED.equals(what) ||
-                    MediaPlaybackService.PLAYSTATE_CHANGED.equals(what)) {
+            if (nu.staldal.djdplayer.MediaPlaybackService.META_CHANGED.equals(what) ||
+                    nu.staldal.djdplayer.MediaPlaybackService.PLAYSTATE_CHANGED.equals(what)) {
                 performUpdate(service, null);
             }
         }
@@ -102,7 +103,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
     /**
      * Update all active widget instances by pushing changes 
      */
-    void performUpdate(MediaPlaybackService service, int[] appWidgetIds) {
+    void performUpdate(nu.staldal.djdplayer.MediaPlaybackService service, int[] appWidgetIds) {
         final Resources res = service.getResources();
         final RemoteViews views = new RemoteViews(service.getPackageName(), R.layout.appwidget);
         
@@ -162,12 +163,12 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
                 0, new Intent(context, activityClass), 0));
 
         views.setOnClickPendingIntent(R.id.pause, PendingIntent.getService(context,
-                0, new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION).setClass(context, MediaPlaybackService.class), 0));
+                0, new Intent(nu.staldal.djdplayer.MediaPlaybackService.TOGGLEPAUSE_ACTION).setClass(context, MobileMediaPlaybackService.class), 0));
 
         views.setOnClickPendingIntent(R.id.next, PendingIntent.getService(context,
-                0, new Intent(MediaPlaybackService.NEXT_ACTION).setClass(context, MediaPlaybackService.class), 0));
+                0, new Intent(nu.staldal.djdplayer.MediaPlaybackService.NEXT_ACTION).setClass(context, MobileMediaPlaybackService.class), 0));
 
         views.setOnClickPendingIntent(R.id.prev, PendingIntent.getService(context,
-                0, new Intent(MediaPlaybackService.PREVIOUS_ACTION).setClass(context, MediaPlaybackService.class), 0));
+                0, new Intent(nu.staldal.djdplayer.MediaPlaybackService.PREVIOUS_ACTION).setClass(context, MobileMediaPlaybackService.class), 0));
     }
 }

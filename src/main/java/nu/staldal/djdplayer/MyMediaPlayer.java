@@ -27,7 +27,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-class MyMediaPlayer {
+public class MyMediaPlayer {
     private static final String LOGTAG = "MyMediaPlayer";
 
     public static final int TRACK_ENDED = 1;
