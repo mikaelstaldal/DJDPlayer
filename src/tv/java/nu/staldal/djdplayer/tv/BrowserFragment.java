@@ -40,6 +40,7 @@ import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.util.List;
@@ -156,7 +157,7 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
             SettingsItem item = (SettingsItem) o;
             switch ((int)item.id) {
                 case R.id.settings_action:
-                    Log.d(TAG, "Settings");
+                    startActivity(new Intent(getActivity(), SettingsActivity.class));
                     break;
 
                 case R.id.effectspanel_action:
