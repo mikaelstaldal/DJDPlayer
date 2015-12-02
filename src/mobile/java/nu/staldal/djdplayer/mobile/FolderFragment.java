@@ -33,10 +33,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
-import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.io.File;

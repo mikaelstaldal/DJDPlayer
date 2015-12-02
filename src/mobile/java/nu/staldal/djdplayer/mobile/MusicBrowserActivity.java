@@ -43,7 +43,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.ImportPlaylistTask;
 import nu.staldal.djdplayer.MediaPlayback;

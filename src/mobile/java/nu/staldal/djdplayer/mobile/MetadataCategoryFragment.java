@@ -30,7 +30,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 

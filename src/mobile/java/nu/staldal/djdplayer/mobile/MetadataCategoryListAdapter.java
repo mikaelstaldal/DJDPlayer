@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.*;
 import nu.staldal.djdplayer.MusicAlphabetIndexer;
 import nu.staldal.djdplayer.R;
-import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 
 public class MetadataCategoryListAdapter extends SimpleCursorAdapterWithContextMenu implements SectionIndexer {
     protected final Resources mResources;

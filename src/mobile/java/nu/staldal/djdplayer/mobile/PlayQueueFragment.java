@@ -41,14 +41,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.SettingsActivity;
-import nu.staldal.djdplayer.SimpleCursorAdapterWithContextMenu;
 import nu.staldal.ui.TouchInterceptor;
 
 import java.util.Arrays;

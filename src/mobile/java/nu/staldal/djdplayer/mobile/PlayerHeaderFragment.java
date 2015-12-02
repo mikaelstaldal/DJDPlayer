@@ -33,7 +33,6 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;

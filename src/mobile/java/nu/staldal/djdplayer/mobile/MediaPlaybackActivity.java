@@ -34,7 +34,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Toast;
-import nu.staldal.djdplayer.CreatePlaylist;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.MusicUtils;

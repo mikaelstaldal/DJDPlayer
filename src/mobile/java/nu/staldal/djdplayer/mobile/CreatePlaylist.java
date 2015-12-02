@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer.mobile;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,6 +28,8 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.R;
 
 public class CreatePlaylist extends DialogFragment {
     @SuppressWarnings("unused")
