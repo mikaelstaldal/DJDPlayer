@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BrowseFragment;
@@ -91,7 +92,9 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
 
         ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(new ActionCardPresenter());
         rowAdapter.add(new SettingsItem(R.id.settings_action, getString(R.string.settings)));
-        rowAdapter.add(new SettingsItem(R.id.effectspanel_action, getString(R.string.effectspanel)));
+        if (getActivity().getPackageManager().resolveActivity(new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL), 0) != null) {
+            rowAdapter.add(new SettingsItem(R.id.effectspanel_action, getString(R.string.effectspanel)));
+        }
         adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), rowAdapter));
 
         setAdapter(adapter);
@@ -161,7 +164,9 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
                     break;
 
                 case R.id.effectspanel_action:
-                    Log.d(TAG, "Effects panel");
+                    Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                    intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, service.getAudioSessionId());
+                    startActivityForResult(intent, 0);
                     break;
             }
         }
