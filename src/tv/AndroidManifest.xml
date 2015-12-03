@@ -17,14 +17,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nu.staldal.djdplayer">
 
-    <uses-feature android:name="android.software.leanback"
-                  android:required="true" />
+    <uses-feature
+            android:name="android.software.leanback"
+            android:required="true"/>
 
-    <uses-feature android:name="android.hardware.touchscreen"
-                  android:required="false" />
+    <uses-feature
+            android:name="android.hardware.touchscreen"
+            android:required="false"/>
 
-    <application android:banner="@drawable/app_banner"
-                 android:theme="@style/Theme.Leanback">
+    <application
+            android:banner="@drawable/app_banner"
+            android:theme="@style/Theme.Leanback">
 
         <!--
         <meta-data
@@ -32,14 +35,16 @@
             android:value=".tv.BrowserActivity" />
             -->
 
-        <activity android:name=".tv.BrowserActivity"
-                  android:theme="@style/Theme.Leanback.Browse">
+        <activity
+                android:name=".tv.BrowserActivity"
+                android:theme="@style/Theme.Leanback.Browse">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.MUSIC_PLAYER" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-                <category android:name="android.intent.category.APP_MUSIC" />
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MUSIC_PLAYER"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+                <category android:name="android.intent.category.APP_MUSIC"/>
             </intent-filter>
         </activity>
 
@@ -47,8 +52,13 @@
                 android:name=".tv.CategoryDetailsActivity"
                 android:theme="@style/Theme.Leanback"/>
 
-        <service android:name=".tv.TvMediaPlaybackService"
-                 android:exported="false"/>
+        <activity
+                android:name=".PickMusicFolderActivity"
+                android:theme="@style/Theme.Leanback"/>
+
+        <service
+                android:name=".tv.TvMediaPlaybackService"
+                android:exported="false"/>
 
     </application>
 

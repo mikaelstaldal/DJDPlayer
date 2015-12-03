@@ -36,9 +36,6 @@
 
         <activity android:name=".SettingsActivity" />
 
-        <activity android:name=".PickMusicFolderActivity"
-            android:theme="@style/Theme.Dialog" />
-
         <activity android:name=".AboutActivity" />
 
         <provider android:authorities="nu.staldal.djdplayer"

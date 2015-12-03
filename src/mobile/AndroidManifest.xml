@@ -105,6 +105,9 @@
                 android:clearTaskOnLaunch="true"
                 android:excludeFromRecents="true" />
 
+        <activity android:name=".PickMusicFolderActivity"
+                android:theme="@android:style/Theme.Holo.Dialog" />
+
         <activity android:name=".mobile.RescanActivity" />
 
         <activity android:name=".mobile.PlaylistShortcutActivity"
