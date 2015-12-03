@@ -10,4 +10,8 @@
     <style name="SongListText.Secondary" parent="SongListText">
         <item name="android:textColor">@color/song_row_secondary_text</item>
     </style>
+
+    <style name="AboutText" parent="TextAppearance.Leanback">
+        <item name="android:textSize">20sp</item>
+    </style>
 </resources>
