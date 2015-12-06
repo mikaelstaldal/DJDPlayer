@@ -15,7 +15,6 @@
  */
 package nu.staldal.djdplayer.tv;
 
-import android.annotation.TargetApi;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.media.audiofx.AudioEffect;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -48,7 +46,6 @@ import nu.staldal.djdplayer.provider.MusicContract;
 
 import java.util.List;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BrowserFragment extends BrowseFragment implements FragmentServiceConnection,
         LoaderManager.LoaderCallbacks<List<ListRow>>, OnItemViewClickedListener {
 

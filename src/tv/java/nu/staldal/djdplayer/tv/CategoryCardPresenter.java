@@ -15,13 +15,10 @@
  */
 package nu.staldal.djdplayer.tv;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.support.v17.leanback.widget.Presenter;
 import android.view.ViewGroup;
 import nu.staldal.djdplayer.R;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class CategoryCardPresenter extends Presenter {
 
     @Override

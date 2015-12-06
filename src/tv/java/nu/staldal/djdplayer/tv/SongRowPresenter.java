@@ -15,8 +15,6 @@
  */
 package nu.staldal.djdplayer.tv;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.support.v17.leanback.widget.Presenter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +23,6 @@ import android.widget.TextView;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class SongRowPresenter extends Presenter {
 
     class ViewHolder extends Presenter.ViewHolder {
