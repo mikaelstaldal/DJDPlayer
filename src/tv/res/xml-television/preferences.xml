@@ -20,18 +20,4 @@
             android:title="@string/cross_fade"
             android:defaultValue="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/music_folder">
-        <Preference android:title="@string/select_music_folder">
-            <intent
-                android:targetPackage="nu.staldal.djdplayer"
-                android:targetClass="nu.staldal.djdplayer.PickMusicFolderActivity" />
-        </Preference>
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/about">
-        <Preference android:title="@string/about">
-            <intent
-                android:targetPackage="nu.staldal.djdplayer"
-                android:targetClass="nu.staldal.djdplayer.AboutActivity" />
-        </Preference>
-    </PreferenceCategory>
 </PreferenceScreen>

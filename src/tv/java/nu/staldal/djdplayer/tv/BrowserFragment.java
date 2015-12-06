@@ -37,9 +37,11 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SinglePresenterSelector;
 import android.util.Log;
 import android.widget.Toast;
+import nu.staldal.djdplayer.AboutActivity;
 import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.PickMusicFolderActivity;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.djdplayer.provider.MusicContract;
@@ -91,10 +93,14 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
         }
 
         ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(new ActionCardPresenter());
+
         rowAdapter.add(new SettingsItem(R.id.settings_action, getString(R.string.settings)));
         if (getActivity().getPackageManager().resolveActivity(new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL), 0) != null) {
             rowAdapter.add(new SettingsItem(R.id.effectspanel_action, getString(R.string.effectspanel)));
         }
+        rowAdapter.add(new SettingsItem(R.id.select_music_folder_action, getString(R.string.music_folder)));
+        rowAdapter.add(new SettingsItem(R.id.about_action, getString(R.string.about)));
+
         adapter.add(new ListRow(new HeaderItem(R.id.settings_section, getString(R.string.settings)), rowAdapter));
 
         setAdapter(adapter);
@@ -167,6 +173,14 @@ public class BrowserFragment extends BrowseFragment implements FragmentServiceCo
                     Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
                     intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, service.getAudioSessionId());
                     startActivityForResult(intent, 0);
+                    break;
+
+                case R.id.select_music_folder_action:
+                    startActivity(new Intent(getActivity(), PickMusicFolderActivity.class));
+                    break;
+
+                case R.id.about_action:
+                    startActivity(new Intent(getActivity(), AboutActivity.class));
                     break;
             }
         }

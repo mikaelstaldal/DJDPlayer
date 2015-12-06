@@ -9,6 +9,8 @@
 
     <item name="settings_action" type="id"/>
     <item name="effectspanel_action" type="id"/>
+    <item name="select_music_folder_action" type="id"/>
+    <item name="about_action" type="id"/>
 
     <item name="play_all_now_action" type="id"/>
     <item name="play_all_next_action" type="id"/>
