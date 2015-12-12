@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2015 Mikael Ståldal
+ * Copyright (C) 2015 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +16,16 @@
 
 package nu.staldal.djdplayer.tv;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ComponentName;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v17.leanback.database.CursorMapper;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
@@ -36,14 +36,20 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.TitleView;
 import android.support.v17.leanback.widget.VerticalGridView;
 import android.util.Log;
+import nu.staldal.djdplayer.MediaPlayback;
+import nu.staldal.djdplayer.MediaPlaybackService;
+import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class CategoryDetailsActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor>, OnItemViewClickedListener {
+public class CategoryDetailsActivity extends Activity implements
+        LoaderManager.LoaderCallbacks<Cursor>, ServiceConnection, OnItemViewClickedListener {
 
     private static final String TAG = CategoryDetailsActivity.class.getSimpleName();
 
     public static final String TITLE = "title";
+
+    private MusicUtils.ServiceToken token = null;
+    private MediaPlayback service = null;
 
     private Uri uri;
     private String title;
@@ -60,6 +66,13 @@ public class CategoryDetailsActivity extends Activity implements LoaderManager.L
         title = getIntent().getStringExtra(TITLE);
 
         buildUI();
+
+        token = MusicUtils.bindToService(this, this, TvMediaPlaybackService.class);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        service = ((MediaPlaybackService.LocalBinder) binder).getService();
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -144,7 +157,24 @@ public class CategoryDetailsActivity extends Activity implements LoaderManager.L
     @Override
     public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                               RowPresenter.ViewHolder rowViewHolder, Row row) {
-        Log.i(TAG, "item: " + item.toString());
+        SongItem song = (SongItem)item;
 
+        MusicUtils.playSong(this, song.id);
     }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        service = null;
+
+        finish();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (token != null) MusicUtils.unbindFromService(token);
+        service = null;
+
+        super.onDestroy();
+    }
+
 }
