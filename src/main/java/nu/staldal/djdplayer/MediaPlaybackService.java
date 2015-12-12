@@ -31,6 +31,9 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -102,6 +105,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     // Delegates
 
     protected AudioManager mAudioManager;
+    protected MediaSession mSession;
     private SharedPreferences mPersistentState;
     private SharedPreferences mSettings;
     private final MyMediaPlayer[] mPlayers = new MyMediaPlayer[2];
@@ -198,6 +202,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         actionFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mIntentReceiver, actionFilter);
 
+        createMediaSession();
+
         additionalCreate();
 
         // If the service was idle, but got killed before it stopped itself, the
@@ -207,6 +213,15 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     }
 
     protected void enrichActionFilter(IntentFilter actionFilter) { }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void createMediaSession() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mSession = new MediaSession(this, getString(R.string.applabel));
+            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+                    MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        }
+    }
 
     protected void additionalCreate() { }
 
@@ -302,6 +317,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         }
 
         additionalDestroy();
+
+        if (mSession != null) {
+            mSession.release();
+        }
 
         for (MyMediaPlayer player : mPlayers) player.release();
 
@@ -494,6 +513,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             audioFocusGain();
+                            if (mSession != null && !mSession.isActive()) {
+                                mSession.setActive(true);
+                            }
 
                             if (!isPlaying() && mPausedByTransientLossOfFocus) {
                                 mPausedByTransientLossOfFocus = false;
@@ -1015,6 +1037,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                         mGenreId = idAndName.id;
                         mGenreName = idAndName.name;
                     }
+
+                    if (mSession != null) {
+                        updateMediaMetadata();
+                    }
                 }
             } finally {
                 cursor.close();
@@ -1032,6 +1058,21 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         mMimeType = null;
         mFolder = null;
         mTrackName = null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void updateMediaMetadata() {
+        MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, getTrackName());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, getArtistName());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_GENRE, getGenreName());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ALBUM, getAlbumName());
+
+        metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART,
+                BitmapFactory.decodeResource(getResources(), R.drawable.app_icon));
+        // TODO set small icon
+
+        mSession.setMetadata(metadataBuilder.build());
     }
 
     @Override
@@ -1053,9 +1094,12 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                 next();
             }
 
+            if (mSession != null) {
+                updateMediaSession();
+            }
+
             mPlayers[mCurrentPlayer].start();
-            // make sure we fade in, in case a previous fadein was stopped because
-            // of another focus loss
+            // make sure we fade in, in case a previous fadein was stopped because of another focus loss
             mPlaybackHander.removeMessages(DUCK);
             mPlaybackHander.removeMessages(FADEDOWN);
             mPlaybackHander.removeMessages(CROSSFADE);
@@ -1071,6 +1115,18 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     }
 
     protected void beforePlay() { }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void updateMediaSession() {
+        if (!mSession.isActive()) {
+            mSession.setActive(true);
+        }
+
+        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE);
+        stateBuilder.setState(PlaybackState.STATE_PLAYING, mPlayers[mCurrentPlayer].currentPosition(), 1.0f);
+        mSession.setPlaybackState(stateBuilder.build());
+    }
 
     private Notification buildNotification() {
         String trackName;
@@ -1190,6 +1246,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         Message msg = mDelayedStopHandler.obtainMessage();
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
         stopForeground(true);
+        if (mSession != null && mSession.isActive()) {
+            mSession.setActive(false);
+        }
         mIsSupposedToBePlaying = false;
     }
 
