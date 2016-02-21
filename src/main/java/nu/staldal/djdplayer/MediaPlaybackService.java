@@ -319,7 +319,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         additionalDestroy();
 
         if (mSession != null) {
-            mSession.release();
+            releaseMediaSession();
         }
 
         for (MyMediaPlayer player : mPlayers) player.release();
@@ -334,6 +334,11 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         unregisterReceiver(mUnmountReceiver);
 
         super.onDestroy();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void releaseMediaSession() {
+        mSession.release();
     }
 
     protected void additionalDestroy() { }
@@ -513,8 +518,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             audioFocusGain();
-                            if (mSession != null && !mSession.isActive()) {
-                                mSession.setActive(true);
+                            if (mSession != null) {
+                                activateMediaSession();
                             }
 
                             if (!isPlaying() && mPausedByTransientLossOfFocus) {
@@ -560,6 +565,13 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             }
         }
     };
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void activateMediaSession() {
+        if (!mSession.isActive()) {
+            mSession.setActive(true);
+        }
+    }
 
     protected void audioFocusGain() { }
 
@@ -1095,9 +1107,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             }
 
             if (mSession != null) {
-                if (!mSession.isActive()) {
-                    mSession.setActive(true);
-                }
+                activateMediaSession();
                 updateMediaSession(true);
             }
 
@@ -1237,11 +1247,18 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         Message msg = mDelayedStopHandler.obtainMessage();
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
         stopForeground(true);
-        if (mSession != null && mSession.isActive()) {
-            updateMediaSession(false);
-            mSession.setActive(false);
+        if (mSession != null) {
+            if (isMediaSessionActive()) {
+                updateMediaSession(false);
+                deactivateMediaSession();
+            }
         }
         mIsSupposedToBePlaying = false;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private boolean isMediaSessionActive() {
+        return mSession.isActive();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -1251,6 +1268,11 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         stateBuilder.setState(isPlaying ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED,
                 mPlayers[mCurrentPlayer].currentPosition(), 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void deactivateMediaSession() {
+        mSession.setActive(false);
     }
 
     @Override
