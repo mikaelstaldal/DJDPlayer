@@ -74,41 +74,25 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
         progressBar.setMax(1000);
 
         RepeatingImageButton prevButton = (RepeatingImageButton) view.findViewById(R.id.prev);
-        prevButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (service == null) return;
-                if (service.position() < 2000) {
-                    service.prev();
-                } else {
-                    service.seek(0);
-                    service.play();
-                }
+        prevButton.setOnClickListener(v -> {
+            if (service == null) return;
+            if (service.position() < 2000) {
+                service.prev();
+            } else {
+                service.seek(0);
+                service.play();
             }
         });
-        prevButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
-            public void onRepeat(View v, long howlong, int repcnt) {
-                scanBackward(repcnt, howlong);
-            }
-        }, 260);
+        prevButton.setRepeatListener((v, howlong, repcnt) -> scanBackward(repcnt, howlong), 260);
         pauseButton = (ImageButton) view.findViewById(R.id.pause);
         pauseButton.requestFocus();
-        pauseButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                doPauseResume();
-            }
-        });
+        pauseButton.setOnClickListener(v -> doPauseResume());
         RepeatingImageButton nextButton = (RepeatingImageButton) view.findViewById(R.id.next);
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (service == null) return;
-                service.next();
-            }
+        nextButton.setOnClickListener(v -> {
+            if (service == null) return;
+            service.next();
         });
-        nextButton.setRepeatListener(new RepeatingImageButton.RepeatListener() {
-            public void onRepeat(View v, long howlong, int repcnt) {
-                scanForward(repcnt, howlong);
-            }
-        }, 260);
+        nextButton.setRepeatListener((v, howlong, repcnt) -> scanForward(repcnt, howlong), 260);
 
         return view;
     }
