@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2015 Mikael Ståldal
+<!-- Copyright (C) 2015-2016 Mikael Ståldal
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -47,6 +47,10 @@
                 <category android:name="android.intent.category.APP_MUSIC"/>
             </intent-filter>
         </activity>
+
+        <activity
+                android:name=".tv.PlaybackActivity"
+                android:theme="@style/Theme.Leanback"/>
 
         <activity
                 android:name=".tv.CategoryDetailsActivity"

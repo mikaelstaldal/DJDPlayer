@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mikael Ståldal
+ * Copyright (C) 2015-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package nu.staldal.djdplayer.tv;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import nu.staldal.djdplayer.MediaPlaybackService;
 
 public class TvMediaPlaybackService extends MediaPlaybackService {
@@ -23,4 +25,10 @@ public class TvMediaPlaybackService extends MediaPlaybackService {
     @SuppressWarnings("unused")
     private static final String LOGTAG = "TvMediaPlaybackService";
 
+    @Override
+    protected void additionalCreate() {
+        Intent intent = new Intent(this, PlaybackActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mSession.setSessionActivity(pendingIntent);
+    }
 }

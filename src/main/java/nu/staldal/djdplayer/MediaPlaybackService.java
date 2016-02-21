@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2015 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1095,7 +1095,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             }
 
             if (mSession != null) {
-                updateMediaSession();
+                if (!mSession.isActive()) {
+                    mSession.setActive(true);
+                }
+                updateMediaSession(true);
             }
 
             mPlayers[mCurrentPlayer].start();
@@ -1115,18 +1118,6 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     }
 
     protected void beforePlay() { }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void updateMediaSession() {
-        if (!mSession.isActive()) {
-            mSession.setActive(true);
-        }
-
-        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-                .setActions(PlaybackState.ACTION_PAUSE);
-        stateBuilder.setState(PlaybackState.STATE_PLAYING, mPlayers[mCurrentPlayer].currentPosition(), 1.0f);
-        mSession.setPlaybackState(stateBuilder.build());
-    }
 
     private Notification buildNotification() {
         String trackName;
@@ -1247,9 +1238,19 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
         stopForeground(true);
         if (mSession != null && mSession.isActive()) {
+            updateMediaSession(false);
             mSession.setActive(false);
         }
         mIsSupposedToBePlaying = false;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void updateMediaSession(boolean isPlaying) {
+        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+                .setActions(isPlaying ? PlaybackState.ACTION_PAUSE : PlaybackState.ACTION_PLAY);
+        stateBuilder.setState(isPlaying ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED,
+                mPlayers[mCurrentPlayer].currentPosition(), 1.0f);
+        mSession.setPlaybackState(stateBuilder.build());
     }
 
     @Override
