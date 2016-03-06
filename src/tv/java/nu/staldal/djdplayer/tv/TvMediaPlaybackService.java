@@ -18,17 +18,51 @@ package nu.staldal.djdplayer.tv;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.media.session.MediaSession;
 import nu.staldal.djdplayer.MediaPlaybackService;
 
 public class TvMediaPlaybackService extends MediaPlaybackService {
 
     @SuppressWarnings("unused")
-    private static final String LOGTAG = "TvMediaPlaybackService";
+    private static final String TAG = TvMediaPlaybackService.class.getSimpleName();
 
     @Override
     protected void additionalCreate() {
         Intent intent = new Intent(this, PlaybackActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setSessionActivity(pendingIntent);
+
+        mSession.setCallback(new MediaSession.Callback() {
+            @Override
+            public void onPlay() {
+                play();
+            }
+
+            @Override
+            public void onPause() {
+                pause();
+            }
+
+            @Override
+            public void onStop() {
+                pause();
+                seek(0);
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                if (position() < PREV_THRESHOLD_MS) {
+                    prev();
+                } else {
+                    seek(0);
+                    play();
+                }
+            }
+
+            @Override
+            public void onSkipToNext() {
+                next();
+            }
+        });
     }
 }

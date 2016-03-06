@@ -33,7 +33,7 @@ import nu.staldal.djdplayer.R;
 
 public class BrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection {
 
-    private static final String LOGTAG = "BrowserActivity";
+    private static final String TAG = BrowserActivity.class.getSimpleName();
 
     private MusicUtils.ServiceToken token = null;
     private MediaPlayback service = null;
@@ -42,7 +42,7 @@ public class BrowserActivity extends Activity implements MusicUtils.Defs, Servic
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.i(LOGTAG, "onCreate - " + getIntent());
+        Log.i(TAG, "onCreate - " + getIntent());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);

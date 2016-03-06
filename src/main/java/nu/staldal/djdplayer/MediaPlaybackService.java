@@ -101,6 +101,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
      */
     private static final int IDLE_DELAY = 60000;
 
+    protected static final int PREV_THRESHOLD_MS = 2000;
+
 
     // Delegates
 
@@ -238,7 +240,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             if (NEXT_ACTION.equals(action)) {
                 next();
             } else if (PREVIOUS_ACTION.equals(action)) {
-                if (position() < 2000) {
+                if (position() < PREV_THRESHOLD_MS) {
                     prev();
                 } else {
                     seek(0);
