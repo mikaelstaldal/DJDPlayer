@@ -58,12 +58,14 @@ public class PlaybackActivity extends Activity implements ServiceConnection {
         service = ((MediaPlaybackService.LocalBinder) binder).getService();
 
         notifyFragmentConnected(R.id.now_playing_fragment, service);
+        notifyFragmentConnected(R.id.play_queue_fragment, service);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
         service = null;
 
+        notifyFragmentDisconnected(R.id.play_queue_fragment);
         notifyFragmentDisconnected(R.id.now_playing_fragment);
 
         finish();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Mikael Ståldal
+ * Copyright (C) 2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,92 +16,74 @@
 
 package nu.staldal.djdplayer.tv;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ComponentName;
-import android.content.CursorLoader;
-import android.content.Intent;
+import android.content.AsyncTaskLoader;
 import android.content.Loader;
-import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v17.leanback.database.CursorMapper;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v17.leanback.widget.TitleView;
 import android.support.v17.leanback.widget.VerticalGridView;
-import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
-import nu.staldal.djdplayer.MediaPlaybackService;
-import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.PlayQueueCursor;
 import nu.staldal.djdplayer.R;
+import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.leanback.ClickableItemBridgeAdapter;
 
-public class CategoryDetailsActivity extends Activity implements
-        LoaderManager.LoaderCallbacks<Cursor>, ServiceConnection, OnItemViewClickedListener {
+public class PlayQueueFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>, FragmentServiceConnection, OnItemViewClickedListener {
 
-    private static final String TAG = CategoryDetailsActivity.class.getSimpleName();
+    @SuppressWarnings("unused")
+    private static final String TAG = PlayQueueFragment.class.getSimpleName();
 
-    public static final String TITLE = "title";
-
-    private MusicUtils.ServiceToken token = null;
     private MediaPlayback service = null;
-
-    private Uri uri;
-    private String title;
 
     private CursorObjectAdapter adapter;
 
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.tv_play_queue_fragment, container, false);
 
-        Log.i(TAG, "onCreate - " + getIntent());
-
-        uri = getIntent().getData();
-        title = getIntent().getStringExtra(TITLE);
-
-        buildUI();
-
-        token = MusicUtils.bindToService(this, this, TvMediaPlaybackService.class);
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder binder) {
-        service = ((MediaPlaybackService.LocalBinder) binder).getService();
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private void buildUI() {
-        setContentView(R.layout.tv_category_details_activity);
-
-        TitleView categoryTitle = (TitleView)findViewById(R.id.category_title);
-        categoryTitle.setTitle(title);
-
-        /*
-        ArrayObjectAdapter actionsAdapter = new ArrayObjectAdapter();
-        actionsAdapter.add(new Action(R.id.play_all_now_action, getActivity().getString(R.string.play_all_now)));
-        actionsAdapter.add(new Action(R.id.play_all_next_action, getActivity().getString(R.string.play_all_next)));
-        actionsAdapter.add(new Action(R.id.queue_all_last_action, getActivity().getString(R.string.queue_all)));
-        detailsOverview.setActionsAdapter(actionsAdapter);
-        adapter.add(detailsOverview);
-        */
-
-        VerticalGridView list = (VerticalGridView) findViewById(android.R.id.list);
+        VerticalGridView list = (VerticalGridView) view.findViewById(android.R.id.list);
         adapter = new CursorObjectAdapter(new SongRowPresenter());
         list.setAdapter(new ClickableItemBridgeAdapter(adapter, this));
+
+        return view;
+    }
+
+    @Override
+    public void onServiceConnected(MediaPlayback s) {
+        service = s;
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this, uri, null, null, null, null);
+        return new AsyncTaskLoader<Cursor>(getActivity()) {
+            @Override
+            public Cursor loadInBackground() {
+                return new PlayQueueCursor(service, getActivity().getContentResolver());
+            }
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                forceLoad();
+            }
+        };
     }
 
     @Override
@@ -138,47 +120,27 @@ public class CategoryDetailsActivity extends Activity implements
         adapter.changeCursor(null);
     }
 
-    /*
-    @Override
-    public void onActionClicked(Action action) {
-        switch ((int)action.getId()) {
-            case R.id.play_all_now_action:
-                Log.d(TAG, "play all now");
-                break;
-
-            case R.id.play_all_next_action:
-                Log.d(TAG, "play all next");
-                break;
-
-            case R.id.queue_all_last_action:
-                Log.d(TAG, "queue all last");
-                break;
-        }
-    }
-    */
-
     @Override
     public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                               RowPresenter.ViewHolder rowViewHolder, Row row) {
         SongItem song = (SongItem)item;
 
-        MusicUtils.playSong(this, song.id);
-        startActivity(new Intent(this, PlaybackActivity.class));
+        if (service != null) {
+            String clickOnSong = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
+                    SettingsActivity.CLICK_ON_SONG, SettingsActivity.PLAY_NEXT);
+            if (clickOnSong.equals(SettingsActivity.PLAY_NOW)) {
+                service.setQueuePosition(song.position);
+            } else {
+                if (!service.isPlaying()) {
+                    service.setQueuePosition(song.position);
+                }
+            }
+        }
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName name) {
+    public void onServiceDisconnected() {
         service = null;
-
-        finish();
-    }
-
-    @Override
-    public void onDestroy() {
-        if (token != null) MusicUtils.unbindFromService(token);
-        service = null;
-
-        super.onDestroy();
     }
 
 }
