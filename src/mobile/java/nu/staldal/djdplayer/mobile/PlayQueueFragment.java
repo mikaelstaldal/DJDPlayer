@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Mikael Ståldal
+ * Copyright (C) 2013-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,8 @@ import android.app.ListFragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -45,25 +43,15 @@ import nu.staldal.djdplayer.FragmentServiceConnection;
 import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.MusicUtils;
+import nu.staldal.djdplayer.PlayQueueCursor;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.ui.TouchInterceptor;
 
-import java.util.Arrays;
-
 public class PlayQueueFragment extends ListFragment
         implements FragmentServiceConnection, AbsListView.OnScrollListener, MusicUtils.Defs {
-    private static final String LOGTAG = "PlayQueueFragment";
 
-    final static String[] mCols = new String[] {
-            MediaStore.Audio.AudioColumns.TITLE,
-            MediaStore.Audio.AudioColumns.ARTIST,
-            MediaStore.Audio.AudioColumns.DURATION,
-            MediaStore.Audio.AudioColumns._ID,
-            MediaStore.Audio.AudioColumns._ID,
-            MediaStore.Audio.AudioColumns.ALBUM,
-            MediaStore.Audio.AudioColumns.MIME_TYPE
-    };
+    private static final String TAG = PlayQueueFragment.class.getSimpleName();
 
     private MediaPlayback service;
 
@@ -92,19 +80,13 @@ public class PlayQueueFragment extends ListFragment
         TouchInterceptor listView = new TouchInterceptor(getActivity(), null);
         listView.setId(android.R.id.list);
         listView.setFastScrollEnabled(true);
-        listView.setDropListener(new TouchInterceptor.DropListener() {
-                public void drop(int from, int to) {
-                playQueueCursor.moveItem(from, to);
-                listAdapter.notifyDataSetChanged();
-                getListView().invalidateViews();
-                deletedOneRow = true;
-                }
-            });
-        listView.setRemoveListener(new TouchInterceptor.RemoveListener() {
-                public void remove(int which) {
-                    removePlaylistItem(which);
-                }
-            });
+        listView.setDropListener((from, to) -> {
+            playQueueCursor.moveItem(from, to);
+            listAdapter.notifyDataSetChanged();
+            getListView().invalidateViews();
+            deletedOneRow = true;
+        });
+        listView.setRemoveListener(this::removePlaylistItem);
         listView.setDivider(null);
         listView.setSelector(R.drawable.list_selector_background);
 
@@ -129,13 +111,13 @@ public class PlayQueueFragment extends ListFragment
     @Override
     public void onServiceConnected(MediaPlayback s) {
         service = s;
-        playQueueCursor = new PlayQueueCursor();
+        playQueueCursor = new PlayQueueCursor(service, getActivity().getContentResolver());
         listAdapter = new SimpleCursorAdapterWithContextMenu(
                 getActivity(),
                 R.layout.edit_track_list_item,
                 playQueueCursor,
-                mCols,
-                new int[] { R.id.line1, R.id.line2, R.id.duration, R.id.play_indicator, R.id.crossfade_indicator },
+                PlayQueueCursor.COLUMNS,
+                new int[]{R.id.line1, R.id.line2, R.id.duration, R.id.play_indicator, R.id.crossfade_indicator},
                 0);
         listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             final String unknownArtist = PlayQueueFragment.this.getActivity().getString(R.string.unknown_artist_name);
@@ -237,7 +219,7 @@ public class PlayQueueFragment extends ListFragment
     private boolean removePlaylistItem(int which) {
         View v = getListView().getChildAt(which - getListView().getFirstVisiblePosition());
         if (v == null) {
-            Log.i(LOGTAG, "No view when removing playlist item " + which);
+            Log.i(TAG, "No view when removing playlist item " + which);
             return false;
         }
         if (service != null && which != service.getQueuePosition()) {
@@ -314,18 +296,18 @@ public class PlayQueueFragment extends ListFragment
             }
 
             case NEW_PLAYLIST3: {
-                CreatePlaylist.showMe(getActivity(), new long[] { mSelectedId });
+                CreatePlaylist.showMe(getActivity(), new long[]{mSelectedId});
                 return true;
             }
 
             case PLAYLIST_SELECTED3: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
-                MusicUtils.addToPlaylist(getActivity(), new long[] { mSelectedId }, playlist);
+                MusicUtils.addToPlaylist(getActivity(), new long[]{mSelectedId}, playlist);
                 return true;
             }
 
             case DELETE_ITEM3: {
-                final long [] list = new long[1];
+                final long[] list = new long[1];
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
                 String desc = String.format(f,
@@ -335,16 +317,10 @@ public class PlayQueueFragment extends ListFragment
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_song_title)
                         .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
                         })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MusicUtils.deleteTracks(PlayQueueFragment.this.getActivity(), list);
-                            }
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) -> {
+                            MusicUtils.deleteTracks(PlayQueueFragment.this.getActivity(), list);
                         }).show();
                 return true;
             }
@@ -380,207 +356,12 @@ public class PlayQueueFragment extends ListFragment
     }
 
     @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) { }
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+    }
 
     @Override
     public void onServiceDisconnected() {
         service = null;
     }
 
-    private class PlayQueueCursor extends AbstractCursor {
-        private Cursor mCurrentPlaylistCursor;     // updated in onMove
-        private int mSize;                         // size of the queue
-        private long[] playQueue;
-        private long[] mCursorIdxs;
-        private int mCurPos;
-
-        public PlayQueueCursor() {
-            init();
-        }
-
-        private void init() {
-            if (mCurrentPlaylistCursor != null) {
-                mCurrentPlaylistCursor.close();
-                mCurrentPlaylistCursor = null;
-            }
-            playQueue = service.getQueue();
-            mSize = playQueue.length;
-            if (mSize == 0) {
-                return;
-            }
-
-            mCurrentPlaylistCursor = PlayQueueFragment.this.getActivity().getContentResolver().query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    mCols, buildPlayQueueWhereClause(playQueue), null, MediaStore.Audio.AudioColumns._ID);
-
-            if (mCurrentPlaylistCursor == null) {
-                mSize = 0;
-                return;
-            }
-
-            int size = mCurrentPlaylistCursor.getCount();
-            mCursorIdxs = new long[size];
-            mCurrentPlaylistCursor.moveToFirst();
-            int colidx = mCurrentPlaylistCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID);
-            for (int i = 0; i < size; i++) {
-                mCursorIdxs[i] = mCurrentPlaylistCursor.getLong(colidx);
-                mCurrentPlaylistCursor.moveToNext();
-            }
-            mCurrentPlaylistCursor.moveToFirst();
-            mCurPos = -1;
-
-            // At this point we can verify the 'now playing' list we got
-            // earlier to make sure that all the items in there still exist
-            // in the database, and remove those that aren't. This way we
-            // don't get any blank items in the list.
-            int removed = 0;
-            for (int i = playQueue.length - 1; i >= 0; i--) {
-                long trackid = playQueue[i];
-                int crsridx = Arrays.binarySearch(mCursorIdxs, trackid);
-                if (crsridx < 0) {
-                    Log.i(LOGTAG, "item no longer exists in db: " + trackid);
-                    removed += service.removeTrack(trackid);
-                }
-            }
-            if (removed > 0) {
-                playQueue = service.getQueue();
-                mSize = playQueue.length;
-                if (mSize == 0) {
-                    mCursorIdxs = null;
-                }
-            }
-        }
-
-        private String buildPlayQueueWhereClause(long[] playQueue) {
-            StringBuilder where = new StringBuilder();
-            where.append(MediaStore.Audio.AudioColumns._ID + " IN (");
-            for (int i = 0; i < playQueue.length; i++) {
-                where.append(playQueue[i]);
-                if (i < playQueue.length - 1) {
-                    where.append(",");
-                }
-            }
-            where.append(")");
-            return where.toString();
-        }
-
-        @Override
-        public int getCount() {
-            return mSize;
-        }
-
-        @Override
-        public boolean onMove(int oldPosition, int newPosition) {
-            if (oldPosition == newPosition)
-                return true;
-
-            if (playQueue == null || mCursorIdxs == null || newPosition >= playQueue.length) {
-                return false;
-            }
-
-            // The cursor doesn't have any duplicates in it, and is not ordered
-            // in queue-order, so we need to figure out where in the cursor we should be.
-
-            long newid = playQueue[newPosition];
-            int crsridx = Arrays.binarySearch(mCursorIdxs, newid);
-            mCurrentPlaylistCursor.moveToPosition(crsridx);
-            mCurPos = newPosition;
-
-            return true;
-        }
-
-        public boolean removeItem(int which) {
-            if (service.removeTracks(which, which) == 0) {
-                return false; // delete failed
-            }
-            int i = which;
-            mSize--;
-            while (i < mSize) {
-                playQueue[i] = playQueue[i + 1];
-                i++;
-            }
-            onMove(-1, mCurPos);
-            return true;
-        }
-
-        public void moveItem(int from, int to) {
-            service.moveQueueItem(from, to);
-            playQueue = service.getQueue();
-            onMove(-1, mCurPos); // update the underlying cursor
-        }
-
-        @Override
-        public String getString(int column) {
-            try {
-                return mCurrentPlaylistCursor.getString(column);
-            } catch (Exception ex) {
-                onChange(true);
-                return "";
-            }
-        }
-
-        @Override
-        public short getShort(int column) {
-            return mCurrentPlaylistCursor.getShort(column);
-        }
-
-        @Override
-        public int getInt(int column) {
-            try {
-                return mCurrentPlaylistCursor.getInt(column);
-            } catch (Exception ex) {
-                onChange(true);
-                return 0;
-            }
-        }
-
-        @Override
-        public long getLong(int column) {
-            try {
-                return mCurrentPlaylistCursor.getLong(column);
-            } catch (Exception ex) {
-                onChange(true);
-                return 0;
-            }
-        }
-
-        @Override
-        public float getFloat(int column) {
-            return mCurrentPlaylistCursor.getFloat(column);
-        }
-
-        @Override
-        public double getDouble(int column) {
-            return mCurrentPlaylistCursor.getDouble(column);
-        }
-
-        @Override
-        public boolean isNull(int column) {
-            return mCurrentPlaylistCursor.isNull(column);
-        }
-
-        @Override
-        public String[] getColumnNames() {
-            return mCols;
-        }
-
-        @Override
-        public void deactivate() {
-            if (mCurrentPlaylistCursor != null)
-                mCurrentPlaylistCursor.deactivate();
-        }
-
-        @Override
-        public boolean requery() {
-            init();
-            return true;
-        }
-
-        @Override
-        public void close() {
-            if (mCurrentPlaylistCursor != null)
-                mCurrentPlaylistCursor.close();
-            super.close();
-        }
-    }
 }
