@@ -263,6 +263,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             } else if (STOP_ACTION.equals(action)) {
                 pause();
                 seek(0);
+                if (mSession != null) {
+                    deactivateMediaSession();
+                }
             }
         }
 
@@ -380,6 +383,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                 switch (mRepeatMode) {
                     case REPEAT_STOPAFTER:
                         Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_STOPAFTER: " + player);
+                        if (mSession != null) {
+                            deactivateMediaSession();
+                        }
                         gotoIdleState();
                         notifyChange(PLAYSTATE_CHANGED);
                         break;
@@ -397,6 +403,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                     case REPEAT_ALL:
                         Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_NONE/REPEAT_ALL: " + player);
                         if (mPlayListLen <= 0) {
+                            if (mSession != null) {
+                                deactivateMediaSession();
+                            }
                             gotoIdleState();
                             notifyChange(PLAYSTATE_CHANGED);
                             break;
@@ -404,6 +413,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
                         if (mPlayPos >= mPlayListLen - 1) {  // we're at the end of the list
                             if (mRepeatMode == REPEAT_NONE) {
+                                if (mSession != null) {
+                                    deactivateMediaSession();
+                                }
                                 gotoIdleState();
                                 notifyChange(PLAYSTATE_CHANGED);
                                 break;
@@ -505,6 +517,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                             audioFocusLoss();
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             pause();
+                            if (mSession != null) {
+                                deactivateMediaSession();
+                            }
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                             Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
@@ -574,9 +589,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void activateMediaSession() {
-        if (!mSession.isActive()) {
-            mSession.setActive(true);
-        }
+        mSession.setActive(true);
     }
 
     protected void audioFocusGain() { }
@@ -622,6 +635,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             } else if (STOP_ACTION.equals(action)) {
                 pause();
                 seek(0);
+                if (mSession != null) {
+                    deactivateMediaSession();
+                }
             } else {
                 handleAdditionalActions(intent);
             }
@@ -803,6 +819,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     private void closeExternalStorageFiles() {
         // stop playback and clean up if the SD card is going to be unmounted.
         stop();
+        if (mSession != null) {
+            deactivateMediaSession();
+        }
         gotoIdleState();
         notifyChange(QUEUE_CHANGED);
         notifyChange(META_CHANGED);
@@ -1258,13 +1277,11 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
     private void gotoIdleState() {
         mDelayedStopHandler.removeCallbacksAndMessages(null);
-        Message msg = mDelayedStopHandler.obtainMessage();
-        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY_MILLIS);
+        mDelayedStopHandler.sendMessageDelayed(mDelayedStopHandler.obtainMessage(), IDLE_DELAY_MILLIS);
         stopForeground(true);
         if (mSession != null) {
             if (isMediaSessionActive()) {
                 updateMediaSession(false);
-                deactivateMediaSession();
             }
         }
         mIsSupposedToBePlaying = false;
@@ -1319,6 +1336,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         if (gotonext) {
             if (mPlayListLen == 0) {
                 stop();
+                if (mSession != null) {
+                    deactivateMediaSession();
+                }
                 gotoIdleState();
                 mPlayPos = -1;
             } else {
