@@ -99,17 +99,17 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     /**
      * Interval after which we stop the service when idle.
      */
-    private static final int IDLE_DELAY = 60000;
+    private static final int IDLE_DELAY_MILLIS = 60000;
 
     /**
      * Jump to previous song if less than this many milliseconds have been played already.
      */
-    private static final int PREV_THRESHOLD_MS = 2000;
+    private static final int PREV_THRESHOLD_MILLIS = 2000;
 
     /**
      * Jump to next song if less than this many milliseconds remains.
      */
-    private static final int NEXT_THRESHOLD_MS = 2000;
+    private static final int NEXT_THRESHOLD_MILLIS = 2000;
 
 
     // Delegates
@@ -219,9 +219,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         // If the service was idle, but got killed before it stopped itself, the
         // system will relaunch it. Make sure it gets stopped again in that case.
         Message msg = mDelayedStopHandler.obtainMessage();
-        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY_MILLIS);
     }
 
+    @SuppressWarnings("unused")
     protected void enrichActionFilter(IntentFilter actionFilter) { }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -269,7 +270,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         // just started but not bound to and nothing is playing
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         Message msg = mDelayedStopHandler.obtainMessage();
-        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY_MILLIS);
         return START_STICKY;
     }
 
@@ -303,7 +304,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         // before stopping the service, so that pause/resume isn't slow.
         if (mPlayListLen > 0) {
             Message msg = mDelayedStopHandler.obtainMessage();
-            mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+            mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY_MILLIS);
             return true;
         }
 
@@ -627,6 +628,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         }
     };
 
+    @SuppressWarnings("unused")
     protected void handleAdditionalActions(Intent intent) { }
 
     /**
@@ -845,6 +847,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         extraNotifyChange(what);
     }
 
+    @SuppressWarnings("unused")
     protected void extraNotifyChange(String what) { }
 
     private void ensurePlayListCapacity(int size) {
@@ -1102,8 +1105,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         if (mPlayers[mCurrentPlayer].isInitialized()) {
             // if we are at the end of the song, go to the next song first
             long duration = mPlayers[mCurrentPlayer].duration();
-            if (mRepeatMode != REPEAT_CURRENT && duration > NEXT_THRESHOLD_MS &&
-                    mPlayers[mCurrentPlayer].currentPosition() >= duration - NEXT_THRESHOLD_MS) {
+            if (mRepeatMode != REPEAT_CURRENT && duration > NEXT_THRESHOLD_MILLIS &&
+                    mPlayers[mCurrentPlayer].currentPosition() >= duration - NEXT_THRESHOLD_MILLIS) {
                 next();
             }
 
@@ -1166,6 +1169,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         return builder.build();
     }
 
+    @SuppressWarnings("unused")
     protected void enrichNotification(NotificationCompat.Builder builder) { }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -1218,7 +1222,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
     @Override
     public void previousOrRestartCurrent() {
-        if (position() < PREV_THRESHOLD_MS) {
+        if (position() < PREV_THRESHOLD_MILLIS) {
             previous();
         } else {
             seek(0);
@@ -1255,7 +1259,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     private void gotoIdleState() {
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         Message msg = mDelayedStopHandler.obtainMessage();
-        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY_MILLIS);
         stopForeground(true);
         if (mSession != null) {
             if (isMediaSessionActive()) {
