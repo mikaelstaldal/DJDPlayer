@@ -57,7 +57,7 @@ import java.util.Set;
  * user to switch between activities without stopping playback.
  */
 public abstract class MediaPlaybackService extends Service implements MediaPlayback {
-    private static final String LOGTAG = "MediaPlaybackService";
+    private static final String TAG = MediaPlaybackService.class.getSimpleName();
 
     public static final String PLAYSTATE_CHANGED = "nu.staldal.djdplayer.playstatechanged";
     public static final String META_CHANGED = "nu.staldal.djdplayer.metachanged";
@@ -164,7 +164,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     public void onCreate() {
         super.onCreate();
 
-        Log.i(LOGTAG, "onCreate");
+        Log.i(TAG, "onCreate");
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -238,7 +238,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOGTAG, "onStartCommand intent=" + intent + " flags=" + flags + " startId=" + startId);
+        Log.d(TAG, "onStartCommand intent=" + intent + " flags=" + flags + " startId=" + startId);
 
         mServiceStartId = startId;
         mDelayedStopHandler.removeCallbacksAndMessages(null);
@@ -318,11 +318,11 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
     @Override
     public void onDestroy() {
-        Log.i(LOGTAG, "onDestroy");
+        Log.i(TAG, "onDestroy");
 
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
-            Log.e(LOGTAG, "Service being destroyed while still playing.");
+            Log.e(TAG, "Service being destroyed while still playing.");
         }
 
         additionalDestroy();
@@ -355,7 +355,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     private synchronized void handlePlayerCallback(int player, Message msg) {
         switch (msg.what) {
             case MyMediaPlayer.SERVER_DIED:
-                Log.d(LOGTAG, "MediaPlayer died: " + player);
+                Log.d(TAG, "MediaPlayer died: " + player);
                 if (mIsSupposedToBePlaying) {
                     next();
                 } else {
@@ -370,7 +370,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                 break;
 
             case MyMediaPlayer.RELEASE_WAKELOCK:
-                Log.d(LOGTAG, "MediaPlayer release wakelock: " + player);
+                Log.d(TAG, "MediaPlayer release wakelock: " + player);
                 mPlayers[player].releaseWakeLock();
                 break;
 
@@ -382,7 +382,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                 mPlaybackHander.removeMessages(CROSSFADE);
                 switch (mRepeatMode) {
                     case REPEAT_STOPAFTER:
-                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_STOPAFTER: " + player);
+                        Log.d(TAG, "MediaPlayer track ended, REPEAT_STOPAFTER: " + player);
                         if (mSession != null) {
                             deactivateMediaSession();
                         }
@@ -391,7 +391,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                         break;
 
                     case REPEAT_CURRENT:
-                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_CURRENT: " + player);
+                        Log.d(TAG, "MediaPlayer track ended, REPEAT_CURRENT: " + player);
                         seek(0);
                         if (fadeSeconds > 0) {
                             mCurrentVolume[mCurrentPlayer] = 0f;
@@ -401,7 +401,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
                     case REPEAT_NONE:
                     case REPEAT_ALL:
-                        Log.d(LOGTAG, "MediaPlayer track ended, REPEAT_NONE/REPEAT_ALL: " + player);
+                        Log.d(TAG, "MediaPlayer track ended, REPEAT_NONE/REPEAT_ALL: " + player);
                         if (mPlayListLen <= 0) {
                             if (mSession != null) {
                                 deactivateMediaSession();
@@ -448,7 +448,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                                 mCurrentVolume[mCurrentPlayer] = 0f;
                                 mPlayers[mCurrentPlayer].setVolume(mCurrentVolume[mCurrentPlayer]);
                             }
-                            Log.d(LOGTAG, "Starting playback");
+                            Log.d(TAG, "Starting playback");
                             mPlayers[mCurrentPlayer].start();
 
                             mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mCurrentPlayer, 0));
@@ -476,7 +476,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
             switch (msg.what) {
                 case DUCK:
-                    // Log.v(LOGTAG, "handleMessage DUCK: " + msg.arg1);
+                    // Log.v(TAG, "handleMessage DUCK: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .05f;
                     if (mCurrentVolume[msg.arg1] > .2f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(DUCK, msg.arg1, 0), 10);
@@ -487,7 +487,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                     break;
 
                 case FADEDOWN:
-                    // Log.v(LOGTAG, "handleMessage FADEDOWN: " + msg.arg1);
+                    // Log.v(TAG, "handleMessage FADEDOWN: " + msg.arg1);
                     mCurrentVolume[msg.arg1] -= .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] > 0.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, msg.arg1, 0), 10);
@@ -498,7 +498,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                     break;
 
                 case FADEUP:
-                    // Log.v(LOGTAG, "handleMessage FADEUP: " + msg.arg1);
+                    // Log.v(TAG, "handleMessage FADEUP: " + msg.arg1);
                     mCurrentVolume[msg.arg1] += .01f / Math.max(fadeSeconds, 1);
                     if (mCurrentVolume[msg.arg1] < 1.0f) {
                         mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEUP, msg.arg1, 0), 10);
@@ -513,7 +513,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                     // This code is here so we can better synchronize it with the code that handles fade-in
                     switch (msg.arg1) {
                         case AudioManager.AUDIOFOCUS_LOSS:
-                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
+                            Log.d(TAG, "AudioFocus: received AUDIOFOCUS_LOSS");
                             audioFocusLoss();
                             mAudioManager.abandonAudioFocus(mAudioFocusListener);
                             pause();
@@ -522,14 +522,14 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                             }
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                            Log.d(TAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                             mPlaybackHander.removeMessages(FADEUP);
                             mPlaybackHander.removeMessages(FADEDOWN);
                             mPlaybackHander.removeMessages(CROSSFADE);
                             mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(DUCK, mCurrentPlayer, 0));
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
+                            Log.d(TAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
                             boolean wasPlaying = isPlaying();
                             pause();
                             if (wasPlaying) {
@@ -537,7 +537,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                             }
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
-                            Log.d(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
+                            Log.d(TAG, "AudioFocus: received AUDIOFOCUS_GAIN");
                             audioFocusGain();
                             if (mSession != null) {
                                 activateMediaSession();
@@ -556,16 +556,16 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                             }
                             break;
                         default:
-                            Log.w(LOGTAG, "Unknown audio focus change code: " + msg.arg1);
+                            Log.w(TAG, "Unknown audio focus change code: " + msg.arg1);
                     }
                     break;
 
                 case CROSSFADE:
-                    Log.d(LOGTAG, "handleMessage CROSSFADE");
+                    Log.d(TAG, "handleMessage CROSSFADE");
                     if (!mPlayers[mNextPlayer].isInitialized()) {
                         if ((mRepeatMode == REPEAT_NONE || mRepeatMode == REPEAT_ALL) && (mPlayPos + 1) < mPlayListLen) {
                             long nextId = mPlayList[mPlayPos + 1];
-                            Log.d(LOGTAG, "Preparing next song " + nextId);
+                            Log.d(TAG, "Preparing next song " + nextId);
                             mPlayers[mNextPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(nextId));
                         }
                     }
@@ -574,7 +574,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
                             mCurrentVolume[mNextPlayer] = 0f;
                             mPlayers[mNextPlayer].setVolume(mCurrentVolume[mNextPlayer]);
                         }
-                        Log.d(LOGTAG, "Cross-fading");
+                        Log.d(TAG, "Cross-fading");
                         mPlayers[mNextPlayer].start();
 
                         mPlaybackHander.sendMessage(mPlaybackHander.obtainMessage(FADEUP, mNextPlayer, 0));
@@ -615,7 +615,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
+            Log.i(TAG, "mIntentReceiver.onReceive: " + action);
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
                 pause();
             } else if (PREVIOUS_ACTION.equals(action)) {
@@ -1047,7 +1047,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     }
 
     private boolean prepare(long audioId) {
-        Log.d(LOGTAG, "Preparing song " + audioId);
+        Log.d(TAG, "Preparing song " + audioId);
         return mPlayers[mCurrentPlayer].prepare(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + String.valueOf(audioId));
     }
 
@@ -1115,7 +1115,7 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         int result = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.w(LOGTAG, "Unable to gain audio focus: " + result);
+            Log.w(TAG, "Unable to gain audio focus: " + result);
             return;
         }
 
@@ -1542,13 +1542,13 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             long timeLeftMillis = mPlayers[mCurrentPlayer].duration() - mPlayers[mCurrentPlayer].currentPosition();
             if (timeLeftMillis > 0) {
                 long delayMillis = timeLeftMillis - fadeOutSeconds * 1000;
-                Log.d(LOGTAG, "Scheduling fade out " + fadeOutSeconds + " seconds with cross-fade=" + crossFade + " in " + delayMillis + " ms");
+                Log.d(TAG, "Scheduling fade out " + fadeOutSeconds + " seconds with cross-fade=" + crossFade + " in " + delayMillis + " ms");
                 if (crossFade) {
                     mPlaybackHander.sendEmptyMessageDelayed(CROSSFADE, delayMillis);
                 }
                 mPlaybackHander.sendMessageDelayed(mPlaybackHander.obtainMessage(FADEDOWN, mCurrentPlayer, 0), delayMillis);
             } else {
-                Log.w(LOGTAG, "timeLeft is " + timeLeftMillis + " ms");
+                Log.w(TAG, "timeLeft is " + timeLeftMillis + " ms");
             }
         }
     }
