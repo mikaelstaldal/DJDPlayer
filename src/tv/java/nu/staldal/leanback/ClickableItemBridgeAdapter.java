@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer.tv;
+package nu.staldal.leanback;
 
 import android.support.v17.leanback.widget.ItemBridgeAdapter;
 import android.support.v17.leanback.widget.ObjectAdapter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
-import android.view.View;
 
 public class ClickableItemBridgeAdapter extends ItemBridgeAdapter {
     private final OnItemViewClickedListener clickedListener;
@@ -34,12 +33,9 @@ public class ClickableItemBridgeAdapter extends ItemBridgeAdapter {
 
     @Override
     public void onBind(final ItemBridgeAdapter.ViewHolder itemViewHolder) {
-        itemViewHolder.getViewHolder().view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (clickedListener != null) {
-                    clickedListener.onItemClicked(itemViewHolder.getViewHolder(), itemViewHolder.getItem(), null, null);
-                }
+        itemViewHolder.getViewHolder().view.setOnClickListener(view -> {
+            if (clickedListener != null) {
+                clickedListener.onItemClicked(itemViewHolder.getViewHolder(), itemViewHolder.getItem(), null, null);
             }
         });
     }

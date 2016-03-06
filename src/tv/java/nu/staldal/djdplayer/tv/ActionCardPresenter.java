@@ -18,6 +18,7 @@ package nu.staldal.djdplayer.tv;
 import android.support.v17.leanback.widget.Presenter;
 import android.view.ViewGroup;
 import nu.staldal.djdplayer.R;
+import nu.staldal.leanback.ActionCardView;
 
 public class ActionCardPresenter extends Presenter {
 

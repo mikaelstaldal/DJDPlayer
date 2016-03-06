@@ -41,6 +41,7 @@ import nu.staldal.djdplayer.MediaPlayback;
 import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
+import nu.staldal.leanback.ClickableItemBridgeAdapter;
 
 public class CategoryDetailsActivity extends Activity implements
         LoaderManager.LoaderCallbacks<Cursor>, ServiceConnection, OnItemViewClickedListener {
