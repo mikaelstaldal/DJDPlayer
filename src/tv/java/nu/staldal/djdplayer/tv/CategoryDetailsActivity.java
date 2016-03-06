@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mikael Ståldal
+ * Copyright (C) 2015-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ComponentName;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
@@ -160,6 +161,7 @@ public class CategoryDetailsActivity extends Activity implements
         SongItem song = (SongItem)item;
 
         MusicUtils.playSong(this, song.id);
+        startActivity(new Intent(this, PlaybackActivity.class));
     }
 
     @Override

@@ -33,18 +33,16 @@ import nu.staldal.djdplayer.R;
 
 public class PlaybackActivity extends Activity implements ServiceConnection {
 
-    private static final String LOGTAG = "PlaybackActivity";
+    private static final String TAG = PlaybackActivity.class.getSimpleName();
 
     private MusicUtils.ServiceToken token = null;
     private MediaPlayback service = null;
-
-    // TODO skip PlaybackOverlayFragment and build own UI in Activity instead
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.i(LOGTAG, "onCreate - " + getIntent());
+        Log.i(TAG, "onCreate - " + getIntent());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -59,14 +57,14 @@ public class PlaybackActivity extends Activity implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder binder) {
         service = ((MediaPlaybackService.LocalBinder) binder).getService();
 
-        notifyFragmentConnected(R.id.playback_fragment, service);
+        notifyFragmentConnected(R.id.now_playing_fragment, service);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
         service = null;
 
-        notifyFragmentDisconnected(R.id.playback_fragment);
+        notifyFragmentDisconnected(R.id.now_playing_fragment);
 
         finish();
     }

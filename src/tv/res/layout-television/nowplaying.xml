@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+              android:baselineAligned="false">
+
+    <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:orientation="vertical">
+
+        <TextView
+                android:id="@+id/title"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        <TextView
+                android:id="@+id/artist"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+    </LinearLayout>
+
+    <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+        <ImageButton
+                android:id="@+id/previous"
+                style="@style/PlaybackControlButton"
+                android:src="@drawable/lb_ic_skip_previous"
+                android:contentDescription="@string/prev"
+                android:layout_alignParentStart="true"/>
+
+        <ImageButton
+                android:id="@+id/play_pause"
+                style="@style/PlaybackControlButton"
+                android:src="@drawable/lb_ic_pause"
+                android:contentDescription="@string/play_pause"
+                android:layout_centerHorizontal="true"/>
+
+        <ImageButton
+                android:id="@+id/next"
+                style="@style/PlaybackControlButton"
+                android:src="@drawable/lb_ic_skip_next"
+                android:contentDescription="@string/next"
+                android:layout_alignParentEnd="true"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

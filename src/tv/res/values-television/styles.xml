@@ -14,4 +14,11 @@
     <style name="AboutText" parent="TextAppearance.Leanback">
         <item name="android:textSize">20sp</item>
     </style>
+
+    <style name="PlaybackControlButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
 </resources>
