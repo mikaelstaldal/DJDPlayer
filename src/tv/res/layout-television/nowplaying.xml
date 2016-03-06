@@ -14,8 +14,8 @@
             android:orientation="vertical">
 
         <TextView
+                style="@style/TitleText"
                 android:id="@+id/title"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
@@ -23,8 +23,8 @@
                 />
 
         <TextView
+                style="@style/ArtistText"
                 android:id="@+id/artist"
-                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
