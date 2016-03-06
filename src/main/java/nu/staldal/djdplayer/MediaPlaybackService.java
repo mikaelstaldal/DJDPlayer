@@ -603,6 +603,9 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             if (isPlaying() || mPausedByTransientLossOfFocus || mServiceInUse) {
                 return;
             }
+
+            Log.d(TAG, "idle timeout, quitting");
+
             // save the queue again, because it might have changed
             // since the user exited the music app (because of
             // the play-position changed)
