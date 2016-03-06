@@ -52,7 +52,7 @@ public class NowPlayingFragment extends Fragment implements FragmentServiceConne
         titleView = (TextView) view.findViewById(R.id.title);
         artistView = (TextView) view.findViewById(R.id.artist);
         view.findViewById(R.id.previous).setOnClickListener(v -> {
-            if (service != null) service.prev();
+            if (service != null) service.previousOrRestartCurrent();
         });
         playPauseButton = (ImageButton) view.findViewById(R.id.play_pause);
         playPauseButton.setOnClickListener(v -> {

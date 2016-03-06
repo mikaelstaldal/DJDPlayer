@@ -76,12 +76,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
         RepeatingImageButton prevButton = (RepeatingImageButton) view.findViewById(R.id.prev);
         prevButton.setOnClickListener(v -> {
             if (service == null) return;
-            if (service.position() < 2000) {
-                service.prev();
-            } else {
-                service.seek(0);
-                service.play();
-            }
+            service.previousOrRestartCurrent();
         });
         prevButton.setRepeatListener((v, howlong, repcnt) -> scanBackward(repcnt, howlong), 260);
         pauseButton = (ImageButton) view.findViewById(R.id.pause);
@@ -210,7 +205,7 @@ public class PlayerFooterFragment extends Fragment implements FragmentServiceCon
             long newpos = startSeekPos - delta;
             if (newpos < 0) {
                 // move to previous track
-                service.prev();
+                service.previous();
                 long duration = service.duration();
                 startSeekPos += duration;
                 newpos += duration;

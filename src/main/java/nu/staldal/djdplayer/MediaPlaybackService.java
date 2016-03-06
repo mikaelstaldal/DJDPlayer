@@ -101,7 +101,15 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
      */
     private static final int IDLE_DELAY = 60000;
 
-    protected static final int PREV_THRESHOLD_MS = 2000;
+    /**
+     * Jump to previous song if less than this many milliseconds have been played already.
+     */
+    private static final int PREV_THRESHOLD_MS = 2000;
+
+    /**
+     * Jump to next song if less than this many milliseconds remains.
+     */
+    private static final int NEXT_THRESHOLD_MS = 2000;
 
 
     // Delegates
@@ -237,15 +245,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         if (intent != null) {
             String action = intent.getAction();
 
-            if (NEXT_ACTION.equals(action)) {
+            if (PREVIOUS_ACTION.equals(action)) {
+                previousOrRestartCurrent();
+            } else if (NEXT_ACTION.equals(action)) {
                 next();
-            } else if (PREVIOUS_ACTION.equals(action)) {
-                if (position() < PREV_THRESHOLD_MS) {
-                    prev();
-                } else {
-                    seek(0);
-                    play();
-                }
             } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
@@ -601,10 +604,10 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
             Log.i(LOGTAG, "mIntentReceiver.onReceive: " + action);
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
                 pause();
+            } else if (PREVIOUS_ACTION.equals(action)) {
+                previousOrRestartCurrent();
             } else if (NEXT_ACTION.equals(action)) {
                 next();
-            } else if (PREVIOUS_ACTION.equals(action)) {
-                prev();
             } else if (TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
@@ -660,12 +663,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         return id;
     }
 
-    private final OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
-        @Override
-        public void onAudioFocusChange(int focusChange) {
-            mPlaybackHander.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
-        }
-    };
+    private final OnAudioFocusChangeListener mAudioFocusListener =
+            focusChange -> mPlaybackHander.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
 
     private void saveQueue(boolean full) {
         if (!mQueueIsSaveable) {
@@ -1103,8 +1102,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
         if (mPlayers[mCurrentPlayer].isInitialized()) {
             // if we are at the end of the song, go to the next song first
             long duration = mPlayers[mCurrentPlayer].duration();
-            if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
-                    mPlayers[mCurrentPlayer].currentPosition() >= duration - 2000) {
+            if (mRepeatMode != REPEAT_CURRENT && duration > NEXT_THRESHOLD_MS &&
+                    mPlayers[mCurrentPlayer].currentPosition() >= duration - NEXT_THRESHOLD_MS) {
                 next();
             }
 
@@ -1218,7 +1217,16 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
     }
 
     @Override
-    public synchronized void prev() {
+    public void previousOrRestartCurrent() {
+        if (position() < PREV_THRESHOLD_MS) {
+            previous();
+        } else {
+            seek(0);
+        }
+    }
+
+    @Override
+    public synchronized void previous() {
         if (mPlayListLen <= 0) return;
 
         if (mPlayPos > 0) {

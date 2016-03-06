@@ -49,38 +49,24 @@ public class NowPlayingFragment extends Fragment implements FragmentServiceConne
 
         titleView = (TextView) nowPlaying.findViewById(R.id.title);
         artistView = (TextView) nowPlaying.findViewById(R.id.artist);
-        nowPlaying.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getActivity(), MediaPlaybackActivity.class));
-            }
-        });
+        nowPlaying.setOnClickListener(v -> startActivity(new Intent(getActivity(), MediaPlaybackActivity.class)));
 
         View prevButton = nowPlaying.findViewById(R.id.prev);
         if (prevButton != null) {
-            prevButton.setOnClickListener(new View.OnClickListener() {
-                 @Override
-                 public void onClick(View v) {
-                     if (service != null) service.prev();
-                 }
+            prevButton.setOnClickListener(v -> {
+                if (service != null) service.previousOrRestartCurrent();
             });
         }
-        nowPlaying.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (service != null) service.next();
-            }
+        nowPlaying.findViewById(R.id.next).setOnClickListener(v -> {
+            if (service != null) service.next();
         });
         playPauseButton = (ImageButton) nowPlaying.findViewById(R.id.pause);
-        playPauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (service != null) {
-                    if (service.isPlaying()) {
-                        service.pause();
-                    } else {
-                        service.play();
-                    }
+        playPauseButton.setOnClickListener(v -> {
+            if (service != null) {
+                if (service.isPlaying()) {
+                    service.pause();
+                } else {
+                    service.play();
                 }
             }
         });

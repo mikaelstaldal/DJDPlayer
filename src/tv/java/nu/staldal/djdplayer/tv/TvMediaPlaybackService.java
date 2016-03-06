@@ -51,12 +51,7 @@ public class TvMediaPlaybackService extends MediaPlaybackService {
 
             @Override
             public void onSkipToPrevious() {
-                if (position() < PREV_THRESHOLD_MS) {
-                    prev();
-                } else {
-                    seek(0);
-                    play();
-                }
+                previousOrRestartCurrent();
             }
 
             @Override

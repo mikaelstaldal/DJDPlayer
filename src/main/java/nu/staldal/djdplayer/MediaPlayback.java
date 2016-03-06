@@ -87,7 +87,9 @@ public interface MediaPlayback {
      */
     boolean isPlaying();
 
-    void prev();
+    void previousOrRestartCurrent();
+
+    void previous();
 
     void next();
 
