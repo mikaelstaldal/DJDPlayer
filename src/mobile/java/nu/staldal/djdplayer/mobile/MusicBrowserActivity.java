@@ -611,7 +611,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private final ActionBar.TabListener tabListener = new ActionBar.TabListener() {
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            viewPager.setCurrentItem(tab.getPosition());
+            viewPager.setCurrentItem(tab.getPosition(), false);
         }
 
         @Override
