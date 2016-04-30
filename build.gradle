@@ -66,11 +66,18 @@ android {
             signingConfig signingConfigs.release
         }
         preview {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.pro'
             debuggable true
             signingConfig signingConfigs.release
         }
         debug {
+            minifyEnabled false
+            shrinkResources false
+            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.pro'
             debuggable true
+            // signing debug
         }
     }
 
