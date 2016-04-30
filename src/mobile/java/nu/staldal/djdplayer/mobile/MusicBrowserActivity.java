@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2015 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package nu.staldal.djdplayer.mobile;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -35,10 +36,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -61,8 +66,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     private static final String LOGTAG = "MusicBrowserActivity";
 
-    private static final String TRACKS_FRAGMENT = "tracksFragment";
-
+    private ViewPager viewPager;
+    private View mainView;
     private ImageView categoryMenuView;
 
     private MusicUtils.ServiceToken token = null;
@@ -86,12 +91,27 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        ActionBar actionBar = getActionBar();
+
         if (MusicUtils.android44OrLater() || !MusicUtils.hasMenuKey(this)
                 || getResources().getBoolean(R.bool.tablet_layout)) {
-            disableStackedActionBar(getActionBar());
+            disableStackedActionBar(actionBar);
         }
 
         setContentView(R.layout.music_browser_activity);
+
+        viewPager = (ViewPager)findViewById(R.id.pager);
+        viewPager.addOnPageChangeListener(
+                new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        // When swiping between pages, select the corresponding tab.
+                        getActionBar().setSelectedNavigationItem(position);
+                    }
+                });
+        setupTabs(actionBar);
+
+        mainView = findViewById(R.id.main);
 
         Button playQueueButton = (Button)findViewById(R.id.playqueue_button);
         if (playQueueButton != null) {
@@ -112,13 +132,13 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     /**
      * Workaround to avoid stacked Action Bar.
-     *
+     * <p>
      * http://developer.android.com/guide/topics/ui/actionbar.html#Tabs
      */
     private void disableStackedActionBar(ActionBar actionBar) {
         try {
             Method setHasEmbeddedTabsMethod = actionBar.getClass()
-                .getDeclaredMethod("setHasEmbeddedTabs", boolean.class);
+                    .getDeclaredMethod("setHasEmbeddedTabs", boolean.class);
             setHasEmbeddedTabsMethod.setAccessible(true);
             setHasEmbeddedTabsMethod.invoke(actionBar, true);
         } catch (Exception e) {
@@ -168,7 +188,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             uri = null;
             title = null;
             searchResult = false;
-            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, SettingsActivity.PLAYLISTS_TAB);
+            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, PlaylistFragment.class.getCanonicalName());
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())
                 && intent.getData() != null
                 && intent.getData().toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
@@ -193,7 +213,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             title = MusicProvider.calcTitle(this, uri);
             searchResult = false;
         } else if (Intent.ACTION_SEARCH.equals(intent.getAction())
-                            || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
+                || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(intent.getAction())) {
             songToPlay = -1;
             uri = null;
             title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY));
@@ -216,9 +236,9 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     private long fetchSongIdFromPath(String path) {
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[] { MediaStore.Audio.Media._ID },
+                new String[] {MediaStore.Audio.Media._ID},
                 MediaStore.Audio.Media.DATA + "=?",
-                new String[] { path },
+                new String[] {path},
                 null);
         if (cursor == null) {
             Log.w(LOGTAG, "Unable to fetch Song Id (cursor is null) for " + path);
@@ -260,7 +280,16 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         uri = null;
         title = null;
 
+        Fragment oldFragment = getFragmentManager().findFragmentByTag(TrackFragment.class.getCanonicalName());
+        if (oldFragment != null) {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.remove(oldFragment);
+            ft.commit();
+        }
+        mainView.setVisibility(View.GONE);
+
         ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setHomeButtonEnabled(false);
@@ -268,18 +297,14 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         actionBar.setCustomView(null);
         actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM);
 
-        Fragment oldFragment = getFragmentManager().findFragmentByTag(TRACKS_FRAGMENT);
-        if (oldFragment != null) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.remove(oldFragment);
-            ft.commit();
-        }
-        setupTabs(actionBar);
+        viewPager.setVisibility(View.VISIBLE);
 
         restoreActiveTab(actionBar);
     }
 
     private void enterSongsMode() {
+        viewPager.setVisibility(View.GONE);
+
         ActionBar actionBar = getActionBar();
         saveActiveTab(actionBar);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -287,6 +312,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         setTitle(title);
+
+        mainView.setVisibility(View.VISIBLE);
 
         Fragment fragment;
         if (searchResult) {
@@ -306,7 +333,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
         }
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.main, fragment, TRACKS_FRAGMENT);
+        ft.replace(R.id.main, fragment, TrackFragment.class.getCanonicalName());
         ft.commit();
     }
 
@@ -319,47 +346,6 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 || key.equals(SettingsActivity.SHOW_PLAYLISTS_TAB)) {
             invalidateTabs = true;
         }
-    }
-
-    private void setupTabs(ActionBar actionBar) {
-        actionBar.removeAllTabs();
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ARTISTS_TAB, true)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.artists_menu)
-                    .setTag(SettingsActivity.ARTISTS_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.ARTISTS_TAB, ArtistFragment.class)));
-        }
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_ALBUMS_TAB, true)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.albums_menu)
-                    .setTag(SettingsActivity.ALBUMS_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.ALBUMS_TAB, AlbumFragment.class)));
-        }
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_GENRES_TAB, true)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.genres_menu)
-                    .setTag(SettingsActivity.GENRES_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.GENRES_TAB, GenreFragment.class)));
-        }
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_FOLDERS_TAB, true)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.folders_menu)
-                    .setTag(SettingsActivity.FOLDERS_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.FOLDERS_TAB, FolderFragment.class)));
-        }
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.SHOW_PLAYLISTS_TAB, true)) {
-            actionBar.addTab(actionBar.newTab()
-                    .setText(R.string.playlists_menu)
-                    .setTag(SettingsActivity.PLAYLISTS_TAB)
-                    .setTabListener(new TabListener<>(this, SettingsActivity.PLAYLISTS_TAB, PlaylistFragment.class)));
-        }
-
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
 
     @Override
@@ -390,6 +376,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         for (int i = 0; i < actionBar.getTabCount(); i++) {
             if (actionBar.getTabAt(i).getTag().equals(activeTab)) {
                 actionBar.setSelectedNavigationItem(i);
+                viewPager.setCurrentItem(i);
                 break;
             }
         }
@@ -398,7 +385,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private void saveActiveTab(ActionBar actionBar) {
         ActionBar.Tab selectedTab = actionBar.getSelectedTab();
         if (selectedTab != null) {
-            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, (String) selectedTab.getTag());
+            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, (String)selectedTab.getTag());
         }
     }
 
@@ -579,62 +566,122 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
     private void notifyFragmentConnected(int id, MediaPlayback service) {
         Fragment fragment = getFragmentManager().findFragmentById(id);
         if (fragment != null && fragment.isInLayout()) {
-            ((FragmentServiceConnection) fragment).onServiceConnected(service);
+            ((FragmentServiceConnection)fragment).onServiceConnected(service);
         }
     }
 
     private void notifyFragmentDisconnected(int id) {
         Fragment fragment = getFragmentManager().findFragmentById(id);
         if (fragment != null && fragment.isInLayout()) {
-            ((FragmentServiceConnection) fragment).onServiceDisconnected();
+            ((FragmentServiceConnection)fragment).onServiceDisconnected();
         }
     }
 
-    static class TabListener<T extends Fragment> implements ActionBar.TabListener {
-        private Fragment mFragment;
-        private final Activity mActivity;
-        private final String mTag;
-        private final Class<T> mClass;
+    private void setupTabs(ActionBar actionBar) {
+        viewPager.setAdapter(null);
 
-        /**
-         * @param activity  The host Activity, used to instantiate the fragment
-         * @param tag  The identifier tag for the fragment
-         * @param clz  The fragment's Class, used to instantiate the fragment
-         */
-        public TabListener(Activity activity, String tag, Class<T> clz) {
-            mActivity = activity;
-            mTag = tag;
-            mClass = clz;
+        actionBar.removeAllTabs();
 
-            mFragment = mActivity.getFragmentManager().findFragmentByTag(mTag);
-            if (mFragment != null && !mFragment.isDetached()) {
-                FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-                ft.detach(mFragment);
-                ft.commit();
-            }
+        setupTab(actionBar, SettingsActivity.SHOW_ARTISTS_TAB, R.string.artists_menu, ArtistFragment.class);
+        setupTab(actionBar, SettingsActivity.SHOW_ALBUMS_TAB, R.string.albums_menu, AlbumFragment.class);
+        setupTab(actionBar, SettingsActivity.SHOW_GENRES_TAB, R.string.genres_menu, GenreFragment.class);
+        setupTab(actionBar, SettingsActivity.SHOW_FOLDERS_TAB, R.string.folders_menu, FolderFragment.class);
+        setupTab(actionBar, SettingsActivity.SHOW_PLAYLISTS_TAB, R.string.playlists_menu, PlaylistFragment.class);
+
+        viewPager.setAdapter(new CategoryPageAdapter(getFragmentManager()));
+    }
+
+    private void setupTab(ActionBar actionBar, String preferenceKey, int titleResId,
+                          Class<? extends Fragment> fragmentClass) {
+        Fragment fragment = MusicBrowserActivity.this.getFragmentManager().findFragmentByTag(fragmentClass.getCanonicalName());
+        if (fragment != null && !fragment.isDetached()) {
+            FragmentTransaction ft = MusicBrowserActivity.this.getFragmentManager().beginTransaction();
+            ft.detach(fragment);
+            ft.commit();
         }
 
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(preferenceKey, true)) {
+            actionBar.addTab(actionBar.newTab()
+                    .setText(titleResId)
+                    .setTag(fragmentClass.getCanonicalName())
+                    .setTabListener(tabListener));
+        }
+    }
+
+    private final ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+        @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // Check if the fragment is already initialized
-            if (mFragment == null) {
-                // If not, instantiate and add it to the activity
-                mFragment = Fragment.instantiate(mActivity, mClass.getName());
-                ft.add(R.id.main, mFragment, mTag);
-            } else {
-                // If it exists, simply attach it in order to show it
-                ft.attach(mFragment);
-            }
+            viewPager.setCurrentItem(tab.getPosition());
         }
 
+        @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            if (mFragment != null) {
-                // Detach the fragment, because another one is being attached
-                ft.detach(mFragment);
+        }
+
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+        }
+    };
+
+    private class CategoryPageAdapter extends PagerAdapter {
+        private final FragmentManager fragmentManager;
+
+        private FragmentTransaction currentTransaction = null;
+
+        private CategoryPageAdapter(FragmentManager fragmentManager) {
+            this.fragmentManager = fragmentManager;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            if (currentTransaction == null) {
+                currentTransaction = fragmentManager.beginTransaction();
+            }
+
+            ActionBar.Tab tab = MusicBrowserActivity.this.getActionBar().getTabAt(position);
+
+            Fragment fragment = fragmentManager.findFragmentByTag((String)tab.getTag());
+            // Check if the fragment is already initialized
+            if (fragment != null) {
+                // If it exists, simply attach it in order to show it
+                currentTransaction.attach(fragment);
+            } else {
+                // If not, instantiate and add it to the activity
+                fragment = instantiateFragment(tab);
+                currentTransaction.add(container.getId(), fragment, (String)tab.getTag());
+            }
+            return fragment;
+        }
+
+        Fragment instantiateFragment(ActionBar.Tab tab) {
+            return Fragment.instantiate(MusicBrowserActivity.this, (String)tab.getTag());
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            if (currentTransaction == null) {
+                currentTransaction = fragmentManager.beginTransaction();
+            }
+            // Detach the fragment, because another one is being attached
+            currentTransaction.detach((Fragment)object);
+        }
+
+        @Override
+        public void finishUpdate(ViewGroup container) {
+            if (currentTransaction != null) {
+                currentTransaction.commit();
+                currentTransaction = null;
             }
         }
 
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // User selected the already selected tab. Usually do nothing.
+        @Override
+        public int getCount() {
+            return MusicBrowserActivity.this.getActionBar().getTabCount();
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return ((Fragment)object).getView() == view;
         }
     }
 }

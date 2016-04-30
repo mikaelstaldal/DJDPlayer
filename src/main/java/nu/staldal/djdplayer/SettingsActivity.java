@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2014 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,6 @@ public class SettingsActivity extends Activity {
     public static final String PLAY_NEXT = "PLAY_NEXT";
     public static final String PLAY_NOW = "PLAY_NOW";
     public static final String QUEUE = "QUEUE";
-
-    // ACTIVE_TAB values
-    public static final String ARTISTS_TAB = "artists";
-    public static final String ALBUMS_TAB = "albums";
-    public static final String GENRES_TAB = "genres";
-    public static final String FOLDERS_TAB = "folders";
-    public static final String PLAYLISTS_TAB = "playlists";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

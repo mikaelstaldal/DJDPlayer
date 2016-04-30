@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2007 The Android Open Source Project
-     Copyright (C) 2013 Mikael Ståldal
+     Copyright (C) 2013-2016 Mikael Ståldal
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,18 +16,27 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <FrameLayout android:id="@+id/main"
-                 android:layout_width="match_parent"
-                 android:layout_height="0dip"
-                 android:layout_weight="1"/>
-
-    <fragment class="nu.staldal.djdplayer.mobile.NowPlayingFragment"
-              android:id="@+id/nowplaying"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"/>
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"/>
+
+    <FrameLayout
+            android:id="@+id/main"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:visibility="gone"/>
+
+    <fragment
+            class="nu.staldal.djdplayer.mobile.NowPlayingFragment"
+            android:id="@+id/nowplaying"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
 </LinearLayout>

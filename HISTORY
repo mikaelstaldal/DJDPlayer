@@ -127,3 +127,7 @@
 ----
 * Playback buttons in notification
 * Remote control in lock screen now works in Android 5
+
+2.11
+----
+* ViewPager to swipe horizontally between tabs
