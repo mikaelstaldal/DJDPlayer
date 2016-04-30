@@ -122,7 +122,7 @@
     <!-- Songs screen title -->
     <string name="tracks_title">Songs</string>
     <!-- Category label on Library screen -->
-    <string name="playlists_menu">Playlists</string>
+    <string name="playlists_menu">"Playlists "</string>
     <!-- Category label on Library screen -->
     <string name="artists_menu">Artists</string>
     <!-- Menu item -->
