@@ -23,6 +23,10 @@ allprojects {
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 
+ext {
+    supportLibVersion = "22.2.1"
+}
+
 android {
     compileSdkVersion 22
     buildToolsVersion "23.0.3"
@@ -37,7 +41,7 @@ android {
         targetSdkVersion 22
 
         dependencies {
-            compile 'com.android.support:appcompat-v7:22.2.1'
+            compile "com.android.support:appcompat-v7:${supportLibVersion}"
         }
     }
 
@@ -89,7 +93,7 @@ android {
             minSdkVersion 21
 
             dependencies {
-                tvCompile 'com.android.support:leanback-v17:22.2.1'
+                tvCompile "com.android.support:leanback-v17:${supportLibVersion}"
             }
         }
     }
