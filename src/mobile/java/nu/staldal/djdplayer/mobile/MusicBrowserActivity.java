@@ -39,7 +39,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -96,12 +95,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         Button playQueueButton = (Button)findViewById(R.id.playqueue_button);
         if (playQueueButton != null) {
-            playQueueButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(MusicBrowserActivity.this, MediaPlaybackActivity.class));
-                }
-            });
+            playQueueButton.setOnClickListener(v -> startActivity(new Intent(this, MediaPlaybackActivity.class)));
         }
 
         if (savedInstanceState != null) {
@@ -307,12 +301,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
             categoryMenuView = new ImageView(this);
             categoryMenuView.setImageResource(R.drawable.ic_section_menu);
-            categoryMenuView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    trackFragment.onCreateSectionMenu(categoryMenuView);
-                }
-            });
+            categoryMenuView.setOnClickListener(v -> trackFragment.onCreateSectionMenu(categoryMenuView));
             actionBar.setCustomView(categoryMenuView);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
         }
