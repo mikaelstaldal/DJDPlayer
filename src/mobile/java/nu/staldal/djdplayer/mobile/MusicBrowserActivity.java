@@ -105,8 +105,11 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
                     public void onPageSelected(int position) {
-                        // When swiping between pages, select the corresponding tab.
-                        getActionBar().setSelectedNavigationItem(position);
+                        // When swiping between pages, select the corresponding tab
+                        ActionBar actionBar = getActionBar();
+                        if (actionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS) {
+                            actionBar.setSelectedNavigationItem(position);
+                        }
                     }
                 });
         setupTabs(actionBar);
