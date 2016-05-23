@@ -24,11 +24,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 
 ext {
-    supportLibVersion = "22.2.1"
+    supportLibVersion = "23.4.0"
 }
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
     compileOptions {
