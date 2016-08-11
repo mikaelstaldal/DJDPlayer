@@ -101,6 +101,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         setContentView(R.layout.music_browser_activity);
 
         viewPager = (ViewPager)findViewById(R.id.pager);
+        viewPager.setOffscreenPageLimit(5);
         viewPager.addOnPageChangeListener(
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
