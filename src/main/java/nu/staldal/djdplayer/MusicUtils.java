@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2012-2015 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,16 +260,11 @@ public class MusicUtils {
             sub.clear();
             sub.add(1, newPlaylist, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
-                //sub.addSeparator(1, 0);
                 cur.moveToFirst();
                 while (! cur.isAfterLast()) {
                     Intent intent = new Intent();
                     intent.putExtra("playlist", cur.getLong(0));
-//                    if (cur.getInt(0) == mLastPlaylistSelected) {
-//                        sub.add(0, MusicBaseActivity.PLAYLIST_SELECTED, cur.getString(1)).setIntent(intent);
-//                    } else {
                     sub.add(1, playlistSelected, 0, cur.getString(1)).setIntent(intent);
-//                    }
                     cur.moveToNext();
                 }
             }
@@ -511,7 +506,7 @@ public class MusicUtils {
         if (list.length == 0 || sService == null) {
             Log.d(LOGTAG, "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
-            String message = context.getString(R.string.emptyplaylist, list.length);
+            String message = context.getString(R.string.emptyplaylist);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             return;
         }

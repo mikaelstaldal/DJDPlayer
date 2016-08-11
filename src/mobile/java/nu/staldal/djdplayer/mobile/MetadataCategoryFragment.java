@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 package nu.staldal.djdplayer.mobile;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -180,17 +179,10 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_songs_title)
                         .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MusicUtils.deleteTracks(MetadataCategoryFragment.this.getActivity(), songs);
-                            }
-                        }).show();
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
+                                MusicUtils.deleteTracks(MetadataCategoryFragment.this.getActivity(), songs))
+                        .show();
                 return true;
             }
 

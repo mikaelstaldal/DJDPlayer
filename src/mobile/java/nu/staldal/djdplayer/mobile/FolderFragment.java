@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package nu.staldal.djdplayer.mobile;
 
 import android.app.AlertDialog;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -40,7 +39,7 @@ import nu.staldal.djdplayer.provider.MusicContract;
 import java.io.File;
 
 public class FolderFragment extends CategoryFragment {
-    static final String[] cols = new String[] {
+    private static final String[] cols = new String[] {
             MusicContract.Folder.NAME,
             MusicContract.Folder._COUNT,
             MusicContract.Folder.PATH,
@@ -70,33 +69,30 @@ public class FolderFragment extends CategoryFragment {
                 new int[] { R.id.line1, R.id.line2, R.id.play_indicator },
                 0);
 
-        listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                switch (view.getId()) {
-                    case R.id.line2:
-                        int numSongs = cursor.getInt(columnIndex);
-                        ((TextView) view).setText(FolderFragment.this.getActivity().getResources()
-                                .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
-                        return true;
+        listAdapter.setViewBinder((view, cursor, columnIndex) -> {
+            switch (view.getId()) {
+                case R.id.line2:
+                    int numSongs = cursor.getInt(columnIndex);
+                    ((TextView) view).setText(FolderFragment.this.getActivity().getResources()
+                            .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+                    return true;
 
-                    case R.id.play_indicator:
-                        String folder = cursor.getString(columnIndex);
+                case R.id.play_indicator:
+                    String folder = cursor.getString(columnIndex);
 
-                        File currentFolder = (MusicUtils.sService != null)
-                                ? MusicUtils.sService.getFolder()
-                                : null;
+                    File currentFolder = (MusicUtils.sService != null)
+                            ? MusicUtils.sService.getFolder()
+                            : null;
 
-                        if (currentFolder != null && currentFolder.getAbsolutePath().equals(folder)) {
-                            view.setVisibility(View.VISIBLE);
-                        } else {
-                            view.setVisibility(View.INVISIBLE);
-                        }
-                        return true;
+                    if (currentFolder != null && currentFolder.getAbsolutePath().equals(folder)) {
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        view.setVisibility(View.INVISIBLE);
+                    }
+                    return true;
 
-                    default:
-                        return false;
-                }
+                default:
+                    return false;
             }
         });
 
@@ -205,17 +201,10 @@ public class FolderFragment extends CategoryFragment {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_songs_title)
                         .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MusicUtils.deleteTracks(FolderFragment.this.getActivity(), list);
-                            }
-                        }).show();
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
+                                MusicUtils.deleteTracks(FolderFragment.this.getActivity(), list))
+                        .show();
                 return true;
             }
 
