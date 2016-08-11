@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2013 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -32,7 +31,6 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -52,7 +50,7 @@ import nu.staldal.djdplayer.provider.MusicContract;
 public class PlaylistFragment extends CategoryFragment {
     private static final String LOGTAG = "PlaylistFragment";
 
-    static final String[] cols = new String[]{
+    private static final String[] cols = new String[] {
             MusicContract.Playlist._ID,
             MusicContract.Playlist.NAME,
             MusicContract.Playlist._COUNT
@@ -76,8 +74,6 @@ public class PlaylistFragment extends CategoryFragment {
         }
 
         createShortcut = (getActivity() instanceof PlaylistShortcutActivity);
-
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -90,19 +86,16 @@ public class PlaylistFragment extends CategoryFragment {
                 new int[] { R.id.line1, R.id.line2 },
                 0);
 
-        listAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                switch (view.getId()) {
-                    case R.id.line2:
-                        int numSongs = cursor.getInt(columnIndex);
-                        ((TextView) view).setText(PlaylistFragment.this.getActivity().getResources()
-                                .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
-                        return true;
+        listAdapter.setViewBinder((view, cursor, columnIndex) -> {
+            switch (view.getId()) {
+                case R.id.line2:
+                    int numSongs = cursor.getInt(columnIndex);
+                    ((TextView) view).setText(PlaylistFragment.this.getActivity().getResources()
+                            .getQuantityString(R.plurals.Nsongs, numSongs, numSongs));
+                    return true;
 
-                    default:
-                        return false;
-                }
+                default:
+                    return false;
             }
         });
 
@@ -197,33 +190,25 @@ public class PlaylistFragment extends CategoryFragment {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_playlist_title)
                         .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) -> {
+                            Uri uri = ContentUris.withAppendedId(
+                                    MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
+                            getActivity().getContentResolver().delete(uri, null, null);
+                            Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
                         })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Uri uri = ContentUris.withAppendedId(
-                                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId);
-                                getActivity().getContentResolver().delete(uri, null, null);
-                                Toast.makeText(getActivity(), R.string.playlist_deleted_message, Toast.LENGTH_SHORT).show();
-                            }
-                        }).show();
+                        .show();
                 return true;
 
             case EDIT_PLAYLIST:
                 if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                     new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.weekpicker_title)
-                            .setItems(R.array.weeklist, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    int numweeks = which + 1;
-                                    MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), SettingsActivity.NUMWEEKS,
-                                            numweeks);
-                                    getLoaderManager().restartLoader(0, null, PlaylistFragment.this);
-                                }
+                            .setItems(R.array.weeklist, (dialog, which) -> {
+                                int numweeks = which + 1;
+                                MusicUtils.setIntPref(PlaylistFragment.this.getActivity(), SettingsActivity.NUMWEEKS,
+                                        numweeks);
+                                getLoaderManager().restartLoader(0, null, PlaylistFragment.this);
                             }).show();
                 } else {
                     Log.e(LOGTAG, "should not be here");
@@ -243,17 +228,10 @@ public class PlaylistFragment extends CategoryFragment {
                             .setTitle(String.format(PlaylistFragment.this.getString(R.string.rename_playlist_prompt),
                                     playlistName))
                             .setView(view)
-                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            })
-                            .setPositiveButton(R.string.create_playlist_create_text, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    MusicUtils.renamePlaylist(getActivity(), playlistId, mPlaylist.getText().toString());
-                                }
-                            }).show();
+                            .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                            .setPositiveButton(R.string.create_playlist_create_text, (dialog, which) ->
+                                    MusicUtils.renamePlaylist(getActivity(), playlistId, mPlaylist.getText().toString()))
+                            .show();
                 }
                 return true;
             }
@@ -296,21 +274,6 @@ public class PlaylistFragment extends CategoryFragment {
         } else {
             viewCategory(MusicContract.Playlist.getMembersUri(id));
         }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.playlists_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.create_new_playlist:
-                CreatePlaylist.showMe(getActivity(), null);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private long[] fetchSongList(long playlistId) {

@@ -436,6 +436,8 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        updatePlaylistItems(menu);
+
         updateSoundEffectItem(menu);
 
         updateRepeatItem(menu);
@@ -443,6 +445,14 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
         updatePlayingItems(menu);
 
         return true;
+    }
+
+    private void updatePlaylistItems(Menu menu) {
+        MenuItem item = menu.findItem(R.id.create_new_playlist);
+        if (item != null) {
+            ActionBar.Tab selectedTab = getActionBar().getSelectedTab();
+            item.setVisible(selectedTab != null && selectedTab.getTag().equals(PlaylistFragment.class.getName()));
+        }
     }
 
     private void updateSoundEffectItem(Menu menu) {
@@ -491,6 +501,10 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 setIntent(intent);
                 return true;
             }
+
+            case R.id.create_new_playlist:
+                CreatePlaylist.showMe(this, null);
+                return true;
 
             case R.id.repeat:
                 cycleRepeat();

@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+            android:id="@+id/create_new_playlist"
+            android:icon="@drawable/ic_menu_add"
+            android:title="@string/create_new_playlist"
+            android:showAsAction="ifRoom"
+            android:orderInCategory="1"/>
+
+    <item
             android:id="@+id/search"
             android:icon="@drawable/ic_menu_search"
             android:title="@string/search_title"
