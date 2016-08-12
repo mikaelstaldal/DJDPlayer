@@ -24,17 +24,15 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
-    private static final String CURRENT_COUNT = "currentCount";
-    private static final String NEW_COUNT = "newCount";
+    protected static final String CURRENT_COUNT = "currentCount";
+    protected static final String NEW_COUNT = "newCount";
 
     public static final String CURRENT_NAME = "CURRENT_NAME";
     public static final String IS_UNKNOWN = "IS_UNKNOWN";
@@ -62,6 +60,8 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
     protected abstract String getEntryContentType();
 
     protected abstract boolean shuffleSongs();
+
+    protected abstract void pupulareContextMenu(ContextMenu menu);
 
     /**
      * Do nothing by default, can be overridden by subclasses.
@@ -114,100 +114,66 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         String title = mIsUnknown ? getString(getUnknownStringId()) : mCurrentName;
         menu.setHeaderTitle(title);
 
-        menu.add(0, R.id.category_play_all_now, 0, R.string.play_all_now);
-        menu.add(0, R.id.category_play_all_next, 0, R.string.play_all_next);
-        menu.add(0, R.id.category_queue_all, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.interleave_all);
-        for (int i = 1; i<=5; i++) {
-            for (int j = 1; j<=5; j++) {
-                Intent intent = new Intent();
-                intent.putExtra(CURRENT_COUNT, i);
-                intent.putExtra(NEW_COUNT, j);
-                interleave.add(2, R.id.category_interleave_all, 0, getResources().getString(R.string.interleaveNNN, i, j)).setIntent(intent);
-            }
-        }
-
-        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.category_new_playlist, R.id.category_selected_playlist);
-
-        menu.add(0, R.id.category_delete_all, 0, R.string.delete_all);
-
-        if (!mIsUnknown) {
-            menu.add(0, R.id.category_search_for_category, 0, R.string.search_for);
-        }
+        pupulareContextMenu(menu);
     }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.category_play_all_now: {
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.playAll(getActivity(), songs);
-                return true;
-            }
+    protected void playAllNow() {
+        long[] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        MusicUtils.playAll(getActivity(), songs);
+    }
 
-            case R.id.category_play_all_next: {
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.queueNext(getActivity(), songs);
-                return true;
-            }
+    protected void playAllNext() {
+        long[] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        MusicUtils.queueNext(getActivity(), songs);
+    }
 
-            case R.id.category_queue_all: {
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.queue(getActivity(), songs);
-                return true;
-            }
+    protected void queueAll() {
+        long[] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        MusicUtils.queue(getActivity(), songs);
+    }
 
-            case R.id.category_interleave_all: {
-                Intent intent = item.getIntent();
-                int currentCount = intent.getIntExtra(CURRENT_COUNT, 0);
-                int newCount = intent.getIntExtra(NEW_COUNT, 0);
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
-                return true;
-            }
+    protected void interleaveAll(MenuItem item) {
+        Intent intent = item.getIntent();
+        int currentCount = intent.getIntExtra(CURRENT_COUNT, 0);
+        int newCount = intent.getIntExtra(NEW_COUNT, 0);
+        long[] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
+    }
 
-            case R.id.category_new_playlist: {
-                long [] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                CreatePlaylist.showMe(getActivity(), songs);
-                return true;
-            }
+    protected void newPlaylist() {
+        long [] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        CreatePlaylist.showMe(getActivity(), songs);
+    }
 
-            case R.id.category_selected_playlist: {
-                long playlist = item.getIntent().getLongExtra("playlist", 0);
-                long[] songs = fetchSongList(mCurrentId);
-                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                MusicUtils.addToPlaylist(getActivity(), songs, playlist);
-                return true;
-            }
+    protected void selectedPlaylist(MenuItem item) {
+        long playlist = item.getIntent().getLongExtra("playlist", 0);
+        long[] songs = fetchSongList(mCurrentId);
+        if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+        MusicUtils.addToPlaylist(getActivity(), songs, playlist);
+    }
 
-            case R.id.category_delete_all: {
-                final long[] songs = fetchSongList(mCurrentId);
-                String f = getString(getDeleteDescStringId());
-                String desc = String.format(f, mCurrentName);
-                new AlertDialog.Builder(getActivity())
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.delete_songs_title)
-                        .setMessage(desc)
-                        .setNegativeButton(R.string.cancel, (dialog, which) -> { })
-                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
-                                MusicUtils.deleteTracks(MetadataCategoryFragment.this.getActivity(), songs))
-                        .show();
-                return true;
-            }
+    protected void deleteAll() {
+        final long[] songs = fetchSongList(mCurrentId);
+        String f = getString(getDeleteDescStringId());
+        String desc = String.format(f, mCurrentName);
+        new AlertDialog.Builder(getActivity())
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.delete_songs_title)
+                .setMessage(desc)
+                .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
+                        MusicUtils.deleteTracks(MetadataCategoryFragment.this.getActivity(), songs))
+                .show();
+    }
 
-            case R.id.category_search_for_category: {
-                Intent intent = MusicUtils.searchForCategory(mCurrentName, getEntryContentType(), getResources());
-                addExtraSearchData(intent);
-                startActivity(intent);
-                return true;
-            }
-        }
-        return super.onContextItemSelected(item);
+    protected void searchForCategory() {
+        Intent intent = MusicUtils.searchForCategory(mCurrentName, getEntryContentType(), getResources());
+        addExtraSearchData(intent);
+        startActivity(intent);
     }
 }

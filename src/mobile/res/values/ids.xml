@@ -22,14 +22,32 @@
     <item type="id" name="folder_selected_playlist"/>
     <item type="id" name="folder_delete_all"/>
 
-    <item type="id" name="category_play_all_now"/>
-    <item type="id" name="category_play_all_next"/>
-    <item type="id" name="category_queue_all"/>
-    <item type="id" name="category_interleave_all"/>
-    <item type="id" name="category_new_playlist"/>
-    <item type="id" name="category_selected_playlist"/>
-    <item type="id" name="category_delete_all"/>
-    <item type="id" name="category_search_for_category"/>
+    <item type="id" name="album_play_all_now"/>
+    <item type="id" name="album_play_all_next"/>
+    <item type="id" name="album_queue_all"/>
+    <item type="id" name="album_interleave_all"/>
+    <item type="id" name="album_new_playlist"/>
+    <item type="id" name="album_selected_playlist"/>
+    <item type="id" name="album_delete_all"/>
+    <item type="id" name="album_search_for_category"/>
+
+    <item type="id" name="artist_play_all_now"/>
+    <item type="id" name="artist_play_all_next"/>
+    <item type="id" name="artist_queue_all"/>
+    <item type="id" name="artist_interleave_all"/>
+    <item type="id" name="artist_new_playlist"/>
+    <item type="id" name="artist_selected_playlist"/>
+    <item type="id" name="artist_delete_all"/>
+    <item type="id" name="artist_search_for_category"/>
+
+    <item type="id" name="genre_play_all_now"/>
+    <item type="id" name="genre_play_all_next"/>
+    <item type="id" name="genre_queue_all"/>
+    <item type="id" name="genre_interleave_all"/>
+    <item type="id" name="genre_new_playlist"/>
+    <item type="id" name="genre_selected_playlist"/>
+    <item type="id" name="genre_delete_all"/>
+    <item type="id" name="genre_search_for_category"/>
 
     <item type="id" name="track_play_now"/>
     <item type="id" name="track_play_next"/>

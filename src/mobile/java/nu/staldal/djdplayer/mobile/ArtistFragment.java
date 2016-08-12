@@ -22,6 +22,10 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.ListView;
 import nu.staldal.djdplayer.MusicUtils;
@@ -113,5 +117,68 @@ public class ArtistFragment extends MetadataCategoryFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         viewCategory(MusicContract.Artist.getMembersUri(id));
+    }
+
+    @Override
+    protected void pupulareContextMenu(ContextMenu menu) {
+        menu.add(0, R.id.artist_play_all_now, 0, R.string.play_all_now);
+        menu.add(0, R.id.artist_play_all_next, 0, R.string.play_all_next);
+        menu.add(0, R.id.artist_queue_all, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.interleave_all);
+        for (int i = 1; i<=5; i++) {
+            for (int j = 1; j<=5; j++) {
+                Intent intent = new Intent();
+                intent.putExtra(CURRENT_COUNT, i);
+                intent.putExtra(NEW_COUNT, j);
+                interleave.add(2, R.id.artist_interleave_all, 0, getResources().getString(R.string.interleaveNNN, i, j)).setIntent(intent);
+            }
+        }
+
+        SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.artist_new_playlist, R.id.artist_selected_playlist);
+
+        menu.add(0, R.id.artist_delete_all, 0, R.string.delete_all);
+
+        if (!mIsUnknown) {
+            menu.add(0, R.id.artist_search_for_category, 0, R.string.search_for);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.artist_play_all_now:
+                playAllNow();
+                return true;
+
+            case R.id.artist_play_all_next:
+                playAllNext();
+                return true;
+
+            case R.id.artist_queue_all:
+                queueAll();
+                return true;
+
+            case R.id.artist_interleave_all:
+                interleaveAll(item);
+                return true;
+
+            case R.id.artist_new_playlist:
+                newPlaylist();
+                return true;
+
+            case R.id.artist_selected_playlist:
+                selectedPlaylist(item);
+                return true;
+
+            case R.id.artist_delete_all:
+                deleteAll();
+                return true;
+
+            case R.id.artist_search_for_category:
+                searchForCategory();
+                return true;
+        }
+        return super.onContextItemSelected(item);
     }
 }
