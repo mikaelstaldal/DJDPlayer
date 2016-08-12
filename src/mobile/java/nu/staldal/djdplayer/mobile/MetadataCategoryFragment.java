@@ -33,10 +33,13 @@ import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 
 public abstract class MetadataCategoryFragment extends CategoryFragment {
+    private static final String CURRENT_COUNT = "currentCount";
+    private static final String NEW_COUNT = "newCount";
+
     public static final String CURRENT_NAME = "CURRENT_NAME";
     public static final String IS_UNKNOWN = "IS_UNKNOWN";
 
-    protected long mCurrentId;    
+    protected long mCurrentId;
     protected String mCurrentName;
     protected boolean mIsUnknown;
 
@@ -111,59 +114,71 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
         String title = mIsUnknown ? getString(getUnknownStringId()) : mCurrentName;
         menu.setHeaderTitle(title);
 
-        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
-        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all);
+        menu.add(0, R.id.category_play_all_now, 0, R.string.play_all_now);
+        menu.add(0, R.id.category_play_all_next, 0, R.string.play_all_next);
+        menu.add(0, R.id.category_queue_all, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
             for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0,
-                        getResources().getString(R.string.interleaveNNN, i, j));
+                Intent intent = new Intent();
+                intent.putExtra(CURRENT_COUNT, i);
+                intent.putExtra(NEW_COUNT, j);
+                interleave.add(2, R.id.category_interleave_all, 0, getResources().getString(R.string.interleaveNNN, i, j)).setIntent(intent);
             }
         }
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.category_new_playlist, R.id.category_selected_playlist);
 
-        menu.add(0, DELETE_ALL, 0, R.string.delete_all);
+        menu.add(0, R.id.category_delete_all, 0, R.string.delete_all);
 
         if (!mIsUnknown) {
-            menu.add(0, SEARCH_FOR_CATEGORY, 0, R.string.search_for);
+            menu.add(0, R.id.category_search_for_category, 0, R.string.search_for);
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL_NOW: {
+            case R.id.category_play_all_now: {
                 long[] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.playAll(getActivity(), songs);
                 return true;
             }
 
-            case PLAY_ALL_NEXT: {
+            case R.id.category_play_all_next: {
                 long[] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.queueNext(getActivity(), songs);
                 return true;
             }
 
-            case QUEUE_ALL: {
+            case R.id.category_queue_all: {
                 long[] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 MusicUtils.queue(getActivity(), songs);
                 return true;
             }
 
-            case NEW_PLAYLIST: {
+            case R.id.category_interleave_all: {
+                Intent intent = item.getIntent();
+                int currentCount = intent.getIntExtra(CURRENT_COUNT, 0);
+                int newCount = intent.getIntExtra(NEW_COUNT, 0);
+                long[] songs = fetchSongList(mCurrentId);
+                if (shuffleSongs()) MusicUtils.shuffleArray(songs);
+                MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
+                return true;
+            }
+
+            case R.id.category_new_playlist: {
                 long [] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
                 CreatePlaylist.showMe(getActivity(), songs);
                 return true;
             }
 
-            case PLAYLIST_SELECTED: {
+            case R.id.category_selected_playlist: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 long[] songs = fetchSongList(mCurrentId);
                 if (shuffleSongs()) MusicUtils.shuffleArray(songs);
@@ -171,7 +186,7 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                 return true;
             }
 
-            case DELETE_ALL: {
+            case R.id.category_delete_all: {
                 final long[] songs = fetchSongList(mCurrentId);
                 String f = getString(getDeleteDescStringId());
                 String desc = String.format(f, mCurrentName);
@@ -186,21 +201,12 @@ public abstract class MetadataCategoryFragment extends CategoryFragment {
                 return true;
             }
 
-            case SEARCH_FOR_CATEGORY:
+            case R.id.category_search_for_category: {
                 Intent intent = MusicUtils.searchForCategory(mCurrentName, getEntryContentType(), getResources());
                 addExtraSearchData(intent);
                 startActivity(intent);
                 return true;
-
-            default:
-                if (item.getItemId() > INTERLEAVE_ALL) {
-                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
-                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    long[] songs = fetchSongList(mCurrentId);
-                    if (shuffleSongs()) MusicUtils.shuffleArray(songs);
-                    MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
-                    return true;
-                }
+            }
         }
         return super.onContextItemSelected(item);
     }

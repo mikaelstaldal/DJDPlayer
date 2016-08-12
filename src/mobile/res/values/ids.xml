@@ -1,0 +1,73 @@
+<resources>
+    <item type="id" name="new_playlist"/>
+    <item type="id" name="selected_playlist"/>
+
+    <item type="id" name="playlist_play_all_now"/>
+    <item type="id" name="playlist_play_all_next"/>
+    <item type="id" name="playlist_queue_all"/>
+    <item type="id" name="playlist_interleave_all"/>
+    <item type="id" name="playlist_new_playlist"/>
+    <item type="id" name="playlist_selected_playlist"/>
+    <item type="id" name="playlist_delete_playlist"/>
+    <item type="id" name="playlist_rename_playlist"/>
+    <item type="id" name="playlist_edit_playlist"/>
+    <item type="id" name="playlist_export_playlist"/>
+    <item type="id" name="playlist_share_playlist"/>
+
+    <item type="id" name="folder_play_all_now"/>
+    <item type="id" name="folder_play_all_next"/>
+    <item type="id" name="folder_queue_all"/>
+    <item type="id" name="folder_interleave_all"/>
+    <item type="id" name="folder_new_playlist"/>
+    <item type="id" name="folder_selected_playlist"/>
+    <item type="id" name="folder_delete_all"/>
+
+    <item type="id" name="category_play_all_now"/>
+    <item type="id" name="category_play_all_next"/>
+    <item type="id" name="category_queue_all"/>
+    <item type="id" name="category_interleave_all"/>
+    <item type="id" name="category_new_playlist"/>
+    <item type="id" name="category_selected_playlist"/>
+    <item type="id" name="category_delete_all"/>
+    <item type="id" name="category_search_for_category"/>
+
+    <item type="id" name="track_play_now"/>
+    <item type="id" name="track_play_next"/>
+    <item type="id" name="track_queue"/>
+    <item type="id" name="track_new_playlist"/>
+    <item type="id" name="track_selected_playlist"/>
+    <item type="id" name="track_remove_from_playlist"/>
+    <item type="id" name="track_info"/>
+    <item type="id" name="track_share_via"/>
+    <item type="id" name="track_delete"/>
+    <item type="id" name="track_search_for_track"/>
+
+    <item type="id" name="tracks_shuffle_playlist"/>
+    <item type="id" name="tracks_uniqueify_playlist"/>
+    <item type="id" name="tracks_play_all_now"/>
+    <item type="id" name="tracks_play_all_next"/>
+    <item type="id" name="tracks_queue_all"/>
+    <item type="id" name="tracks_interleave_all"/>
+    <item type="id" name="tracks_new_playlist"/>
+    <item type="id" name="tracks_selected_playlist"/>
+    <item type="id" name="tracks_delete_all"/>
+    <item type="id" name="tracks_search_for_category"/>
+    <item type="id" name="tracks_edit_playlist"/>
+    <item type="id" name="tracks_export_playlist"/>
+    <item type="id" name="tracks_share_playlist"/>
+
+    <item type="id" name="playerheader_new_playlist"/>
+    <item type="id" name="playerheader_selected_playlist"/>
+    <item type="id" name="playerheader_delete"/>
+    <item type="id" name="playerheader_info"/>
+    <item type="id" name="playerheader_share_via"/>
+    <item type="id" name="playerheader_search_for"/>
+
+    <item type="id" name="playqueue_play_now"/>
+    <item type="id" name="playqueue_new_playlist"/>
+    <item type="id" name="playqueue_selected_playlist"/>
+    <item type="id" name="playqueue_delete"/>
+    <item type="id" name="playqueue_info"/>
+    <item type="id" name="playqueue_share_via"/>
+    <item type="id" name="playqueue_search_for"/>
+</resources>

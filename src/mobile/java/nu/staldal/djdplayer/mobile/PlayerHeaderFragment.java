@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Mikael Ståldal
+ * Copyright (C) 2014-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -40,8 +39,7 @@ import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.provider.MusicContract;
 
-public class PlayerHeaderFragment extends Fragment implements
-        FragmentServiceConnection, View.OnLongClickListener, MusicUtils.Defs {
+public class PlayerHeaderFragment extends Fragment implements FragmentServiceConnection, View.OnLongClickListener {
 
     @SuppressWarnings("unused")
     private static final String LOGTAG = "PlayerHeaderFragment";
@@ -69,12 +67,7 @@ public class PlayerHeaderFragment extends Fragment implements
         artistNameView.setOnLongClickListener(this);
         genreNameView.setOnLongClickListener(this);
 
-        view.findViewById(R.id.context_menu).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                trackNameContainer.showContextMenu();
-            }
-        });
+        view.findViewById(R.id.context_menu).setOnClickListener(v -> trackNameContainer.showContextMenu());
 
         return view;
     }
@@ -113,15 +106,15 @@ public class PlayerHeaderFragment extends Fragment implements
         if (service == null) return;
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST2, PLAYLIST_SELECTED2);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.playerheader_new_playlist, R.id.playerheader_selected_playlist);
 
-        menu.add(0, DELETE_ITEM2, 0, R.string.delete_item);
+        menu.add(0, R.id.playerheader_delete, 0, R.string.delete_item);
 
-        menu.add(0, TRACK_INFO2, 0, R.string.info);
+        menu.add(0, R.id.playerheader_info, 0, R.string.info);
 
-        menu.add(0, SHARE_VIA2, 0, R.string.share_via);
+        menu.add(0, R.id.playerheader_share_via, 0, R.string.share_via);
 
-        menu.add(0, SEARCH_FOR2, 0, R.string.search_for);
+        menu.add(0, R.id.playerheader_search_for, 0, R.string.search_for);
 
         menu.setHeaderTitle(service.getTrackName());
     }
@@ -131,12 +124,11 @@ public class PlayerHeaderFragment extends Fragment implements
         if (service == null) return false;
 
         switch (item.getItemId()) {
-            case NEW_PLAYLIST2: {
+            case R.id.playerheader_new_playlist:
                 CreatePlaylist.showMe(getActivity(), new long[] { service.getAudioId() });
                 return true;
-            }
 
-            case PLAYLIST_SELECTED2: {
+            case R.id.playerheader_selected_playlist: {
                 long [] list = new long[1];
                 list[0] = service.getAudioId();
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
@@ -144,7 +136,7 @@ public class PlayerHeaderFragment extends Fragment implements
                 return true;
             }
 
-            case DELETE_ITEM2: {
+            case R.id.playerheader_delete: {
                 final long [] list = new long[1];
                 list[0] = service.getAudioId();
                 String f = getString(R.string.delete_song_desc, service.getTrackName());
@@ -152,28 +144,19 @@ public class PlayerHeaderFragment extends Fragment implements
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_song_title)
                         .setMessage(f)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .setPositiveButton(R.string.delete_confirm_button_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MusicUtils.deleteTracks(PlayerHeaderFragment.this.getActivity(), list);
-                            }
-                        }).show();
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> { })
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
+                                MusicUtils.deleteTracks(PlayerHeaderFragment.this.getActivity(), list))
+                        .show();
                 return true;
             }
 
-            case TRACK_INFO2: {
+            case R.id.playerheader_info:
                 TrackInfoFragment.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, service.getAudioId()));
-
                 return true;
-            }
 
-            case SHARE_VIA2: {
+            case R.id.playerheader_share_via: {
                 startActivity(MusicUtils.shareVia(
                         service.getAudioId(),
                         service.getMimeType(),
@@ -181,7 +164,7 @@ public class PlayerHeaderFragment extends Fragment implements
                 return true;
             }
 
-            case SEARCH_FOR2:
+            case R.id.playerheader_search_for:
                 startActivity(MusicUtils.searchForTrack(
                         service.getTrackName(),
                         service.getArtistName(),

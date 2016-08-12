@@ -61,7 +61,7 @@ import nu.staldal.ui.WithSectionMenu;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection,
+public class MusicBrowserActivity extends Activity implements ServiceConnection,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String LOGTAG = "MusicBrowserActivity";
@@ -428,7 +428,7 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
 
         if (getResources().getBoolean(R.bool.tablet_layout)) {
             SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, 16, R.string.add_all_to_playlist);
-            MusicUtils.makePlaylistMenu(this, sub, MusicUtils.Defs.NEW_PLAYLIST4, MusicUtils.Defs.PLAYLIST_SELECTED4);
+            MusicUtils.makePlaylistMenu(this, sub, R.id.new_playlist, R.id.selected_playlist);
         }
 
         return true;
@@ -522,11 +522,11 @@ public class MusicBrowserActivity extends Activity implements MusicUtils.Defs, S
                 if (service != null) service.removeTracks(0, Integer.MAX_VALUE);
                 return true;
 
-            case NEW_PLAYLIST4:
+            case R.id.new_playlist:
                 if (service != null) CreatePlaylist.showMe(this, service.getQueue());
                 return true;
 
-            case PLAYLIST_SELECTED4:
+            case R.id.selected_playlist:
                 if (service != null) {
                     long playlist = item.getIntent().getLongExtra("playlist", 0);
                     MusicUtils.addToPlaylist(this, service.getQueue(), playlist);

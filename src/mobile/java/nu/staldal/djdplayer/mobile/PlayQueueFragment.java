@@ -49,7 +49,7 @@ import nu.staldal.djdplayer.SettingsActivity;
 import nu.staldal.ui.TouchInterceptor;
 
 public class PlayQueueFragment extends ListFragment
-        implements FragmentServiceConnection, AbsListView.OnScrollListener, MusicUtils.Defs {
+        implements FragmentServiceConnection, AbsListView.OnScrollListener {
 
     private static final String TAG = PlayQueueFragment.class.getSimpleName();
 
@@ -267,20 +267,20 @@ public class PlayQueueFragment extends ListFragment
         playQueueCursor.moveToPosition(mSelectedPosition);
         mSelectedId = playQueueCursor.getLong(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID));
 
-        menu.add(0, PLAY_NOW2, 0, R.string.play_now);
+        menu.add(0, R.id.playqueue_play_now, 0, R.string.play_now);
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub, NEW_PLAYLIST3, PLAYLIST_SELECTED3);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.playqueue_new_playlist, R.id.playqueue_selected_playlist);
 
-        menu.add(0, DELETE_ITEM3, 0, R.string.delete_item);
+        menu.add(0, R.id.playqueue_delete, 0, R.string.delete_item);
 
-        menu.add(0, TRACK_INFO3, 0, R.string.info);
+        menu.add(0, R.id.playqueue_info, 0, R.string.info);
 
-        menu.add(0, SHARE_VIA3, 0, R.string.share_via);
+        menu.add(0, R.id.playqueue_share_via, 0, R.string.share_via);
 
         // only add the 'search' menu if the selected item is music
         if (MusicUtils.isMusic(playQueueCursor)) {
-            menu.add(0, SEARCH_FOR, 0, R.string.search_for);
+            menu.add(0, R.id.playqueue_search_for, 0, R.string.search_for);
         }
 
         menu.setHeaderTitle(
@@ -290,23 +290,23 @@ public class PlayQueueFragment extends ListFragment
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_NOW2: {
+            case R.id.playqueue_play_now: {
                 if (service != null) service.setQueuePosition(mSelectedPosition);
                 return true;
             }
 
-            case NEW_PLAYLIST3: {
+            case R.id.playqueue_new_playlist: {
                 CreatePlaylist.showMe(getActivity(), new long[]{mSelectedId});
                 return true;
             }
 
-            case PLAYLIST_SELECTED3: {
+            case R.id.playqueue_selected_playlist: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), new long[]{mSelectedId}, playlist);
                 return true;
             }
 
-            case DELETE_ITEM3: {
+            case R.id.playqueue_delete: {
                 final long[] list = new long[1];
                 list[0] = (int) mSelectedId;
                 String f = getString(R.string.delete_song_desc);
@@ -319,26 +319,26 @@ public class PlayQueueFragment extends ListFragment
                         .setMessage(desc)
                         .setNegativeButton(R.string.cancel, (dialog, which) -> {
                         })
-                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) -> {
-                            MusicUtils.deleteTracks(PlayQueueFragment.this.getActivity(), list);
-                        }).show();
+                        .setPositiveButton(R.string.delete_confirm_button_text, (dialog, which) ->
+                                MusicUtils.deleteTracks(PlayQueueFragment.this.getActivity(), list))
+                        .show();
                 return true;
             }
 
-            case TRACK_INFO3:
+            case R.id.playqueue_info:
                 TrackInfoFragment.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
 
                 return true;
 
-            case SHARE_VIA3:
+            case R.id.playqueue_share_via:
                 startActivity(MusicUtils.shareVia(
                         mSelectedId,
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
                         getResources()));
                 return true;
 
-            case SEARCH_FOR:
+            case R.id.playqueue_search_for:
                 startActivity(MusicUtils.searchForTrack(
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
                         playQueueCursor.getString(playQueueCursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),

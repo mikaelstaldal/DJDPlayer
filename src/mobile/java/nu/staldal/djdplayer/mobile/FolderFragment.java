@@ -18,6 +18,7 @@ package nu.staldal.djdplayer.mobile;
 
 import android.app.AlertDialog;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -45,6 +46,9 @@ public class FolderFragment extends CategoryFragment {
             MusicContract.Folder.PATH,
             MusicContract.Folder._ID,
     };
+
+    private static final String CURRENT_COUNT = "currentCount";
+    private static final String NEW_COUNT = "newCount";
 
     private static final String CURRENT_FOLDER = "currentfolder";
 
@@ -146,53 +150,57 @@ public class FolderFragment extends CategoryFragment {
         String title = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Folder.NAME));
         menu.setHeaderTitle(title);
 
-        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
-        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all);
+        menu.add(0, R.id.folder_play_all_now, 0, R.string.play_all_now);
+        menu.add(0, R.id.folder_play_all_next, 0, R.string.play_all_next);
+        menu.add(0, R.id.folder_queue_all, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.interleave_all);
         for (int i = 1; i<=5; i++) {
             for (int j = 1; j<=5; j++) {
-                interleave.add(2, INTERLEAVE_ALL+10*i+j, 0,
-                        getResources().getString(R.string.interleaveNNN, i, j));
+                Intent intent = new Intent();
+                intent.putExtra(CURRENT_COUNT, i);
+                intent.putExtra(NEW_COUNT, j);
+                interleave.add(2, R.id.folder_interleave_all, 0, getResources().getString(R.string.interleaveNNN, i, j)).setIntent(intent);
             }
         }
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.folder_new_playlist, R.id.folder_selected_playlist);
 
-        menu.add(0, DELETE_ALL, 0, R.string.delete_all);
+        menu.add(0, R.id.folder_delete_all, 0, R.string.delete_all);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL_NOW: {
+            case R.id.folder_play_all_now:
                 MusicUtils.playAll(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
-            }
 
-            case PLAY_ALL_NEXT: {
+            case R.id.folder_play_all_next:
                 MusicUtils.queueNext(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
-            }
 
-            case QUEUE_ALL: {
+            case R.id.folder_queue_all:
                 MusicUtils.queue(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
-            }
 
-            case NEW_PLAYLIST: {
+            case R.id.folder_interleave_all:
+                Intent intent = item.getIntent();
+                int currentCount = intent.getIntExtra(CURRENT_COUNT, 0);
+                int newCount = intent.getIntExtra(NEW_COUNT, 0);
+                MusicUtils.interleave(getActivity(), fetchSongList(mCurrentFolder), currentCount, newCount);
+                return true;
+
+            case R.id.folder_new_playlist:
                 CreatePlaylist.showMe(getActivity(), fetchSongList(mCurrentFolder));
                 return true;
-            }
 
-            case PLAYLIST_SELECTED: {
+            case R.id.folder_selected_playlist:
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), fetchSongList(mCurrentFolder), playlist);
                 return true;
-            }
 
-            case DELETE_ALL: {
+            case R.id.folder_delete_all:
                 final long [] list = fetchSongList(mCurrentFolder);
                 String f = getString(R.string.delete_folder_desc);
                 String desc = String.format(f, mCurrentFolder);
@@ -206,17 +214,6 @@ public class FolderFragment extends CategoryFragment {
                                 MusicUtils.deleteTracks(FolderFragment.this.getActivity(), list))
                         .show();
                 return true;
-            }
-
-            default:
-                if (item.getItemId() > INTERLEAVE_ALL) {
-                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
-                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    long[] songs = fetchSongList(mCurrentFolder);
-                    MusicUtils.interleave(getActivity(), songs, currentCount, newCount);
-                    return true;
-                }
-
         }
         return super.onContextItemSelected(item);
     }

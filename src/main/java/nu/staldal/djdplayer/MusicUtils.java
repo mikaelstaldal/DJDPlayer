@@ -52,50 +52,6 @@ import java.util.Random;
 public class MusicUtils {
     private static final String LOGTAG = "MusicUtils";
 
-    public interface Defs {
-        int PLAYLIST_SELECTED = 3;
-        int NEW_PLAYLIST = 4;
-        int PLAY_ALL_NOW = 5;
-        int SHUFFLE_PLAYLIST = 9;
-        int UNIQUEIFY_PLAYLIST = 10;
-        int QUEUE_ALL = 11;
-        int DELETE_ITEM = 12;
-        int QUEUE = 14;
-        int PLAY_NOW = 15;
-        int PLAY_NEXT = 16;
-        int SHARE_VIA = 19;
-        int TRACK_INFO = 20;
-        int SEARCH_FOR_TRACK = 21;
-        int PLAY_ALL_NEXT = 22;
-        int PLAYLIST_SELECTED_ALL = 24;
-        int NEW_PLAYLIST_ALL = 25;
-        int DELETE_ALL = 26;
-        int SEARCH_FOR_CATEGORY = 27;
-        int DELETE_PLAYLIST = 28;
-        int EDIT_PLAYLIST = 29;
-        int RENAME_PLAYLIST = 30;
-        int EXPORT_PLAYLIST = 31;
-        int NEW_PLAYLIST2 = 32;
-        int PLAYLIST_SELECTED2 = 33;
-        int SEARCH_FOR = 34;
-        int DELETE_ITEM2 = 35;
-        int TRACK_INFO2 = 36;
-        int SHARE_VIA2 = 37;
-        int SEARCH_FOR2 = 38;
-        int NEW_PLAYLIST3 = 39;
-        int PLAYLIST_SELECTED3 = 40;
-        int REMOVE_FROM_PLAYLIST = 41;
-        int TRACK_INFO3 = 42;
-        int PLAY_NOW2 = 43;
-        int SHARE_VIA3 = 44;
-        int DELETE_ITEM3 = 45;
-        int SHARE_PLAYLIST = 46;
-        int NEW_PLAYLIST4 = 47;
-        int PLAYLIST_SELECTED4 = 48;
-
-        int INTERLEAVE_ALL = 1000;
-    }
-
     public static final String AUDIO_X_MPEGURL = "audio/x-mpegurl";
 
     public static final long [] sEmptyList = new long[0];
@@ -240,11 +196,6 @@ public class MusicUtils {
      * @param context The context to use for creating the menu items
      * @param sub The submenu to add the items to.
      */
-    public static void makePlaylistMenu(Context context, SubMenu sub) {
-        makePlaylistMenu(context, sub, Defs.NEW_PLAYLIST, Defs.PLAYLIST_SELECTED);
-
-    }
-
     public static void makePlaylistMenu(Context context, SubMenu sub, int newPlaylist, int playlistSelected) {
         String[] cols = new String[] {
                 MediaStore.Audio.Playlists._ID,

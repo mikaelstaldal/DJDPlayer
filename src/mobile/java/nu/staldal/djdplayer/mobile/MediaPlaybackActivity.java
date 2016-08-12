@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2012-2015 Mikael Ståldal
+ * Copyright (C) 2012-2016 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 import nu.staldal.djdplayer.SettingsActivity;
 
-public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, ServiceConnection {
+public class MediaPlaybackActivity extends Activity implements ServiceConnection {
 
     private static final String LOGTAG = "MediaPlaybackActivity";
 
@@ -133,7 +133,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
         }
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, 16, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(this, sub, MusicUtils.Defs.NEW_PLAYLIST4, MusicUtils.Defs.PLAYLIST_SELECTED4);
+        MusicUtils.makePlaylistMenu(this, sub, R.id.new_playlist, R.id.selected_playlist);
 
         return true;
     }
@@ -227,11 +227,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs, 
                 if (service != null) service.removeTracks(0, Integer.MAX_VALUE);
                 return true;
 
-            case NEW_PLAYLIST4:
+            case R.id.new_playlist:
                 if (service != null) CreatePlaylist.showMe(this, service.getQueue());
                 return true;
 
-            case PLAYLIST_SELECTED4:
+            case R.id.selected_playlist:
                 if (service != null) {
                     long playlist = item.getIntent().getLongExtra("playlist", 0);
                     MusicUtils.addToPlaylist(this, service.getQueue(), playlist);

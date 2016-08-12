@@ -21,9 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import nu.staldal.djdplayer.MusicUtils;
 
-public abstract class CategoryFragment extends BrowserFragment implements MusicUtils.Defs {
+public abstract class CategoryFragment extends BrowserFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ListView listView = new ListView(getActivity());

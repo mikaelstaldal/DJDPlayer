@@ -57,6 +57,9 @@ public class PlaylistFragment extends CategoryFragment {
             MusicContract.Playlist._COUNT
     };
 
+    private static final String CURRENT_COUNT = "currentCount";
+    private static final String NEW_COUNT = "newCount";
+
     private static final String CURRENT_PLAYLIST = "currentplaylist";
     private static final String CURRENT_PLAYLIST_NAME = "currentplaylistname";
 
@@ -130,61 +133,70 @@ public class PlaylistFragment extends CategoryFragment {
         playlistName = adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME));
         menu.setHeaderTitle(playlistName);
 
-        menu.add(0, PLAY_ALL_NOW, 0, R.string.play_all_now);
-        menu.add(0, PLAY_ALL_NEXT, 0, R.string.play_all_next);
-        menu.add(0, QUEUE_ALL, 0, R.string.queue_all);
-        SubMenu interleave = menu.addSubMenu(Menu.NONE, INTERLEAVE_ALL, Menu.NONE, R.string.interleave_all);
+        menu.add(0, R.id.playlist_play_all_now, 0, R.string.play_all_now);
+        menu.add(0, R.id.playlist_play_all_next, 0, R.string.play_all_next);
+        menu.add(0, R.id.playlist_queue_all, 0, R.string.queue_all);
+        SubMenu interleave = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.interleave_all);
         for (int i = 1; i <= 5; i++) {
             for (int j = 1; j <= 5; j++) {
-                interleave.add(2, INTERLEAVE_ALL + 10 * i + j, 0,
-                        getResources().getString(R.string.interleaveNNN, i, j));
+                Intent intent = new Intent();
+                intent.putExtra(CURRENT_COUNT, i);
+                intent.putExtra(NEW_COUNT, j);
+                interleave.add(2, R.id.playlist_interleave_all, 0, getResources().getString(R.string.interleaveNNN, i, j)).setIntent(intent);
             }
         }
 
         SubMenu sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_all_to_playlist);
-        MusicUtils.makePlaylistMenu(getActivity(), sub);
+        MusicUtils.makePlaylistMenu(getActivity(), sub, R.id.playlist_new_playlist, R.id.playlist_selected_playlist);
 
         if (currentId >= 0) {
-            menu.add(0, DELETE_PLAYLIST, 0, R.string.delete_playlist_menu);
-            menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
+            menu.add(0, R.id.playlist_delete_playlist, 0, R.string.delete_playlist_menu);
+            menu.add(0, R.id.playlist_rename_playlist, 0, R.string.rename_playlist_menu);
         }
 
         if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-            menu.add(0, EDIT_PLAYLIST, 0, R.string.edit_playlist_menu);
+            menu.add(0, R.id.playlist_edit_playlist, 0, R.string.edit_playlist_menu);
         }
 
         if (currentId >= 0) {
-            menu.add(0, EXPORT_PLAYLIST, 0, R.string.export_playlist_menu);
-            menu.add(0, SHARE_PLAYLIST, 0, R.string.share_via);
+            menu.add(0, R.id.playlist_export_playlist, 0, R.string.export_playlist_menu);
+            menu.add(0, R.id.playlist_share_playlist, 0, R.string.share_via);
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case PLAY_ALL_NOW:
+            case R.id.playlist_play_all_now:
                 MusicUtils.playAll(getActivity(), fetchSongList(currentId));
                 return true;
 
-            case PLAY_ALL_NEXT:
+            case R.id.playlist_play_all_next:
                 MusicUtils.queueNext(getActivity(), fetchSongList(currentId));
                 return true;
 
-            case QUEUE_ALL:
+            case R.id.playlist_queue_all:
                 MusicUtils.queue(getActivity(), fetchSongList(currentId));
                 return true;
 
-            case NEW_PLAYLIST:
+            case R.id.playlist_interleave_all:
+                Intent intent = item.getIntent();
+                int currentCount = intent.getIntExtra(CURRENT_COUNT, 0);
+                int newCount = intent.getIntExtra(NEW_COUNT, 0);
+                MusicUtils.interleave(getActivity(), fetchSongList(currentId), currentCount, newCount);
+                return true;
+
+            case R.id.playlist_new_playlist:
                 CreatePlaylist.showMe(getActivity(), fetchSongList(currentId));
                 return true;
 
-            case PLAYLIST_SELECTED: {
+            case R.id.playlist_selected_playlist: {
                 long playlist = item.getIntent().getLongExtra("playlist", 0);
                 MusicUtils.addToPlaylist(getActivity(), fetchSongList(currentId), playlist);
                 return true;
             }
 
-            case DELETE_PLAYLIST:
+            case R.id.playlist_delete_playlist:
                 String desc = String.format(getString(R.string.delete_playlist_desc),
                         adapter.getCursor().getString(adapter.getCursor().getColumnIndexOrThrow(MusicContract.Playlist.NAME)));
                 new AlertDialog.Builder(getActivity())
@@ -201,7 +213,7 @@ public class PlaylistFragment extends CategoryFragment {
                         .show();
                 return true;
 
-            case EDIT_PLAYLIST:
+            case R.id.playlist_edit_playlist:
                 if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                     new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.weekpicker_title)
@@ -216,7 +228,7 @@ public class PlaylistFragment extends CategoryFragment {
                 }
                 return true;
 
-            case RENAME_PLAYLIST: {
+            case R.id.playlist_rename_playlist: {
                 @SuppressLint("InflateParams") View view = getActivity().getLayoutInflater().inflate(R.layout.rename_playlist, null);
                 final EditText mPlaylist = (EditText) view.findViewById(R.id.playlist);
                 final long playlistId = currentId;
@@ -237,21 +249,13 @@ public class PlaylistFragment extends CategoryFragment {
                 return true;
             }
 
-            case EXPORT_PLAYLIST:
+            case R.id.playlist_export_playlist:
                 new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId, false);
                 return true;
 
-            case SHARE_PLAYLIST:
+            case R.id.playlist_share_playlist:
                 new ExportPlaylistTask(getActivity().getApplicationContext()).execute(playlistName, currentId, true);
                 return true;
-
-            default:
-                if (item.getItemId() > INTERLEAVE_ALL) {
-                    int currentCount = (item.getItemId() - INTERLEAVE_ALL) / 10;
-                    int newCount = (item.getItemId() - INTERLEAVE_ALL) % 10;
-                    MusicUtils.interleave(getActivity(), fetchSongList(currentId), currentCount, newCount);
-                    return true;
-                }
         }
         return super.onContextItemSelected(item);
     }
