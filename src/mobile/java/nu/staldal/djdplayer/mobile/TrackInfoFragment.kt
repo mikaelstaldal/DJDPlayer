@@ -29,12 +29,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.TextView
 import nu.staldal.djdplayer.MusicUtils
 import nu.staldal.djdplayer.R
 import java.io.File
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
+
+import kotlinx.android.synthetic.mobile.track_info.*
 
 class TrackInfoFragment : DialogFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     companion object {
@@ -92,33 +93,24 @@ class TrackInfoFragment : DialogFragment(), LoaderManager.LoaderCallbacks<Cursor
     override fun onLoaderReset(loader: Loader<Cursor>) {}
 
     private fun bindView(cursor: Cursor) {
-        val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID))
         val file = File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)))
-        val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE))
-        val title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE))
-        val album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM))
-        val artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST))
-        val composer = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.COMPOSER))
-        val duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION))
-        val year = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.YEAR))
-        val dateAdded = Date(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATE_ADDED)) * 1000)
 
-        (view.findViewById(R.id.title) as TextView).text = title
-        (view.findViewById(R.id.artist) as TextView).text = artist
-        (view.findViewById(R.id.composer) as TextView).text = composer
-        (view.findViewById(R.id.album) as TextView).text = album
-        val genre = MusicUtils.fetchGenre(activity, id)
-        if (genre != null) {
-            (view.findViewById(R.id.genre) as TextView).text = genre.name
-        }
-        (view.findViewById(R.id.year) as TextView).text = year
-        (view.findViewById(R.id.duration) as TextView).text = MusicUtils.formatDuration(activity, duration.toLong())
-        (view.findViewById(R.id.folder) as TextView).text = file.parent
-        (view.findViewById(R.id.filename) as TextView).text = file.name
-        (view.findViewById(R.id.filesize) as TextView).text = formatFileSize(file.length())
-        (view.findViewById(R.id.mimetype) as TextView).text = mimeType
-        (view.findViewById(R.id.date_added) as TextView).text = formatDate(dateAdded)
-        (view.findViewById(R.id.id) as TextView).text = id.toString()
+        title.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE))
+        artist.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST))
+        composer.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.COMPOSER))
+        album.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM))
+        genre.text = MusicUtils.fetchGenre(activity,
+                cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID)))?.name
+        year.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.YEAR))
+        duration.text = MusicUtils.formatDuration(activity,
+                cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION)).toLong())
+        folder.text = file.parent
+        filename.text = file.name
+        filesize.text = formatFileSize(file.length())
+        mimetype.text = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE))
+        date_added.text = formatDate(Date(cursor.getLong(
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATE_ADDED)) * 1000))
+        id_view.text = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID)).toString()
     }
 
     private fun formatFileSize(size: Long): String {
