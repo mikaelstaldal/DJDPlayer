@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2017 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,16 @@
  */
 package nu.staldal.djdplayer.tests;
 
-import android.test.InstrumentationTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import nu.staldal.djdplayer.provider.ID3Utils;
+import org.junit.Test;
 
-public class ID3UtilsTest extends InstrumentationTestCase {
+public class ID3UtilsTest {
 
-    public void testDecodeGenre() {
+    @Test
+    public void decodeGenre() {
         assertNull(ID3Utils.decodeGenre(null));
         assertEquals("", ID3Utils.decodeGenre(""));
         assertEquals("f", ID3Utils.decodeGenre("f"));

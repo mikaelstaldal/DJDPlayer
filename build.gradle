@@ -42,6 +42,7 @@ android {
 
         dependencies {
             compile "com.android.support:appcompat-v7:${supportLibVersion}"
+            testCompile 'junit:junit:4.12'
         }
     }
 
