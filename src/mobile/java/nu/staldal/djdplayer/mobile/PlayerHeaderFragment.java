@@ -152,7 +152,7 @@ public class PlayerHeaderFragment extends Fragment implements FragmentServiceCon
             }
 
             case R.id.playerheader_info:
-                TrackInfoFragment.showMe(getActivity(),
+                TrackInfoFragment.Companion.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, service.getAudioId()));
                 return true;
 

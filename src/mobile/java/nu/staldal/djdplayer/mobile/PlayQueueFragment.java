@@ -326,7 +326,7 @@ public class PlayQueueFragment extends ListFragment
             }
 
             case R.id.playqueue_info:
-                TrackInfoFragment.showMe(getActivity(),
+                TrackInfoFragment.Companion.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mSelectedId));
 
                 return true;

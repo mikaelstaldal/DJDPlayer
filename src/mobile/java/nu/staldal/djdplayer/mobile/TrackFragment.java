@@ -254,7 +254,7 @@ public class TrackFragment extends BrowserFragment implements PopupMenu.OnMenuIt
                 return true;
 
             case R.id.track_info:
-                TrackInfoFragment.showMe(getActivity(),
+                TrackInfoFragment.Companion.showMe(getActivity(),
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selectedId));
                 return true;
 
