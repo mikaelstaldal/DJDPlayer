@@ -21,13 +21,13 @@
               android:orientation="horizontal">
 
     <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="2"/>
 
     <FrameLayout
-            android:id="@+id/main"
+            android:id="@+id/mainView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="2"

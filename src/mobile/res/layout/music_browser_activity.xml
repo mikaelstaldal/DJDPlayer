@@ -21,13 +21,13 @@
               android:orientation="vertical">
 
     <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"/>
 
     <FrameLayout
-            android:id="@+id/main"
+            android:id="@+id/mainView"
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"

@@ -58,12 +58,11 @@ import nu.staldal.djdplayer.provider.MusicProvider
 import nu.staldal.ui.WithSectionMenu
 import java.util.ArrayList
 
+import kotlinx.android.synthetic.mobile.music_browser_activity.*
+
 const val LOGTAG = "MusicBrowserActivity"
 
 class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.OnSharedPreferenceChangeListener {
-
-    private var viewPager: ViewPager? = null
-    private var mainView: View? = null
 
     private var token: MusicUtils.ServiceToken? = null
     private var service: MediaPlayback? = null
@@ -94,9 +93,8 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
 
         setContentView(R.layout.music_browser_activity)
 
-        viewPager = findViewById(R.id.pager) as ViewPager?
-        viewPager!!.offscreenPageLimit = 5
-        viewPager!!.addOnPageChangeListener(
+        viewPager.offscreenPageLimit = 5
+        viewPager.addOnPageChangeListener(
                 object : ViewPager.SimpleOnPageChangeListener() {
                     override fun onPageSelected(position: Int) {
                         // When swiping between pages, select the corresponding tab
@@ -107,8 +105,6 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
                     }
                 })
         setupTabs(myActionBar)
-
-        mainView = findViewById(R.id.main)
 
         val playQueueButton = findViewById(R.id.playqueue_button) as Button?
         playQueueButton?.setOnClickListener { v -> startActivity(Intent(this, MediaPlaybackActivity::class.java)) }
@@ -275,7 +271,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
             ft.remove(oldFragment)
             ft.commit()
         }
-        mainView!!.visibility = View.GONE
+        mainView.visibility = View.GONE
 
         val actionBar = actionBar
         actionBar.navigationMode = ActionBar.NAVIGATION_MODE_TABS
@@ -286,13 +282,13 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         actionBar.customView = null
         actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_CUSTOM)
 
-        viewPager!!.visibility = View.VISIBLE
+        viewPager.visibility = View.VISIBLE
 
         restoreActiveTab(actionBar)
     }
 
     private fun enterSongsMode() {
-        viewPager!!.visibility = View.GONE
+        viewPager.visibility = View.GONE
 
         val actionBar = actionBar
         saveActiveTab(actionBar)
@@ -302,7 +298,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         actionBar.setHomeButtonEnabled(true)
         setTitle(title)
 
-        mainView!!.visibility = View.VISIBLE
+        mainView.visibility = View.VISIBLE
 
         val fragment: Fragment
         if (searchResult) {
@@ -322,7 +318,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM)
         }
         val ft = fragmentManager.beginTransaction()
-        ft.replace(R.id.main, fragment, TrackFragment::class.java.canonicalName)
+        ft.replace(R.id.mainView, fragment, TrackFragment::class.java.canonicalName)
         ft.commit()
     }
 
@@ -363,7 +359,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         for (i in 0..actionBar.tabCount - 1) {
             if (actionBar.getTabAt(i).tag == activeTab) {
                 actionBar.setSelectedNavigationItem(i)
-                viewPager!!.currentItem = i
+                viewPager.currentItem = i
                 break
             }
         }
@@ -573,7 +569,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
     }
 
     private fun setupTabs(actionBar: ActionBar) {
-        viewPager!!.adapter = null
+        viewPager.adapter = null
 
         actionBar.removeAllTabs()
 
@@ -583,7 +579,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         setupTab(actionBar, SettingsActivity.SHOW_FOLDERS_TAB, R.string.folders_menu, FolderFragment::class.java)
         setupTab(actionBar, SettingsActivity.SHOW_PLAYLISTS_TAB, R.string.playlists_menu, PlaylistFragment::class.java)
 
-        viewPager!!.adapter = CategoryPageAdapter(fragmentManager)
+        viewPager.adapter = CategoryPageAdapter(fragmentManager)
     }
 
     private fun setupTab(actionBar: ActionBar, preferenceKey: String, titleResId: Int,
@@ -605,7 +601,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
 
     private val tabListener = object : ActionBar.TabListener {
         override fun onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
-            viewPager!!.setCurrentItem(tab.position, false)
+            viewPager.setCurrentItem(tab.position, false)
         }
 
         override fun onTabUnselected(tab: ActionBar.Tab, ft: FragmentTransaction) {}
