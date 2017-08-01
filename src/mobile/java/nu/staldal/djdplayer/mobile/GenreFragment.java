@@ -75,7 +75,7 @@ public class GenreFragment extends MetadataCategoryFragment {
 
     @Override
     protected String fetchCategoryName(Cursor cursor) {
-        return ID3Utils.decodeGenre(cursor.getString(getNameColumnIndex(cursor)));
+        return ID3Utils.INSTANCE.decodeGenre(cursor.getString(getNameColumnIndex(cursor)));
     }
 
     @Override

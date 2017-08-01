@@ -502,7 +502,7 @@ public class MusicUtils {
                 if (c.moveToFirst()) {
                     return new IdAndName(
                             c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID)),
-                            ID3Utils.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME))));
+                            ID3Utils.INSTANCE.decodeGenre(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME))));
                 } else {
                     return null;
                 }

@@ -483,7 +483,7 @@ public class MusicProvider extends ContentProvider {
                 if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
                     return context.getString(R.string.unknown_genre_name);
                 } else {
-                    return ID3Utils.decodeGenre(fancyName);
+                    return ID3Utils.INSTANCE.decodeGenre(fancyName);
                 }
             }
             case MusicProvider.ARTIST_MEMBERS: {
