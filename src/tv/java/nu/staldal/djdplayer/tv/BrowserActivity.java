@@ -31,7 +31,7 @@ import nu.staldal.djdplayer.MediaPlaybackService;
 import nu.staldal.djdplayer.MusicUtils;
 import nu.staldal.djdplayer.R;
 
-public class BrowserActivity extends Activity implements MusicUtils.Defs, ServiceConnection {
+public class BrowserActivity extends Activity implements ServiceConnection {
 
     private static final String TAG = BrowserActivity.class.getSimpleName();
 
