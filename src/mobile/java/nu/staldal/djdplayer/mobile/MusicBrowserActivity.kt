@@ -199,7 +199,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         } else if ((Intent.ACTION_VIEW == intent.action || Intent.ACTION_PICK == intent.action) && intent.data != null) {
             songToPlay = -1
             uri = fixUri(intent.data)
-            title = MusicProvider.calcTitle(this, uri)
+            title = MusicProvider.calcTitle(this, uri!!)
             searchResult = false
         } else if (Intent.ACTION_SEARCH == intent.action || MediaStore.INTENT_ACTION_MEDIA_SEARCH == intent.action) {
             songToPlay = -1
