@@ -1072,8 +1072,8 @@ public abstract class MediaPlaybackService extends Service implements MediaPlayb
 
                     IdAndName idAndName = MusicUtils.fetchGenre(this, audioId);
                     if (idAndName != null) {
-                        mGenreId = idAndName.id;
-                        mGenreName = idAndName.name;
+                        mGenreId = idAndName.getId();
+                        mGenreName = idAndName.getName();
                     }
 
                     if (mSession != null) {

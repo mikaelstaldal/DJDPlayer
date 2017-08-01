@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Mikael Ståldal
+ * Copyright (C) 2012-2017 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer
 
-public class IdAndName {
-    public final long id;
-    public final String name;
-
-    public IdAndName(long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-}
+data class IdAndName(val id: Long, val name: String)
