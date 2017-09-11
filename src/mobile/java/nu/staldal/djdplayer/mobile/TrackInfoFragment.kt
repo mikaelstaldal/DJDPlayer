@@ -38,6 +38,7 @@ import java.util.Date
 import kotlinx.android.synthetic.mobile.track_info.*
 
 class TrackInfoFragment : DialogFragment(), LoaderManager.LoaderCallbacks<Cursor> {
+
     companion object {
         fun showMe(activity: Activity, uri: Uri) {
             val trackInfoFragment = TrackInfoFragment()

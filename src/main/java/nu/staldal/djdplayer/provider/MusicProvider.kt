@@ -35,7 +35,7 @@ import java.io.File
 import java.io.FileFilter
 import java.util.Arrays
 
-const val LOGTAG = "MusicProvider"
+private const val LOGTAG = "MusicProvider"
 
 class MusicProvider : ContentProvider() {
 
@@ -66,7 +66,7 @@ class MusicProvider : ContentProvider() {
 
     override fun onCreate() = true
 
-    override fun query(uri: Uri, projection: Array<String>, selection: String, selectionArgs: Array<String>, sortOrder: String): Cursor? {
+    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): Cursor? {
         when (sURIMatcher.match(uri)) {
             FOLDER -> return fetchFolders()
 
@@ -336,17 +336,17 @@ class MusicProvider : ContentProvider() {
     }
 
     companion object {
-        internal val FOLDER = 1
-        internal val PLAYLIST = 2
-        internal val GENRE = 3
-        internal val ARTIST = 4
-        internal val ALBUM = 5
-        internal val FOLDER_MEMBERS = 6
-        internal val PLAYLIST_MEMBERS = 7
-        internal val GENRE_MEMBERS = 8
-        internal val ARTIST_MEMBERS = 9
-        internal val ALBUM_MEMBERS = 10
-        internal val MUSIC_MEMBERS = 11
+        internal const val FOLDER = 1
+        internal const val PLAYLIST = 2
+        internal const val GENRE = 3
+        internal const val ARTIST = 4
+        internal const val ALBUM = 5
+        internal const val FOLDER_MEMBERS = 6
+        internal const val PLAYLIST_MEMBERS = 7
+        internal const val GENRE_MEMBERS = 8
+        internal const val ARTIST_MEMBERS = 9
+        internal const val ALBUM_MEMBERS = 10
+        internal const val MUSIC_MEMBERS = 11
 
         internal val sURIMatcher = UriMatcher(UriMatcher.NO_MATCH)
 

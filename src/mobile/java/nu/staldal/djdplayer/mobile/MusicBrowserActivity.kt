@@ -60,7 +60,7 @@ import java.util.ArrayList
 
 import kotlinx.android.synthetic.mobile.music_browser_activity.*
 
-const val LOGTAG = "MusicBrowserActivity"
+private const val LOGTAG = "MusicBrowserActivity"
 
 class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -153,7 +153,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         invalidateOptionsMenu()
     }
 
-    override fun onNewIntent(intent: Intent) {
+    override public fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.i(LOGTAG, "onNewIntent - $intent")
         val addToBackStack = parseIntent(intent, false)
