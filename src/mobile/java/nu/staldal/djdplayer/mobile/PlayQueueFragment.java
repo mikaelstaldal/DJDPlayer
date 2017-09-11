@@ -296,7 +296,7 @@ public class PlayQueueFragment extends ListFragment
             }
 
             case R.id.playqueue_new_playlist: {
-                CreatePlaylist.showMe(getActivity(), new long[]{mSelectedId});
+                CreatePlaylist.Companion.showMe(getActivity(), new long[]{mSelectedId});
                 return true;
             }
 

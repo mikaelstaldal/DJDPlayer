@@ -228,7 +228,7 @@ public class MediaPlaybackActivity extends Activity implements ServiceConnection
                 return true;
 
             case R.id.new_playlist:
-                if (service != null) CreatePlaylist.showMe(this, service.getQueue());
+                if (service != null) CreatePlaylist.Companion.showMe(this, service.getQueue());
                 return true;
 
             case R.id.selected_playlist:

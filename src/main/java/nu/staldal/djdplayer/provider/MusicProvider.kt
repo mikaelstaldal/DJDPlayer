@@ -66,33 +66,32 @@ class MusicProvider : ContentProvider() {
 
     override fun onCreate() = true
 
-    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): Cursor? {
+    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): Cursor? =
         when (sURIMatcher.match(uri)) {
-            FOLDER -> return fetchFolders()
+            FOLDER -> fetchFolders()
 
-            PLAYLIST -> return fetchPlaylists()
+            PLAYLIST -> fetchPlaylists()
 
-            GENRE -> return fetchGenres()
+            GENRE -> fetchGenres()
 
-            ARTIST -> return fetchArtists()
+            ARTIST -> fetchArtists()
 
-            ALBUM -> return fetchAlbums()
+            ALBUM -> fetchAlbums()
 
-            FOLDER_MEMBERS -> return fetchFolder(uri.lastPathSegment)
+            FOLDER_MEMBERS -> fetchFolder(uri.lastPathSegment)
 
-            PLAYLIST_MEMBERS -> return fetchPlaylist(ContentUris.parseId(uri))
+            PLAYLIST_MEMBERS -> fetchPlaylist(ContentUris.parseId(uri))
 
-            GENRE_MEMBERS -> return fetchGenre(ContentUris.parseId(uri))
+            GENRE_MEMBERS -> fetchGenre(ContentUris.parseId(uri))
 
-            ARTIST_MEMBERS -> return fetchArtist(ContentUris.parseId(uri))
+            ARTIST_MEMBERS -> fetchArtist(ContentUris.parseId(uri))
 
-            ALBUM_MEMBERS -> return fetchAlbum(ContentUris.parseId(uri))
+            ALBUM_MEMBERS -> fetchAlbum(ContentUris.parseId(uri))
 
-            MUSIC_MEMBERS -> return fetchMusic()
+            MUSIC_MEMBERS -> fetchMusic()
 
-            else -> return null
+            else -> null
         }
-    }
 
     private fun fetchFolders(): Cursor {
         val root = fetchRoot(context)
@@ -103,91 +102,87 @@ class MusicProvider : ContentProvider() {
         return cursor
     }
 
-    private fun fetchFolder(folder: String): Cursor {
-        return context.contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " LIKE ?"
-                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
-                arrayOf(folder + "%"),
-                MediaStore.Audio.AudioColumns.DATA)
-    }
+    private fun fetchFolder(folder: String): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            MEDIA_STORE_MEMBER_CURSOR_COLS,
+            MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " LIKE ?"
+                    + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1",
+            arrayOf(folder + "%"),
+            MediaStore.Audio.AudioColumns.DATA)
 
-    private fun fetchPlaylist(id: Long): Cursor {
-        if (id == MusicContract.Playlist.ALL_SONGS) {
-            return fetchMusic()
-        } else if (id == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-            // do a query for all songs added in the last X weeks
-            val context = context
-            val weeks = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-                    .getInt(SettingsActivity.NUMWEEKS, 2)
-            val seconds = weeks * (3600 * 24 * 7)
-            return getContext().contentResolver.query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    MEDIA_STORE_MEMBER_CURSOR_COLS,
-                    MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                            + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                            + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
-                            + " AND " + MediaStore.Audio.AudioColumns.DATE_ADDED + ">"
-                            + (System.currentTimeMillis() / 1000 - seconds)
-                            + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER
-            )
-        } else {
-            return context.contentResolver.query(
+    private fun fetchPlaylist(id: Long): Cursor? =
+        when (id) {
+            MusicContract.Playlist.ALL_SONGS -> fetchMusic()
+            MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST -> {
+                // do a query for all songs added in the last X weeks
+                val context = context
+                val weeks = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+                        .getInt(SettingsActivity.NUMWEEKS, 2)
+                val seconds = weeks * (3600 * 24 * 7)
+                getContext().contentResolver.query(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        MEDIA_STORE_MEMBER_CURSOR_COLS,
+                        MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                                + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                                + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
+                                + " AND " + MediaStore.Audio.AudioColumns.DATE_ADDED + ">"
+                                + (System.currentTimeMillis() / 1000 - seconds)
+                                + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
+                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER
+                )
+            }
+            else -> context.contentResolver.query(
                     MediaStore.Audio.Playlists.Members.getContentUri("external", id),
-                    MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS, null, null,
+                    MEDIA_STORE_PLAYLIST_MEMBER_CURSOR_COLS,
+                    null,
+                    null,
                     MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER)
         }
-    }
 
-    private fun fetchGenre(id: Long): Cursor {
-        return context.contentResolver.query(
-                MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
-                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER)
-    }
+    private fun fetchGenre(id: Long): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Genres.Members.getContentUri("external", id),
+            MEDIA_STORE_MEMBER_CURSOR_COLS,
+            MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
+            MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER)
 
-    private fun fetchArtist(id: Long): Cursor {
-        return context.contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=" + id
-                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
-    }
+    private fun fetchArtist(id: Long): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            MEDIA_STORE_MEMBER_CURSOR_COLS,
+            MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=" + id
+                    + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
+            MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
 
-    private fun fetchAlbum(id: Long): Cursor {
-        return context.contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=" + id
-                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
-                MediaStore.Audio.AudioColumns.TRACK + ", " + MediaStore.Audio.AudioColumns.TITLE_KEY)
-    }
+    private fun fetchAlbum(id: Long): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            MEDIA_STORE_MEMBER_CURSOR_COLS,
+            MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=" + id
+                    + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
+            MediaStore.Audio.AudioColumns.TRACK + ", " + MediaStore.Audio.AudioColumns.TITLE_KEY)
 
-    private fun fetchMusic(): Cursor {
-        return context.contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                MEDIA_STORE_MEMBER_CURSOR_COLS,
-                MediaStore.Audio.AudioColumns.TITLE + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
-                        + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
-                        + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
-    }
+    private fun fetchMusic(): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            MEDIA_STORE_MEMBER_CURSOR_COLS,
+            MediaStore.Audio.AudioColumns.TITLE + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " IS NOT NULL"
+                    + " AND " + MediaStore.Audio.AudioColumns.DATA + " != ''"
+                    + " AND " + MediaStore.Audio.AudioColumns.IS_MUSIC + "=1", null,
+            MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
 
     private fun processFolder(cursor: MatrixCursor, counter: IntArray, start: File, root: File) {
         val subFolders = start.listFiles(DIRECTORY_FILTER)
@@ -207,20 +202,13 @@ class MusicProvider : ContentProvider() {
         cursor.addRow(arrayOf(counter[0], fetchFolderCount(path), path, path.substring(root.absolutePath.length + 1)))
     }
 
-    private fun fetchFolderCount(path: String): Int {
-        val cursor = context.contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+    private fun fetchFolderCount(path: String): Int =
+        context.contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Audio.AudioColumns._ID),
                 MediaStore.Audio.AudioColumns.IS_MUSIC + "=1 AND " + MediaStore.Audio.AudioColumns.DATA + " LIKE ?",
-                arrayOf(path + "%"), null)
-
-        return if (cursor != null) {
-            val count = cursor.count
-            cursor.close()
-            count
-        } else {
-            0
-        }
-    }
+                arrayOf(path + "%"),
+                null)?.use { it.count } ?: 0
 
     internal class DirectoryFilter : FileFilter {
         override fun accept(file: File): Boolean {
@@ -229,8 +217,11 @@ class MusicProvider : ContentProvider() {
     }
 
     private fun fetchPlaylists(): Cursor? {
-        val cursor = context.contentResolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                arrayOf(MediaStore.Audio.Playlists._ID, MediaStore.Audio.Playlists.NAME), null, null,
+        val cursor = context.contentResolver.query(
+                MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Audio.Playlists._ID, MediaStore.Audio.Playlists.NAME),
+                null,
+                null,
                 MediaStore.Audio.Playlists.NAME) ?: return null
 
         val mergeCursor = MergeCursor(arrayOf(buildAutoPlaylistsCursor(), cursor))
@@ -259,7 +250,8 @@ class MusicProvider : ContentProvider() {
     }
 
     private fun fetchGenres(): Cursor? {
-        val cursor = context.contentResolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+        val cursor = context.contentResolver.query(
+                MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME),
                 MediaStore.Audio.Genres.NAME + " != ''", null,
                 MediaStore.Audio.Genres.DEFAULT_SORT_ORDER) ?: return null
@@ -281,59 +273,45 @@ class MusicProvider : ContentProvider() {
         return CursorWithCountColumn(cursor, counts)
     }
 
-    private fun fetchArtists(): Cursor {
-        return context.contentResolver.query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-                arrayOf(MediaStore.Audio.Artists._ID, MediaStore.Audio.Artists.ARTIST, MediaStore.Audio.Artists.NUMBER_OF_TRACKS),
-                MediaStore.Audio.Artists.ARTIST + " != ''", null,
-                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER)
-    }
+    private fun fetchArtists(): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Audio.Artists._ID, MediaStore.Audio.Artists.ARTIST, MediaStore.Audio.Artists.NUMBER_OF_TRACKS),
+            MediaStore.Audio.Artists.ARTIST + " != ''", null,
+            MediaStore.Audio.Artists.DEFAULT_SORT_ORDER)
 
-    private fun fetchAlbums(): Cursor {
-        return context.contentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                arrayOf(MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.NUMBER_OF_SONGS),
-                MediaStore.Audio.Albums.ALBUM + " != ''", null,
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER)
-    }
+    private fun fetchAlbums(): Cursor? =
+        context.contentResolver.query(
+            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.NUMBER_OF_SONGS),
+            MediaStore.Audio.Albums.ALBUM + " != ''", null,
+            MediaStore.Audio.Albums.DEFAULT_SORT_ORDER)
 
+    private fun getCursorCount(cursor: Cursor?): Int = cursor?.use { it.count } ?: 0
 
-    private fun getCursorCount(cursor: Cursor?): Int {
-        if (cursor == null) return 0
-        val count = cursor.count
-        cursor.close()
-        return count
-    }
-
-
-    override fun getType(uri: Uri): String? {
+    override fun getType(uri: Uri): String? =
         when (sURIMatcher.match(uri)) {
-            FOLDER -> return MusicContract.Folder.CONTENT_TYPE
+            FOLDER -> MusicContract.Folder.CONTENT_TYPE
 
-            PLAYLIST -> return MusicContract.Playlist.CONTENT_TYPE
+            PLAYLIST -> MusicContract.Playlist.CONTENT_TYPE
 
-            GENRE -> return MusicContract.Genre.CONTENT_TYPE
+            GENRE -> MusicContract.Genre.CONTENT_TYPE
 
-            ARTIST -> return MusicContract.Artist.CONTENT_TYPE
+            ARTIST -> MusicContract.Artist.CONTENT_TYPE
 
-            ALBUM -> return MusicContract.Album.CONTENT_TYPE
+            ALBUM -> MusicContract.Album.CONTENT_TYPE
 
             FOLDER_MEMBERS, PLAYLIST_MEMBERS, GENRE_MEMBERS, ARTIST_MEMBERS, ALBUM_MEMBERS, MUSIC_MEMBERS ->
-                return MusicContract.CONTENT_TYPE
+                MusicContract.CONTENT_TYPE
 
-            else -> return null
+            else -> null
         }
-    }
 
-    override fun insert(uri: Uri, values: ContentValues): Uri? {
-        return null
-    }
+    override fun insert(uri: Uri, values: ContentValues): Uri? = null
 
-    override fun delete(uri: Uri, selection: String, selectionArgs: Array<String>): Int {
-        return 0
-    }
+    override fun delete(uri: Uri, selection: String, selectionArgs: Array<String>): Int = 0
 
-    override fun update(uri: Uri, values: ContentValues, selection: String, selectionArgs: Array<String>): Int {
-        return 0
-    }
+    override fun update(uri: Uri, values: ContentValues, selection: String, selectionArgs: Array<String>): Int = 0
 
     companion object {
         internal const val FOLDER = 1
@@ -366,10 +344,9 @@ class MusicProvider : ContentProvider() {
             sURIMatcher.addURI(MusicContract.AUTHORITY, MusicContract.MUSIC_PATH, MUSIC_MEMBERS)
         }
 
-        private fun fetchRoot(context: Context): File {
-            return File(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.MUSIC_FOLDER,
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).absolutePath))
-        }
+        private fun fetchRoot(context: Context): File =
+            File(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.MUSIC_FOLDER,
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).absolutePath))
 
         internal val DIRECTORY_FILTER: FileFilter = DirectoryFilter()
 
@@ -381,78 +358,82 @@ class MusicProvider : ContentProvider() {
                 }
 
                 MusicProvider.PLAYLIST_MEMBERS -> {
-                    if (ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
-                        return context.getString(R.string.recentlyadded_title)
-                    } else if (ContentUris.parseId(uri) == MusicContract.Playlist.ALL_SONGS) {
-                        return context.getString(R.string.all_songs_title)
-                    } else {
-                        val cols = arrayOf(MediaStore.Audio.Playlists.NAME)
-                        val cursor = context.contentResolver.query(
-                                ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
-                                cols, null, null, null)
-                        if (cursor != null) {
-                            cursor.use { c ->
-                                if (c.count != 0) {
-                                    c.moveToFirst()
-                                    return c.getString(0)
+                    return when {
+                        ContentUris.parseId(uri) == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST ->
+                            context.getString(R.string.recentlyadded_title)
+                        ContentUris.parseId(uri) == MusicContract.Playlist.ALL_SONGS ->
+                            context.getString(R.string.all_songs_title)
+                        else -> {
+                            context.contentResolver.query(
+                                    ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                                    arrayOf(MediaStore.Audio.Playlists.NAME),
+                                    null,
+                                    null,
+                                    null)?.use {
+                                if (it.count != 0) {
+                                    it.moveToFirst()
+                                    return it.getString(0)
                                 }
                             }
+                            context.getString(R.string.unknown_playlist_name)
                         }
-                        return context.getString(R.string.unknown_playlist_name)
                     }
                 }
                 MusicProvider.GENRE_MEMBERS -> {
                     var fancyName: String? = null
-                    val cols = arrayOf(MediaStore.Audio.Genres.NAME)
-                    val cursor = context.contentResolver.query(ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)), cols, null, null, null)
-                    if (cursor != null) {
-                        cursor.use { c ->
-                            if (c.count != 0) {
-                                c.moveToFirst()
-                                fancyName = c.getString(0)
-                            }
+                    context.contentResolver.query(
+                            ContentUris.withAppendedId(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                            arrayOf(MediaStore.Audio.Genres.NAME),
+                            null,
+                            null,
+                            null)?.use {
+                        if (it.count != 0) {
+                            it.moveToFirst()
+                            fancyName = it.getString(0)
                         }
                     }
-                    if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
-                        return context.getString(R.string.unknown_genre_name)
+                    return if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
+                        context.getString(R.string.unknown_genre_name)
                     } else {
-                        return ID3Utils.decodeGenre(fancyName)
+                        ID3Utils.decodeGenre(fancyName)
                     }
                 }
                 MusicProvider.ARTIST_MEMBERS -> {
                     var fancyName: String? = null
-                    val cols = arrayOf(MediaStore.Audio.Artists.ARTIST)
-                    val cursor = context.contentResolver.query(ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)), cols, null, null, null)
-                    if (cursor != null) {
-                        cursor.use { c ->
-                            if (c.count != 0) {
-                                c.moveToFirst()
-                                fancyName = c.getString(0)
-                            }
+                    context.contentResolver.query(
+                            ContentUris.withAppendedId(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                            arrayOf(MediaStore.Audio.Artists.ARTIST),
+                            null,
+                            null,
+                            null)?.use {
+                        if (it.count != 0) {
+                            it.moveToFirst()
+                            fancyName = it.getString(0)
                         }
                     }
-                    if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
-                        return context.getString(R.string.unknown_artist_name)
+                    return if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
+                        context.getString(R.string.unknown_artist_name)
                     } else {
-                        return fancyName
+                        fancyName
                     }
                 }
                 MusicProvider.ALBUM_MEMBERS -> {
                     var fancyName: String? = null
-                    val cols = arrayOf(MediaStore.Audio.Albums.ALBUM)
-                    val cursor = context.contentResolver.query(ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)), cols, null, null, null)
-                    if (cursor != null) {
-                        cursor.use { c ->
-                            if (c.count != 0) {
-                                c.moveToFirst()
-                                fancyName = c.getString(0)
-                            }
+                    context.contentResolver.query(
+                            ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ContentUris.parseId(uri)),
+                            arrayOf(MediaStore.Audio.Albums.ALBUM),
+                            null,
+                            null,
+                            null)?.use {
+                        if (it.count != 0) {
+                            it.moveToFirst()
+                            fancyName = it.getString(0)
                         }
                     }
-                    if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
-                        return context.getString(R.string.unknown_album_name)
+                    return if (fancyName == null || fancyName == MediaStore.UNKNOWN_STRING) {
+                        context.getString(R.string.unknown_album_name)
                     } else {
-                        return fancyName
+                        fancyName
                     }
                 }
 

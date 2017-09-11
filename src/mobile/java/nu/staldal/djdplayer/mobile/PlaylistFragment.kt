@@ -51,7 +51,7 @@ private const val CURRENT_PLAYLIST_NAME = "currentplaylistname"
 class PlaylistFragment : CategoryFragment() {
 
     companion object {
-        private val COLUMNS = arrayOf<String>(
+        private val COLUMNS = arrayOf(
                 MediaStore.Audio.AudioColumns._ID,
                 MusicContract.PlaylistColumns.NAME,
                 MediaStore.Audio.AudioColumns._COUNT)
@@ -155,6 +155,7 @@ class PlaylistFragment : CategoryFragment() {
         }
     }
 
+    @SuppressLint("InflateParams")
     override fun onContextItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.playlist_play_all_now -> {
@@ -198,8 +199,8 @@ class PlaylistFragment : CategoryFragment() {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_playlist_title)
                         .setMessage(desc)
-                        .setNegativeButton(R.string.cancel) { dialog, which -> }
-                        .setPositiveButton(R.string.delete_confirm_button_text) { dialog, which ->
+                        .setNegativeButton(R.string.cancel) { _, _ -> }
+                        .setPositiveButton(R.string.delete_confirm_button_text) { _, _ ->
                             val uri = ContentUris.withAppendedId(
                                     MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, currentId)
                             activity.contentResolver.delete(uri, null, null)
@@ -213,7 +214,7 @@ class PlaylistFragment : CategoryFragment() {
                 if (currentId == MusicContract.Playlist.RECENTLY_ADDED_PLAYLIST) {
                     AlertDialog.Builder(activity)
                             .setTitle(R.string.weekpicker_title)
-                            .setItems(R.array.weeklist) { dialog, which ->
+                            .setItems(R.array.weeklist) { _, which ->
                                 val numweeks = which + 1
                                 MusicUtils.setIntPref(this@PlaylistFragment.activity, SettingsActivity.NUMWEEKS,
                                         numweeks)
@@ -226,7 +227,7 @@ class PlaylistFragment : CategoryFragment() {
             }
 
             R.id.playlist_rename_playlist -> {
-                @SuppressLint("InflateParams") val view = activity.layoutInflater.inflate(R.layout.rename_playlist, null)
+                val view = activity.layoutInflater.inflate(R.layout.rename_playlist, null)
                 val mPlaylist = view.findViewById(R.id.playlist) as EditText
                 val playlistId = currentId
 
@@ -238,8 +239,8 @@ class PlaylistFragment : CategoryFragment() {
                             .setTitle(String.format(this@PlaylistFragment.getString(R.string.rename_playlist_prompt),
                                     playlistName))
                             .setView(view)
-                            .setNegativeButton(R.string.cancel) { dialog, which -> }
-                            .setPositiveButton(R.string.create_playlist_create_text) { dialog, which -> MusicUtils.renamePlaylist(activity, playlistId, mPlaylist.text.toString()) }
+                            .setNegativeButton(R.string.cancel) { _, _ -> }
+                            .setPositiveButton(R.string.create_playlist_create_text) { _, _ -> MusicUtils.renamePlaylist(activity, playlistId, mPlaylist.text.toString()) }
                             .show()
                 }
                 true

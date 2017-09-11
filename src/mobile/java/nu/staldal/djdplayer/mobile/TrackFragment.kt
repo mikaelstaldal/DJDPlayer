@@ -561,15 +561,9 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
 
             val audioId = cursor.getLong(audioIdIdx)
 
-            var playingId: Long = -1
-            if (MusicUtils.sService != null) {
-                playingId = MusicUtils.sService.audioId
-            }
+            val playingId = MusicUtils.sService?.audioId ?: -1L
 
-            var crossfadingId: Long = -1
-            if (MusicUtils.sService != null) {
-                crossfadingId = MusicUtils.sService.crossfadeAudioId
-            }
+            val crossfadingId = MusicUtils.sService?.crossfadeAudioId ?: -1L
 
             when (audioId) {
                 playingId -> {
@@ -591,12 +585,7 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
 
         override fun getSections(): Array<Any>? = indexer?.sections
 
-        override fun getPositionForSection(section: Int) =
-            if (indexer != null) {
-                indexer!!.getPositionForSection(section)
-            } else {
-                0
-            }
+        override fun getPositionForSection(section: Int) = indexer?.getPositionForSection(section) ?: 0
 
         override fun getSectionForPosition(position: Int) = 0
     }

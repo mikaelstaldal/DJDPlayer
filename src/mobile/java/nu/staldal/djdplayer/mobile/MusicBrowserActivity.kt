@@ -109,11 +109,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         val playQueueButton = findViewById(R.id.playqueue_button) as Button?
         playQueueButton?.setOnClickListener { v -> startActivity(Intent(this, MediaPlaybackActivity::class.java)) }
 
-        if (savedInstanceState != null) {
-            backStack = savedInstanceState.getParcelableArrayList<Intent>("backStack")
-        } else {
-            backStack = ArrayList<Intent>(8)
-        }
+        backStack = savedInstanceState?.getParcelableArrayList<Intent>("backStack") ?: ArrayList<Intent>(8)
 
         parseIntent(intent, true)
 
@@ -479,29 +475,29 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
             }
 
             R.id.shuffle -> {
-                if (service != null) service!!.doShuffle()
+                service?.doShuffle()
                 return true
             }
 
             R.id.uniqueify -> {
-                if (service != null) service!!.uniqueify()
+                service?.uniqueify()
                 return true
             }
 
             R.id.clear_queue -> {
-                if (service != null) service!!.removeTracks(0, Integer.MAX_VALUE)
+                service?.removeTracks(0, Integer.MAX_VALUE)
                 return true
             }
 
             R.id.new_playlist -> {
-                if (service != null) CreatePlaylist.showMe(this, service!!.queue)
+                service?.let { CreatePlaylist.showMe(this, it.queue) }
                 return true
             }
 
             R.id.selected_playlist -> {
-                if (service != null) {
+                service?.let {
                     val playlist = item.intent.getLongExtra("playlist", 0)
-                    MusicUtils.addToPlaylist(this, service!!.queue, playlist)
+                    MusicUtils.addToPlaylist(this, it.queue, playlist)
                 }
                 return true
             }

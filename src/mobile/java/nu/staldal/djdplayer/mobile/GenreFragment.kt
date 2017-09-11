@@ -39,11 +39,7 @@ class GenreFragment : MetadataCategoryFragment() {
 
     override fun getDeleteDescStringId() = R.string.delete_genre_desc
 
-    override fun fetchCurrentlyPlayingCategoryId() =
-        if (MusicUtils.sService != null)
-            MusicUtils.sService.genreId
-        else
-            -1L
+    override fun fetchCurrentlyPlayingCategoryId() = MusicUtils.sService?.genreId ?: -1L
 
     override fun getEntryContentType() = MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE
 
