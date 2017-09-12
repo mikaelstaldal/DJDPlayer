@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2017 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +15,26 @@
  * limitations under the License.
  */
 
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer
 
-import android.database.Cursor;
-import android.provider.MediaStore;
-import android.widget.AlphabetIndexer;
+import android.database.Cursor
+import android.provider.MediaStore
+import android.widget.AlphabetIndexer
 
 /**
  * Handles comparisons in a different way because the Album, Song and Artist name
  * are stripped of some prefixes such as "a", "an", "the" and some symbols.
- *
  */
-public class MusicAlphabetIndexer extends AlphabetIndexer {
-    
-    public MusicAlphabetIndexer(Cursor cursor, int sortedColumnIndex, CharSequence alphabet) {
-        super(cursor, sortedColumnIndex, alphabet);
-    }
-    
-    @Override
-    protected int compare(String word, String letter) {
-        String wordKey = MediaStore.Audio.keyFor(word);
-        String letterKey = MediaStore.Audio.keyFor(letter);
-        if (wordKey.startsWith(letter)) {
-            return 0;
+class MusicAlphabetIndexer(cursor: Cursor, sortedColumnIndex: Int, alphabet: CharSequence)
+        : AlphabetIndexer(cursor, sortedColumnIndex, alphabet) {
+
+    override fun compare(word: String, letter: String): Int {
+        val wordKey = MediaStore.Audio.keyFor(word)
+        val letterKey = MediaStore.Audio.keyFor(letter)
+        return if (wordKey.startsWith(letter)) {
+            0
         } else {
-            return wordKey.compareTo(letterKey);
+            wordKey.compareTo(letterKey)
         }
     }
 }

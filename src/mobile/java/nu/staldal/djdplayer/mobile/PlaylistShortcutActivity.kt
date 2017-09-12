@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Mikael Ståldal
+ * Copyright (C) 2013-2017 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer.mobile;
+package nu.staldal.djdplayer.mobile
 
-import nu.staldal.djdplayer.R;
+import android.app.Activity
+import android.os.Bundle
+import nu.staldal.djdplayer.R
 
-public class NarrowPlayerFooterFragment extends PlayerFooterFragment {
+class PlaylistShortcutActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.narrow_player_footer;
+        setContentView(R.layout.playlist_shortcut)
     }
 }

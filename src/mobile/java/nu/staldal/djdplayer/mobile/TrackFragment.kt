@@ -65,7 +65,7 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
     }
 
     internal var selectedPosition: Int = 0
-    private var selectedId: Long = 0
+    internal var selectedId: Long = 0
 
     private var uri: Uri? = null
     private var isPlaylist: Boolean = false
@@ -459,6 +459,16 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
     val isEditMode: Boolean
         get() = playlist >= 0
 
+    internal data class ViewHolder(
+            val line1: TextView,
+            val line2: TextView,
+            val duration: TextView,
+            val play_indicator: ImageView,
+            val crossfade_indicator: ImageView,
+            val buffer1: CharArrayBuffer,
+            var buffer2: CharArray
+    )
+
     internal inner class TrackListAdapter(context: Context, layout: Int, from: Array<String>, to: IntArray) :
             SimpleCursorAdapterWithContextMenu(context, layout, null, from, to, 0), SectionIndexer {
 
@@ -472,18 +482,8 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
 
         private var indexer: AlphabetIndexer? = null
 
-        internal inner class ViewHolder {
-            var line1: TextView? = null
-            var line2: TextView? = null
-            var duration: TextView? = null
-            var play_indicator: ImageView? = null
-            var crossfade_indicator: ImageView? = null
-            var buffer1: CharArrayBuffer? = null
-            var buffer2: CharArray? = null
-        }
-
         override fun swapCursor(c: Cursor?): Cursor? {
-            val res = super.swapCursor(c)
+            val res: Cursor? = super.swapCursor(c)
             if (c != null) {
                 getColumnIndices(c)
             }
@@ -514,33 +514,33 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
         }
 
         override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {
-            val v = super.newView(context, cursor, parent)
-            val iv = v.findViewById(R.id.icon) as ImageView
-            iv.visibility = View.GONE
+            val view = super.newView(context, cursor, parent)
 
-            val vh = ViewHolder()
-            vh.line1 = v.findViewById(R.id.line1) as TextView
-            vh.line2 = v.findViewById(R.id.line2) as TextView
-            vh.duration = v.findViewById(R.id.duration) as TextView
-            vh.play_indicator = v.findViewById(R.id.play_indicator) as ImageView
-            vh.crossfade_indicator = v.findViewById(R.id.crossfade_indicator) as ImageView
-            vh.buffer1 = CharArrayBuffer(100)
-            vh.buffer2 = CharArray(200)
-            v.tag = vh
-            return v
+            (view.findViewById(R.id.icon) as ImageView).visibility = View.GONE
+
+            view.tag = ViewHolder(
+                view.findViewById(R.id.line1) as TextView,
+                view.findViewById(R.id.line2) as TextView,
+                view.findViewById(R.id.duration) as TextView,
+                view.findViewById(R.id.play_indicator) as ImageView,
+                view.findViewById(R.id.crossfade_indicator) as ImageView,
+                CharArrayBuffer(100),
+                CharArray(200))
+
+            return view
         }
 
         override fun bindView(view: View, context: Context, cursor: Cursor) {
             val vh = view.tag as ViewHolder
 
             cursor.copyStringToBuffer(titleIdx, vh.buffer1)
-            vh.line1!!.setText(vh.buffer1!!.data, 0, vh.buffer1!!.sizeCopied)
+            vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied)
 
             val secs = cursor.getInt(durationIdx)
             if (secs == 0) {
-                vh.duration!!.text = ""
+                vh.duration.text = ""
             } else {
-                vh.duration!!.text = MusicUtils.formatDuration(context, secs.toLong())
+                vh.duration.text = MusicUtils.formatDuration(context, secs.toLong())
             }
 
             val builder = stringBuilder
@@ -553,11 +553,11 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
                 builder.append(name)
             }
             val len = builder.length
-            if (vh.buffer2!!.size < len) {
+            if (vh.buffer2.size < len) {
                 vh.buffer2 = CharArray(len)
             }
             builder.getChars(0, len, vh.buffer2, 0)
-            vh.line2!!.setText(vh.buffer2, 0, len)
+            vh.line2.setText(vh.buffer2, 0, len)
 
             val audioId = cursor.getLong(audioIdIdx)
 
@@ -567,16 +567,16 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
 
             when (audioId) {
                 playingId -> {
-                    vh.play_indicator!!.visibility = View.VISIBLE
-                    vh.crossfade_indicator!!.visibility = View.INVISIBLE
+                    vh.play_indicator.visibility = View.VISIBLE
+                    vh.crossfade_indicator.visibility = View.INVISIBLE
                 }
                 crossfadingId -> {
-                    vh.play_indicator!!.visibility = View.INVISIBLE
-                    vh.crossfade_indicator!!.visibility = View.VISIBLE
+                    vh.play_indicator.visibility = View.INVISIBLE
+                    vh.crossfade_indicator.visibility = View.VISIBLE
                 }
                 else -> {
-                    vh.play_indicator!!.visibility = View.INVISIBLE
-                    vh.crossfade_indicator!!.visibility = View.INVISIBLE
+                    vh.play_indicator.visibility = View.INVISIBLE
+                    vh.crossfade_indicator.visibility = View.INVISIBLE
                 }
             }
         }

@@ -166,47 +166,54 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
     }
 
     private fun parseIntent(intent: Intent, onCreate: Boolean): Boolean {
-        if (Intent.ACTION_VIEW == intent.action
-                && intent.data != null
-                && intent.type != null && intent.type.startsWith(MusicUtils.AUDIO_X_MPEGURL)) {
-            ImportPlaylistTask(applicationContext).execute(intent.data)
-            songToPlay = -1
-            uri = null
-            title = null
-            searchResult = false
-            MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, PlaylistFragment::class.java.canonicalName)
-        } else if (Intent.ACTION_VIEW == intent.action
-                && intent.data != null
-                && intent.data.toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
-                && MusicUtils.isLong(intent.data.lastPathSegment)) {
-            songToPlay = ContentUris.parseId(intent.data)
-            if (!onCreate) return false
-            uri = null
-            title = null
-            searchResult = false
-        } else if (Intent.ACTION_VIEW == intent.action
-                && intent.data != null
-                && intent.data.scheme == "file") {
-            songToPlay = fetchSongIdFromPath(intent.data.path)
-            if (!onCreate) return false
-            uri = null
-            title = null
-            searchResult = false
-        } else if ((Intent.ACTION_VIEW == intent.action || Intent.ACTION_PICK == intent.action) && intent.data != null) {
-            songToPlay = -1
-            uri = fixUri(intent.data)
-            title = MusicProvider.calcTitle(this, uri!!)
-            searchResult = false
-        } else if (Intent.ACTION_SEARCH == intent.action || MediaStore.INTENT_ACTION_MEDIA_SEARCH == intent.action) {
-            songToPlay = -1
-            uri = null
-            title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY))
-            searchResult = true
-        } else {
-            songToPlay = -1
-            uri = null
-            title = null
-            searchResult = false
+        when {
+            Intent.ACTION_VIEW == intent.action
+                    && intent.data != null
+                    && intent.type != null && intent.type.startsWith(MusicUtils.AUDIO_X_MPEGURL) -> {
+                ImportPlaylistTask(applicationContext).execute(intent.data)
+                songToPlay = -1
+                uri = null
+                title = null
+                searchResult = false
+                MusicUtils.setStringPref(this, SettingsActivity.ACTIVE_TAB, PlaylistFragment::class.java.canonicalName)
+            }
+            Intent.ACTION_VIEW == intent.action
+                    && intent.data != null
+                    && intent.data.toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
+                    && MusicUtils.isLong(intent.data.lastPathSegment) -> {
+                songToPlay = ContentUris.parseId(intent.data)
+                if (!onCreate) return false
+                uri = null
+                title = null
+                searchResult = false
+            }
+            Intent.ACTION_VIEW == intent.action
+                    && intent.data != null
+                    && intent.data.scheme == "file" -> {
+                songToPlay = fetchSongIdFromPath(intent.data.path)
+                if (!onCreate) return false
+                uri = null
+                title = null
+                searchResult = false
+            }
+            (Intent.ACTION_VIEW == intent.action || Intent.ACTION_PICK == intent.action) && intent.data != null -> {
+                songToPlay = -1
+                uri = fixUri(intent.data)
+                title = MusicProvider.calcTitle(this, uri!!)
+                searchResult = false
+            }
+            Intent.ACTION_SEARCH == intent.action || MediaStore.INTENT_ACTION_MEDIA_SEARCH == intent.action -> {
+                songToPlay = -1
+                uri = null
+                title = getString(R.string.search_results, intent.getStringExtra(SearchManager.QUERY))
+                searchResult = true
+            }
+            else -> {
+                songToPlay = -1
+                uri = null
+                title = null
+                searchResult = false
+            }
         }
 
         if (title == null) {
@@ -218,44 +225,43 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         return true
     }
 
-    private fun fetchSongIdFromPath(path: String): Long {
-        val cursor = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+    private fun fetchSongIdFromPath(path: String): Long =
+        contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Audio.Media._ID),
                 MediaStore.Audio.Media.DATA + "=?",
-                arrayOf(path), null)
-        if (cursor == null) {
-            Log.w(LOGTAG, "Unable to fetch Song Id (cursor is null) for $path")
-            return -1
-        }
-        cursor.use { cur ->
+                arrayOf(path),
+                null)?.use { cur ->
             if (cur.moveToFirst()) {
-                return cur.getLong(cur.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                cur.getLong(cur.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
             } else {
                 Log.w(LOGTAG, "Unable to fetch Song Id (cursor is empty) for $path")
-                return -1
+                -1L
             }
-        }
+        } ?: nullCursor(path)
+
+    private fun nullCursor(path: String): Long {
+        Log.w(LOGTAG, "Unable to fetch Song Id (cursor is null) for $path")
+        return -1L
     }
 
-    private fun fixUri(uri: Uri): Uri {
+    private fun fixUri(uri: Uri): Uri =
         try {
             val id = uri.lastPathSegment.toLong()
-            if (uri.toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Album.getMembersUri(id)
-            } else if (uri.toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Artist.getMembersUri(id)
-            } else if (uri.toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Genre.getMembersUri(id)
-            } else if (uri.toString().startsWith(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI.toString())) {
-                return MusicContract.Playlist.getMembersUri(id)
-            } else {
-                return uri
+            when {
+                uri.toString().startsWith(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI.toString()) ->
+                    MusicContract.Album.getMembersUri(id)
+                uri.toString().startsWith(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI.toString()) ->
+                    MusicContract.Artist.getMembersUri(id)
+                uri.toString().startsWith(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI.toString()) ->
+                    MusicContract.Genre.getMembersUri(id)
+                uri.toString().startsWith(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI.toString()) ->
+                    MusicContract.Playlist.getMembersUri(id)
+                else -> uri
             }
         } catch (e: NumberFormatException) {
-            return uri
+            uri
         }
-
-    }
 
     private fun enterCategoryMode() {
         uri = null
@@ -352,7 +358,7 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
     private fun restoreActiveTab(actionBar: ActionBar) {
         val activeTab = getSharedPreferences(packageName, Context.MODE_PRIVATE)
                 .getString(SettingsActivity.ACTIVE_TAB, null)
-        for (i in 0..actionBar.tabCount - 1) {
+        for (i in 0 until actionBar.tabCount) {
             if (actionBar.getTabAt(i).tag == activeTab) {
                 actionBar.setSelectedNavigationItem(i)
                 viewPager.currentItem = i
@@ -437,16 +443,14 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
     private fun updateRepeatItem(menu: Menu) {
         val item = menu.findItem(R.id.repeat)
         if (item != null) {
-            if (service != null) {
-                when (service!!.repeatMode) {
+            service?.let { s ->
+                when (s.repeatMode) {
                     MediaPlayback.REPEAT_ALL -> item.setIcon(R.drawable.ic_mp_repeat_all_btn)
                     MediaPlayback.REPEAT_CURRENT -> item.setIcon(R.drawable.ic_mp_repeat_once_btn)
                     MediaPlayback.REPEAT_STOPAFTER -> item.setIcon(R.drawable.ic_mp_repeat_stopafter_btn)
                     else -> item.setIcon(R.drawable.ic_mp_repeat_off_btn)
                 }
-            } else {
-                item.setIcon(R.drawable.ic_mp_repeat_off_btn)
-            }
+            } ?: item.setIcon(R.drawable.ic_mp_repeat_off_btn)
         }
     }
 
@@ -454,44 +458,44 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
         menu.setGroupVisible(R.id.playing_items, service != null && !service!!.isPlaying)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             android.R.id.home -> {
                 backStack!!.clear()
                 val intent = Intent(Intent.ACTION_MAIN)
                 parseIntent(intent, false)
                 setIntent(intent)
-                return true
+                true
             }
 
             R.id.create_new_playlist -> {
                 CreatePlaylist.showMe(this, null)
-                return true
+                true
             }
 
             R.id.repeat -> {
                 cycleRepeat()
-                return true
+                true
             }
 
             R.id.shuffle -> {
                 service?.doShuffle()
-                return true
+                true
             }
 
             R.id.uniqueify -> {
                 service?.uniqueify()
-                return true
+                true
             }
 
             R.id.clear_queue -> {
                 service?.removeTracks(0, Integer.MAX_VALUE)
-                return true
+                true
             }
 
             R.id.new_playlist -> {
                 service?.let { CreatePlaylist.showMe(this, it.queue) }
-                return true
+                true
             }
 
             R.id.selected_playlist -> {
@@ -499,45 +503,48 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
                     val playlist = item.intent.getLongExtra("playlist", 0)
                     MusicUtils.addToPlaylist(this, it.queue, playlist)
                 }
-                return true
+                true
             }
 
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
-                return true
+                true
             }
 
-            R.id.search -> return onSearchRequested()
+            R.id.search -> onSearchRequested()
 
             R.id.effect_panel -> {
                 val intent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, service!!.audioSessionId)
                 startActivityForResult(intent, 0)
-                return true
+                true
             }
+
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
-    }
 
     private fun cycleRepeat() {
-        if (service == null) {
-            return
+        service?.let { s ->
+            when (s.repeatMode) {
+                MediaPlayback.REPEAT_NONE -> {
+                    s.repeatMode = MediaPlayback.REPEAT_ALL
+                    Toast.makeText(this, R.string.repeat_all_notif, Toast.LENGTH_SHORT).show()
+                }
+                MediaPlayback.REPEAT_ALL -> {
+                    s.repeatMode = MediaPlayback.REPEAT_CURRENT
+                    Toast.makeText(this, R.string.repeat_current_notif, Toast.LENGTH_SHORT).show()
+                }
+                MediaPlayback.REPEAT_CURRENT -> {
+                    s.repeatMode = MediaPlayback.REPEAT_STOPAFTER
+                    Toast.makeText(this, R.string.repeat_stopafter_notif, Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    s.repeatMode = MediaPlayback.REPEAT_NONE
+                    Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show()
+                }
+            }
+            invalidateOptionsMenu()
         }
-        val mode = service!!.repeatMode
-        if (mode == MediaPlayback.REPEAT_NONE) {
-            service!!.repeatMode = MediaPlayback.REPEAT_ALL
-            Toast.makeText(this, R.string.repeat_all_notif, Toast.LENGTH_SHORT).show()
-        } else if (mode == MediaPlayback.REPEAT_ALL) {
-            service!!.repeatMode = MediaPlayback.REPEAT_CURRENT
-            Toast.makeText(this, R.string.repeat_current_notif, Toast.LENGTH_SHORT).show()
-        } else if (mode == MediaPlayback.REPEAT_CURRENT) {
-            service!!.repeatMode = MediaPlayback.REPEAT_STOPAFTER
-            Toast.makeText(this, R.string.repeat_stopafter_notif, Toast.LENGTH_SHORT).show()
-        } else {
-            service!!.repeatMode = MediaPlayback.REPEAT_NONE
-            Toast.makeText(this, R.string.repeat_off_notif, Toast.LENGTH_SHORT).show()
-        }
-        invalidateOptionsMenu()
     }
 
     override fun onBackPressed() {
@@ -629,9 +636,8 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
             return fragment
         }
 
-        internal fun instantiateFragment(tab: ActionBar.Tab): Fragment {
-            return Fragment.instantiate(this@MusicBrowserActivity, tab.tag as String)
-        }
+        internal fun instantiateFragment(tab: ActionBar.Tab): Fragment =
+            Fragment.instantiate(this@MusicBrowserActivity, tab.tag as String)
 
         override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
             if (currentTransaction == null) {
@@ -648,12 +654,8 @@ class MusicBrowserActivity : Activity(), ServiceConnection, SharedPreferences.On
             }
         }
 
-        override fun getCount(): Int {
-            return this@MusicBrowserActivity.actionBar.tabCount
-        }
+        override fun getCount(): Int = this@MusicBrowserActivity.actionBar.tabCount
 
-        override fun isViewFromObject(view: View, obj: Any): Boolean {
-            return (obj as Fragment).view === view
-        }
+        override fun isViewFromObject(view: View, obj: Any): Boolean = (obj as Fragment).view === view
     }
 }

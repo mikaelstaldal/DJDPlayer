@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Mikael Ståldal
+ * Copyright (C) 2014-2107 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer.mobile;
+package nu.staldal.djdplayer
 
-import android.app.Activity;
-import android.os.Bundle;
-import nu.staldal.djdplayer.R;
+import android.app.Activity
+import android.os.Bundle
 
-public class PlaylistShortcutActivity extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.playlist_shortcut);
+class AboutActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.about)
     }
 }

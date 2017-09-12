@@ -84,43 +84,41 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, view: View, menuInfoIn: ContextMenu.ContextMenuInfo) {
-        if (service == null) return
+        service?.let { s ->
+            val sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist)
+            MusicUtils.makePlaylistMenu(activity, sub, R.id.playerheader_new_playlist, R.id.playerheader_selected_playlist)
 
-        val sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist)
-        MusicUtils.makePlaylistMenu(activity, sub, R.id.playerheader_new_playlist, R.id.playerheader_selected_playlist)
+            menu.add(0, R.id.playerheader_delete, 0, R.string.delete_item)
 
-        menu.add(0, R.id.playerheader_delete, 0, R.string.delete_item)
+            menu.add(0, R.id.playerheader_info, 0, R.string.info)
 
-        menu.add(0, R.id.playerheader_info, 0, R.string.info)
+            menu.add(0, R.id.playerheader_share_via, 0, R.string.share_via)
 
-        menu.add(0, R.id.playerheader_share_via, 0, R.string.share_via)
+            menu.add(0, R.id.playerheader_search_for, 0, R.string.search_for)
 
-        menu.add(0, R.id.playerheader_search_for, 0, R.string.search_for)
-
-        menu.setHeaderTitle(service!!.trackName)
+            menu.setHeaderTitle(s.trackName)
+        }
     }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        if (service == null) return false
-
+    override fun onContextItemSelected(item: MenuItem): Boolean = service?.let { s ->
         when (item.itemId) {
             R.id.playerheader_new_playlist -> {
-                CreatePlaylist.showMe(activity, longArrayOf(service!!.audioId))
-                return true
+                CreatePlaylist.showMe(activity, longArrayOf(s.audioId))
+                true
             }
 
             R.id.playerheader_selected_playlist -> {
                 val list = LongArray(1)
-                list[0] = service!!.audioId
+                list[0] = s.audioId
                 val playlist = item.intent.getLongExtra("playlist", 0)
                 MusicUtils.addToPlaylist(activity, list, playlist)
-                return true
+                true
             }
 
             R.id.playerheader_delete -> {
                 val list = LongArray(1)
-                list[0] = service!!.audioId
-                val f = getString(R.string.delete_song_desc, service!!.trackName)
+                list[0] = s.audioId
+                val f = getString(R.string.delete_song_desc, s.trackName)
                 AlertDialog.Builder(activity)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.delete_song_title)
@@ -128,44 +126,42 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
                         .setNegativeButton(R.string.cancel) { _, _ -> }
                         .setPositiveButton(R.string.delete_confirm_button_text) { _, _ -> MusicUtils.deleteTracks(this@PlayerHeaderFragment.activity, list) }
                         .show()
-                return true
+                true
             }
 
             R.id.playerheader_info -> {
                 TrackInfoFragment.showMe(activity,
-                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, service!!.audioId))
-                return true
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, s.audioId))
+                true
             }
 
             R.id.playerheader_share_via -> {
                 startActivity(MusicUtils.shareVia(
-                        service!!.audioId,
-                        service!!.mimeType,
+                        s.audioId,
+                        s.mimeType,
                         resources))
-                return true
+                true
             }
 
             R.id.playerheader_search_for -> {
                 startActivity(MusicUtils.searchForTrack(
-                        service!!.trackName,
-                        service!!.artistName,
-                        service!!.albumName,
+                        s.trackName,
+                        s.artistName,
+                        s.albumName,
                         resources))
-                return true
+                true
             }
+            else -> super.onContextItemSelected(item)
         }
-        return super.onContextItemSelected(item)
-    }
+    } ?: false
 
-    override fun onLongClick(view: View): Boolean {
-        if (service == null) return true
-
-        val audioId = service!!.audioId
-        val artistId = service!!.artistId
-        val genreId = service!!.genreId
-        val song = service!!.trackName
-        val artist = service!!.artistName
-        val album = service!!.albumName
+    override fun onLongClick(view: View): Boolean = service?.let { s ->
+        val audioId = s.audioId
+        val artistId = s.artistId
+        val genreId = s.genreId
+        val song = s.trackName
+        val artist = s.artistName
+        val album = s.albumName
 
         if (audioId < 0) {
             return false
@@ -179,7 +175,7 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
             return false
         }
 
-        when (view) {
+        return when (view) {
             artistname -> {
                 val intent = Intent(activity, MusicBrowserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -187,7 +183,7 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
                 intent.data = MusicContract.Artist.getMembersUri(artistId)
                 startActivity(intent)
                 if (activity !is MusicBrowserActivity) activity.finish()
-                return true
+                true
             }
             genrename -> {
                 val intent = Intent(activity, MusicBrowserActivity::class.java)
@@ -196,11 +192,11 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
                 intent.data = MusicContract.Genre.getMembersUri(genreId)
                 startActivity(intent)
                 if (activity !is MusicBrowserActivity) activity.finish()
-                return true
+                true
             }
             else -> throw RuntimeException("shouldn't be here")
         }
-    }
+    } ?: true
 
     private val mStatusListener = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -209,34 +205,34 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
     }
 
     private fun update() {
-        if (service == null) return
-
-        if (service!!.audioId != -1L) {
-            val trackName = service!!.trackName
-            trackname!!.text = trackName
-            var artistName = service!!.artistName
-            if (MediaStore.UNKNOWN_STRING == artistName) {
-                artistName = getString(R.string.unknown_artist_name)
+        service?.let { s ->
+            if (s.audioId != -1L) {
+                val trackName = s.trackName
+                trackname.text = trackName
+                var artistName = s.artistName
+                if (MediaStore.UNKNOWN_STRING == artistName) {
+                    artistName = getString(R.string.unknown_artist_name)
+                }
+                artistname.text = artistName
+                var genreName = s.genreName
+                if (MediaStore.UNKNOWN_STRING == genreName) {
+                    genreName = getString(R.string.unknown_genre_name)
+                }
+                genrename.text = genreName
+            } else {
+                trackname.text = ""
+                artistname.text = ""
+                genrename.text = ""
             }
-            artistname!!.text = artistName
-            var genreName = service!!.genreName
-            if (MediaStore.UNKNOWN_STRING == genreName) {
-                genreName = getString(R.string.unknown_genre_name)
-            }
-            genrename!!.text = genreName
-        } else {
-            trackname!!.text = ""
-            artistname!!.text = ""
-            genrename!!.text = ""
         }
     }
 
     fun show() {
-        player_header!!.visibility = View.VISIBLE
+        player_header.visibility = View.VISIBLE
     }
 
     fun hide() {
-        player_header!!.visibility = View.GONE
+        player_header.visibility = View.GONE
     }
 
 }

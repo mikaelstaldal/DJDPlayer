@@ -80,7 +80,8 @@ abstract class MetadataCategoryFragment : CategoryFragment() {
     override fun createListAdapter(): MetadataCategoryListAdapter =
         MetadataCategoryListAdapter(
                 activity,
-                R.layout.track_list_item, null,
+                R.layout.track_list_item,
+                null,
                 arrayOf(),
                 intArrayOf(),
                 this)
