@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Mikael Ståldal
+ * Copyright (C) 2014-2017 Mikael Ståldal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nu.staldal.djdplayer;
+package nu.staldal.djdplayer
 
-import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import android.os.Bundle
+import android.preference.PreferenceFragment
 
-public class SettingsFragment extends PreferenceFragment {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preferences);
+class SettingsFragment : PreferenceFragment() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        addPreferencesFromResource(R.xml.preferences)
     }
 }

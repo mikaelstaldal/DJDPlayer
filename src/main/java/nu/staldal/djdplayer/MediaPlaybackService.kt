@@ -971,47 +971,46 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
     }
 
     @Synchronized
-    override fun moveQueueItem(i1: Int, i2: Int) {
-        var index1 = i1
-        var index2 = i2
-        if (index1 >= mPlayListLen) {
-            index1 = mPlayListLen - 1
+    override fun moveQueueItem(index1: Int, index2: Int) {
+        var i1 = index1
+        var i2 = index2
+        if (i1 >= mPlayListLen) {
+            i1 = mPlayListLen - 1
         }
-        if (index2 >= mPlayListLen) {
-            index2 = mPlayListLen - 1
+        if (i2 >= mPlayListLen) {
+            i2 = mPlayListLen - 1
         }
-        if (index1 < index2) {
-            val tmp = mPlayList[index1]
-            System.arraycopy(mPlayList, index1 + 1, mPlayList, index1, index2 - index1)
-            mPlayList[index2] = tmp
-            if (mPlayPos == index1) {
-                mPlayPos = index2
-            } else if (mPlayPos >= index1 && mPlayPos <= index2) {
+        if (i1 < i2) {
+            val tmp = mPlayList[i1]
+            System.arraycopy(mPlayList, i1 + 1, mPlayList, i1, i2 - i1)
+            mPlayList[i2] = tmp
+            if (mPlayPos == i1) {
+                mPlayPos = i2
+            } else if (mPlayPos >= i1 && mPlayPos <= i2) {
                 mPlayPos--
             }
-        } else if (index2 < index1) {
-            val tmp = mPlayList[index1]
-            System.arraycopy(mPlayList, index2, mPlayList, index2 + 1, index1 - index2)
-            mPlayList[index2] = tmp
-            if (mPlayPos == index1) {
-                mPlayPos = index2
-            } else if (mPlayPos >= index2 && mPlayPos <= index1) {
+        } else if (i2 < i1) {
+            val tmp = mPlayList[i1]
+            System.arraycopy(mPlayList, i2, mPlayList, i2 + 1, i1 - i2)
+            mPlayList[i2] = tmp
+            if (mPlayPos == i1) {
+                mPlayPos = i2
+            } else if (mPlayPos >= i2 && mPlayPos <= i1) {
                 mPlayPos++
             }
         }
         notifyChange(QUEUE_CHANGED)
     }
 
-    @Synchronized
-    override fun getQueue(): LongArray {
-        val len = mPlayListLen
-        val list = LongArray(len)
-        System.arraycopy(mPlayList, 0, list, 0, len)
-        return list
-    }
+    override val queue: LongArray
+        @Synchronized get() {
+            val len = mPlayListLen
+            val list = LongArray(len)
+            System.arraycopy(mPlayList, 0, list, 0, len)
+            return list
+        }
 
-    @Synchronized
-    override fun getQueueLength(): Int = mPlayListLen
+    override val queueLength: Int @Synchronized get() = mPlayListLen
 
     private fun prepare(audioId: Long): Boolean {
         Log.d(TAG, "Preparing song " + audioId)
@@ -1072,7 +1071,8 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         mSession!!.setMetadata(metadataBuilder.build())
     }
 
-    @Synchronized override fun play() {
+    @Synchronized
+    override fun play() {
         val result = mAudioManager!!.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             Log.w(TAG, "Unable to gain audio focus: " + result)
@@ -1113,24 +1113,24 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
     protected open fun beforePlay() {}
 
     private fun buildNotification(): Notification {
-        val trackName: String?
-        var artistName: String?
+        val trackName2: String?
+        var artistName2: String?
         if (audioId < 0) { // streaming
-            trackName = getString(R.string.streaming)
-            artistName = null
+            trackName2 = getString(R.string.streaming)
+            artistName2 = null
         } else {
-            trackName = getTrackName()
-            artistName = getArtistName()
-            if (artistName == null || artistName == MediaStore.UNKNOWN_STRING) {
-                artistName = getString(R.string.unknown_artist_name)
+            trackName2 = trackName
+            artistName2 = artistName
+            if (artistName2 == null || artistName2 == MediaStore.UNKNOWN_STRING) {
+                artistName2 = getString(R.string.unknown_artist_name)
             }
         }
 
         val builder = NotificationCompat.Builder(this)
         builder.setSmallIcon(R.drawable.stat_notify_musicplayer)
         builder.setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.app_icon))
-        builder.setContentTitle(trackName)
-        builder.setContentText(artistName)
+        builder.setContentTitle(trackName2)
+        builder.setContentText(artistName2)
         builder.setOngoing(true)
         builder.setWhen(0)
         builder.addAction(android.R.drawable.ic_media_previous, resources.getString(R.string.prev),
@@ -1172,7 +1172,8 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         resetMetadata()
     }
 
-    @Synchronized override fun pause() {
+    @Synchronized
+    override fun pause() {
         mPlaybackHander.removeMessages(DUCK)
         mPlaybackHander.removeMessages(FADEUP)
         mPlaybackHander.removeMessages(FADEDOWN)
@@ -1192,9 +1193,7 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         mPausedByTransientLossOfFocus = false
     }
 
-    override fun isPlaying(): Boolean {
-        return mIsSupposedToBePlaying
-    }
+    override val isPlaying: Boolean get() = mIsSupposedToBePlaying
 
     override fun previousOrRestartCurrent() {
         if (position() < PREV_THRESHOLD_MILLIS) {
@@ -1204,7 +1203,8 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         }
     }
 
-    @Synchronized override fun previous() {
+    @Synchronized
+    override fun previous() {
         if (mPlayListLen <= 0) return
 
         if (mPlayPos > 0) {
@@ -1216,7 +1216,8 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         prepareAndPlay(mPlayList[mPlayPos])
     }
 
-    @Synchronized override fun next() {
+    @Synchronized
+    override fun next() {
         if (mPlayListLen <= 0) return
 
         if (mPlayPos >= mPlayListLen - 1) {
@@ -1361,67 +1362,63 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         }
     }
 
-    @Synchronized
-    override fun setRepeatMode(repeatmode: Int) {
-        mRepeatMode = repeatmode
-        saveQueue(false)
-    }
-
-    @Synchronized
-    override fun getRepeatMode(): Int = mRepeatMode
-
-    @Synchronized
-    override fun getAudioId(): Long =
-        if (mPlayPos >= 0 && mPlayers[mCurrentPlayer]!!.isInitialized()) {
-            mPlayList[mPlayPos]
-        } else {
-            -1
+    override var repeatMode: Int
+        @Synchronized get() = mRepeatMode
+        @Synchronized set(newRepeatMode) {
+            mRepeatMode = newRepeatMode
+            saveQueue(false)
         }
 
-    @Synchronized
-    override fun getCrossfadeAudioId(): Long =
-        if (mPlayPos >= 0 && mPlayers[mNextPlayer]!!.isPlaying()) {
-            mPlayList[mPlayPos + 1]
-        } else {
-            -1
+    override val audioId: Long
+        @Synchronized get() =
+            if (mPlayPos >= 0 && mPlayers[mCurrentPlayer]!!.isInitialized()) {
+                mPlayList[mPlayPos]
+            } else {
+                -1
+            }
+
+    override val crossfadeAudioId: Long
+        @Synchronized get() =
+            if (mPlayPos >= 0 && mPlayers[mNextPlayer]!!.isPlaying()) {
+                mPlayList[mPlayPos + 1]
+            } else {
+                -1
+            }
+
+    override var queuePosition: Int
+        @Synchronized get() = mPlayPos
+        @Synchronized set(position) {
+            if (position > mPlayListLen - 1) return
+            stop()
+            mPlayPos = position
+            prepareAndPlay(mPlayList[mPlayPos])
         }
 
-    @Synchronized
-    override fun getQueuePosition(): Int = mPlayPos
+    override val crossfadeQueuePosition: Int
+        @Synchronized get() =
+            if (mPlayPos >= 0 && mPlayers[mNextPlayer]!!.isPlaying()) {
+                mPlayPos + 1
+            } else {
+                -1
+            }
 
-    @Synchronized
-    override fun getCrossfadeQueuePosition(): Int =
-        if (mPlayPos >= 0 && mPlayers[mNextPlayer]!!.isPlaying()) {
-            mPlayPos + 1
-        } else {
-            -1
-        }
+    override val artistName: String? @Synchronized get() = mArtistName
 
-    @Synchronized
-    override fun setQueuePosition(pos: Int) {
-        if (pos > mPlayListLen - 1) return
-        stop()
-        mPlayPos = pos
-        prepareAndPlay(mPlayList[mPlayPos])
-    }
+    override val artistId: Long @Synchronized get() = mArtistId
 
-    @Synchronized override fun getArtistName(): String? = mArtistName
+    override val albumName: String? @Synchronized get() = mAlbumName
 
-    @Synchronized override fun getArtistId(): Long = mArtistId
+    override val albumId: Long @Synchronized get() = mAlbumId
 
-    @Synchronized override fun getAlbumName(): String? = mAlbumName
+    override val genreName: String? @Synchronized get() = mGenreName
 
-    @Synchronized override fun getAlbumId(): Long = mAlbumId
+    override val genreId: Long @Synchronized get() = mGenreId
 
-    @Synchronized override fun getGenreName(): String? = mGenreName
+    override val mimeType: String? @Synchronized get() = mMimeType
 
-    @Synchronized override fun getGenreId(): Long = mGenreId
+    override val folder: File? @Synchronized get() = mFolder
 
-    @Synchronized override fun getMimeType(): String? = mMimeType
-
-    @Synchronized override fun getFolder(): File? = mFolder
-
-    @Synchronized override fun getTrackName(): String? = mTrackName
+    override val trackName: String? @Synchronized get() = mTrackName
 
     override fun duration(): Long =
         if (mPlayers[mCurrentPlayer]!!.isInitialized()) {
@@ -1470,8 +1467,6 @@ abstract class MediaPlaybackService : Service(), MediaPlayback {
         }
     }
 
-    override fun getAudioSessionId(): Int {
-        return mPlayers[mCurrentPlayer]!!.getAudioSessionId()
-    }
+    override val audioSessionId: Int get() = mPlayers[mCurrentPlayer]!!.getAudioSessionId()
 
 }
