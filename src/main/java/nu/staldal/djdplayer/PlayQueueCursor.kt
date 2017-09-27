@@ -159,7 +159,7 @@ class PlayQueueCursor(private val service: MediaPlayback, private val contentRes
         onMove(-1, mCurPos) // update the underlying cursor
     }
 
-    override fun getString(column: Int): String =
+    override fun getString(column: Int): String? =
         try {
             mCurrentPlaylistCursor!!.getString(column)
         } catch (e: Exception) {

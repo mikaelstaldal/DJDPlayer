@@ -60,19 +60,12 @@ class AlbumFragment : MetadataCategoryFragment() {
 
     override fun getNumberOfSongsColumnName() = MusicContract.AlbumColumns.COUNT
 
-    override fun fetchSongList(id: Long): LongArray {
-        val cursor = MusicUtils.query(activity,
+    override fun fetchSongList(id: Long): LongArray =
+        MusicUtils.query(activity,
                 MusicContract.Album.getMembersUri(id),
-                arrayOf(MediaStore.Audio.AudioColumns._ID), null, null, null)
-
-        return if (cursor != null) {
-            val list = MusicUtils.getSongListForCursor(cursor)
-            cursor.close()
-            list
-        } else {
-            MusicUtils.sEmptyList
+                arrayOf(MediaStore.Audio.AudioColumns._ID), null, null, null).use { cursor ->
+            MusicUtils.getSongListForCursor(cursor)
         }
-    }
 
     override fun shuffleSongs() = false
 

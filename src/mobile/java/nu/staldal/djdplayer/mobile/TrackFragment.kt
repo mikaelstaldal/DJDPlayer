@@ -253,27 +253,23 @@ open class TrackFragment : BrowserFragment(), PopupMenu.OnMenuItemClickListener,
             }
 
             R.id.track_share_via -> {
-                startActivity(MusicUtils.shareVia(
-                        selectedId,
-                        adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
-                                MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                        resources
-                ))
+                adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE))?.let { mimeType ->
+                    startActivity(MusicUtils.shareVia(
+                            selectedId,
+                            mimeType,
+                            resources))
+                }
                 true
             }
 
             R.id.track_search_for_track -> {
-                val currentTrackName = adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
+                val trackName: String? = adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
                         MediaStore.Audio.AudioColumns.TITLE))
-
-                startActivity(MusicUtils.searchForTrack(
-                        currentTrackName,
-                        adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
-                                MediaStore.Audio.AudioColumns.ARTIST)),
-                        adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
-                                MediaStore.Audio.AudioColumns.ALBUM)),
-                        resources
-                ))
+                val artistName: String? = adapter!!.cursor.getString(adapter!!.cursor.getColumnIndexOrThrow(
+                        MediaStore.Audio.AudioColumns.ARTIST))
+                if (trackName != null && artistName != null) {
+                    startActivity(MusicUtils.searchForTrack(trackName, artistName, resources))
+                }
                 true
             }
 

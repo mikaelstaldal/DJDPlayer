@@ -83,7 +83,7 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
         service = null
     }
 
-    override fun onCreateContextMenu(menu: ContextMenu, view: View, menuInfoIn: ContextMenu.ContextMenuInfo) {
+    override fun onCreateContextMenu(menu: ContextMenu, view: View, menuInfoIn: ContextMenu.ContextMenuInfo?) {
         service?.let { s ->
             val sub = menu.addSubMenu(Menu.NONE, Menu.NONE, Menu.NONE, R.string.add_to_playlist)
             MusicUtils.makePlaylistMenu(activity, sub, R.id.playerheader_new_playlist, R.id.playerheader_selected_playlist)
@@ -136,19 +136,21 @@ class PlayerHeaderFragment : Fragment(), FragmentServiceConnection, View.OnLongC
             }
 
             R.id.playerheader_share_via -> {
-                startActivity(MusicUtils.shareVia(
-                        s.audioId,
-                        s.mimeType,
-                        resources))
+                s.mimeType?.let { mimeType ->
+                    startActivity(MusicUtils.shareVia(
+                            s.audioId,
+                            mimeType,
+                            resources))
+                }
                 true
             }
 
             R.id.playerheader_search_for -> {
-                startActivity(MusicUtils.searchForTrack(
-                        s.trackName,
-                        s.artistName,
-                        s.albumName,
-                        resources))
+                val trackName = s.trackName
+                val artistName = s.artistName
+                if (trackName != null && artistName != null) {
+                    startActivity(MusicUtils.searchForTrack(trackName, artistName, resources))
+                }
                 true
             }
             else -> super.onContextItemSelected(item)

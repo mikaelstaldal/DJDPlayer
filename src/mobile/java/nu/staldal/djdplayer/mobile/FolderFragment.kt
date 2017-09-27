@@ -105,18 +105,12 @@ class FolderFragment : CategoryFragment() {
         super.onSaveInstanceState(outcicle)
     }
 
-    private fun fetchSongList(folder: String): LongArray {
-        val cursor = MusicUtils.query(activity,
+    private fun fetchSongList(folder: String): LongArray =
+        MusicUtils.query(activity,
                 MusicContract.Folder.getMembersUri(folder),
-                arrayOf(MediaStore.Audio.AudioColumns._ID), null, null, null)
-
-        if (cursor != null) {
-            val list = MusicUtils.getSongListForCursor(cursor)
-            cursor.close()
-            return list
+                arrayOf(MediaStore.Audio.AudioColumns._ID), null, null, null).use { cursor ->
+            MusicUtils.getSongListForCursor(cursor)
         }
-        return MusicUtils.sEmptyList
-    }
 
     override fun onListItemClick(l: ListView, v: View, position: Int, id: Long) {
         adapter!!.cursor.moveToPosition(position)

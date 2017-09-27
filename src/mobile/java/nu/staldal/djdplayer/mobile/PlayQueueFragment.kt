@@ -266,7 +266,7 @@ class PlayQueueFragment : ListFragment(), FragmentServiceConnection, AbsListView
         menu.add(0, R.id.playqueue_share_via, 0, R.string.share_via)
 
         // only add the 'search' menu if the selected item is music
-        if (MusicUtils.isMusic(playQueueCursor)) {
+        if (MusicUtils.isMusic(playQueueCursor!!)) {
             menu.add(0, R.id.playqueue_search_for, 0, R.string.search_for)
         }
 
@@ -317,19 +317,21 @@ class PlayQueueFragment : ListFragment(), FragmentServiceConnection, AbsListView
             }
 
             R.id.playqueue_share_via -> {
-                startActivity(MusicUtils.shareVia(
-                        mSelectedId,
-                        playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                        resources))
+                playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE))?.let { mimeType ->
+                    startActivity(MusicUtils.shareVia(
+                            mSelectedId,
+                            mimeType,
+                            resources))
+                }
                 true
             }
 
             R.id.playqueue_search_for -> {
-                startActivity(MusicUtils.searchForTrack(
-                        playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
-                        playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
-                        playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
-                        resources))
+                val trackName = playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE))
+                val artistName = playQueueCursor!!.getString(playQueueCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST))
+                if (trackName != null && artistName != null) {
+                    startActivity(MusicUtils.searchForTrack(trackName, artistName, resources))
+                }
                 true
             }
             else -> super.onContextItemSelected(item)

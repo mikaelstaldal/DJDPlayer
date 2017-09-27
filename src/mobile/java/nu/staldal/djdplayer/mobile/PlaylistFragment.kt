@@ -279,12 +279,10 @@ class PlaylistFragment : CategoryFragment() {
     }
 
     private fun fetchSongList(playlistId: Long): LongArray =
-        MusicUtils.getSongListForCursorAndClose(MusicUtils.query(
-                activity,
-                MusicContract.Playlist.getMembersUri(playlistId),
-                null,
-                null,
-                null,
-                null))
+            MusicUtils.query(activity,
+                    MusicContract.Playlist.getMembersUri(playlistId),
+                    null,null,null,null).use { cursor ->
+                MusicUtils.getSongListForCursor(cursor)
+            }
 
 }
